@@ -1,0 +1,646 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-15",
+  "completeness_claim": "partial_auditable_coverage",
+  "claim_statement_zh": "本矩阵只证明已登记条目的覆盖和缺口，不代表已经收录全球全部港航权威文件、全部司法辖区、全部港口规则或全部有效版本；任何面向用户的表述均不得声称“全球完整”或“全部覆盖”。",
+  "claim_statement_en": "This matrix records auditable partial coverage and known gaps. It must not be represented as complete worldwide coverage of maritime, shipping, port, customs, labour, health, environmental or technical authorities.",
+  "audit_rules": {
+    "global_completeness_claim_prohibited": true,
+    "local_artifact_means": "仅表示本地存在摘要、目录或经许可材料；不自动表示已收录官方全文。",
+    "official_url_means": "权威机构的首要核验入口；动态状态、修正案、生效日期和辖区适用仍需在回答时复核。",
+    "clause_level_answers_require": [
+      "official_full_text_or_authorized_excerpt",
+      "applicable_jurisdiction",
+      "effective_version_for_question_date",
+      "amendment_and_exception_check"
+    ],
+    "license_check_required_before_ingestion": true,
+    "entry_required_fields": [
+      "status",
+      "priority",
+      "jurisdictions",
+      "local_artifacts",
+      "official_url",
+      "ingestion_policy",
+      "update_frequency"
+    ]
+  },
+  "status_definitions": {
+    "indexed_summary": "本地仅有基于官方公开页面形成的自主摘要；可用于主题导航和有限事实，不等于官方全文。",
+    "indexed_directory": "本地仅有官方目录、状态页或发布入口定位；不能据此回答条款、数值、罚则或例外。",
+    "license_isolated": "材料因版权、付费、会员或许可边界未进入 RAG；只有取得并记录授权后才能改变状态。",
+    "planned": "已确认是覆盖缺口，尚未形成可审计的本地材料。"
+  },
+  "priority_definitions": {
+    "P0": "安全、保安、污染、船员、边境、法律责任或当前强制合规的核心来源。",
+    "P1": "高频运营、数据交换、港口国监管或重点司法辖区来源。",
+    "P2": "分析、绩效、行业实践或后续扩展来源。"
+  },
+  "sections": [
+    {
+      "id": "international_core",
+      "label_zh": "国际核心权威与公共技术来源",
+      "scope_note": "覆盖核心组织的公开摘要或目录，但不等于每项公约、修正案、缔约状态和正式出版物均已全文收录。",
+      "entries": [
+        {
+          "id": "un_unclos",
+          "title": "联合国海洋法公约概览、文本与缔约状态入口",
+          "organization": "United Nations DOALOS",
+          "status": "indexed_directory",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/109_unclos_official_directory.md"],
+          "official_url": "https://www.un.org/depts/los/convention_agreements/convention_overview_convention.htm",
+          "companion_official_urls": ["https://www.un.org/depts/los/LEGISLATIONANDTREATIES/status.htm"],
+          "ingestion_policy": "只索引联合国公开概览与状态入口的自主摘要；具体条款、国家声明、保留和缔约状态必须实时核对正式来源。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "imo_convention_and_amendment_directories",
+          "title": "IMO 公约目录与修正案监测入口",
+          "organization": "International Maritime Organization",
+          "status": "indexed_directory",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/70_imo_conventions_directory.md",
+            "data/kb/89_imo_amendments_version_monitoring.md"
+          ],
+          "official_url": "https://www.imo.org/en/about/conventions/pages/listofconventions.aspx",
+          "companion_official_urls": ["https://www.imo.org/en/about/conventions/pages/amendments-to-imo-instruments.aspx"],
+          "ingestion_policy": "索引官方目录和修正流程的事实摘要；目录不作为公约全文、合并修订本、缔约状态或实施法证据。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "imo_public_maritime_summaries",
+          "title": "IMO 安全、保安、污染、船员、货物、减排与拆船公开摘要",
+          "organization": "International Maritime Organization",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/45_imo_maritime_single_window.md",
+            "data/kb/46_imo_fal_guidance.md",
+            "data/kb/77_imo_maritime_cyber_risk.md",
+            "data/kb/78_imo_container_vgm.md",
+            "data/kb/79_imo_imdg_code.md",
+            "data/kb/80_imo_ism_code.md",
+            "data/kb/81_imo_solas_public_summary.md",
+            "data/kb/82_imo_marpol_public_summary.md",
+            "data/kb/83_imo_stcw_public_summary.md",
+            "data/kb/84_imo_isps_code_public_summary.md",
+            "data/kb/85_imo_ballast_water_management_summary.md",
+            "data/kb/86_imo_imsbc_code_public_summary.md",
+            "data/kb/87_imo_2023_ghg_strategy_summary.md",
+            "data/kb/88_imo_hong_kong_convention_entry_summary.md",
+            "data/kb/110_imo_colreg_public_summary.md"
+          ],
+          "official_url": "https://www.imo.org/en/about/conventions/pages/listofconventions.aspx",
+          "ingestion_policy": "仅保存 IMO 官方公开网页的自主摘要和公开通函定位；条款、技术表格、正式规则及付费出版物不得由摘要替代。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "ilo_maritime_and_dock_labour",
+          "title": "ILO 海事劳工与码头职业安全卫生",
+          "organization": "International Labour Organization",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/72_ilo_safety_health_ports.md",
+            "data/kb/90_ilo_c152_dock_work_summary.md",
+            "data/kb/91_ilo_mlc_normlex_summary.md"
+          ],
+          "official_url": "https://normlex.ilo.org/dyn/nrmlx_en/f?p=NORMLEXPUB%3A91%3A0%3A%3ANO%3A%3AP91_INSTRUMENT_ID%3A312331",
+          "ingestion_policy": "索引 ILO 公开概览、NORMLEX 状态和自主摘要；个案须核对国家批准状态、声明、修正接受状态及国内实施法。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "wco_public_data_model_overview",
+          "title": "WCO 数据模型公开概览",
+          "organization": "World Customs Organization",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/71_wco_data_model.md"],
+          "official_url": "https://www.wcoomd.org/DataModel",
+          "ingestion_policy": "只索引公开介绍页的自主摘要；需要登录、许可或受限制的技术包、代码表、模式文件与 SAFE 材料保持隔离。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "who_international_health_regulations_ports",
+          "title": "WHO 国际卫生条例及口岸能力",
+          "organization": "World Health Organization",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/92_who_ihr_ports_summary.md"],
+          "official_url": "https://www.who.int/health-topics/international-health-regulations/",
+          "ingestion_policy": "索引 WHO 公开概览和修正状态摘要；回答时必须核对问题日期、缔约方状态、保留或拒绝情况及国家口岸实施措施。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "wto_trade_facilitation_agreement",
+          "title": "WTO 贸易便利化协定",
+          "organization": "World Trade Organization",
+          "status": "indexed_summary",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/93_wto_trade_facilitation_agreement_summary.md"],
+          "official_url": "https://www.wto.org/english/docs_e/legal_e/tfa_e.htm",
+          "ingestion_policy": "索引 WTO 官方法律页的自主摘要；国家实施进度、通知、保留和海关程序必须继续核对成员资料。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "unece_trade_and_multimodal_standards",
+          "title": "UNECE UN/EDIFACT、UN/LOCODE 与多式联运数据模型",
+          "organization": "United Nations Economic Commission for Europe",
+          "status": "indexed_summary",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/47_unece_unedifact_maritime.md",
+            "data/kb/94_unece_unlocode_summary.md",
+            "data/kb/95_unece_multimodal_transport_rdm_summary.md"
+          ],
+          "official_url": "https://unece.org/trade/documents/2023/10/executive-guide-unlocode",
+          "ingestion_policy": "索引公开标准说明和目录摘要；代码版本、消息目录和数据模型版本必须按发布批次核验，不将示例当作强制法律义务。",
+          "update_frequency": "semiannual"
+        },
+        {
+          "id": "unctad_review_of_maritime_transport",
+          "title": "UNCTAD 海运述评",
+          "organization": "United Nations Conference on Trade and Development",
+          "status": "indexed_summary",
+          "priority": "P2",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/74_unctad_review_maritime_transport.md"],
+          "official_url": "https://unctad.org/RMT",
+          "ingestion_policy": "索引公开报告的事实摘要和版本定位；其分析与统计不作为法律、港口操作或安全指令。",
+          "update_frequency": "annual"
+        },
+        {
+          "id": "iho_s100",
+          "title": "IHO S-100 水文数据模型与注册表",
+          "organization": "International Hydrographic Organization",
+          "status": "indexed_summary",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/49_iho_s100_hydrographic.md"],
+          "official_url": "https://iho.int/en/s-100-universal-hydrographic-data-model",
+          "ingestion_policy": "索引公开概览和注册表定位；具体产品规范、版本、实现指南与测试数据须分别核对许可和现行版。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "iala_vts",
+          "title": "IALA VTS 与 S-1040 产品入口",
+          "organization": "International Organization for Marine Aids to Navigation",
+          "status": "indexed_summary",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": ["data/kb/73_iala_s1040_vts.md"],
+          "official_url": "https://www.iala.int/product/s1040/",
+          "ingestion_policy": "索引公开产品页摘要；下载件、规范正文和修订版在许可核对后才能进入条款级检索。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "world_bank_port_analysis",
+          "title": "世界银行港口改革工具包与集装箱港口绩效指数",
+          "organization": "World Bank",
+          "status": "indexed_summary",
+          "priority": "P2",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/96_world_bank_port_reform_toolkit_summary.md",
+            "data/kb/97_world_bank_cppi_2025.md"
+          ],
+          "official_url": "https://www.worldbank.org/en/topic/transport/publication/port-reform-toolkit",
+          "ingestion_policy": "按世界银行页面标注的许可保存引用和自主摘要；排名与建议属于分析资料，不作为法规或实时港口状态。",
+          "update_frequency": "annual"
+        },
+        {
+          "id": "dcsa_operational_data_standards",
+          "title": "DCSA 港口靠泊与跟踪追踪标准",
+          "organization": "Digital Container Shipping Association",
+          "status": "indexed_summary",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [
+            "data/kb/48_dcsa_port_call_standard.md",
+            "data/kb/75_dcsa_track_trace.md"
+          ],
+          "official_url": "https://dcsa.org/standards/track-and-trace/standard-documentation-track-and-trace",
+          "ingestion_policy": "索引公开标准概览与版本定位；属于行业互操作标准，不应表述为国家强制法或港口实时流程。",
+          "update_frequency": "quarterly"
+        }
+      ]
+    },
+    {
+      "id": "china",
+      "label_zh": "中国国家层级与港航公开来源",
+      "scope_note": "已覆盖若干国家法律、行政法规、部门规章和服务指南摘要；地方立法、港口通告、有效标准全文和动态执法口径仍不完整。",
+      "entries": [
+        {
+          "id": "cn_port_maritime_core_law",
+          "title": "中国港口、海上交通、安全生产、危险货物、岸电、污染、海运和水路运输核心规则",
+          "organization": "全国人民代表大会常务委员会、国务院、交通运输部及海事管理机构",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["CN"],
+          "local_artifacts": [
+            "data/kb/60_cn_port_law.md",
+            "data/kb/61_cn_maritime_traffic_safety_law.md",
+            "data/kb/62_cn_work_safety_law.md",
+            "data/kb/63_cn_port_dangerous_goods_rules.md",
+            "data/kb/64_cn_port_ship_shore_power_rules.md",
+            "data/kb/65_cn_ship_pollution_regulation.md",
+            "data/kb/66_cn_international_maritime_transport_regulation.md",
+            "data/kb/67_cn_maritime_code_2025.md",
+            "data/kb/68_cn_ship_safety_supervision_rules.md",
+            "data/kb/69_cn_domestic_waterway_transport_regulation.md"
+          ],
+          "official_url": "https://flk.npc.gov.cn/",
+          "ingestion_policy": "索引国家机关公开文本的自主摘要和定位；处罚、许可、期限、例外和责任问题必须读取对应日期的官方现行全文。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "cn_environment_code_transition",
+          "title": "生态环境法典与海洋环境保护法新旧法过渡",
+          "organization": "全国人民代表大会、全国人民代表大会常务委员会、生态环境部",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["CN"],
+          "local_artifacts": [
+            "data/kb/106_china_ecology_environment_code_transition.md",
+            "data/kb/107_china_marine_environment_law_current.md"
+          ],
+          "official_url": "https://www.mee.gov.cn/ywgz/fgbz/fl/202603/t20260313_1146496.shtml",
+          "ingestion_policy": "保留明确有效期边界：生态环境法典 2026-08-15 生效，现行海洋环境保护法同日废止；问答必须按事实日期选择来源。",
+          "update_frequency": "transition_event"
+        },
+        {
+          "id": "cn_border_health_quarantine",
+          "title": "中国国境卫生检疫法",
+          "organization": "全国人民代表大会常务委员会、海关总署",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["CN"],
+          "local_artifacts": ["data/kb/108_china_border_health_quarantine_law.md"],
+          "official_url": "https://policy.mofcom.gov.cn/claw/clawContent.shtml?id=102318",
+          "ingestion_policy": "索引现行法律摘要；疾病目录、船舶检疫、健康申报、应急措施和口岸流程须连接海关总署及具体口岸的动态文件。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "cn_customs_manifest_and_vessel_reporting",
+          "title": "中国海关舱单服务与船舶进出港报告",
+          "organization": "海关总署、中华人民共和国海事局",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["CN"],
+          "local_artifacts": [
+            "data/kb/53_cn_vessel_port_reporting.md",
+            "data/kb/76_cn_customs_manifest_service_guide.md"
+          ],
+          "official_url": "https://online.customs.gov.cn/static/pages/guides/000629018002/000629018002.html",
+          "ingestion_policy": "索引公开办事指南与报告规则摘要；字段、时限、系统状态和地方口岸要求必须按操作日期复核。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "cn_port_and_container_standards_metadata",
+          "title": "中国港口、集装箱安全与自动化码头标准题录",
+          "organization": "交通运输部、国家标准化管理委员会",
+          "status": "indexed_directory",
+          "priority": "P1",
+          "jurisdictions": ["CN"],
+          "local_artifacts": [
+            "data/kb/50_cn_port_standards_2024.md",
+            "data/kb/51_cn_gb16994_4_container_safety.md",
+            "data/kb/52_cn_gbt42809_automated_terminal_tos.md"
+          ],
+          "official_url": "https://openstd.samr.gov.cn/",
+          "ingestion_policy": "仅保存官方题录、标准状态和自主摘要；标准正文是否可摄取取决于该标准公开页面和许可，不因题录公开而自动进入 RAG。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "cn_local_port_and_regional_rules_gap",
+          "title": "中国地方港口、自由贸易区、引航、锚地与地方执法规则缺口",
+          "organization": "地方人民政府、地方交通运输主管部门、海事局和港口管理机构",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["CN"],
+          "local_artifacts": [],
+          "official_url": "https://www.msa.gov.cn/",
+          "ingestion_policy": "后续按上海、宁波舟山、深圳、广州、青岛、天津等重点港口逐一建立官方目录和版本记录；不得用国家摘要推断地方作业要求。",
+          "update_frequency": "monthly"
+        }
+      ]
+    },
+    {
+      "id": "singapore",
+      "label_zh": "新加坡国家与港口来源",
+      "scope_note": "已建立法规、活动通告和船舶到离港入口；海关、移民、卫生、危险货物、燃油、引航及码头运营细则仍需跨机构补齐。",
+      "entries": [
+        {
+          "id": "sg_maritime_legislation_and_port_regulations",
+          "title": "新加坡海事立法目录与港口规章",
+          "organization": "Singapore Statutes Online and Maritime and Port Authority of Singapore",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["SG"],
+          "local_artifacts": [
+            "data/kb/98_sg_maritime_legislation_directory.md",
+            "data/kb/99_sg_port_regulations_current.md"
+          ],
+          "official_url": "https://sso.agc.gov.sg/SL/MPASA1996-RG7",
+          "ingestion_policy": "索引现行法规入口和自主摘要；具体义务、罚则、豁免和历史版本必须在 Singapore Statutes Online 按日期核对。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "sg_active_port_marine_circulars",
+          "title": "新加坡有效港口海事通告清单",
+          "organization": "Maritime and Port Authority of Singapore",
+          "status": "indexed_directory",
+          "priority": "P0",
+          "jurisdictions": ["SG"],
+          "local_artifacts": ["data/kb/100_sg_active_port_marine_circulars_2026.md"],
+          "official_url": "https://www.mpa.gov.sg/media-centre/details/port-marine-circular-no.-01-of-2026---list-of-active-port-marine-circulars",
+          "ingestion_policy": "将有效清单作为目录和更新触发器；每份通告正文、撤销关系及适用船型必须另行登记后才能作答。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "sg_vessel_arrival_departure",
+          "title": "新加坡船舶到港与离港程序入口",
+          "organization": "Maritime and Port Authority of Singapore",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["SG"],
+          "local_artifacts": ["data/kb/101_sg_vessel_arrival_departure_procedures.md"],
+          "official_url": "https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-arriving-in-singapore",
+          "ingestion_policy": "索引公开程序摘要；申报时限、数字系统字段、临时措施和代理操作须在业务发生时读取官方页面。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "sg_cross_agency_and_terminal_gap",
+          "title": "新加坡海关、移民、卫生、危险货物、燃油、引航及码头规则缺口",
+          "organization": "MPA, Singapore Customs, ICA, MOH and terminal operators",
+          "status": "planned",
+          "priority": "P0",
+          "jurisdictions": ["SG"],
+          "local_artifacts": [],
+          "official_url": "https://www.mpa.gov.sg/regulations-advisory",
+          "ingestion_policy": "按主管机构和业务环节分开建档；码头经营方材料须先核验公开性和许可，不能用 MPA 一般页面替代。",
+          "update_frequency": "monthly"
+        }
+      ]
+    },
+    {
+      "id": "malaysia",
+      "label_zh": "马来西亚国家与港口来源",
+      "scope_note": "已建立海事法律目录、有效航运通告、航海通告和巴生港手册定位；跨机构及其他主要港口规则仍不完整。",
+      "entries": [
+        {
+          "id": "my_marine_legislation_directory",
+          "title": "马来西亚海事法律目录",
+          "organization": "Marine Department Malaysia",
+          "status": "indexed_directory",
+          "priority": "P0",
+          "jurisdictions": ["MY"],
+          "local_artifacts": ["data/kb/102_my_marine_legislation_directory.md"],
+          "official_url": "https://www.marine.gov.my/en/quick-links/legislation/legislation-list/",
+          "ingestion_policy": "目录用于定位受管法律；具体法条、修正、生效日期和州或港口适用须另行读取官方文本。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "my_shipping_and_navigation_notices",
+          "title": "马来西亚有效航运通告与航海通告",
+          "organization": "Marine Department Malaysia",
+          "status": "indexed_directory",
+          "priority": "P0",
+          "jurisdictions": ["MY"],
+          "local_artifacts": [
+            "data/kb/103_my_active_shipping_notices_2026.md",
+            "data/kb/104_my_notices_to_mariners.md"
+          ],
+          "official_url": "https://www.marine.gov.my/en/informasi/notis/malaysia-shipping-notice/",
+          "ingestion_policy": "有效清单与通告栏目只作为动态目录；每份通告的正文、海域、有效期和撤销状态必须按月复核。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "my_port_klang_handbook",
+          "title": "巴生港海事手册",
+          "organization": "Port Klang Authority",
+          "status": "indexed_summary",
+          "priority": "P0",
+          "jurisdictions": ["MY"],
+          "local_artifacts": ["data/kb/105_port_klang_marine_handbook.md"],
+          "official_url": "https://www.pka.gov.my/phocadownload/Publication/MARINE%20HANDBOOK%20LPK.pdf",
+          "ingestion_policy": "仅保存发布方手册的自主摘要和定位；具体尺度、时限、通信、危险货物和航行要求须核对最新手册、通告及许可。",
+          "update_frequency": "quarterly"
+        },
+        {
+          "id": "my_cross_agency_and_other_ports_gap",
+          "title": "马来西亚海关、移民、卫生及其他主要港口规则缺口",
+          "organization": "Marine Department Malaysia, Customs, Immigration, Health Ministry and port authorities",
+          "status": "planned",
+          "priority": "P0",
+          "jurisdictions": ["MY"],
+          "local_artifacts": [],
+          "official_url": "https://www.marine.gov.my/",
+          "ingestion_policy": "后续优先补充丹戎帕拉帕斯港、槟城港、柔佛港、民都鲁港以及海关、移民和卫生程序；不得把巴生港规则泛化到全国。",
+          "update_frequency": "monthly"
+        }
+      ]
+    },
+    {
+      "id": "other_priority_jurisdictions_and_ports",
+      "label_zh": "其他重点司法辖区、港口国监督和港口规则缺口",
+      "scope_note": "以下为已确认的优先缺口而非穷尽清单；当前本地国际公约摘要不能替代这些国家、区域和港口的实施法。",
+      "entries": [
+        {
+          "id": "us_federal_and_major_ports",
+          "title": "美国联邦海事、海岸警卫队、海关、环保及主要港口规则",
+          "organization": "USCG, CBP, EPA and port authorities",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["US"],
+          "local_artifacts": [],
+          "official_url": "https://www.ecfr.gov/current/title-33",
+          "ingestion_policy": "先建立法规标题、历史版本和机构职责目录，再补洛杉矶、长滩、纽约新泽西等港口公开规则；动态 eCFR 与官方年度版本须区分。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "eu_maritime_acquis_and_ports",
+          "title": "欧盟海事安全、环境、海关和港口服务法规",
+          "organization": "European Union and European Maritime Safety Agency",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["EU"],
+          "local_artifacts": [],
+          "official_url": "https://eur-lex.europa.eu/",
+          "ingestion_policy": "按 EUR-Lex CELEX、合并版本、生效日和成员国转置状态建档；欧盟规则不能替代成员国及单港规定。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "uk_maritime_and_port_law",
+          "title": "英国海事与港口法律、MCA 海事通告和港口细则",
+          "organization": "UK legislation service and Maritime and Coastguard Agency",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["GB"],
+          "local_artifacts": [],
+          "official_url": "https://www.legislation.gov.uk/",
+          "ingestion_policy": "建立法律、修订、M-Notices 与港口地方法规的分层目录；注意英国四法域和脱欧后版本边界。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "australia_maritime_and_port_rules",
+          "title": "澳大利亚海事安全、Marine Orders、港口国监督和州港规则",
+          "organization": "Australian Maritime Safety Authority and state port authorities",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["AU"],
+          "local_artifacts": [],
+          "official_url": "https://www.amsa.gov.au/about/regulations-and-standards",
+          "ingestion_policy": "先补 AMSA 国家层级规则，再按州和港口区分地方要求；不得把联邦指导页当作地方港口作业指令。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "japan_maritime_and_port_rules",
+          "title": "日本海事、港湾、海上保安与主要港口规则",
+          "organization": "Ministry of Land, Infrastructure, Transport and Tourism and Japan Coast Guard",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["JP"],
+          "local_artifacts": [],
+          "official_url": "https://www.mlit.go.jp/en/maritime/index.html",
+          "ingestion_policy": "按日本法原文、英文参考译文和港口地方规则分层；译文只用于导航，法律结论回到日文现行文本。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "netherlands_and_rotterdam_rules",
+          "title": "荷兰海事法及鹿特丹港地方规则",
+          "organization": "Government of the Netherlands and Port of Rotterdam Authority",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["NL", "EU"],
+          "local_artifacts": [],
+          "official_url": "https://wetten.overheid.nl/",
+          "companion_official_urls": ["https://www.portofrotterdam.com/en/rules-regulations-and-exemptions"],
+          "ingestion_policy": "国家法、欧盟规则和鹿特丹港港务长规定分别登记；地方规则不得泛化为荷兰全国或欧盟要求。",
+          "update_frequency": "monthly"
+        },
+        {
+          "id": "paris_and_tokyo_mou_port_state_control",
+          "title": "巴黎备忘录与东京备忘录港口国监督资料",
+          "organization": "Paris MoU and Tokyo MoU",
+          "status": "planned",
+          "priority": "P1",
+          "jurisdictions": ["REGIONAL"],
+          "local_artifacts": [],
+          "official_url": "https://parismou.org/",
+          "companion_official_urls": ["https://www.tokyo-mou.org/"],
+          "ingestion_policy": "索引公开检查制度、年度报告和通告；具体滞留或检查结论必须核对当前数据库、成员国实施法和个案记录。",
+          "update_frequency": "monthly"
+        }
+      ]
+    },
+    {
+      "id": "license_isolated_materials",
+      "label_zh": "许可隔离与禁止未经授权摄取的材料",
+      "scope_note": "本节材料不得因业务重要而绕过版权、付费、会员或许可要求。取得授权时应记录权利人、许可文本、使用范围、期限和允许的机器处理方式。",
+      "entries": [
+        {
+          "id": "iso_standard_full_text",
+          "title": "ISO 标准正文及受保护衍生内容",
+          "organization": "International Organization for Standardization",
+          "status": "license_isolated",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://www.iso.org/copyright.html",
+          "ingestion_policy": "未经 ISO 或权利人明确书面授权，不得把 ISO 标准正文、页面、长摘要、翻译、抽取结果或其他受保护内容用于 RAG、向量化、机器学习或提示处理；只保留最低限度的题录和许可状态。",
+          "update_frequency": "on_license_change"
+        },
+        {
+          "id": "iec_paid_standard_full_text",
+          "title": "IEC 付费标准正文，包括船岸高压连接标准",
+          "organization": "International Electrotechnical Commission",
+          "status": "license_isolated",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://webstore.iec.ch/en/publication/29485",
+          "ingestion_policy": "IEC 付费正文、图表和技术要求未经授权不得进入 RAG；可登记标准号、标题、版本、状态、购买入口和许可审查结果。",
+          "update_frequency": "on_version_or_license_change"
+        },
+        {
+          "id": "imo_paid_publications",
+          "title": "IMO 付费出版物和受保护正式文本",
+          "organization": "International Maritime Organization",
+          "status": "license_isolated",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://www.imo.org/en/publications/Pages/PermissionRequests.aspx",
+          "ingestion_policy": "IMDG、IMSBC、SOLAS 合并本等付费出版物和正式文本未经 IMO 许可不得复制、批量抽取、嵌入或进入 RAG；继续使用已登记的公开网页摘要作为定位材料。",
+          "update_frequency": "on_version_or_license_change"
+        },
+        {
+          "id": "wco_restricted_packages",
+          "title": "WCO 受限数据模型技术包、SAFE 材料及账户内容",
+          "organization": "World Customs Organization",
+          "status": "license_isolated",
+          "priority": "P0",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://www.wcoomd.org/DataModel",
+          "ingestion_policy": "登录、会员、许可或版权受限的 WCO 包、模式、代码表和文件未经授权不得下载后进入 RAG；公开页面仅可形成简短自主摘要。",
+          "update_frequency": "on_version_or_license_change"
+        },
+        {
+          "id": "bimco_contracts_and_clauses",
+          "title": "BIMCO 合同、条款和会员内容",
+          "organization": "Baltic and International Maritime Council",
+          "status": "license_isolated",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://www.bimco.org/contracts-and-clauses/bimco-contracts",
+          "ingestion_policy": "BIMCO 合同和条款未经授权不得复制、改写为可还原文本或进入 RAG；只登记名称、版本、官方入口和许可状态。",
+          "update_frequency": "on_version_or_license_change"
+        },
+        {
+          "id": "ics_publications_and_member_materials",
+          "title": "ICS 出版物和会员材料",
+          "organization": "International Chamber of Shipping",
+          "status": "license_isolated",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://www.ics-shipping.org/publications/",
+          "ingestion_policy": "ICS 付费或会员材料未经授权不得进入 RAG；公开新闻和页面可在逐页确认许可后形成不可还原原文的自主摘要。",
+          "update_frequency": "on_version_or_license_change"
+        },
+        {
+          "id": "classification_society_rules",
+          "title": "船级社统一要求、船级规则和技术通函",
+          "organization": "IACS and classification societies",
+          "status": "license_isolated",
+          "priority": "P1",
+          "jurisdictions": ["GLOBAL"],
+          "local_artifacts": [],
+          "official_url": "https://iacs.org.uk/publications/",
+          "ingestion_policy": "逐机构核对公开下载和机器处理许可；没有明确许可时只登记题录，不摄取规则正文、图纸、表格或通函附件。",
+          "update_frequency": "on_version_or_license_change"
+        }
+      ]
+    }
+  ],
+  "known_cross_cutting_gaps": [
+    "尚未建立覆盖所有船旗国、沿海国、港口国和地方港口的法规目录。",
+    "尚未逐项保存国际公约缔约状态、声明、保留、修正接受方式和国家实施法。",
+    "尚未完整覆盖船舶机械、船级、法定证书、液体散货计量与品质、贸易术语、支付、保险和融资。",
+    "多数动态通告和港口操作页面尚未接入自动变更监测与人工复核工作流。",
+    "摘要与目录不能支持条款原文、罚则、具体数值、时限、豁免、责任归属或个案法律意见。"
+  ]
+}

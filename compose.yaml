@@ -1,0 +1,30 @@
+services:
+  xiaoyi:
+    build:
+      context: .
+    image: xiaoyi-ai:0.3.0
+    ports:
+      - "127.0.0.1:8010:8010"
+    environment:
+      XIAOYI_ENV: ${XIAOYI_ENV:-local}
+      XIAOYI_SECURITY_MODE: ${XIAOYI_SECURITY_MODE:-local}
+      XIAOYI_ALLOWED_HOSTS: ${XIAOYI_ALLOWED_HOSTS:-127.0.0.1,localhost}
+      XIAOYI_CORS_ORIGINS: ${XIAOYI_CORS_ORIGINS:-http://127.0.0.1:8010,http://localhost:8010}
+      XIAOYI_RUNTIME_DB: /app/runtime/xiaoyi_runtime.db
+    volumes:
+      - xiaoyi-runtime:/app/runtime
+      - xiaoyi-rl-runs:/app/data/rl_runs
+      - xiaoyi-kb-pending:/app/data/kb_pending
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+
+volumes:
+  xiaoyi-runtime:
+  xiaoyi-rl-runs:
+  xiaoyi-kb-pending:
