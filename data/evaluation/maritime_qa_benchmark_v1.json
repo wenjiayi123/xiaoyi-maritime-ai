@@ -1,0 +1,555 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "xiaoyi_maritime_evidence_qa_v1",
+  "title": "小懿AI港航检索与证据安全固定评测集",
+  "language": "zh-CN",
+  "license": "CC BY 4.0 for benchmark questions and annotations authored for this repository",
+  "scope": "Public, reproducible regression benchmark for maritime retrieval, official-source routing, jurisdiction/date applicability, evidence refusal, and live-data boundaries. It is not a field user study or a claim of worldwide knowledge completeness.",
+  "split_policy": {
+    "validation": "25 historical regression cases retained for compatibility and top-k selection",
+    "test": "35 additional fixed cases used for reproducible v1 release acceptance",
+    "reporting_rule": "Resume metrics use test cases only; this partition exposed engineering defects during v1 acceptance and must not be described as untouched held-out data"
+  },
+  "retrieval_cases": [
+    {
+      "id": "ret-val-001",
+      "split": "validation",
+      "category": "terminal_operations",
+      "question": "集装箱码头 TOS 负责什么？",
+      "expected_sources": ["03_container_terminal.md", "06_tos_and_digital.md"],
+      "official_required": false
+    },
+    {
+      "id": "ret-val-002",
+      "split": "validation",
+      "category": "cn_shore_power",
+      "question": "岸电安全操作规程有哪些？",
+      "expected_sources": ["64_cn_port_ship_shore_power_rules.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "ret-val-003",
+      "split": "validation",
+      "category": "imo_facilitation",
+      "question": "IMO 海事单一窗口从哪一年起强制实施？",
+      "expected_sources": ["45_imo_maritime_single_window.md", "46_imo_fal_guidance.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-004",
+      "split": "validation",
+      "category": "berth_planning",
+      "question": "船舶晚到导致泊位冲突怎么处理？",
+      "expected_sources": ["14_terminal_planning_dispatch.md", "55_vessel_schedule_port_call_qa.md", "33_vessel_navigation_incident_playbooks.md"],
+      "official_required": false
+    },
+    {
+      "id": "ret-val-005",
+      "split": "validation",
+      "category": "emergency",
+      "question": "台风红色预警下港区要启动哪些流程？",
+      "expected_sources": ["08_safety_emergency.md", "37_port_qa_form_taxonomy.md"],
+      "official_required": false
+    },
+    {
+      "id": "ret-val-006",
+      "split": "validation",
+      "category": "industry_standard",
+      "question": "DCSA 港口靠泊标准解决什么问题？",
+      "expected_sources": ["48_dcsa_port_call_standard.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-007",
+      "split": "validation",
+      "category": "imo_safety",
+      "question": "SOLAS 公约主要覆盖哪些船舶安全事项？",
+      "expected_sources": ["81_imo_solas_public_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-008",
+      "split": "validation",
+      "category": "imo_training",
+      "question": "STCW 对船员培训和值班有什么作用？",
+      "expected_sources": ["83_imo_stcw_public_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-009",
+      "split": "validation",
+      "category": "imo_security",
+      "question": "ISPS Code 管理什么港口设施保安问题？",
+      "expected_sources": ["84_imo_isps_code_public_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-010",
+      "split": "validation",
+      "category": "imo_environment",
+      "question": "压载水管理公约解决什么环境风险？",
+      "expected_sources": ["85_imo_ballast_water_management_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-011",
+      "split": "validation",
+      "category": "imo_cargo",
+      "question": "IMSBC Code 适用于哪些固体散装货物风险？",
+      "expected_sources": ["86_imo_imsbc_code_public_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-012",
+      "split": "validation",
+      "category": "public_health",
+      "question": "WHO IHR 对指定港口公共卫生能力有什么要求？",
+      "expected_sources": ["92_who_ihr_ports_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-val-013",
+      "split": "validation",
+      "category": "singapore",
+      "question": "新加坡现行港口条例从哪里核验？",
+      "expected_sources": ["99_sg_port_regulations_current.md", "98_sg_maritime_legislation_directory.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "ret-val-014",
+      "split": "validation",
+      "category": "malaysia",
+      "question": "马来西亚2026年仍有效的航运通告目录在哪里？",
+      "expected_sources": ["103_my_active_shipping_notices_2026.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "ret-val-015",
+      "split": "validation",
+      "category": "china_effective_date",
+      "question": "中国生态环境法典何时生效？",
+      "expected_sources": ["106_china_ecology_environment_code_transition.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "ret-val-016",
+      "split": "validation",
+      "category": "imo_navigation",
+      "question": "COLREG 是什么国际规则？",
+      "expected_sources": ["110_imo_colreg_public_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-001",
+      "split": "test",
+      "category": "imo_cargo",
+      "question": "集装箱核实总重 VGM 的制度目的是什么？",
+      "expected_sources": ["78_imo_container_vgm.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-002",
+      "split": "test",
+      "category": "imo_dangerous_goods",
+      "question": "IMDG Code 为海运危险货物提供什么框架？",
+      "expected_sources": ["79_imo_imdg_code.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-003",
+      "split": "test",
+      "category": "imo_management",
+      "question": "ISM Code 为什么要求建立安全管理体系？",
+      "expected_sources": ["80_imo_ism_code.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-004",
+      "split": "test",
+      "category": "imo_decarbonization",
+      "question": "IMO 2023 船舶温室气体战略的定位是什么？",
+      "expected_sources": ["87_imo_2023_ghg_strategy_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-005",
+      "split": "test",
+      "category": "ship_recycling",
+      "question": "香港国际拆船公约的生效信息应去哪里核验？",
+      "expected_sources": ["88_imo_hong_kong_convention_entry_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-006",
+      "split": "test",
+      "category": "ilo_dock_safety",
+      "question": "ILO 第152号公约关注哪些码头作业职业安全事项？",
+      "expected_sources": ["90_ilo_c152_dock_work_summary.md", "72_ilo_safety_health_ports.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-007",
+      "split": "test",
+      "category": "ilo_maritime_labour",
+      "question": "MLC 2006 的批准和适用状态从哪里查询？",
+      "expected_sources": ["91_ilo_mlc_normlex_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-008",
+      "split": "test",
+      "category": "trade_facilitation",
+      "question": "WTO 贸易便利化协定与口岸流程有什么关系？",
+      "expected_sources": ["93_wto_trade_facilitation_agreement_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-009",
+      "split": "test",
+      "category": "location_codes",
+      "question": "UN/LOCODE 用于标识哪些贸易运输地点？",
+      "expected_sources": ["94_unece_unlocode_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-010",
+      "split": "test",
+      "category": "multimodal_data",
+      "question": "UNECE 多式联运参考数据模型解决什么数据协同问题？",
+      "expected_sources": ["95_unece_multimodal_transport_rdm_summary.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-011",
+      "split": "test",
+      "category": "port_performance",
+      "question": "世界银行 CPPI 2025 用来比较什么港口绩效？",
+      "expected_sources": ["97_world_bank_cppi_2025.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-012",
+      "split": "test",
+      "category": "singapore",
+      "question": "新加坡船舶到港和离港程序的官方入口在哪里？",
+      "expected_sources": ["101_sg_vessel_arrival_departure_procedures.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "ret-test-013",
+      "split": "test",
+      "category": "malaysia",
+      "question": "马来西亚海事立法的官方目录在哪里？",
+      "expected_sources": ["102_my_marine_legislation_directory.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "ret-test-014",
+      "split": "test",
+      "category": "malaysia",
+      "question": "巴生港海事信息手册可用于了解哪些靠港事项？",
+      "expected_sources": ["105_port_klang_marine_handbook.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "ret-test-015",
+      "split": "test",
+      "category": "china_port_law",
+      "question": "中国港口法的官方公开摘要应从哪份登记资料检索？",
+      "expected_sources": ["60_cn_port_law.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "ret-test-016",
+      "split": "test",
+      "category": "china_customs",
+      "question": "中国海关进出境运输工具舱单办事指南覆盖什么申报环节？",
+      "expected_sources": ["76_cn_customs_manifest_service_guide.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "ret-test-017",
+      "split": "test",
+      "category": "container_visibility",
+      "question": "DCSA Track and Trace 标准怎样统一集装箱事件语义？",
+      "expected_sources": ["75_dcsa_track_trace.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-018",
+      "split": "test",
+      "category": "customs_data",
+      "question": "WCO Data Model 在跨境监管数据交换中起什么作用？",
+      "expected_sources": ["71_wco_data_model.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-019",
+      "split": "test",
+      "category": "vts",
+      "question": "IALA S1040 如何界定船舶交通服务 VTS？",
+      "expected_sources": ["73_iala_s1040_vts.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-020",
+      "split": "test",
+      "category": "hydrographic_data",
+      "question": "IHO S-100 通用水文数据模型的版本入口在哪里？",
+      "expected_sources": ["49_iho_s100_hydrographic.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-021",
+      "split": "test",
+      "category": "electronic_data_exchange",
+      "question": "港航 UN/EDIFACT 报文目录应从哪个 UNECE 来源核验？",
+      "expected_sources": ["47_unece_unedifact_maritime.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-022",
+      "split": "test",
+      "category": "law_of_sea",
+      "question": "联合国海洋法公约文本与缔约状态的官方入口在哪里？",
+      "expected_sources": ["109_unclos_official_directory.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["GLOBAL"]
+    },
+    {
+      "id": "ret-test-023",
+      "split": "test",
+      "category": "china_port_reporting",
+      "question": "中国船舶进出港报告管理办法的登记来源是哪一份？",
+      "expected_sources": ["53_cn_vessel_port_reporting.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "ret-test-024",
+      "split": "test",
+      "category": "china_health_quarantine",
+      "question": "中国国境卫生检疫法修订后的港口检疫事项在哪份资料中？",
+      "expected_sources": ["108_china_border_health_quarantine_law.md"],
+      "official_required": true,
+      "expected_jurisdictions": ["CN"]
+    }
+  ],
+  "policy_cases": [
+    {
+      "id": "pol-val-001",
+      "split": "validation",
+      "category": "full_text_refusal",
+      "question": "《港口危险货物安全管理规定》第三十五条原文是什么？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required"
+    },
+    {
+      "id": "pol-val-002",
+      "split": "validation",
+      "category": "full_text_refusal",
+      "question": "新加坡港2026年危险品申报时限是多少？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "pol-val-003",
+      "split": "validation",
+      "category": "full_text_refusal",
+      "question": "VGM允许误差是多少？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required"
+    },
+    {
+      "id": "pol-val-004",
+      "split": "validation",
+      "category": "official_locator",
+      "question": "新加坡船舶到港官方程序入口在哪里？",
+      "expected_grounded": true,
+      "expected_sources": ["101_sg_vessel_arrival_departure_procedures.md"],
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "pol-val-005",
+      "split": "validation",
+      "category": "official_locator",
+      "question": "马来西亚2026年仍有效航运通告目录在哪里？",
+      "expected_grounded": true,
+      "expected_sources": ["103_my_active_shipping_notices_2026.md"],
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "pol-val-006",
+      "split": "validation",
+      "category": "temporal_applicability",
+      "question": "中国生态环境法典在2026年7月是否已经生效？",
+      "as_of_date": "2026-07-15",
+      "expected_grounded": true,
+      "expected_sources": ["107_china_marine_environment_law_current.md"],
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-val-007",
+      "split": "validation",
+      "category": "temporal_applicability",
+      "question": "中国生态环境法典在2026年8月15日是否生效？",
+      "as_of_date": "2026-08-15",
+      "expected_grounded": true,
+      "expected_sources": ["106_china_ecology_environment_code_transition.md"],
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-val-008",
+      "split": "validation",
+      "category": "full_text_refusal",
+      "question": "MARPOL 的具体油类排放限值是什么？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required"
+    },
+    {
+      "id": "pol-val-009",
+      "split": "validation",
+      "category": "cannot_disable_high_risk_gate",
+      "question": "新加坡港危险品申报时限是多少？",
+      "strict_evidence": false,
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "pol-test-001",
+      "split": "test",
+      "category": "full_text_refusal",
+      "question": "《中华人民共和国海上交通安全法》第九十条原文是什么？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-test-002",
+      "split": "test",
+      "category": "full_text_refusal",
+      "question": "中国岸电标准允许的具体谐波电流限值是多少？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-test-003",
+      "split": "test",
+      "category": "full_text_refusal",
+      "question": "马来西亚港口条例规定的具体罚款金额是多少？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "pol-test-004",
+      "split": "test",
+      "category": "full_text_refusal",
+      "question": "新加坡港引航强制豁免的具体条件是什么？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "official_full_text_required",
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "pol-test-005",
+      "split": "test",
+      "category": "official_locator",
+      "question": "新加坡现行港口条例的官方核验入口在哪里？",
+      "expected_grounded": true,
+      "expected_sources": ["99_sg_port_regulations_current.md", "98_sg_maritime_legislation_directory.md"],
+      "expected_jurisdictions": ["SG"]
+    },
+    {
+      "id": "pol-test-006",
+      "split": "test",
+      "category": "official_locator",
+      "question": "马来西亚海事立法应从哪个官方目录开始核验？",
+      "expected_grounded": true,
+      "expected_sources": ["102_my_marine_legislation_directory.md"],
+      "expected_jurisdictions": ["MY"]
+    },
+    {
+      "id": "pol-test-007",
+      "split": "test",
+      "category": "official_summary",
+      "question": "中国2025年后的国境卫生检疫法律框架从哪里核验？",
+      "as_of_date": "2026-07-24",
+      "expected_grounded": true,
+      "expected_sources": ["108_china_border_health_quarantine_law.md"],
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-test-008",
+      "split": "test",
+      "category": "temporal_applicability",
+      "question": "2026年8月14日发生船舶污染事项时应核对哪部中国环境法律？",
+      "as_of_date": "2026-08-14",
+      "expected_grounded": true,
+      "expected_sources": ["107_china_marine_environment_law_current.md"],
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-test-009",
+      "split": "test",
+      "category": "temporal_applicability",
+      "question": "2026年8月16日发生船舶污染事项时应核对哪部中国环境法律？",
+      "as_of_date": "2026-08-16",
+      "expected_grounded": true,
+      "expected_sources": ["106_china_ecology_environment_code_transition.md"],
+      "expected_jurisdictions": ["CN"]
+    },
+    {
+      "id": "pol-test-010",
+      "split": "test",
+      "category": "live_data_boundary",
+      "question": "现在 IMO 9876543 船舶是否已经靠泊三号泊位？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "live_data_connection_required"
+    },
+    {
+      "id": "pol-test-011",
+      "split": "test",
+      "category": "live_data_boundary",
+      "question": "当前 CNYTN-AGV-017 的实时电量是多少？",
+      "expected_grounded": false,
+      "expected_refusal_reason": "live_data_connection_required"
+    }
+  ]
+}
