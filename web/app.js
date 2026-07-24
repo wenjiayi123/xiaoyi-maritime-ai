@@ -157,7 +157,7 @@
 
   const fallbackDashboard = {
     data_mode: "offline",
-    data_notice: "港口运营数据接口不可用；当前仅保留界面结构，不展示或推断现场数值。",
+    data_notice: "等待接入港口：当前仅保留界面结构，不展示或推断现场数值。",
     updated_at: new Date().toISOString(),
     overview: {
       metrics: [
@@ -191,6 +191,45 @@
     ],
     knowledge_categories: ["港口运营","航运调度","能源管理","设备管理","政策法规","行业标准"]
   };
+
+  function withoutUnverifiedOperationalValues(data) {
+    const live = data?.source_metadata?.data_mode === "live"
+      && data?.source_metadata?.live_data_verified === true;
+    if (live) return data;
+    const overview = data?.overview || fallbackDashboard.overview;
+    const energy = data?.energy || fallbackDashboard.energy;
+    return {
+      ...data,
+      data_notice: "等待接入港口：TOS、AIS、EMS、EAM 或 VTS 适配器尚未通过现场验证。",
+      public_open_source_waiting: true,
+      overview: {
+        ...overview,
+        metrics: (overview.metrics || fallbackDashboard.overview.metrics).map((item) => ({
+          ...item,
+          value: 0,
+          display_value: "等待接入港口",
+          trend_percent: 0,
+          trend: "flat",
+          status: "warning"
+        }))
+      },
+      energy: {
+        ...energy,
+        public_open_source_waiting: true,
+        summary: fallbackDashboard.energy.summary,
+        series: [],
+        insights: ["等待接入港口：配置并验证 EMS、TOS 与岸电计量适配器后显示现场趋势。"]
+      },
+      alerts: {
+        ...(data?.alerts || {}),
+        total: 0,
+        critical: 0,
+        warning: 0,
+        info: 0,
+        items: []
+      }
+    };
+  }
 
   const fallbackTemplates = [
     { id:"analyze-energy", title:"分析今日港口能耗", description:"读取指标、比对基线、定位异常并形成节能建议。", estimated_minutes:3, risk_level:"low", requires_human_confirmation:false, steps:["读取今日能耗与碳排数据","对比历史基线与作业量","定位异常时段和设备","生成调度与节能建议","形成可追溯分析结论"] },
@@ -492,6 +531,12 @@
   }
 
   function applyEnergySummary(energy) {
+    if (energy?.public_open_source_waiting) {
+      $("#responseKpis").innerHTML = ["总能耗", "碳排放总量", "单位吞吐能耗", "岸电使用率"]
+        .map((label) => `<div><span>${label}</span><strong>等待接入港口</strong><em class="down">未读取现场数据</em></div>`)
+        .join("");
+      return;
+    }
     const s = energy?.summary || fallbackDashboard.energy.summary;
     const kpis = [
       ["总能耗", formatNumber(s.total_energy_mwh), "MWh", s.energy_change_percent],
@@ -503,6 +548,15 @@
   }
 
   function renderAnalytics(energy) {
+    if (energy?.public_open_source_waiting) {
+      $("#analyticsKpis").innerHTML = ["综合能耗", "碳排放", "碳强度", "岸电利用率"]
+        .map((label, index) => `<div class="analytics-kpi" style="color:${["#22d4ff","#4ee58c","#f5a733","#8b78ff"][index]}"><span>${label}</span><strong>—</strong><small>等待接入港口</small><em>未读取现场数据</em></div>`)
+        .join("");
+      $("#analyticsUpdated").textContent = "等待接入港口 · 当前未读取生产数据";
+      buildChart(energy, $("#largeEnergyChart"), true);
+      $("#chartInsights").textContent = energy.insights?.[0] || "等待接入港口";
+      return;
+    }
     const s = energy?.summary || fallbackDashboard.energy.summary;
     const values = [
       ["综合能耗", formatNumber(s.total_energy_mwh), "MWh", s.energy_change_percent, "#22d4ff"],
@@ -523,15 +577,17 @@
     const badge = $("#runtimeStatusBadge");
     if (!badge) return;
     const live = metadata?.data_mode === "live" && metadata?.live_data_verified;
-    badge.textContent = live ? "生产数据" : metadata?.data_mode === "operations_sandbox" ? "运营沙箱" : "接口离线";
-    badge.title = metadata ? `${metadata.source_system} · ${metadata.quality_code} · ${formatDateTime(metadata.observed_at)}` : "运营数据接口不可用";
+    badge.textContent = live ? "生产数据" : "等待接入港口";
+    badge.title = live
+      ? `${metadata.source_system} · ${metadata.quality_code} · ${formatDateTime(metadata.observed_at)}`
+      : "等待接入港口：未验证的沙箱或本地数据不会显示为现场实绩";
   }
 
   async function loadDashboard(silent = false) {
     try {
       const data = await api("/api/dashboard");
-      state.dashboard = data;
-      state.energy = data.energy;
+      state.dashboard = withoutUnverifiedOperationalValues(data);
+      state.energy = state.dashboard.energy;
       syncRuntimeBadge(data.source_metadata);
     } catch (error) {
       state.dashboard = fallbackDashboard;
@@ -555,17 +611,20 @@
       return;
     }
     const isLive = status.data_mode === "live" && status.live_data_verified;
-    openModal("运营数据来源", `${isLive ? "生产实绩" : "运营沙箱"} · ${formatDateTime(status.observed_at)}`, `<div class="settings-grid"><div class="setting-row"><div><strong>当前适配器</strong><span>${escapeHtml(status.source_adapter)} · ${escapeHtml(status.schema_version)}</span></div><span class="${isLive ? "status-pill" : "demo-badge"}">${isLive ? "LIVE" : "SANDBOX"}</span></div><div class="setting-row"><div><strong>来源系统</strong><span>${escapeHtml(status.source_system)} · 港区代码 ${escapeHtml(status.port_code)}</span></div><span>${escapeHtml(status.source_type)}</span></div><div class="setting-row"><div><strong>数据质量</strong><span>观测时间 ${formatDateTime(status.observed_at)} · 延迟 ${status.latency_ms} ms</span></div><span class="status-pill">${escapeHtml(status.quality_code)} · ${(Number(status.quality_score) * 100).toFixed(0)}%</span></div><div class="setting-row"><div><strong>生产替换边界</strong><span>保持 port-ops.v1 契约，实现同一适配器接口后即可切换；写操作仍独立授权。</span></div><span>${status.production_ready ? "契约就绪" : "待建设"}</span></div><div class="drawer-note"><strong>真实性声明：</strong>${escapeHtml(status.data_notice)}</div></div>`, "", "runtime-status");
+    openModal("运营数据来源", `${isLive ? "生产实绩" : "等待接入港口"} · ${formatDateTime(status.observed_at)}`, `<div class="settings-grid"><div class="setting-row"><div><strong>当前适配器</strong><span>${escapeHtml(status.source_adapter)} · ${escapeHtml(status.schema_version)}</span></div><span class="${isLive ? "status-pill" : "demo-badge"}">${isLive ? "LIVE" : "PENDING"}</span></div><div class="setting-row"><div><strong>来源系统</strong><span>${escapeHtml(status.source_system)} · 港区代码 ${escapeHtml(status.port_code)}</span></div><span>${escapeHtml(status.source_type)}</span></div><div class="setting-row"><div><strong>数据质量</strong><span>观测时间 ${formatDateTime(status.observed_at)} · 延迟 ${status.latency_ms} ms</span></div><span class="status-pill">${escapeHtml(status.quality_code)} · ${(Number(status.quality_score) * 100).toFixed(0)}%</span></div><div class="setting-row"><div><strong>生产替换边界</strong><span>保持 port-ops.v1 契约，实现同一适配器接口后即可切换；写操作仍独立授权。</span></div><span>${isLive ? "已验证" : "等待接入港口"}</span></div><div class="drawer-note"><strong>真实性声明：</strong>${isLive ? escapeHtml(status.data_notice) : "当前未读取港口现场数值；沙箱数据仅用于接口测试，不进入运营看板。"}</div></div>`, "", "runtime-status");
   }
 
   async function loadEnergy(range, source = "rail") {
     const controls = source === "analytics" ? "#analyticsRange [data-range]" : "#energyRange [data-range]";
     try {
       const data = await api(`/api/energy?range=${encodeURIComponent(range)}`);
-      state.energy = data;
-      buildChart(data, $("#energyChart"));
-      renderAnalytics(data);
-      applyEnergySummary(data);
+      const safeData = data?.source_metadata?.data_mode === "live" && data?.source_metadata?.live_data_verified === true
+        ? data
+        : { ...data, public_open_source_waiting:true, summary:fallbackDashboard.energy.summary, series:[], insights:["等待接入港口：当前未读取生产能耗数据。"] };
+      state.energy = safeData;
+      buildChart(safeData, $("#energyChart"));
+      renderAnalytics(safeData);
+      applyEnergySummary(safeData);
       $$(controls).forEach((button) => button.classList.toggle("active", button.dataset.range === range));
       return true;
     } catch (error) {
@@ -583,7 +642,8 @@
       priority: index === 0 ? "high" : index === 1 ? "medium" : "low",
       impact: impactLabels[index] || "执行后返回可审计结果"
     }));
-    $("#decisionCards").innerHTML = cards.map((item, index) => `<article class="decision-item"><span class="decision-rank">0${index+1}</span><header><strong>${escapeHtml(item.title)}</strong><span class="priority-${item.priority}">${item.priority === "high" ? "高优先级" : item.priority === "medium" ? "中优先级" : "建议"}</span></header><p>${escapeHtml(item.description)}</p><footer><span>${escapeHtml(item.impact)}</span><button type="button" data-task-template="${escapeHtml(item.task_template_id)}">让小懿执行 →</button></footer></article>`).join("");
+    const waitingForPort = state.dashboard.public_open_source_waiting === true;
+    $("#decisionCards").innerHTML = cards.map((item, index) => `<article class="decision-item"><span class="decision-rank">0${index+1}</span><header><strong>${escapeHtml(item.title)}</strong><span class="priority-${item.priority}">${item.priority === "high" ? "高优先级" : item.priority === "medium" ? "中优先级" : "建议"}</span></header><p>${waitingForPort ? "等待接入港口后基于现场状态生成候选，不使用沙箱数值替代。" : escapeHtml(item.description)}</p><footer><span>${waitingForPort ? "等待接入港口" : escapeHtml(item.impact)}</span><button type="button" data-task-template="${escapeHtml(item.task_template_id)}" ${waitingForPort ? "disabled title=\"尚未接入经验证的港口数据源\"" : ""}>${waitingForPort ? "等待数据接入" : "让小懿执行 →"}</button></footer></article>`).join("");
     const risk = { critical: state.dashboard.alerts?.critical || 0, warning: state.dashboard.alerts?.warning || 0, info: state.dashboard.alerts?.info || 0 };
     const totalAlerts = risk.critical + risk.warning + risk.info;
     const riskScore = Math.max(0, 100 - risk.critical * 18 - risk.warning * 8 - risk.info * 2);
@@ -591,7 +651,9 @@
     if ($("#riskAlertSummary")) $("#riskAlertSummary").textContent = `当前 ${totalAlerts} 项运营提醒 · 按级别扣分`;
     $("#riskLegend").innerHTML = `<span><i style="background:#ff6268"></i>高 ${risk.critical}</span><span><i style="background:#f5a733"></i>中 ${risk.warning}</span><span><i style="background:#4ee58c"></i>提示 ${risk.info}</span>`;
     const summary = state.energy?.summary || {};
-    if ($("#energyEvidenceMetrics")) $("#energyEvidenceMetrics").innerHTML = `<span>综合能耗<b>${formatNumber(summary.total_energy_mwh)} MWh</b></span><span>碳排放<b>${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e</b></span><span>碳强度<b>${formatNumber(summary.carbon_intensity_kgco2e_per_teu)} kg/TEU</b></span><span>岸电利用率<b>${formatNumber(summary.shore_power_utilization_percent)}%</b></span>`;
+    if ($("#energyEvidenceMetrics")) $("#energyEvidenceMetrics").innerHTML = waitingForPort
+      ? `<span>综合能耗<b>等待接入港口</b></span><span>碳排放<b>等待接入港口</b></span><span>碳强度<b>等待接入港口</b></span><span>岸电利用率<b>等待接入港口</b></span>`
+      : `<span>综合能耗<b>${formatNumber(summary.total_energy_mwh)} MWh</b></span><span>碳排放<b>${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e</b></span><span>碳强度<b>${formatNumber(summary.carbon_intensity_kgco2e_per_teu)} kg/TEU</b></span><span>岸电利用率<b>${formatNumber(summary.shore_power_utilization_percent)}%</b></span>`;
     if (!quick.length && alerts.length) $("#decisionCards").innerHTML = `<div class="task-empty">暂无可执行建议</div>`;
   }
 
@@ -997,25 +1059,26 @@
     const energy = state.dashboard.energy || fallbackDashboard.energy;
     const summary = energy.summary;
     const metadata = state.dashboard.source_metadata || null;
-    const modeName = metadata?.live_data_verified ? "生产实绩" : metadata ? "运营沙箱动态合成数据" : "接口离线";
+    const live = metadata?.data_mode === "live" && metadata?.live_data_verified === true;
+    const modeName = live ? "生产实绩" : "等待接入港口";
     state.currentQuestion = "帮我分析一下今日港口的能耗情况";
-    state.currentAnswer = metadata
+    state.currentAnswer = live
       ? `当前能耗态势：\n• 综合能耗 ${formatNumber(summary.total_energy_mwh)} MWh，较对比基线 ${Number(summary.energy_change_percent) <= 0 ? "下降" : "上升"} ${Math.abs(Number(summary.energy_change_percent)).toFixed(1)}%。\n• 碳排放 ${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e，岸电利用率 ${formatNumber(summary.shore_power_utilization_percent)}%。\n• ${energy.insights?.[0] || "请结合当前作业计划复核能耗变化。"}\n• ${energy.insights?.[1] || "高负荷窗口需要现场值班人员确认。"}\n\n数据边界：${modeName}，来源 ${metadata.source_system}，观测时间 ${formatDateTime(metadata.observed_at)}，质量码 ${metadata.quality_code}。${metadata.live_data_verified ? "" : "当前不是现场生产实绩，不能作为控制依据。"}`
-      : "运营数据接口当前不可用，界面未回退到固定假数据。请检查后端服务和数据适配器状态。";
-    state.currentEvidence = metadata ? [{ id:"runtime:XIAOYI-PORT-SANDBOX", source:metadata.source_system, title:"港口运营沙箱动态事件流", score:1, snippet:metadata.data_notice, institution:"小懿AI本地运营沙箱", version:metadata.schema_version, official:false, source_quality:"sandbox_runtime", verification_status:"synthetic_validated" }] : [];
+      : "等待接入港口：当前未读取 TOS、AIS、EMS、EAM 或 VTS 的现场数据，因此不展示或推断今日能耗、吞吐量、设备状态和告警数值。港航知识问答与固定 RAG 评测仍可独立使用。";
+    state.currentEvidence = live ? [{ id:"runtime:LIVE-PORT", source:metadata.source_system, title:"已验证港口运营数据", score:1, snippet:metadata.data_notice, institution:metadata.source_system, version:metadata.schema_version, official:false, source_quality:"live_verified", verification_status:"live_verified" }] : [];
     state.currentMode = "ops";
     state.currentIntent = "energy_analysis";
     $("#currentQuestion").textContent = state.currentQuestion;
     $("#answer").textContent = state.currentAnswer;
     $("#responseKpis").hidden = false;
     $("#analysisTitle").textContent = "今日能耗概况";
-    $("#responseStatus").textContent = metadata ? "已读取动态运营事件并完成来源校验" : "运营数据接口不可用";
+    $("#responseStatus").textContent = live ? "已读取并验证港口现场数据" : "等待接入港口";
     $("#modeMetric").textContent = "运营 / Ops";
     $("#intentTag").textContent = "energy_analysis";
-    $("#confMetric").textContent = metadata ? "中" : "低";
+    $("#confMetric").textContent = live ? "中" : "不适用";
     $("#evMetric").textContent = String(state.currentEvidence.length);
     $("#next").innerHTML = `<button type="button" data-action="generate-report">${icon("report")}生成详细报告</button><button type="button" data-task-template="analyze-energy">${icon("spark")}帮我逐步分析</button><button type="button" data-q="请预测未来 7 日港口能耗趋势。" data-mode="expert">${icon("chart")}能耗趋势预测</button>`;
-    updateGroundingState(metadata ? { grounded:true, coverage:1, source_quality:"sandbox_runtime", refusal_reason:"sandbox_not_production", evidence:state.currentEvidence } : null);
+    updateGroundingState(live ? { grounded:true, coverage:1, source_quality:"live_verified", evidence:state.currentEvidence } : { grounded:false, coverage:0, source_quality:"unverified", refusal_reason:"live_data_connection_required", evidence:[] });
     setView("chat", { silent:true });
     applyEnergySummary(state.dashboard.energy || fallbackDashboard.energy);
     setHeroState("idle");

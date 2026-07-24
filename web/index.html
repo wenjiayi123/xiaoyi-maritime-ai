@@ -138,7 +138,7 @@
                     <header class="response-header">
                       <div><strong>小懿AI</strong><span id="responseStatus">已完成运营数据分析</span></div>
                       <div class="response-actions">
-                        <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">运营沙箱</span>
+                        <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">等待接入港口</span>
                         <span class="grounding-badge pending" id="groundingBadge" aria-live="polite">等待验证</span>
                         <button type="button" class="tiny-icon-button" data-action="favorite-current" aria-label="收藏当前回答"><svg><use href="#i-star"/></svg></button>
                         <button type="button" class="tiny-icon-button" data-action="response-menu" aria-label="更多操作"><svg><use href="#i-more"/></svg></button>
@@ -214,7 +214,7 @@
         <section class="workspace-view" data-view="decisions">
           <header class="view-header"><div><p>DECISION INTELLIGENCE</p><h2>决策建议</h2><span>基于运营快照、港航知识库与安全边界生成可追溯建议</span></div><button type="button" class="primary-button" data-task-template="optimize-berth" data-agent-target="task-optimize-berth"><svg><use href="#i-spark"/></svg>生成智能方案</button></header>
           <div class="decision-layout">
-            <section class="glass-card decision-hero"><div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-bulb"/></svg></span><div><strong>今日决策焦点</strong><small>已按影响度与紧迫性排序</small></div><span class="demo-badge" data-action="runtime-status">动态沙箱</span></div><div id="decisionCards" class="decision-cards"></div></section>
+            <section class="glass-card decision-hero"><div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-bulb"/></svg></span><div><strong>今日决策焦点</strong><small>接入港口后按影响度与紧迫性排序</small></div><span class="demo-badge" data-action="runtime-status">等待接入港口</span></div><div id="decisionCards" class="decision-cards"></div></section>
             <section class="glass-card risk-board"><div class="card-heading"><span class="heading-icon red"><svg><use href="#i-alert"/></svg></span><div><strong>风险态势</strong><small id="riskAlertSummary">等待告警数据</small></div></div><div class="risk-orbit"><div><strong id="riskHealthScore">--</strong><span>告警健康分</span></div><i class="orbit-one"></i><i class="orbit-two"></i></div><div id="riskLegend" class="risk-legend"></div></section>
             <section class="glass-card recommendation-flow"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-task"/></svg></span><div><strong>建议执行链</strong><small>先分析，再确认，后执行</small></div></div><div class="execution-chain"><div class="done"><i><svg><use href="#i-check"/></svg></i><span><strong>识别目标</strong><small>完成业务意图解析</small></span></div><em></em><div class="active"><i>2</i><span><strong>评估约束</strong><small>泊位、岸桥、时窗与风险</small></span></div><em></em><div><i>3</i><span><strong>生成方案</strong><small>输出多个候选策略</small></span></div><em></em><div><i>4</i><span><strong>人工确认</strong><small>授权后才可下发</small></span></div></div></section>
           </div>
@@ -224,7 +224,7 @@
           <header class="view-header"><div><p>PORT DATA OBSERVATORY</p><h2>数据分析</h2><span>运营、能耗、碳排与设备态势一屏联动</span></div><div class="segmented" id="analyticsRange" data-agent-target="analytics-range"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
           <div class="analytics-grid">
             <div class="analytics-kpis" id="analyticsKpis"></div>
-            <section class="glass-card analytics-chart-card"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-chart"/></svg></span><div><strong>港区能耗与碳排趋势</strong><small id="analyticsUpdated">数据同步中</small></div><span class="demo-badge" data-action="runtime-status">动态沙箱</span></div><div class="large-chart" id="largeEnergyChart"></div><div class="chart-insight" id="chartInsights"></div></section>
+            <section class="glass-card analytics-chart-card"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-chart"/></svg></span><div><strong>港区能耗与碳排趋势</strong><small id="analyticsUpdated">等待接入港口</small></div><span class="demo-badge" data-action="runtime-status">等待接入港口</span></div><div class="large-chart" id="largeEnergyChart"></div><div class="chart-insight" id="chartInsights"></div></section>
             <section class="glass-card efficiency-card"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-leaf"/></svg></span><div><strong>可核验能耗指标</strong><small>直接读取当前能源数据接口</small></div></div><div class="energy-evidence-metrics" id="energyEvidenceMetrics"><span>综合能耗<b>--</b></span><span>碳排放<b>--</b></span><span>碳强度<b>--</b></span><span>岸电利用率<b>--</b></span></div><button type="button" class="outline-button" data-task-template="analyze-energy" data-agent-target="task-analyze-energy">让小懿深度分析</button></section>
           </div>
         </section>
@@ -243,19 +243,19 @@
           <header class="view-header"><div><p>AI ACTION CENTER</p><h2>任务中心</h2><span>小懿可在安全白名单内逐步执行，生产操作始终需要人工确认</span></div><button type="button" class="primary-button" data-action="new-task"><svg><use href="#i-plus"/></svg>新建智能任务</button></header>
           <div class="task-center-layout">
             <section class="glass-card template-panel"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-spark"/></svg></span><div><strong>智能任务模板</strong><small>点击即可创建可视化执行流程</small></div></div><div class="task-templates" id="taskTemplates"></div></section>
-            <section class="glass-card running-panel"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-task"/></svg></span><div><strong>执行记录</strong><small>每一步均保留时间与结果</small></div><span class="status-pill"><i></i>运营沙箱</span></div><div id="taskList" class="task-list"></div></section>
+            <section class="glass-card running-panel"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-task"/></svg></span><div><strong>执行记录</strong><small>每一步均保留时间与结果</small></div><span class="status-pill"><i></i>DRY-RUN 审计</span></div><div id="taskList" class="task-list"></div></section>
           </div>
         </section>
       </main>
 
       <aside class="right-rail" id="rightRail">
         <section class="rail-card overview-card" id="overviewCard">
-          <header><div><svg><use href="#i-chart"/></svg><strong>实时运营概况</strong><span class="demo-dot" data-action="runtime-status" title="运营沙箱动态合成数据，尚未接生产源">SANDBOX</span></div><button type="button" data-view-target="analytics">查看更多</button></header>
+          <header><div><svg><use href="#i-chart"/></svg><strong>实时运营概况</strong><span class="demo-dot" data-action="runtime-status" title="等待接入港口现场数据源">PENDING</span></div><button type="button" data-view-target="analytics">查看更多</button></header>
           <div class="overview-grid" id="overviewGrid"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>
         </section>
 
         <section class="rail-card energy-card" id="energyCard">
-          <header><div><svg><use href="#i-leaf"/></svg><strong>能耗实时指标</strong><span class="demo-dot" data-action="runtime-status">SANDBOX</span></div><div class="mini-segmented" id="energyRange"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
+          <header><div><svg><use href="#i-leaf"/></svg><strong>能耗实时指标</strong><span class="demo-dot" data-action="runtime-status">PENDING</span></div><div class="mini-segmented" id="energyRange"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
           <div class="chart-legend"><span><i class="cyan"></i>能耗 (MWh)</span><span><i class="green"></i>碳排放 (tCO₂e)</span></div>
           <div class="energy-chart" id="energyChart"><div class="chart-loading">正在绘制趋势...</div></div>
         </section>

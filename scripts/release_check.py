@@ -15,7 +15,7 @@ REQUIRED = (
     ".github/dependabot.yml", "docs/DEPLOYMENT.md", "docs/ARCHITECTURE.md",
     "docs/RESUME_CLAIMS.md", "data/evaluation/maritime_qa_benchmark_v1.json",
     "scripts/run_rag_benchmark.py", "reports/maritime_rag_benchmark_v1.json",
-    "reports/maritime_rag_benchmark_v1.md",
+    "reports/maritime_rag_benchmark_v1.md", "web/index.html", "web/app.js",
 )
 EXCLUDED_PARTS = {
     ".git", ".venv", ".pytest_cache", "__pycache__",
@@ -87,6 +87,21 @@ def main() -> int:
             errors.append("RAG固定评测发布门禁未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"RAG基准报告不可验证：{exc}")
+
+    try:
+        web_html = (ROOT / "web/index.html").read_text(encoding="utf-8")
+        web_js = (ROOT / "web/app.js").read_text(encoding="utf-8")
+        for marker in (
+            "等待接入港口",
+            "withoutUnverifiedOperationalValues",
+            "未验证的沙箱或本地数据不会显示为现场实绩",
+        ):
+            if marker not in f"{web_html}\n{web_js}":
+                errors.append(f"开源界面的港口接入边界缺失：{marker}")
+        if ">动态沙箱<" in web_html or ">运营沙箱<" in web_html:
+            errors.append("开源首页仍把沙箱状态作为默认港口运营数据展示")
+    except OSError as exc:
+        errors.append(f"开源界面真实性门禁不可验证：{exc}")
 
     for path in _candidate_files():
         try:
