@@ -39,12 +39,12 @@
 
 | 证据维度 / Evidence dimension | 固定结果 / Pinned result | 可复验入口 / Verification entry |
 |---|---:|---|
-| 知识快照 / Knowledge snapshot | **112**份文档、**708**个分块、**60**份官方核验来源<br><sub>**112** documents, **708** chunks, **60** officially verified sources</sub> | `data/xiaoyi_index.json` + `data/source_registry.json` |
-| 固定测试 / Fixed release acceptance | **35**题：24题检索 + 11题证据策略<br><sub>**35** tests: 24 retrieval + 11 evidence-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
-| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = **87.50% / 100% / 100%** | `reports/maritime_rag_benchmark_v1.json` |
-| 同快照对照 / Same-snapshot baseline | MRR **0.8507 → 0.9236**（+7.29个百分点 / pp） | Hybrid Sparse vs BM25-only |
-| 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 **100%**<br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all **100%**</sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
-| 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 **11/11通过**<br><sub>Refusal, jurisdiction, date, and live-data boundaries: **11/11 passed**</sub> | `python scripts/run_rag_benchmark.py verify --deep` |
+| 知识快照 / Knowledge snapshot | <strong>112</strong>份文档、<strong>708</strong>个分块、<strong>60</strong>份官方核验来源<br><sub><strong>112</strong> documents, <strong>708</strong> chunks, <strong>60</strong> officially verified sources</sub> | `data/xiaoyi_index.json` + `data/source_registry.json` |
+| 固定测试 / Fixed release acceptance | <strong>35</strong>题：24题检索 + 11题证据策略<br><sub><strong>35</strong> tests: 24 retrieval + 11 evidence-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
+| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>87.50% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1.json` |
+| 同快照对照 / Same-snapshot baseline | MRR <strong>0.8507 → 0.9236</strong>（+7.29个百分点 / pp） | Hybrid Sparse vs BM25-only |
+| 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 <strong>100%</strong><br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all <strong>100%</strong></sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
+| 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 <strong>11/11通过</strong><br><sub>Refusal, jurisdiction, date, and live-data boundaries: <strong>11/11 passed</strong></sub> | `python scripts/run_rag_benchmark.py verify --deep` |
 
 > [!NOTE]
 > 这些数字来自仓库固定发布验收集，不是第三方用户研究、生产SLA、法律意见或全球知识覆盖率。小懿默认将“公开/整理知识”“运营沙箱”“授权实时接口”和“生产动作权限”分开标识。
