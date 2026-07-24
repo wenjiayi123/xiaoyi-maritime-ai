@@ -4,6 +4,7 @@
       <p><code>MARITIME RAG · EVIDENCE GOVERNANCE · SOP COPILOT</code></p>
       <h1>小懿 AI · 港航行业智能问答与SOP决策助手</h1>
       <h3>Xiaoyi AI · Evidence-Grounded Maritime RAG &amp; Operations Copilot</h3>
+      <p><strong>研发作者：</strong>温家懿 · <strong>Research Author:</strong> Wen Jiayi</p>
       <p><strong>把港航问答从“模型说了什么”，提升为“证据来自哪里、适用于哪个辖区和日期、何时必须拒答、谁允许推进任务”的可审计决策链。</strong></p>
       <p><em>A governance-first maritime assistant where retrieval, jurisdiction, temporal applicability, refusal, task progression, and audit evidence are independently reviewable.</em></p>
       <p><strong>112</strong> 登记文档 · <strong>708</strong> 知识分块 · <strong>60</strong> 官方来源 · <strong>11/11</strong> 证据策略门禁</p>
