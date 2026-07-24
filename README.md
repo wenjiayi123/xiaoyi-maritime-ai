@@ -1,30 +1,98 @@
-# 小懿
+<table>
+  <tr>
+    <td width="64%" valign="middle">
+      <p><code>MARITIME RAG · EVIDENCE GOVERNANCE · SOP COPILOT</code></p>
+      <h1>小懿 AI · 港航行业智能问答与SOP决策助手</h1>
+      <h3>Xiaoyi AI · Evidence-Grounded Maritime RAG &amp; Operations Copilot</h3>
+      <p><strong>把港航问答从“模型说了什么”，提升为“证据来自哪里、适用于哪个辖区和日期、何时必须拒答、谁允许推进任务”的可审计决策链。</strong></p>
+      <p><em>A governance-first maritime assistant where retrieval, jurisdiction, temporal applicability, refusal, task progression, and audit evidence are independently reviewable.</em></p>
+      <p><strong>112</strong> 登记文档 · <strong>708</strong> 知识分块 · <strong>60</strong> 官方来源 · <strong>11/11</strong> 证据策略门禁</p>
+    </td>
+    <td width="36%" align="center">
+      <img src="web/assets/xiaoyi-ai-port-hero.png" alt="小懿AI港航助手原始形象" width="300" />
+    </td>
+  </tr>
+</table>
 
-> 当前版本：0.3.0。项目按可公开复现、证据边界明确和生产默认安全的标准维护。
+<p align="center">
+  <a href="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/ci.yml/badge.svg" /></a>
+  <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e.svg" /></a>
+  <img alt="Version" src="https://img.shields.io/badge/release-v0.3.0-7057ff.svg" />
+  <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-evidence%20gateway-009688?logo=fastapi&logoColor=white" />
+  <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-0.9236-0ea5e9.svg" />
+  <img alt="Production boundary" src="https://img.shields.io/badge/high--risk%20actions-human%20gated-e87945.svg" />
+</p>
 
-小懿是一个面向港口、航运、港航运行场景的迷你版 LLM 助手。
+<p align="center">
+  <a href="#核心证明数据--headline-evidence">核心指标</a> ·
+  <a href="#能力全景--capability-map">能力全景</a> ·
+  <a href="#系统架构--architecture">系统架构</a> ·
+  <a href="#快速运行--quick-start">快速运行</a> ·
+  <a href="reports/maritime_rag_benchmark_v1.md">基准报告</a> ·
+  <a href="docs/OPEN_SOURCE_READINESS.md">开源审计</a>
+</p>
 
-它的核心能力包括：
+---
 
-- 港航基础知识库
-- 本地 RAG 检索
-- 港航专家回答模板
-- 专业问答模式
-- SOP 与告警解释模式
-- FastAPI 服务
-- Web 交互页面
-- CLI 命令行问答
-- 生产形态的港口运营动态沙箱、能耗趋势与预警 API
-- 可逐步推进的智能任务和结构化报告生成
-- 真实时序数据驱动的本地 RL 训练实验室
-- 4 种强化学习算法与 1 种 PID 控制基线
-- 训练无渲染、训练后保留测试集轨迹与模型/数据哈希
-- JWT 身份验证、四级角色权限、限流、安全响应头和持久幂等
-- 服务端会话、任务、报告、自动化计划与审计状态持久化
-- 深度就绪检查、Prometheus 指标、JSON 日志和请求追踪编号
-- 可选 OpenAI-compatible 模型网关，含证据门禁、隐私开关、重试、熔断和本地回退
+## 核心证明数据 / Headline evidence
 
-## 项目结构
+| 证据维度 / Evidence dimension | 固定结果 / Pinned result | 可复验入口 / Verification entry |
+|---|---:|---|
+| 知识快照 / Knowledge snapshot | **112**份文档、**708**个分块、**60**份官方核验来源 | `data/xiaoyi_index.json` + `data/source_registry.json` |
+| 固定测试 / Fixed release acceptance | **35**题：24题检索 + 11题证据策略 | `data/evaluation/maritime_qa_benchmark_v1.json` |
+| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = **87.50% / 100% / 100%** | `reports/maritime_rag_benchmark_v1.json` |
+| 同快照对照 / Same-snapshot baseline | MRR **0.8507 → 0.9236**（+7.29个百分点） | Hybrid Sparse vs BM25-only |
+| 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 **100%** | SHA-256固定索引、来源与核心策略代码 |
+| 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 **11/11通过** | `python scripts/run_rag_benchmark.py verify --deep` |
+
+> [!NOTE]
+> 这些数字来自仓库固定发布验收集，不是第三方用户研究、生产SLA、法律意见或全球知识覆盖率。小懿默认将“公开/整理知识”“运营沙箱”“授权实时接口”和“生产动作权限”分开标识。
+
+## 能力全景 / Capability map
+
+| 能力平面 / Plane | 已实现 / Implemented | 工程边界 / Guardrail |
+|---|---|---|
+| 港航RAG / Maritime RAG | Hybrid Sparse + BM25对照、来源路由、证据融合、结构化引用 | 无匹配证据时拒答，不补造条款 |
+| 法规治理 / Regulatory governance | 辖区、施行日期、官方来源要求、全文版权边界 | 回答不替代主管机关或法律意见 |
+| SOP决策 / SOP decision support | 告警解释、对象追问、步骤任务、报告生成 | 高风险任务强制 `requires_human_confirmation` |
+| 运营沙箱 / Operations sandbox | 船舶、泊位、设备、能耗、预警与任务API | 未验证网关显示“等待接入港口”，不冒充生产实绩 |
+| RL实验室 / RL laboratory | Q-learning、SARSA、Expected SARSA、Double Q + PID | 公开UCI时序基准，不宣称港口现场收益 |
+| 平台工程 / Platform engineering | FastAPI、SSE、JWT/RBAC、SQLite、幂等、限流、审计 | 外部模型调用受隐私、证据和角色门禁约束 |
+| 可观测性 / Observability | readiness、Prometheus、JSON日志、请求追踪、熔断 | 未配置依赖失败关闭并返回可诊断状态 |
+
+## 系统架构 / Architecture
+
+```mermaid
+flowchart LR
+  subgraph Sources["Knowledge & Runtime Sources / 知识与运行来源"]
+    KB["112 docs / 708 chunks"]
+    REG["Authority registry\n官方来源与辖区"]
+    OPS["Sandbox or verified live adapter\n沙箱或验证实时适配器"]
+  end
+  subgraph Intelligence["Evidence Intelligence / 证据智能"]
+    HYB["Hybrid Sparse + BM25"]
+    ROUTE["Jurisdiction + effective date"]
+    POLICY["Citation · refusal · privacy gates"]
+    LLM["Local rules / optional compatible gateway"]
+  end
+  subgraph Workflow["Human-Gated Workflow / 人工门禁工作流"]
+    CHAT["SSE chat + structured answer"]
+    SOP["SOP task + report"]
+    AUDIT["Receipt + audit persistence"]
+  end
+  KB --> HYB
+  REG --> ROUTE --> HYB --> POLICY
+  OPS --> POLICY
+  POLICY --> LLM --> CHAT
+  CHAT --> SOP --> AUDIT
+```
+
+<p align="center">
+  <img src="web/xiaoyi-port-diagram.svg" alt="小懿港航知识、运营和安全治理架构" width="96%" />
+</p>
+
+## 项目结构 / Repository map
 
 ```text
 小懿AI/
@@ -56,7 +124,7 @@
     test_operations_api.py # 运营 API 与兼容性回归
 ```
 
-## 快速运行
+## 快速运行 / Quick start
 
 推荐直接使用项目启动脚本；首次运行会创建 `.venv`、安装运行依赖、重建索引并启动服务：
 
