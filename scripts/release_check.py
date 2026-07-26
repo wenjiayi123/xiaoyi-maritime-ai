@@ -16,6 +16,13 @@ REQUIRED = (
     "docs/RESUME_CLAIMS.md", "data/evaluation/maritime_qa_benchmark_v1.json",
     "scripts/run_rag_benchmark.py", "reports/maritime_rag_benchmark_v1.json",
     "reports/maritime_rag_benchmark_v1.md", "web/index.html", "web/app.js",
+    "docs/PORT_RL_DATA_CONTRACT.md", "docs/PORT_RL_LANDING_PLAN.md",
+    "scripts/run_rl_dataset_benchmark.py", "reports/rl_dataset_benchmark_v1.json",
+    "reports/rl_dataset_benchmark_v1.md",
+    "docs/screenshots/rl-evidence-center.png",
+    "docs/screenshots/rl-training-configuration.png",
+    "docs/screenshots/rl-port-environment-contract.png",
+    "docs/screenshots/xiaoyi-grounded-conversation.png",
 )
 EXCLUDED_PARTS = {
     ".git", ".venv", ".pytest_cache", "__pycache__",
@@ -44,17 +51,26 @@ def main() -> int:
         if not (ROOT / relative).is_file():
             errors.append(f"缺少发布文件：{relative}")
 
-    provenance_path = ROOT / "data/public/uci_appliances_energy.provenance.json"
-    dataset_path = ROOT / "data/public/uci_appliances_energy.csv"
-    try:
-        provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
-        digest = hashlib.sha256(dataset_path.read_bytes()).hexdigest()
-        if provenance.get("derived_csv_sha256") != digest:
-            errors.append("公开RL数据的派生SHA-256与血缘记录不一致")
-        if "CC BY 4.0" not in str(provenance.get("license") or ""):
-            errors.append("公开RL数据许可证声明不是CC BY 4.0")
-    except (OSError, json.JSONDecodeError) as exc:
-        errors.append(f"公开RL数据血缘不可验证：{exc}")
+    public_datasets = (
+        ("uci_appliances_energy", 19735, "CC BY 4.0"),
+        ("uci_household_power_5min", 409887, "CC BY 4.0"),
+        ("noaa_la_lb_ais_2024_12_25_1min", 710, "U.S. Government"),
+    )
+    for dataset_id, expected_rows, license_marker in public_datasets:
+        provenance_path = ROOT / "data/public" / f"{dataset_id}.provenance.json"
+        dataset_path = ROOT / "data/public" / f"{dataset_id}.csv"
+        try:
+            provenance = json.loads(provenance_path.read_text(encoding="utf-8"))
+            digest = hashlib.sha256(dataset_path.read_bytes()).hexdigest()
+            if provenance.get("derived_csv_sha256") != digest:
+                errors.append(f"公开RL数据的派生SHA-256与血缘记录不一致：{dataset_id}")
+            if license_marker not in str(provenance.get("license") or ""):
+                errors.append(f"公开RL数据许可证声明缺失：{dataset_id}")
+            row_count = provenance.get("row_count", provenance.get("derived_rows"))
+            if row_count != expected_rows:
+                errors.append(f"公开RL数据行数变化：{dataset_id}")
+        except (OSError, json.JSONDecodeError) as exc:
+            errors.append(f"公开RL数据血缘不可验证：{dataset_id}: {exc}")
 
     benchmark_report_path = ROOT / "reports/maritime_rag_benchmark_v1.json"
     try:
@@ -88,6 +104,28 @@ def main() -> int:
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"RAG基准报告不可验证：{exc}")
 
+    rl_report_path = ROOT / "reports/rl_dataset_benchmark_v1.json"
+    try:
+        rl_report = json.loads(rl_report_path.read_text(encoding="utf-8"))
+        if not rl_report.get("passed"):
+            errors.append("RL多数据集基准门禁未通过")
+        configuration = rl_report["configuration"]
+        if len(configuration.get("algorithms", [])) != 5:
+            errors.append("RL基准不是4种RL加1种PID")
+        if configuration.get("seed_count", 0) < 3:
+            errors.append("RL基准随机种子少于3个")
+        if configuration.get("training_render_mode") is not None:
+            errors.append("RL基准训练阶段启用了渲染")
+        for relative, expected_digest in rl_report["evidence_sha256"].items():
+            evidence_path = ROOT / relative
+            if not evidence_path.is_file():
+                errors.append(f"RL基准证据文件缺失：{relative}")
+                continue
+            if hashlib.sha256(evidence_path.read_bytes()).hexdigest() != expected_digest:
+                errors.append(f"RL基准证据哈希已变化：{relative}")
+    except (KeyError, OSError, json.JSONDecodeError) as exc:
+        errors.append(f"RL基准报告不可验证：{exc}")
+
     try:
         web_html = (ROOT / "web/index.html").read_text(encoding="utf-8")
         web_js = (ROOT / "web/app.js").read_text(encoding="utf-8")
@@ -98,6 +136,15 @@ def main() -> int:
         ):
             if marker not in f"{web_html}\n{web_js}":
                 errors.append(f"开源界面的港口接入边界缺失：{marker}")
+        for marker in (
+            'data-view="rl"',
+            "rlCenterAlgorithmMatrix",
+            "rlAdvisorFeed",
+            "rlSystemLinkage",
+            "/api/rl-lab/advisor",
+        ):
+            if marker not in f"{web_html}\n{web_js}":
+                errors.append(f"训练中心前后端契约缺失：{marker}")
         if ">动态沙箱<" in web_html or ">运营沙箱<" in web_html:
             errors.append("开源首页仍把沙箱状态作为默认港口运营数据展示")
     except OSError as exc:
@@ -119,6 +166,7 @@ def main() -> int:
     print("- required governance and deployment files present")
     print("- public dataset provenance hash verified")
     print("- fixed RAG benchmark report and evidence hashes verified")
+    print("- fixed multi-dataset RL benchmark and evidence hashes verified")
     print("- no high-confidence credential patterns found")
     return 0
 

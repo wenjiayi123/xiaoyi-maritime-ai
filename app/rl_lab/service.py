@@ -29,11 +29,13 @@ from app.rl_lab.datasets import (
     inspect_dataset,
     load_records,
 )
+from app.rl_lab.contracts import environment_contract
 from app.rl_lab.environment import derive_parameters
+from app.rl_lab.port_environment import derive_port_parameters
 
 
 RUNS_DIR = DATA_DIR / "rl_runs"
-RUN_SCHEMA_VERSION = "xiaoyi-rl-run.v1"
+RUN_SCHEMA_VERSION = "xiaoyi-rl-run.v2"
 
 
 def _now() -> str:
@@ -119,6 +121,7 @@ class RLLabService:
         run_id = f"rl-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S')}-{uuid4().hex[:8]}"
         normalized_config = {
             "dataset_id": dataset_id,
+            "environment_type": definition.environment_type,
             "algorithms": algorithms,
             "episodes": episodes,
             "horizon_steps": horizon_steps,
@@ -172,6 +175,7 @@ class RLLabService:
             },
             "test_evaluation": None,
             "environment": None,
+            "environment_contract": environment_contract(definition.environment_type),
             "reproducibility": {
                 "seed": seed,
                 "dataset_sha256": dataset_info["sha256"],
@@ -179,6 +183,11 @@ class RLLabService:
                 "python_hash_seed": os.getenv("PYTHONHASHSEED", "not-set; algorithm RNG uses explicit random.Random seeds"),
                 "training_render_disabled": True,
                 "test_rows_touched_during_training": False,
+                "profile_sha256": (
+                    file_sha256(definition.profile_path)
+                    if definition.profile_path is not None and definition.profile_path.is_file()
+                    else None
+                ),
             },
             "error": None,
         }
@@ -215,7 +224,12 @@ class RLLabService:
                 train_ratio=config["train_ratio"],
                 validation_ratio=config["validation_ratio"],
             )
-            parameters = derive_parameters(train)
+            environment_type = str(config.get("environment_type") or definition.environment_type)
+            parameters = (
+                derive_port_parameters(train)
+                if environment_type == "port_operations"
+                else derive_parameters(train)
+            )
             self._update(run_id, lambda item: item.__setitem__("environment", parameters.public_dict()))
             cancel_event = self._cancel_events[run_id]
             policies: dict[str, TrainedPolicy | PIDPolicy] = {"pid": PIDPolicy()}
@@ -253,6 +267,7 @@ class RLLabService:
                     epsilon_end=config["epsilon_end"],
                     progress=report,
                     cancelled=cancel_event.is_set,
+                    environment_type=environment_type,
                 )
                 policies[algorithm_id] = policy
                 model_path = self._run_dir(run_id) / "models" / f"{algorithm_id}.json"
@@ -299,6 +314,7 @@ class RLLabService:
                     horizon_steps=config["horizon_steps"],
                     seed=config["seed"] + 50_000,
                     render=False,
+                    environment_type=environment_type,
                 )
                 for algorithm_id in config["algorithms"]
             ]
@@ -398,13 +414,41 @@ class RLLabService:
         if invalid:
             raise ValueError(f"algorithms were not part of this run: {invalid}")
         definition = get_dataset(job["config"]["dataset_id"])
+        current_dataset_hash = file_sha256(definition.path)
+        if current_dataset_hash != job["reproducibility"]["dataset_sha256"]:
+            raise RunConflict("dataset SHA-256 changed after training; evaluation refused")
+        environment_type = str(job["config"].get("environment_type") or definition.environment_type)
+        if environment_type != definition.environment_type:
+            raise RunConflict("dataset environment_type changed after training; evaluation refused")
+        expected_profile_hash = job.get("reproducibility", {}).get("profile_sha256")
+        if expected_profile_hash:
+            if definition.profile_path is None or not definition.profile_path.is_file():
+                raise RunConflict("port profile is missing after training; evaluation refused")
+            if file_sha256(definition.profile_path) != expected_profile_hash:
+                raise RunConflict("port profile SHA-256 changed after training; evaluation refused")
+        for algorithm_id in selected:
+            model_path = self._run_dir(run_id) / "models" / f"{algorithm_id}.json"
+            expected_model_hash = (
+                job.get("training", {})
+                .get("algorithms", {})
+                .get(algorithm_id, {})
+                .get("artifact_sha256")
+            )
+            if not model_path.is_file() or not expected_model_hash:
+                raise RunConflict(f"model evidence is incomplete for {algorithm_id}")
+            if file_sha256(model_path) != expected_model_hash:
+                raise RunConflict(f"model SHA-256 changed after training for {algorithm_id}")
         records = load_records(definition)
         train, _, test = chronological_split(
             records,
             train_ratio=job["config"]["train_ratio"],
             validation_ratio=job["config"]["validation_ratio"],
         )
-        parameters = derive_parameters(train)
+        parameters = (
+            derive_port_parameters(train)
+            if environment_type == "port_operations"
+            else derive_parameters(train)
+        )
         results = [
             evaluate_policy(
                 algorithm_id,
@@ -414,6 +458,7 @@ class RLLabService:
                 horizon_steps=job["config"]["horizon_steps"],
                 seed=job["config"]["seed"] + 90_000,
                 render=True,
+                environment_type=environment_type,
             )
             for algorithm_id in selected
         ]
@@ -429,6 +474,7 @@ class RLLabService:
             "results": results,
             "best_algorithm_id": winner,
             "production_execution": False,
+            "environment_type": environment_type,
             "notice": "测试轨迹仅在全部训练完成后由未参与训练的时间后段数据生成；未连接生产控制接口。",
         }
         evaluation_path = self._run_dir(run_id) / "evaluations" / f"{evaluation['evaluation_id']}.json"

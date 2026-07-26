@@ -8,7 +8,7 @@
   const BILINGUAL_TEXT = new Map(Object.entries({
     "智能助手":"INTELLIGENCE COPILOT",
     "智能对话":"AI Dialogue", "决策建议":"Decision Advisory", "数据分析":"Data Analytics",
-    "知识库":"Knowledge Base", "港航知识库":"Maritime Knowledge Base", "任务中心":"Action Center",
+    "知识库":"Knowledge Base", "港航知识库":"Maritime Knowledge Base", "训练中心":"Training Center", "任务中心":"Action Center",
     "管理员":"Administrator", "小懿AI":"Xiaoyi AI", "您的港航智能助手":"Your Maritime Intelligence Copilot",
     "新建对话":"New Dialogue", "对话历史":"Dialogue History", "常用指令":"Quick Commands",
     "我的收藏":"Favorites", "接口中心":"Connector Center", "智能联动中心":"Intelligence Hub", "RAG评测闭环":"RAG Evaluation Loop", "推荐指令":"Recommended Prompts",
@@ -83,7 +83,9 @@
     "领航员小懿":"Navigator Xiaoyi", "分析师小懿":"Analyst Xiaoyi", "收藏回答":"Save Response",
     "生成报告":"Generate Report", "转为智能任务":"Convert to AI Task", "回答操作":"Response Actions",
     "AGV能耗联合优化":"AGV Energy Optimization", "AGV充换电与能耗联合优化":"AGV Charging & Energy Optimization",
-    "极端天气联合调度":"Extreme Weather Scheduling", "多智能体协同优化":"Multi-Agent Coordination"
+    "极端天气联合调度":"Extreme Weather Scheduling", "多智能体协同优化":"Multi-Agent Coordination",
+    "真实训练与证据中心":"Reproducible Training & Evidence", "算法矩阵":"Algorithm Matrix",
+    "小懿训练顾问":"Xiaoyi Training Advisor", "小懿全系统助手":"Xiaoyi System Copilot"
   }));
   const BILINGUAL_PLACEHOLDERS = new Map([
     ["请输入您的问题...", "请输入问题 / Ask Xiaoyi"],
@@ -278,6 +280,9 @@
     drawerMode: null,
     modalKind: null,
     pendingRLLabConfig: null,
+    rlCenter: null,
+    rlCenterLoading: false,
+    rlAdvisorMessages: [],
     linkedStartup: null,
     lastFocused: null,
     sessionId: persistentSessionId
@@ -441,8 +446,9 @@
     if (view === "analytics") renderAnalytics(state.energy);
     if (view === "knowledge") renderKnowledge();
     if (view === "tasks") refreshTasks();
+    if (view === "rl") void loadRLCenter();
     if (!options.silent && view !== "chat") {
-      $("#heroSpeechTitle").textContent = { decisions:"正在评估决策约束", analytics:"正在联动运营数据", knowledge:"正在检索港航知识", tasks:"正在跟踪智能任务" }[view] || "您好！我是小懿AI";
+      $("#heroSpeechTitle").textContent = { decisions:"正在评估决策约束", analytics:"正在联动运营数据", knowledge:"正在检索港航知识", rl:"正在核验训练证据", tasks:"正在跟踪智能任务" }[view] || "您好！我是小懿AI";
     }
   }
 
@@ -2787,6 +2793,188 @@
     }
   }
 
+  function compactHash(value) {
+    const hash = String(value || "");
+    return hash ? `${hash.slice(0, 8)}…${hash.slice(-6)}` : "—";
+  }
+
+  function latestCompletedRun(runs) {
+    return (runs || []).find((item) => item.status === "evaluated")
+      || (runs || []).find((item) => item.status === "trained")
+      || (runs || [])[0]
+      || null;
+  }
+
+  function renderRLAdvisorFeed() {
+    const feed = $("#rlAdvisorFeed");
+    if (!feed) return;
+    const messages = state.rlAdvisorMessages.length ? state.rlAdvisorMessages : [{
+      role:"assistant",
+      text:"数据与算法证据已经就绪。你可以直接问我观测、动作、目标函数、数据可信度，或最近一次结果能否用于简历。",
+      evidence:[]
+    }];
+    feed.innerHTML = messages.map((item) => {
+      const role = item.role === "user" ? "user" : item.loading ? "loading" : "assistant";
+      const evidence = (item.evidence || []).length
+        ? `<small>${item.evidence.map((entry) => escapeHtml(entry)).join(" · ")}</small>`
+        : "";
+      return `<div class="rl-advisor-message ${role}"><i>${role === "user" ? "您" : "懿"}</i><p>${escapeHtml(item.text)}${evidence}</p></div>`;
+    }).join("");
+    feed.scrollTop = feed.scrollHeight;
+  }
+
+  function renderRLCenter() {
+    const payload = state.rlCenter;
+    if (!payload) return;
+    const health = payload.health || {};
+    const datasets = health.datasets || [];
+    const algorithms = health.algorithms || [];
+    const runs = payload.runs?.items || [];
+    const recent = latestCompletedRun(runs);
+    const evidenceReport = payload.evidence || {};
+    const available = datasets.filter((item) => item.available);
+    const largest = [...available].sort((left, right) => Number(right.row_count || 0) - Number(left.row_count || 0))[0];
+    const portDatasets = available.filter((item) => item.port_data);
+    const evaluated = recent?.test_evaluation;
+    const reportReady = evidenceReport.status === "available";
+
+    const gate = $("#rlCenterGate");
+    gate.textContent = health.status === "ready" ? "EVIDENCE READY" : "DATA REQUIRED";
+    gate.classList.toggle("warning", health.status !== "ready");
+    $("#rlCenterEvidenceStrip").innerHTML = [
+      ["最大公开基准", largest ? `${formatNumber(largest.row_count, 0)} 行` : "—", largest?.id || "未安装"],
+      ["港口实测场景", `${portDatasets.length} 套`, portDatasets[0] ? "AIS交通 · 运营代理" : "待安装"],
+      ["最近训练", recent ? `${recent.completed_training_episodes || 0}/${recent.total_training_episodes || 0}` : "尚无", recent ? `${recent.status} · seed ${recent.config?.seed}` : "可配置复现实验"],
+      ["证据报告", reportReady ? "已固化" : "待生成", evaluated ? `TEST · ${evaluated.best_algorithm_id || "—"}` : "训练后独立测试"],
+    ].map(([label, value, detail]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><em>${escapeHtml(detail)}</em></div>`).join("");
+
+    $("#rlCenterDatasets").innerHTML = available.map((item) => `
+      <div class="rl-dataset-card ${item.port_data ? "port" : ""}" title="${escapeHtml(item.description)}">
+        <span>${item.port_data ? "PORT SCENARIO" : "PUBLIC BENCHMARK"}<b>${escapeHtml(item.license)}</b></span>
+        <strong>${escapeHtml(item.label)}</strong>
+        <em>${formatNumber(item.row_count, 0)} 行 · ${compactHash(item.sha256)} · ${escapeHtml(item.evidence_level)}</em>
+      </div>`).join("");
+
+    const validationResults = new Map((recent?.validation?.results || []).map((item) => [item.algorithm_id, item]));
+    $("#rlCenterAlgorithmMatrix").innerHTML = algorithms.map((item, index) => {
+      const score = validationResults.get(item.id)?.selection_score;
+      return `<article class="rl-matrix-card ${item.family === "control_theory" ? "pid" : ""}">
+        <span>0${index + 1} · ${item.family === "control_theory" ? "CONTROL" : "RL"}<b>${item.trainable ? "TRAINABLE" : "BASELINE"}</b></span>
+        <strong>${escapeHtml(item.label)}</strong>
+        <p>${escapeHtml(item.description)}</p>
+        <code>${escapeHtml(item.update_equation)}</code>
+        <footer><span>相同划分/种子/约束</span><b>${Number.isFinite(Number(score)) ? Number(score).toFixed(3) : "READY"}</b></footer>
+      </article>`;
+    }).join("");
+
+    const contracts = health.environment_contracts || [];
+    const contract = contracts.find((item) => item.id === "port_operations") || contracts[0];
+    if (contract) {
+      $("#rlCenterContract").innerHTML = `
+        <div class="rl-contract-block"><span>OBSERVATION · ${contract.observation.length}</span><strong>港口状态观测</strong><div class="rl-contract-tags">${contract.observation.slice(0, 9).map((item) => `<b>${escapeHtml(item.id)}</b>`).join("")}</div></div>
+        <div class="rl-contract-block"><span>ACTION · ${contract.actions.length}</span><strong>离散能力档位</strong><div class="rl-contract-tags">${contract.actions.map((item) => `<b>${escapeHtml(item.label)}</b>`).join("")}</div></div>
+        <div class="rl-contract-block"><span>OBJECTIVE + HARD GATE</span><strong>最大化安全约束下的服务收益</strong><p>${escapeHtml(contract.objective.formula)}</p><div class="rl-contract-tags">${contract.hard_constraints.slice(0, 2).map((item) => `<b>${escapeHtml(item)}</b>`).join("")}</div></div>`;
+    }
+
+    const systemNodes = [
+      ["公开数据", available.length ? `${available.length} 套可用` : "缺失", available.length > 0],
+      ["五算法训练", algorithms.length === 5 ? "4 RL + PID" : `${algorithms.length} 个`, algorithms.length === 5],
+      ["保留测试", evaluated ? "已生成轨迹" : "训练后执行", Boolean(evaluated)],
+      ["证据账本", reportReady ? "报告已固化" : "待跑基准", reportReady],
+      ["真实港口适配", portDatasets.length ? "契约已就绪" : "待接入", false],
+    ];
+    $("#rlSystemLinkage").innerHTML = systemNodes.map(([label, detail, ready]) => `
+      <div class="rl-system-node-mini ${ready ? "" : "pending"}"><i></i><strong>${escapeHtml(label)}</strong><span>${escapeHtml(detail)}</span></div>`).join("");
+    renderRLAdvisorFeed();
+  }
+
+  async function loadRLCenter(force = false) {
+    if (state.rlCenterLoading || (state.rlCenter && !force)) {
+      if (state.rlCenter) renderRLCenter();
+      return;
+    }
+    state.rlCenterLoading = true;
+    const gate = $("#rlCenterGate");
+    if (gate) gate.textContent = "VERIFYING";
+    try {
+      const [health, runs, evidence] = await Promise.all([
+        api("/api/rl-lab/health", { timeoutMs:30000 }),
+        api("/api/rl-lab/runs?limit=10", { timeoutMs:18000 }),
+        api("/api/rl-lab/evidence", { timeoutMs:18000 }),
+      ]);
+      state.rlCenter = { health, runs, evidence };
+      renderRLCenter();
+    } catch (error) {
+      if (gate) {
+        gate.textContent = "CHECK FAILED";
+        gate.classList.add("warning");
+      }
+      toast("训练中心读取失败", error.message, "warning", 6000);
+    } finally {
+      state.rlCenterLoading = false;
+    }
+  }
+
+  async function askRLAdvisor(message) {
+    const prompt = String(message || "").trim();
+    if (!prompt) return;
+    const input = $("#rlAdvisorInput");
+    if (input) input.value = "";
+    state.rlAdvisorMessages.push({ role:"user", text:prompt });
+    state.rlAdvisorMessages.push({ role:"assistant", text:"正在核对当前数据、契约与运行记录…", loading:true });
+    renderRLAdvisorFeed();
+    const recent = latestCompletedRun(state.rlCenter?.runs?.items || []);
+    try {
+      const result = await api("/api/rl-lab/advisor", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ message:prompt, run_id:recent?.run_id || null }),
+        timeoutMs:18000
+      });
+      state.rlAdvisorMessages.pop();
+      state.rlAdvisorMessages.push({ role:"assistant", text:result.answer, evidence:result.evidence || [] });
+    } catch (error) {
+      state.rlAdvisorMessages.pop();
+      state.rlAdvisorMessages.push({ role:"assistant", text:`这次没有读取到训练证据：${error.message}` });
+    }
+    renderRLAdvisorFeed();
+  }
+
+  function showRLContract() {
+    const contracts = state.rlCenter?.health?.environment_contracts || [];
+    const contract = contracts.find((item) => item.id === "port_operations") || contracts[0];
+    if (!contract) {
+      toast("契约尚未加载", "请先刷新训练中心。", "warning");
+      return;
+    }
+    openModal(
+      `${contract.label} · 环境契约`,
+      contract.decision_scope,
+      `<div class="settings-grid">
+        <div class="drawer-note"><strong>观测（${contract.observation.length}）</strong><br>${contract.observation.map((item) => `${escapeHtml(item.id)} ← ${escapeHtml(item.source)} [${escapeHtml(item.evidence)}]`).join("<br>")}</div>
+        <div class="drawer-note"><strong>动作（${contract.actions.length}）</strong><br>${contract.actions.map((item) => `${item.index}. ${escapeHtml(item.label)}`).join("<br>")}</div>
+        <div class="drawer-note"><strong>目标函数</strong><br><code>${escapeHtml(contract.objective.formula)}</code></div>
+        <div class="drawer-note"><strong>硬约束</strong><br>${contract.hard_constraints.map((item) => `• ${escapeHtml(item)}`).join("<br>")}</div>
+      </div>`,
+      `<button type="button" class="drawer-button" data-action="close-modal">已核对</button>`,
+      "rl-contract"
+    );
+  }
+
+  async function handleRLCenterAction(action) {
+    if (action === "refresh") {
+      state.rlCenter = null;
+      await loadRLCenter(true);
+      toast("证据已刷新", "数据哈希、运行记录、算法和环境契约已重新读取。", "success");
+    }
+    if (action === "start-training") await openRLLabConfig();
+    if (action === "show-contract") showRLContract();
+    if (action === "ask-advisor") {
+      $("#rlAdvisorInput")?.focus();
+      await askRLAdvisor("结合当前证据，告诉我下一步应该跑哪套数据，以及为什么。");
+    }
+  }
+
   async function openRLLabConfig() {
     try {
       const health = await api("/api/rl-lab/health", { timeoutMs:18000 });
@@ -2848,6 +3036,10 @@
       toast(event.target.checked ? "严格证据模式已开启" : "严格证据模式已关闭", event.target.checked ? "专业事实必须命中已登记索引，证据不足将拒答。" : "关闭后仍会展示来源，但不再强制拒答。", event.target.checked ? "success" : "warning", 4800);
     });
     $("#fileInput").addEventListener("change", (event) => { handleAttachment(event.target.files?.[0]); event.target.value = ""; });
+    $("#rlAdvisorForm")?.addEventListener("submit", (event) => {
+      event.preventDefault();
+      void askRLAdvisor($("#rlAdvisorInput")?.value);
+    });
     $$('[data-rl-mission-launch]').forEach((button) => button.addEventListener("click", (event) => {
       event.stopPropagation();
       void openRLLabConfig();
@@ -2864,6 +3056,10 @@
     document.addEventListener("click", async (event) => {
       const viewButton = event.target.closest("[data-view-target]");
       if (viewButton) { setView(viewButton.dataset.viewTarget); return; }
+      const rlCenterAction = event.target.closest("[data-rl-center-action]");
+      if (rlCenterAction) { await handleRLCenterAction(rlCenterAction.dataset.rlCenterAction); return; }
+      const rlAdvisorPrompt = event.target.closest("[data-rl-advisor-prompt]");
+      if (rlAdvisorPrompt) { await askRLAdvisor(rlAdvisorPrompt.dataset.rlAdvisorPrompt); return; }
       const promptButton = event.target.closest("[data-q]");
       if (promptButton) { closeModal(); setView("chat", { silent:true }); askQuestion(promptButton.dataset.q, promptButton.dataset.mode || "expert"); return; }
       const taskButton = event.target.closest("[data-task-template]");

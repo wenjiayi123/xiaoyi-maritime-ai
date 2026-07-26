@@ -1,0 +1,873 @@
+{
+  "completed_training_episodes": 40,
+  "config": {
+    "algorithms": [
+      "q_learning",
+      "sarsa",
+      "expected_sarsa",
+      "double_q_learning",
+      "pid"
+    ],
+    "dataset_id": "uci_appliances_energy",
+    "discount_factor": 0.97,
+    "episodes": 10,
+    "epsilon_end": 0.05,
+    "epsilon_start": 1.0,
+    "horizon_steps": 24,
+    "learning_rate": 0.12,
+    "seed": 712,
+    "train_ratio": 0.7,
+    "validation_ratio": 0.15
+  },
+  "created_at": "2026-07-24T12:08:38+00:00",
+  "current_algorithm_id": null,
+  "dataset": {
+    "available": true,
+    "citation": "Candanedo, L. (2017). Appliances Energy Prediction. UCI Machine Learning Repository. DOI: 10.24432/C5VC8G.",
+    "description": "19735条10分钟级真实建筑用电与气象观测。仅作为能源调度算法公开基准，不宣称为港口或AGV实绩。",
+    "id": "uci_appliances_energy",
+    "label": "UCI Appliances Energy Prediction",
+    "license": "CC BY 4.0",
+    "load_kw_max": 6.48,
+    "load_kw_median": 0.36,
+    "load_kw_min": 0.06,
+    "mapping": {
+      "humidity_percent": "humidity_percent",
+      "load_kw": "load_kw",
+      "pressure_hpa": "pressure_hpa",
+      "temperature_c": "temperature_c",
+      "timestamp": "timestamp",
+      "visibility_km": "visibility_km",
+      "wind_speed_mps": "wind_speed_mps"
+    },
+    "optional_fields": [
+      "temperature_c",
+      "humidity_percent",
+      "wind_speed_mps",
+      "visibility_km",
+      "pressure_hpa",
+      "price_per_kwh",
+      "carbon_kg_per_kwh"
+    ],
+    "path": "data/public/uci_appliances_energy.csv",
+    "port_data": false,
+    "required_fields": [
+      "timestamp",
+      "load_kw"
+    ],
+    "row_count": 19735,
+    "sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+    "source_type": "public_benchmark",
+    "source_url": "https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction",
+    "split": {
+      "strategy": "chronological_no_shuffle",
+      "test_rows": 2961,
+      "test_time_start": "2016-05-07T04:40:00",
+      "train_rows": 13814,
+      "train_time_end": "2016-04-16T15:10:00",
+      "validation_rows": 2960,
+      "validation_time_end": "2016-05-07T04:30:00"
+    },
+    "step_minutes": 10.0,
+    "time_end": "2016-05-27T18:00:00",
+    "time_start": "2016-01-11T17:00:00",
+    "timezone": "Europe/Brussels"
+  },
+  "duration_seconds": 0.73,
+  "environment": {
+    "action_factors": [
+      -1.0,
+      -0.5,
+      0.0,
+      0.5,
+      1.0
+    ],
+    "capacity_kwh": 6.12,
+    "initial_soc": 0.55,
+    "load_bins": [
+      0.3,
+      0.3,
+      0.42,
+      0.66
+    ],
+    "max_power_kw": 1.122,
+    "maximum_soc": 0.95,
+    "mean_load_kw": 0.592651,
+    "minimum_soc": 0.1,
+    "peak_target_kw": 0.6,
+    "round_trip_efficiency": 0.9,
+    "step_hours": 0.166667
+  },
+  "error": null,
+  "finished_at": "2026-07-24T12:08:38+00:00",
+  "phase": "test_rendered",
+  "progress_percent": 100.0,
+  "reproducibility": {
+    "config_sha256": "6c591c3fb3699d63ae6c57d44c2c329f1620ff85a08e1fa414a041dfb6e4192f",
+    "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+    "python_hash_seed": "not-set; algorithm RNG uses explicit random.Random seeds",
+    "seed": 712,
+    "test_rows_touched_during_training": false,
+    "training_render_disabled": true
+  },
+  "run_id": "rl-20260724T120838-ecbd3029",
+  "schema_version": "xiaoyi-rl-run.v1",
+  "started_at": "2026-07-24T12:08:38+00:00",
+  "status": "evaluated",
+  "test_evaluation": {
+    "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/evaluations/eval-172e7dfc84.json",
+    "artifact_sha256": "278aed50099092f02ac1055a52aecb2f5384c1ca0ce1e145b9933f82cda466b2",
+    "best_algorithm_id": "double_q_learning",
+    "created_at": "2026-07-24T12:08:39+00:00",
+    "evaluation_id": "eval-172e7dfc84",
+    "rendering_performed": true
+  },
+  "total_training_episodes": 40,
+  "training": {
+    "algorithms": {
+      "double_q_learning": {
+        "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/models/double_q_learning.json",
+        "artifact_sha256": "ba553bfbb368cf402bd7c5c6f898e8b9a8425c94b52c65757f8e71722160e116",
+        "curve": [
+          {
+            "constraint_violations": 0,
+            "episode": 1,
+            "epsilon": 1.0,
+            "reward": -24.012717,
+            "reward_ema": -24.012717
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 2,
+            "epsilon": 0.716871,
+            "reward": -72.759664,
+            "reward_ema": -27.912473
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 3,
+            "epsilon": 0.513904,
+            "reward": -23.334398,
+            "reward_ema": -27.546227
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 4,
+            "epsilon": 0.368403,
+            "reward": -13.115344,
+            "reward_ema": -26.391756
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 5,
+            "epsilon": 0.264098,
+            "reward": -24.772549,
+            "reward_ema": -26.26222
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 6,
+            "epsilon": 0.189324,
+            "reward": -82.546365,
+            "reward_ema": -30.764951
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 7,
+            "epsilon": 0.135721,
+            "reward": -39.094267,
+            "reward_ema": -31.431297
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 8,
+            "epsilon": 0.097294,
+            "reward": -21.744338,
+            "reward_ema": -30.65634
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 9,
+            "epsilon": 0.069748,
+            "reward": -142.260863,
+            "reward_ema": -39.584702
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 10,
+            "epsilon": 0.05,
+            "reward": -92.494304,
+            "reward_ema": -43.81747
+          }
+        ],
+        "episodes": 10,
+        "final_reward": -92.494304,
+        "final_reward_ema": -43.81747,
+        "state_count": 99,
+        "status": "trained"
+      },
+      "expected_sarsa": {
+        "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/models/expected_sarsa.json",
+        "artifact_sha256": "fdbe5ebb9b32d3c5b2fdd9fc077e8ea9ce3fe90f7586439b258b009be8d8ff79",
+        "curve": [
+          {
+            "constraint_violations": 0,
+            "episode": 1,
+            "epsilon": 1.0,
+            "reward": -105.268106,
+            "reward_ema": -105.268106
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 2,
+            "epsilon": 0.716871,
+            "reward": -54.48875,
+            "reward_ema": -101.205758
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 3,
+            "epsilon": 0.513904,
+            "reward": -19.359517,
+            "reward_ema": -94.658058
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 4,
+            "epsilon": 0.368403,
+            "reward": -29.804042,
+            "reward_ema": -89.469737
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 5,
+            "epsilon": 0.264098,
+            "reward": -58.353418,
+            "reward_ema": -86.980432
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 6,
+            "epsilon": 0.189324,
+            "reward": -36.135273,
+            "reward_ema": -82.912819
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 7,
+            "epsilon": 0.135721,
+            "reward": -28.929066,
+            "reward_ema": -78.594119
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 8,
+            "epsilon": 0.097294,
+            "reward": -30.922306,
+            "reward_ema": -74.780374
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 9,
+            "epsilon": 0.069748,
+            "reward": -121.332979,
+            "reward_ema": -78.504582
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 10,
+            "epsilon": 0.05,
+            "reward": -16.541146,
+            "reward_ema": -73.547507
+          }
+        ],
+        "episodes": 10,
+        "final_reward": -16.541146,
+        "final_reward_ema": -73.547507,
+        "state_count": 81,
+        "status": "trained"
+      },
+      "pid": {
+        "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/models/pid.json",
+        "artifact_sha256": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+        "curve": [],
+        "episodes": 0,
+        "status": "configured_control_baseline"
+      },
+      "q_learning": {
+        "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/models/q_learning.json",
+        "artifact_sha256": "3cddff34a264658932ea0103aa025a5a0db960094bbf3b37232cfabbef5ec311",
+        "curve": [
+          {
+            "constraint_violations": 0,
+            "episode": 1,
+            "epsilon": 1.0,
+            "reward": -24.156879,
+            "reward_ema": -24.156879
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 2,
+            "epsilon": 0.716871,
+            "reward": -26.281475,
+            "reward_ema": -24.326847
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 3,
+            "epsilon": 0.513904,
+            "reward": -46.509661,
+            "reward_ema": -26.101472
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 4,
+            "epsilon": 0.368403,
+            "reward": -104.076889,
+            "reward_ema": -32.339505
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 5,
+            "epsilon": 0.264098,
+            "reward": -28.681904,
+            "reward_ema": -32.046897
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 6,
+            "epsilon": 0.189324,
+            "reward": -25.81558,
+            "reward_ema": -31.548392
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 7,
+            "epsilon": 0.135721,
+            "reward": -22.47221,
+            "reward_ema": -30.822297
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 8,
+            "epsilon": 0.097294,
+            "reward": -89.715288,
+            "reward_ema": -35.533737
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 9,
+            "epsilon": 0.069748,
+            "reward": -19.95895,
+            "reward_ema": -34.287754
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 10,
+            "epsilon": 0.05,
+            "reward": -19.135882,
+            "reward_ema": -33.075604
+          }
+        ],
+        "episodes": 10,
+        "final_reward": -19.135882,
+        "final_reward_ema": -33.075604,
+        "state_count": 101,
+        "status": "trained"
+      },
+      "sarsa": {
+        "artifact": "data/rl_runs/rl-20260724T120838-ecbd3029/models/sarsa.json",
+        "artifact_sha256": "d4db91ee41057ba88f2711f29f3b7bc67967cdcd08218996996b473fcb14da4f",
+        "curve": [
+          {
+            "constraint_violations": 0,
+            "episode": 1,
+            "epsilon": 1.0,
+            "reward": -37.367472,
+            "reward_ema": -37.367472
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 2,
+            "epsilon": 0.716871,
+            "reward": -80.693031,
+            "reward_ema": -40.833516
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 3,
+            "epsilon": 0.513904,
+            "reward": -29.027543,
+            "reward_ema": -39.889038
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 4,
+            "epsilon": 0.368403,
+            "reward": -27.84602,
+            "reward_ema": -38.925597
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 5,
+            "epsilon": 0.264098,
+            "reward": -22.619031,
+            "reward_ema": -37.621072
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 6,
+            "epsilon": 0.189324,
+            "reward": -20.551869,
+            "reward_ema": -36.255535
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 7,
+            "epsilon": 0.135721,
+            "reward": -54.272796,
+            "reward_ema": -37.696916
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 8,
+            "epsilon": 0.097294,
+            "reward": -27.691718,
+            "reward_ema": -36.8965
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 9,
+            "epsilon": 0.069748,
+            "reward": -14.462872,
+            "reward_ema": -35.10181
+          },
+          {
+            "constraint_violations": 0,
+            "episode": 10,
+            "epsilon": 0.05,
+            "reward": -36.881403,
+            "reward_ema": -35.244178
+          }
+        ],
+        "episodes": 10,
+        "final_reward": -36.881403,
+        "final_reward_ema": -35.244178,
+        "state_count": 90,
+        "status": "trained"
+      }
+    },
+    "curve_tail": [
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 1,
+        "epsilon": 1.0,
+        "reward": -24.156879,
+        "reward_ema": -24.156879
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 2,
+        "epsilon": 0.716871,
+        "reward": -26.281475,
+        "reward_ema": -24.326847
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 3,
+        "epsilon": 0.513904,
+        "reward": -46.509661,
+        "reward_ema": -26.101472
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 4,
+        "epsilon": 0.368403,
+        "reward": -104.076889,
+        "reward_ema": -32.339505
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 5,
+        "epsilon": 0.264098,
+        "reward": -28.681904,
+        "reward_ema": -32.046897
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 6,
+        "epsilon": 0.189324,
+        "reward": -25.81558,
+        "reward_ema": -31.548392
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 7,
+        "epsilon": 0.135721,
+        "reward": -22.47221,
+        "reward_ema": -30.822297
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 8,
+        "epsilon": 0.097294,
+        "reward": -89.715288,
+        "reward_ema": -35.533737
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 9,
+        "epsilon": 0.069748,
+        "reward": -19.95895,
+        "reward_ema": -34.287754
+      },
+      {
+        "algorithm_id": "q_learning",
+        "constraint_violations": 0,
+        "episode": 10,
+        "epsilon": 0.05,
+        "reward": -19.135882,
+        "reward_ema": -33.075604
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 1,
+        "epsilon": 1.0,
+        "reward": -37.367472,
+        "reward_ema": -37.367472
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 2,
+        "epsilon": 0.716871,
+        "reward": -80.693031,
+        "reward_ema": -40.833516
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 3,
+        "epsilon": 0.513904,
+        "reward": -29.027543,
+        "reward_ema": -39.889038
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 4,
+        "epsilon": 0.368403,
+        "reward": -27.84602,
+        "reward_ema": -38.925597
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 5,
+        "epsilon": 0.264098,
+        "reward": -22.619031,
+        "reward_ema": -37.621072
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 6,
+        "epsilon": 0.189324,
+        "reward": -20.551869,
+        "reward_ema": -36.255535
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 7,
+        "epsilon": 0.135721,
+        "reward": -54.272796,
+        "reward_ema": -37.696916
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 8,
+        "epsilon": 0.097294,
+        "reward": -27.691718,
+        "reward_ema": -36.8965
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 9,
+        "epsilon": 0.069748,
+        "reward": -14.462872,
+        "reward_ema": -35.10181
+      },
+      {
+        "algorithm_id": "sarsa",
+        "constraint_violations": 0,
+        "episode": 10,
+        "epsilon": 0.05,
+        "reward": -36.881403,
+        "reward_ema": -35.244178
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 1,
+        "epsilon": 1.0,
+        "reward": -105.268106,
+        "reward_ema": -105.268106
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 2,
+        "epsilon": 0.716871,
+        "reward": -54.48875,
+        "reward_ema": -101.205758
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 3,
+        "epsilon": 0.513904,
+        "reward": -19.359517,
+        "reward_ema": -94.658058
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 4,
+        "epsilon": 0.368403,
+        "reward": -29.804042,
+        "reward_ema": -89.469737
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 5,
+        "epsilon": 0.264098,
+        "reward": -58.353418,
+        "reward_ema": -86.980432
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 6,
+        "epsilon": 0.189324,
+        "reward": -36.135273,
+        "reward_ema": -82.912819
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 7,
+        "epsilon": 0.135721,
+        "reward": -28.929066,
+        "reward_ema": -78.594119
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 8,
+        "epsilon": 0.097294,
+        "reward": -30.922306,
+        "reward_ema": -74.780374
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 9,
+        "epsilon": 0.069748,
+        "reward": -121.332979,
+        "reward_ema": -78.504582
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "constraint_violations": 0,
+        "episode": 10,
+        "epsilon": 0.05,
+        "reward": -16.541146,
+        "reward_ema": -73.547507
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 1,
+        "epsilon": 1.0,
+        "reward": -24.012717,
+        "reward_ema": -24.012717
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 2,
+        "epsilon": 0.716871,
+        "reward": -72.759664,
+        "reward_ema": -27.912473
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 3,
+        "epsilon": 0.513904,
+        "reward": -23.334398,
+        "reward_ema": -27.546227
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 4,
+        "epsilon": 0.368403,
+        "reward": -13.115344,
+        "reward_ema": -26.391756
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 5,
+        "epsilon": 0.264098,
+        "reward": -24.772549,
+        "reward_ema": -26.26222
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 6,
+        "epsilon": 0.189324,
+        "reward": -82.546365,
+        "reward_ema": -30.764951
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 7,
+        "epsilon": 0.135721,
+        "reward": -39.094267,
+        "reward_ema": -31.431297
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 8,
+        "epsilon": 0.097294,
+        "reward": -21.744338,
+        "reward_ema": -30.65634
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 9,
+        "epsilon": 0.069748,
+        "reward": -142.260863,
+        "reward_ema": -39.584702
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "constraint_violations": 0,
+        "episode": 10,
+        "epsilon": 0.05,
+        "reward": -92.494304,
+        "reward_ema": -43.81747
+      }
+    ],
+    "data_split": "train",
+    "render_mode": null,
+    "rendering_performed": false
+  },
+  "validation": {
+    "best_algorithm_id": "pid",
+    "data_split": "validation",
+    "rendering_performed": false,
+    "results": [
+      {
+        "algorithm_id": "q_learning",
+        "metrics": {
+          "baseline_cost": 0.6354,
+          "baseline_peak_kw": 2.0,
+          "carbon_kg": 1.454775,
+          "constraint_violations": 0.0,
+          "cost_saving_percent": -17.146933,
+          "peak_grid_kw": 2.715,
+          "peak_reduction_percent": -138.064333,
+          "score": -130.864456,
+          "terminal_soc": 0.438344,
+          "total_cost": 0.723437,
+          "total_reward": -68.77995
+        }
+      },
+      {
+        "algorithm_id": "sarsa",
+        "metrics": {
+          "baseline_cost": 0.6354,
+          "baseline_peak_kw": 2.0,
+          "carbon_kg": 1.468275,
+          "constraint_violations": 0.0,
+          "cost_saving_percent": -17.2313,
+          "peak_grid_kw": 2.715,
+          "peak_reduction_percent": -138.064333,
+          "score": -132.217475,
+          "terminal_soc": 0.443175,
+          "total_cost": 0.738367,
+          "total_reward": -70.099222
+        }
+      },
+      {
+        "algorithm_id": "expected_sarsa",
+        "metrics": {
+          "baseline_cost": 0.6354,
+          "baseline_peak_kw": 2.0,
+          "carbon_kg": 1.57245,
+          "constraint_violations": 0.0,
+          "cost_saving_percent": -27.542433,
+          "peak_grid_kw": 2.715,
+          "peak_reduction_percent": -138.064333,
+          "score": -141.097283,
+          "terminal_soc": 0.515644,
+          "total_cost": 0.79892,
+          "total_reward": -74.854577
+        }
+      },
+      {
+        "algorithm_id": "double_q_learning",
+        "metrics": {
+          "baseline_cost": 0.6354,
+          "baseline_peak_kw": 2.0,
+          "carbon_kg": 1.387275,
+          "constraint_violations": 0.0,
+          "cost_saving_percent": -14.6139,
+          "peak_grid_kw": 2.728,
+          "peak_reduction_percent": -142.684,
+          "score": -130.561958,
+          "terminal_soc": 0.412041,
+          "total_cost": 0.693033,
+          "total_reward": -67.642798
+        }
+      },
+      {
+        "algorithm_id": "pid",
+        "metrics": {
+          "baseline_cost": 0.6354,
+          "baseline_peak_kw": 2.0,
+          "carbon_kg": 1.478325,
+          "constraint_violations": 0.0,
+          "cost_saving_percent": -56.014733,
+          "peak_grid_kw": 1.9,
+          "peak_reduction_percent": -50.104,
+          "score": -91.710375,
+          "terminal_soc": 0.60207,
+          "total_cost": 0.612337,
+          "total_reward": -49.262882
+        }
+      }
+    ]
+  }
+}

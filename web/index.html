@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
   <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
   <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20260720-platform-2">
+  <link rel="stylesheet" href="/web/styles.css?v=20260726-rl-center-1">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -56,6 +56,7 @@
         <button class="nav-item active" type="button" data-view-target="chat" data-agent-target="nav-chat"><svg><use href="#i-chat"/></svg><span>智能对话</span></button>
         <button class="nav-item" type="button" data-view-target="decisions" data-agent-target="nav-decisions"><svg><use href="#i-bulb"/></svg><span>决策建议</span></button>
         <button class="nav-item" type="button" data-view-target="analytics" data-agent-target="nav-analytics"><svg><use href="#i-chart"/></svg><span>数据分析</span></button>
+        <button class="nav-item" type="button" data-view-target="rl" data-agent-target="nav-rl"><svg><use href="#i-agv"/></svg><span>训练中心</span></button>
         <button class="nav-item" type="button" data-view-target="knowledge" data-agent-target="nav-knowledge"><svg><use href="#i-book"/></svg><span>知识库</span></button>
         <button class="nav-item" type="button" data-view-target="tasks" data-agent-target="nav-tasks"><svg><use href="#i-task"/></svg><span>任务中心</span><b id="taskNavBadge">0</b></button>
       </nav>
@@ -239,6 +240,63 @@
           </div>
         </section>
 
+        <section class="workspace-view" data-view="rl">
+          <header class="view-header rl-center-header">
+            <div><p>PORT RL EVIDENCE CENTER</p><h2>真实训练与证据中心</h2><span>训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动</span></div>
+            <div class="view-header-actions">
+              <button type="button" class="outline-button" data-rl-center-action="refresh"><svg><use href="#i-history"/></svg>刷新证据</button>
+              <button type="button" class="primary-button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg>配置五算法训练</button>
+            </div>
+          </header>
+          <div class="rl-center-layout">
+            <section class="glass-card rl-center-overview">
+              <div class="rl-center-title"><div><span>REPRODUCIBILITY LEDGER</span><strong>训练中心</strong><small>公开数据血缘 · 时间隔离 · 模型哈希 · 测试后回放</small></div><b id="rlCenterGate">LOADING</b></div>
+              <div class="rl-evidence-strip" id="rlCenterEvidenceStrip"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>
+              <div class="rl-center-datasets" id="rlCenterDatasets"></div>
+            </section>
+
+            <section class="glass-card rl-center-matrix-card">
+              <div class="card-heading"><span class="heading-icon violet"><svg><use href="#i-chart"/></svg></span><div><strong>算法矩阵</strong><small>4 种强化学习算法 + 1 个控制理论基线，共享同一评估门禁</small></div><span class="status-pill"><i></i>5 BASELINES</span></div>
+              <div class="rl-center-algorithm-matrix" id="rlCenterAlgorithmMatrix"></div>
+            </section>
+
+            <section class="glass-card rl-center-advisor-card">
+              <div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-spark"/></svg></span><div><strong>小懿训练顾问</strong><small>只根据当前数据、契约、运行记录与证据回答</small></div><span class="grounding-badge verified">证据约束</span></div>
+              <div class="rl-advisor-feed" id="rlAdvisorFeed">
+                <div class="rl-advisor-message assistant"><i>懿</i><p>我正在读取数据集、算法契约与最近运行。你可以直接问：观测和动作是什么、哪套数据更可信、最近一次结果能不能写进简历。</p></div>
+              </div>
+              <div class="rl-advisor-suggestions">
+                <button type="button" data-rl-advisor-prompt="这次训练的观测、动作、目标函数和硬约束是什么？">解释观测与目标</button>
+                <button type="button" data-rl-advisor-prompt="目前公开数据有多少行、来源和许可是什么，哪套更可信？">比较数据可信度</button>
+                <button type="button" data-rl-advisor-prompt="五种算法的区别是什么，为什么要保留PID？">解释五算法矩阵</button>
+              </div>
+              <form class="rl-advisor-composer" id="rlAdvisorForm">
+                <textarea id="rlAdvisorInput" rows="1" placeholder="向小懿训练顾问提问..." aria-label="训练顾问问题"></textarea>
+                <button type="submit" aria-label="发送给训练顾问"><svg><use href="#i-send"/></svg></button>
+              </form>
+            </section>
+
+            <section class="glass-card rl-center-contract-card">
+              <div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-task"/></svg></span><div><strong>观测 · 动作 · 目标函数</strong><small>可执行环境契约，不用宣传词替代代码语义</small></div><button type="button" class="mini-link-button" data-rl-center-action="show-contract">展开契约</button></div>
+              <div class="rl-contract-grid" id="rlCenterContract"></div>
+            </section>
+
+            <section class="glass-card rl-center-system-card">
+              <div class="card-heading"><span class="heading-icon green"><svg><use href="#i-command"/></svg></span><div><strong>小懿全系统助手</strong><small>训练按钮到数据、算法、测试、证据和港口接入的真实联动</small></div><b class="system-link-pulse">LINKED</b></div>
+              <div class="rl-system-linkage" id="rlSystemLinkage"></div>
+              <div class="rl-system-actions">
+                <button type="button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg><span>训练中心</span></button>
+                <i></i>
+                <button type="button" data-rl-center-action="show-contract"><svg><use href="#i-chart"/></svg><span>算法矩阵</span></button>
+                <i></i>
+                <button type="button" data-rl-center-action="ask-advisor"><svg><use href="#i-spark"/></svg><span>训练顾问</span></button>
+                <i></i>
+                <button type="button" data-action="intelligence-hub"><svg><use href="#i-command"/></svg><span>全系统助手</span></button>
+              </div>
+            </section>
+          </div>
+        </section>
+
         <section class="workspace-view" data-view="tasks">
           <header class="view-header"><div><p>AI ACTION CENTER</p><h2>任务中心</h2><span>小懿可在安全白名单内逐步执行，生产操作始终需要人工确认</span></div><button type="button" class="primary-button" data-action="new-task"><svg><use href="#i-plus"/></svg>新建智能任务</button></header>
           <div class="task-center-layout">
@@ -295,6 +353,6 @@
   <button id="clearTopicsBtn" type="button" hidden></button>
   <span id="kbChip" hidden></span>
 
-  <script src="/web/app.js?v=20260720-platform-2" defer></script>
+  <script src="/web/app.js?v=20260726-rl-center-1" defer></script>
 </body>
 </html>

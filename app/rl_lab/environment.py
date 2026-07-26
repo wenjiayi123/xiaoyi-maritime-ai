@@ -46,6 +46,7 @@ class EnvironmentParameters:
 
     def public_dict(self) -> dict[str, Any]:
         return {
+            "environment_type": "energy_storage",
             "capacity_kwh": round(self.capacity_kwh, 6),
             "max_power_kw": round(self.max_power_kw, 6),
             "minimum_soc": self.minimum_soc,
@@ -169,9 +170,27 @@ class EnergySchedulingEnvironment:
         return hour_bin, load_bin, soc_bin, tariff_bin, trend_bin
 
     def valid_action_mask(self) -> tuple[bool, ...]:
+        efficiency = math.sqrt(self.parameters.round_trip_efficiency)
+        available_discharge_kwh = max(
+            0.0,
+            (self.soc - self.parameters.minimum_soc) * self.parameters.capacity_kwh,
+        )
+        available_charge_kwh = max(
+            0.0,
+            (self.parameters.maximum_soc - self.soc) * self.parameters.capacity_kwh,
+        )
         return tuple(
-            not (factor < 0 and self.soc <= self.parameters.minimum_soc + 1e-9)
-            and not (factor > 0 and self.soc >= self.parameters.maximum_soc - 1e-9)
+            (
+                abs(factor) * self.parameters.max_power_kw * self.parameters.step_hours
+                <= available_discharge_kwh * efficiency + 1e-9
+            )
+            if factor < 0
+            else (
+                factor * self.parameters.max_power_kw * self.parameters.step_hours
+                <= available_charge_kwh / efficiency + 1e-9
+            )
+            if factor > 0
+            else True
             for factor in ACTIONS
         )
 

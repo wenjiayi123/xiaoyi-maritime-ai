@@ -1,0 +1,35 @@
+{
+  "schema_version": "xiaoyi-public-dataset-provenance.v1",
+  "dataset_id": "noaa_la_lb_ais_2024_12_25_1min",
+  "title": "NOAA MarineCadastre historical AIS point data",
+  "providers": [
+    "U.S. Coast Guard Nationwide AIS",
+    "NOAA Office for Coastal Management",
+    "Bureau of Ocean Energy Management"
+  ],
+  "landing_page": "https://coast.noaa.gov/digitalcoast/tools/ais.html",
+  "download_url": "https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2024/AIS_2024_12_25.zip",
+  "license": "U.S. Government material; free for public use under the NOAA MarineCadastre AIS terms, with U.S. Government material notice",
+  "downloaded_at": "2026-07-26T00:25:46+00:00",
+  "source_archive_sha256": "6ed71a352ca0dd742fbb41ccdb54170cea6276bc859d9e87dadc6bc82732af03",
+  "derived_csv_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+  "bbox_wgs84": {
+    "west": -118.32,
+    "south": 33.65,
+    "east": -118.1,
+    "north": 33.82
+  },
+  "source_rows_scanned": 5727812,
+  "source_rows_in_bbox": 54169,
+  "derived_rows": 710,
+  "time_start": "2024-12-25T00:00:00+00:00",
+  "time_end": "2024-12-25T12:01:00+00:00",
+  "transformations": [
+    "Filtered published AIS point records to the declared WGS84 bounding box.",
+    "Grouped records into UTC one-minute buckets and counted unique MMSI values.",
+    "Derived anchored counts from AIS navigation status 1 or 5 and slow counts from SOG <= 1 knot.",
+    "Derived vessel-class counts from published AIS VesselType codes.",
+    "Retained only minute buckets containing published AIS messages; no empty or vessel records were synthesized."
+  ],
+  "scope_notice": "Vessel counts, navigation status, vessel type and speed are derived from measured AIS messages. They are suitable for a public traffic-driven planning scenario, not regulatory enforcement. Berth, yard, equipment, cargo, tide, weather and energy production fields remain site-required."
+}

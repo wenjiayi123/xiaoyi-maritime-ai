@@ -22,6 +22,15 @@ RAG、官方来源注册表、辖区/生效日期证据路由、条款级拒答�
 策略代码 SHA-256，支持一条命令完整复跑；生产连接器默认离线，未返回
 `live_data_verified=true` 时失败关闭，高风险任务保持人工确认。
 
+▸ **强化学习证据链**：保留原 19,735 行 UCI 能源基准并新增 409,887 行
+五分钟级公开大规模基准（20.77 倍）与 NOAA 洛杉矶—长滩港区 710 个 AIS
+实测分钟桶；实现 Q-learning、SARSA、Expected SARSA、Double Q-learning
+与 PID 同划分比较，使用三个固定种子、时间顺序 70%/15%/15% 隔离、训练无
+渲染、测试后轨迹及数据/配置/profile/模型/评估 SHA-256。大规模能源基准的
+多种子平均测试优选为 Expected SARSA；原小基准和 AIS 校准场景均由 PID
+三次胜出，所有算法平均投影约束违例为 0（公开离线基准与校准沙箱，不是港口
+生产收益）。
+
 ▸ **技术栈**：Python + FastAPI + Pydantic + Hybrid Sparse/BM25/RAG
 + SSE/OpenAI-compatible Gateway + JWT/RBAC + SQLite + 原生
 JavaScript/CSS + Docker + GitHub Actions + pytest
@@ -45,5 +54,7 @@ JavaScript/CSS + Docker + GitHub Actions + pytest
 - “全球法规覆盖”“可替代法律审查”：来源覆盖有限且摘要不等于法规全文。
 - “港口效率提升/成本下降”：本仓库没有港口生产对照实验。
 - “实时接入TOS/AIS/VTS”：连接器契约已实现，但默认未接生产端点。
-- “多智能体强化学习平台”：当前 RL Lab 是公开建筑能源数据上的四种表格型
-  RL 与 PID 基线，不是港口多智能体生产调度。
+- “多智能体强化学习平台”：当前 RL Lab 是能源与 AIS 港口交通场景上的单策略
+  表格型 RL 与 PID 对照，不是港口多智能体生产调度。
+- “港口效率提升35.46%”：35.46% 是大规模公开家庭用电环境中 Expected SARSA
+  的平均测试节费代理，使用实验电价，不是港口现场成本或效率。

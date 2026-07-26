@@ -14,7 +14,7 @@ WEB_DIR = BASE_DIR / "web"
 RUNTIME_DB_PATH = DATA_DIR / "xiaoyi_runtime.db"
 
 APP_NAME = "小懿"
-APP_VERSION = "0.3.0"
+APP_VERSION = "0.4.0"
 DEFAULT_TOP_K = 5
 
 SUPPORTED_MODES = {

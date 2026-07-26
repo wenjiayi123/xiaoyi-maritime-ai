@@ -1,6 +1,6 @@
 # 小懿AI 港航检索与证据安全固定基准 v1
 
-生成时间：2026-07-24T10:48:20+00:00
+生成时间：2026-07-26T01:17:25+00:00
 
 ## 可复现结论
 
@@ -37,7 +37,7 @@ Hybrid 与 BM25 使用同一知识快照、同一辖区/官方来源过滤、同
   "app/retrieval.py": "3dbc3ffa5f17624faf5eb059ddf615a4cde9cddb9c27f4993b37b8ad6b237515",
   "app/knowledge_policy.py": "af8f07399d1f09ccba7d924253714fb8c3d88e87f14aff960ed9b9f8df94d1ee",
   "app/operator_assistant.py": "f8e26a8906dafb5e605fdcdf46cbb5402ab978a6bbc86eb4ec533ac2d9a7694d",
-  "app/xiaoyi.py": "82663d85019a30ea9280657d10f751e6c7e79554dcc00a30bebe6025158d9f80"
+  "app/xiaoyi.py": "6e833aa59f98840de991a7d83d0abcde77b5a8637ac92e7098be81579ecc5a72"
 }
 ```
 

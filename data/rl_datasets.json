@@ -21,6 +21,68 @@
         "visibility_km": "visibility_km",
         "pressure_hpa": "pressure_hpa"
       }
+    },
+    {
+      "id": "uci_household_power_5min",
+      "label": "UCI Household Power · 5-minute large benchmark",
+      "path": "data/public/uci_household_power_5min.csv",
+      "source_type": "public_benchmark",
+      "source_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
+      "license": "CC BY 4.0",
+      "citation": "Hebrail, G. & Berard, A. (2006). Individual Household Electric Power Consumption. UCI Machine Learning Repository. DOI: 10.24432/C58K54.",
+      "description": "约四年一分钟真实用电记录聚合为五分钟时间序列；用于大规模能源调度算法基准，不宣称为港口实绩。",
+      "timezone": "Europe/Paris",
+      "port_data": false,
+      "environment_type": "energy_storage",
+      "evidence_level": "measured_public_benchmark",
+      "factor_coverage": {
+        "energy_load": "measured",
+        "weather": "missing",
+        "tariff": "documented_experimental_default",
+        "carbon": "documented_experimental_default",
+        "port_operations": "not_applicable"
+      },
+      "mapping": {
+        "timestamp": "timestamp",
+        "load_kw": "load_kw"
+      }
+    },
+    {
+      "id": "noaa_la_lb_ais_2024_12_25_1min",
+      "label": "NOAA LA–Long Beach AIS · 2024-12-25",
+      "path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+      "source_type": "public_port_traffic",
+      "source_url": "https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2024/",
+      "license": "U.S. Government material; NOAA MarineCadastre AIS terms",
+      "citation": "U.S. Coast Guard NAIS; NOAA Office for Coastal Management; Bureau of Ocean Energy Management. MarineCadastre historical AIS point data.",
+      "description": "洛杉矶—长滩港区公开AIS实测交通的一分钟聚合场景；服务量、队列与等待改善属于校准仿真输出，不是码头生产KPI。",
+      "timezone": "UTC",
+      "port_data": true,
+      "environment_type": "port_operations",
+      "profile_path": "data/port_profiles/us_la_lb_public_ais_v1.json",
+      "evidence_level": "measured_ais_plus_calibrated_operations_proxy",
+      "factor_coverage": {
+        "traffic": "measured_ais",
+        "vessel_mix": "measured_ais",
+        "queue": "derived_proxy",
+        "berth": "site_required",
+        "yard": "site_required",
+        "equipment": "site_required",
+        "gate_rail": "site_required",
+        "weather_tide": "site_required",
+        "energy_carbon": "site_required"
+      },
+      "mapping": {
+        "timestamp": "timestamp",
+        "vessel_count": "vessel_count",
+        "anchored_vessels": "anchored_vessels",
+        "slow_vessels": "slow_vessels",
+        "avg_sog_knots": "avg_sog_knots",
+        "cargo_vessels": "cargo_vessels",
+        "tanker_vessels": "tanker_vessels",
+        "passenger_vessels": "passenger_vessels",
+        "tug_vessels": "tug_vessels"
+      }
     }
   ]
 }

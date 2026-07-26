@@ -177,6 +177,19 @@ def chat(payload: ChatRequest, request: Request) -> ChatResponse:
 def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
     response = _answer(payload, request)
 
+    def natural_chunks(text: str, target: int = 28, maximum: int = 52):
+        start = 0
+        for index, character in enumerate(text, start=1):
+            length = index - start
+            if length >= maximum or (
+                length >= target
+                and character in "，。！？；：\n,.!?;:"
+            ):
+                yield text[start:index]
+                start = index
+        if start < len(text):
+            yield text[start:]
+
     def events():
         metadata = {
             "answer_id": response.answer_id,
@@ -185,9 +198,8 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
             "generation_provider": response.generation_provider,
         }
         yield f"event: metadata\ndata: {json.dumps(metadata, ensure_ascii=False)}\n\n"
-        text = response.answer
-        for start in range(0, len(text), 24):
-            yield f"event: token\ndata: {json.dumps({'text': text[start:start + 24]}, ensure_ascii=False)}\n\n"
+        for chunk in natural_chunks(response.answer):
+            yield f"event: token\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
         yield f"event: done\ndata: {response.model_dump_json()}\n\n"
 
     return StreamingResponse(

@@ -63,6 +63,11 @@ def test_required_frontend_dom_ids_exist_once() -> None:
         "knowledgeChunkCount",
         "knowledgeOfficialCount",
         "connectorNavBadge",
+        "rlCenterGate",
+        "rlCenterEvidenceStrip",
+        "rlCenterAlgorithmMatrix",
+        "rlAdvisorFeed",
+        "rlSystemLinkage",
     }
 
     missing = sorted(node_id for node_id in required_ids if counts[node_id] == 0)
@@ -109,6 +114,9 @@ def test_frontend_calls_required_backend_surfaces() -> None:
         "/api/system/info",
         "/api/models",
         "/api/governance/identity",
+        "/api/rl-lab/health",
+        "/api/rl-lab/evidence",
+        "/api/rl-lab/advisor",
     }
 
     missing = []
@@ -120,6 +128,19 @@ def test_frontend_calls_required_backend_surfaces() -> None:
             missing.append(endpoint)
 
     assert not missing, f"app.js 尚未调用后端能力入口: {missing}"
+
+
+def test_training_center_connects_matrix_advisor_and_system_actions() -> None:
+    html, javascript = _read_frontend()
+
+    assert 'data-view="rl"' in html
+    assert "训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动" in html
+    for action in ("refresh", "start-training", "show-contract", "ask-advisor"):
+        assert f'data-rl-center-action="{action}"' in html
+    assert "loadRLCenter" in javascript
+    assert "renderRLCenter" in javascript
+    assert "askRLAdvisor" in javascript
+    assert "handleRLCenterAction" in javascript
 
 
 def test_intelligence_hub_has_visible_entry_and_seven_priority_runtime() -> None:

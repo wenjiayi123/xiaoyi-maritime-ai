@@ -1,0 +1,1933 @@
+{
+  "configuration": {
+    "algorithms": [
+      "q_learning",
+      "sarsa",
+      "expected_sarsa",
+      "double_q_learning",
+      "pid"
+    ],
+    "episodes": 320,
+    "horizon_steps": 72,
+    "seed_count": 3,
+    "seeds": [
+      260726,
+      260727,
+      260728
+    ],
+    "split": "chronological_no_shuffle_70_15_15",
+    "test_render_mode": "trace_after_training",
+    "training_render_mode": null
+  },
+  "dataset_comparison": {
+    "large_rows": 409887,
+    "large_to_original_row_ratio": 20.769546,
+    "original_rows": 19735,
+    "recommendation": "Use the large UCI dataset for algorithm-scale evidence and retain the original dataset for regression comparison. Use NOAA AIS for port-traffic relevance. None of them replaces site validation."
+  },
+  "evidence_sha256": {
+    "data/port_profiles/us_la_lb_public_ais_v1.json": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+    "data/public/noaa_la_lb_ais_2024_12_25_1min.csv": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+    "data/public/noaa_la_lb_ais_2024_12_25_1min.provenance.json": "cbf1f1705acb351dd60702d7514bc2ab7856f61fe96c325012dfe103318ba00f",
+    "data/public/uci_appliances_energy.csv": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+    "data/public/uci_appliances_energy.provenance.json": "0ed6d6cc1f526c8b4209ea79363bc225794be1a487323e1b1db558bf8d6ec710",
+    "data/public/uci_household_power_5min.csv": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+    "data/public/uci_household_power_5min.provenance.json": "0fc6cc6a04b2605b9bea2af496ea2528b4576d0e75f996bf5e781e44d616c054",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/evaluations/eval-172e7dfc84.json": "278aed50099092f02ac1055a52aecb2f5384c1ca0ce1e145b9933f82cda466b2",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/models/double_q_learning.json": "ba553bfbb368cf402bd7c5c6f898e8b9a8425c94b52c65757f8e71722160e116",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/models/expected_sarsa.json": "fdbe5ebb9b32d3c5b2fdd9fc077e8ea9ce3fe90f7586439b258b009be8d8ff79",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/models/q_learning.json": "3cddff34a264658932ea0103aa025a5a0db960094bbf3b37232cfabbef5ec311",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/models/sarsa.json": "d4db91ee41057ba88f2711f29f3b7bc67967cdcd08218996996b473fcb14da4f",
+    "reports/rl_evidence/legacy_uci_smoke_20260724/run.json": "69cbe9e176a0f97aebf839e12400937843b7906ec45d7149f11d4b9d4e7e5979",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/evaluations/eval-48e97c0bdd.json": "b84d10a545fb8034e71e0323f13f0abe583c6b3a945b2ad4dbf6fb127f306999",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/double_q_learning.json": "593b24e247952705bfe0e7d416a547ec4388af16e424d6377a262d3c2f5bef58",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/expected_sarsa.json": "10a3fd5534f0d132dbfdcb2787eeff5fb087bc5bc13872e1cddf6c6a29bc9f44",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/q_learning.json": "e825950207cf49d6bd8d991cd10a543092e23aa480e7b3b5f349fb0af0b9e095",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/sarsa.json": "dc136ed548a976271271e889ee83b5679c5ffde1e62d6b193a945410a7297b61",
+    "reports/rl_evidence/noaa_la_lb_ais_2024_12_25_1min/selected_run/run.json": "6e90d4d9c10edd84bb3957b4d058b1faef73c8ca8f119e17fb47b34d748668da",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/evaluations/eval-c327c8286e.json": "9b7b31fa3879ff76f95cebb21a747fb2fbd99d099a45ff0be704786fef78667f",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/models/double_q_learning.json": "5e532cb6b366b84c8263d7d03d70842e5070a770beeabea20168e0fd1d008336",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/models/expected_sarsa.json": "1a303ba2053d53546a8592913187c96e0d75fec3baf9353c1f0645e8d8627706",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/models/q_learning.json": "8ad3faf916263ac18b7a46eca743fd90a8673b470691c1c60200075792819a06",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/models/sarsa.json": "77c8f60118e38f7c0b15d1548c5a943d6d603aa04af915f138145212fd41c105",
+    "reports/rl_evidence/uci_appliances_energy/selected_run/run.json": "18303f81c92aa2cbe84cba91653589bee0aa75ff2667a851134a93987db3356f",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/evaluations/eval-3c0ae03c37.json": "6c5ce7f5155687e4e235235650b608a36a950381f6b371284f0ac43be4e92961",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/models/double_q_learning.json": "3d71a98bf6e27dae809a302d2de035c98b358c224fd7019cfffa042923f79239",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/models/expected_sarsa.json": "f1a6f38020fd131a0c1adf10c33f89cb5e975878edc69bc11b54c265703445c3",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/models/q_learning.json": "4c3c0d80c55f88f9d982b7628f19843f79e498e6f5955dc1384592a568e36ce3",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/models/sarsa.json": "2de932247830f23a685a4397472d0b2fdba3d6b0c98b8c5f390b8daddf2210dd",
+    "reports/rl_evidence/uci_household_power_5min/selected_run/run.json": "53fa34a278e8296f057f1d4419ff1ded6b3ad8260316dfc409591fbb0e385661"
+  },
+  "experiments": {
+    "noaa_la_lb_ais_2024_12_25_1min": {
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "average_backlog_units": {
+              "mean": 149.333304,
+              "stddev": 2.882657
+            },
+            "capacity_utilization_percent": {
+              "mean": 100.0,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -10087.494504,
+              "stddev": 221.222079
+            },
+            "served_units": {
+              "mean": 376.97022,
+              "stddev": 7.806493
+            },
+            "terminal_backlog_units": {
+              "mean": 227.416447,
+              "stddev": 7.806493
+            },
+            "total_reward": {
+              "mean": -10087.494504,
+              "stddev": 221.222079
+            },
+            "wait_proxy_hours": {
+              "mean": 179.199965,
+              "stddev": 3.459189
+            }
+          },
+          "expected_sarsa": {
+            "average_backlog_units": {
+              "mean": 149.381567,
+              "stddev": 2.898372
+            },
+            "capacity_utilization_percent": {
+              "mean": 100.0,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -10091.780047,
+              "stddev": 222.865316
+            },
+            "served_units": {
+              "mean": 376.5069,
+              "stddev": 8.104611
+            },
+            "terminal_backlog_units": {
+              "mean": 227.879767,
+              "stddev": 8.104611
+            },
+            "total_reward": {
+              "mean": -10091.780047,
+              "stddev": 222.865316
+            },
+            "wait_proxy_hours": {
+              "mean": 179.25788,
+              "stddev": 3.478047
+            }
+          },
+          "pid": {
+            "average_backlog_units": {
+              "mean": 103.191467,
+              "stddev": 0.0
+            },
+            "capacity_utilization_percent": {
+              "mean": 100.0,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -6574.06588,
+              "stddev": 0.0
+            },
+            "served_units": {
+              "mean": 480.6054,
+              "stddev": 0.0
+            },
+            "terminal_backlog_units": {
+              "mean": 123.781267,
+              "stddev": 0.0
+            },
+            "total_reward": {
+              "mean": -6574.06588,
+              "stddev": 0.0
+            },
+            "wait_proxy_hours": {
+              "mean": 123.82976,
+              "stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "average_backlog_units": {
+              "mean": 149.383299,
+              "stddev": 2.908907
+            },
+            "capacity_utilization_percent": {
+              "mean": 100.0,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -10092.051605,
+              "stddev": 224.030178
+            },
+            "served_units": {
+              "mean": 376.47126,
+              "stddev": 8.225126
+            },
+            "terminal_backlog_units": {
+              "mean": 227.915407,
+              "stddev": 8.225126
+            },
+            "total_reward": {
+              "mean": -10092.051605,
+              "stddev": 224.030178
+            },
+            "wait_proxy_hours": {
+              "mean": 179.259959,
+              "stddev": 3.490688
+            }
+          },
+          "sarsa": {
+            "average_backlog_units": {
+              "mean": 149.414649,
+              "stddev": 2.913882
+            },
+            "capacity_utilization_percent": {
+              "mean": 100.0,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -10095.061423,
+              "stddev": 224.569494
+            },
+            "served_units": {
+              "mean": 376.01388,
+              "stddev": 8.435486
+            },
+            "terminal_backlog_units": {
+              "mean": 228.372787,
+              "stddev": 8.435486
+            },
+            "total_reward": {
+              "mean": -10095.061423,
+              "stddev": 224.569494
+            },
+            "wait_proxy_hours": {
+              "mean": 179.297579,
+              "stddev": 3.496659
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "pid",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 3,
+          "q_learning": 0,
+          "sarsa": 0
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "U.S. Coast Guard NAIS; NOAA Office for Coastal Management; Bureau of Ocean Energy Management. MarineCadastre historical AIS point data.",
+        "description": "洛杉矶—长滩港区公开AIS实测交通的一分钟聚合场景；服务量、队列与等待改善属于校准仿真输出，不是码头生产KPI。",
+        "environment_type": "port_operations",
+        "evidence_level": "measured_ais_plus_calibrated_operations_proxy",
+        "factor_coverage": {
+          "berth": "site_required",
+          "energy_carbon": "site_required",
+          "equipment": "site_required",
+          "gate_rail": "site_required",
+          "queue": "derived_proxy",
+          "traffic": "measured_ais",
+          "vessel_mix": "measured_ais",
+          "weather_tide": "site_required",
+          "yard": "site_required"
+        },
+        "id": "noaa_la_lb_ais_2024_12_25_1min",
+        "label": "NOAA LA–Long Beach AIS · 2024-12-25",
+        "license": "U.S. Government material; NOAA MarineCadastre AIS terms",
+        "mapping": {
+          "anchored_vessels": "anchored_vessels",
+          "avg_sog_knots": "avg_sog_knots",
+          "cargo_vessels": "cargo_vessels",
+          "passenger_vessels": "passenger_vessels",
+          "slow_vessels": "slow_vessels",
+          "tanker_vessels": "tanker_vessels",
+          "timestamp": "timestamp",
+          "tug_vessels": "tug_vessels",
+          "vessel_count": "vessel_count"
+        },
+        "optional_fields": [
+          "load_kw",
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "slow_vessels",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+        "port_data": true,
+        "profile_path": "data/port_profiles/us_la_lb_public_ais_v1.json",
+        "queue_proxy_max": 125.0,
+        "queue_proxy_median": 92.0,
+        "required_fields": [
+          "timestamp",
+          "vessel_count",
+          "anchored_vessels",
+          "avg_sog_knots"
+        ],
+        "row_count": 710,
+        "sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+        "source_type": "public_port_traffic",
+        "source_url": "https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2024/",
+        "step_minutes": 1.0,
+        "time_end": "2024-12-25T12:01:00+00:00",
+        "time_start": "2024-12-25T00:00:00+00:00",
+        "timezone": "UTC",
+        "vessel_count_max": 106.0,
+        "vessel_count_median": 82.0,
+        "vessel_count_min": 1.0
+      },
+      "runs": [
+        {
+          "config_sha256": "eca8bbdd96c0402f784e5f0db3ede5ceb3269e332f3038675c7ebff210739197",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 11.221,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.624847,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9800.977048,
+                "served_units": 387.79884,
+                "terminal_backlog_units": 216.587827,
+                "total_reward": -9800.977048,
+                "wait_proxy_hours": 174.749816
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.624847,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9800.977048,
+                "served_units": 387.79884,
+                "terminal_backlog_units": 216.587827,
+                "total_reward": -9800.977048,
+                "wait_proxy_hours": 174.749816
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.624847,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9800.977048,
+                "served_units": 387.79884,
+                "terminal_backlog_units": 216.587827,
+                "total_reward": -9800.977048,
+                "wait_proxy_hours": 174.749816
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.624847,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9800.977048,
+                "served_units": 387.79884,
+                "terminal_backlog_units": 216.587827,
+                "total_reward": -9800.977048,
+                "wait_proxy_hours": 174.749816
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005952-2cb0d59c",
+          "seed": 260726,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005952-2cb0d59c/evaluations/eval-48e97c0bdd.json",
+          "test_artifact_sha256": "b84d10a545fb8034e71e0323f13f0abe583c6b3a945b2ad4dbf6fb127f306999",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "221c4d71975b5076df794f6e69032b0e539366016d70651a2c875588ae885058",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 11.243,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 149.814032,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10129.233068,
+                "served_units": 373.09734,
+                "terminal_backlog_units": 231.289327,
+                "total_reward": -10129.233068,
+                "wait_proxy_hours": 179.776838
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 149.908082,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10138.26252,
+                "served_units": 371.7252,
+                "terminal_backlog_units": 232.661467,
+                "total_reward": -10138.26252,
+                "wait_proxy_hours": 179.889698
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 149.840019,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10131.926448,
+                "served_units": 372.56274,
+                "terminal_backlog_units": 231.823927,
+                "total_reward": -10131.926448,
+                "wait_proxy_hours": 179.808023
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 149.721219,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10121.9432,
+                "served_units": 373.4181,
+                "terminal_backlog_units": 230.968567,
+                "total_reward": -10121.9432,
+                "wait_proxy_hours": 179.665463
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            }
+          ],
+          "run_id": "rl-20260726T010003-7928077c",
+          "seed": 260727,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T010003-7928077c/evaluations/eval-e1cc98e669.json",
+          "test_artifact_sha256": "e98faab2b41d243643f21d36adfe6b29cfb6ec342402a09aaf91ab8d3b8d4d66",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "9b1790c3d84be8d9e62ecb8e230a3df94770ef51b42248425d0c670d93b90a32",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 11.423,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 152.711019,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10345.9447,
+                "served_units": 368.5176,
+                "terminal_backlog_units": 235.869067,
+                "total_reward": -10345.9447,
+                "wait_proxy_hours": 183.253223
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 152.711019,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10345.9447,
+                "served_units": 368.5176,
+                "terminal_backlog_units": 235.869067,
+                "total_reward": -10345.9447,
+                "wait_proxy_hours": 183.253223
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 152.679834,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10342.436644,
+                "served_units": 369.15912,
+                "terminal_backlog_units": 235.227547,
+                "total_reward": -10342.436644,
+                "wait_proxy_hours": 183.215801
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 152.653847,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10339.563264,
+                "served_units": 369.69372,
+                "terminal_backlog_units": 234.692947,
+                "total_reward": -10339.563264,
+                "wait_proxy_hours": 183.184616
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            }
+          ],
+          "run_id": "rl-20260726T010015-45938ad9",
+          "seed": 260728,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T010015-45938ad9/evaluations/eval-fd1d19d9aa.json",
+          "test_artifact_sha256": "759d50e6e90ca25af710e40b97fa5505399f9a089b5546c9fa408ed16edbad95",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        }
+      ]
+    },
+    "uci_appliances_energy": {
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "baseline_cost": {
+              "mean": 1.463533,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 2.26,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.5146,
+              "stddev": 0.078819
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": -5.270822,
+              "stddev": 4.844303
+            },
+            "peak_grid_kw": {
+              "mean": 2.626,
+              "stddev": 0.153364
+            },
+            "peak_reduction_percent": {
+              "mean": -53.343144,
+              "stddev": 6.316065
+            },
+            "score": {
+              "mean": -168.303343,
+              "stddev": 7.098867
+            },
+            "terminal_soc": {
+              "mean": 0.118408,
+              "stddev": 0.005748
+            },
+            "total_cost": {
+              "mean": 1.454183,
+              "stddev": 0.037618
+            },
+            "total_reward": {
+              "mean": -144.857757,
+              "stddev": 2.984849
+            }
+          },
+          "expected_sarsa": {
+            "baseline_cost": {
+              "mean": 1.463533,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 2.26,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.489625,
+              "stddev": 0.112777
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": -1.363333,
+              "stddev": 2.447628
+            },
+            "peak_grid_kw": {
+              "mean": 2.661333,
+              "stddev": 0.196186
+            },
+            "peak_reduction_percent": {
+              "mean": -48.244967,
+              "stddev": 6.838698
+            },
+            "score": {
+              "mean": -159.245152,
+              "stddev": 11.437509
+            },
+            "terminal_soc": {
+              "mean": 0.145069,
+              "stddev": 0.027929
+            },
+            "total_cost": {
+              "mean": 1.468518,
+              "stddev": 0.027033
+            },
+            "total_reward": {
+              "mean": -139.401832,
+              "stddev": 8.423351
+            }
+          },
+          "pid": {
+            "baseline_cost": {
+              "mean": 1.463533,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 2.26,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.5694,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": -8.743333,
+              "stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "mean": 1.619,
+              "stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "mean": 10.5471,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -105.99257,
+              "stddev": 0.0
+            },
+            "terminal_soc": {
+              "mean": 0.503298,
+              "stddev": 0.0
+            },
+            "total_cost": {
+              "mean": 1.38624,
+              "stddev": 0.0
+            },
+            "total_reward": {
+              "mean": -106.714077,
+              "stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "baseline_cost": {
+              "mean": 1.463533,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 2.26,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.302575,
+              "stddev": 0.050537
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 3.937111,
+              "stddev": 2.112232
+            },
+            "peak_grid_kw": {
+              "mean": 2.808,
+              "stddev": 0.216019
+            },
+            "peak_reduction_percent": {
+              "mean": -52.790411,
+              "stddev": 9.172022
+            },
+            "score": {
+              "mean": -152.02582,
+              "stddev": 5.546339
+            },
+            "terminal_soc": {
+              "mean": 0.130217,
+              "stddev": 0.00244
+            },
+            "total_cost": {
+              "mean": 1.396321,
+              "stddev": 0.023677
+            },
+            "total_reward": {
+              "mean": -132.4845,
+              "stddev": 2.001382
+            }
+          },
+          "sarsa": {
+            "baseline_cost": {
+              "mean": 1.463533,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 2.26,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.385275,
+              "stddev": 0.154273
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 1.273655,
+              "stddev": 7.624374
+            },
+            "peak_grid_kw": {
+              "mean": 2.895,
+              "stddev": 0.10408
+            },
+            "peak_reduction_percent": {
+              "mean": -60.465778,
+              "stddev": 4.42046
+            },
+            "score": {
+              "mean": -157.584128,
+              "stddev": 10.617445
+            },
+            "terminal_soc": {
+              "mean": 0.127712,
+              "stddev": 0.004257
+            },
+            "total_cost": {
+              "mean": 1.403313,
+              "stddev": 0.057808
+            },
+            "total_reward": {
+              "mean": -133.907279,
+              "stddev": 6.337002
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "pid",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 3,
+          "q_learning": 0,
+          "sarsa": 0
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "Candanedo, L. (2017). Appliances Energy Prediction. UCI Machine Learning Repository. DOI: 10.24432/C5VC8G.",
+        "description": "19735条10分钟级真实建筑用电与气象观测。仅作为能源调度算法公开基准，不宣称为港口或AGV实绩。",
+        "environment_type": "energy_storage",
+        "evidence_level": "measured_public_benchmark",
+        "factor_coverage": {},
+        "id": "uci_appliances_energy",
+        "label": "UCI Appliances Energy Prediction",
+        "license": "CC BY 4.0",
+        "load_kw_max": 6.48,
+        "load_kw_median": 0.36,
+        "load_kw_min": 0.06,
+        "mapping": {
+          "humidity_percent": "humidity_percent",
+          "load_kw": "load_kw",
+          "pressure_hpa": "pressure_hpa",
+          "temperature_c": "temperature_c",
+          "timestamp": "timestamp",
+          "visibility_km": "visibility_km",
+          "wind_speed_mps": "wind_speed_mps"
+        },
+        "optional_fields": [
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "vessel_count",
+          "anchored_vessels",
+          "slow_vessels",
+          "avg_sog_knots",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/uci_appliances_energy.csv",
+        "port_data": false,
+        "required_fields": [
+          "timestamp",
+          "load_kw"
+        ],
+        "row_count": 19735,
+        "sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+        "source_type": "public_benchmark",
+        "source_url": "https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction",
+        "step_minutes": 10.0,
+        "time_end": "2016-05-27T18:00:00",
+        "time_start": "2016-01-11T17:00:00",
+        "timezone": "Europe/Brussels"
+      },
+      "runs": [
+        {
+          "config_sha256": "de80d0fcab5f4ff96bb072e9a0802b5ef6b1b0655ac48c50c4e0d6f4c95cf69c",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 8.575,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.26115,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 6.2397,
+                "peak_grid_kw": 2.534,
+                "peak_reduction_percent": -41.515167,
+                "score": -144.188385,
+                "terminal_soc": 0.126997,
+                "total_cost": 1.374977,
+                "total_reward": -130.078198
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.338625,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 4.759133,
+                "peak_grid_kw": 2.748,
+                "peak_reduction_percent": -54.789567,
+                "score": -151.685505,
+                "terminal_soc": 0.133438,
+                "total_cost": 1.383347,
+                "total_reward": -131.673331
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.4557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -2.229133,
+                "peak_grid_kw": 2.648,
+                "peak_reduction_percent": -51.0017,
+                "score": -155.365956,
+                "terminal_soc": 0.159205,
+                "total_cost": 1.452553,
+                "total_reward": -134.073623
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.61785,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -12.085,
+                "peak_grid_kw": 2.842,
+                "peak_reduction_percent": -62.2138,
+                "score": -178.246756,
+                "terminal_soc": 0.117334,
+                "total_cost": 1.505907,
+                "total_reward": -148.527236
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.5694,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -8.743333,
+                "peak_grid_kw": 1.619,
+                "peak_reduction_percent": 10.5471,
+                "score": -105.99257,
+                "terminal_soc": 0.503298,
+                "total_cost": 1.38624,
+                "total_reward": -106.714077
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005721-852c2777",
+          "seed": 260726,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005721-852c2777/evaluations/eval-c327c8286e.json",
+          "test_artifact_sha256": "9b7b31fa3879ff76f95cebb21a747fb2fbd99d099a45ff0be704786fef78667f",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "q_learning"
+        },
+        {
+          "config_sha256": "a24ad6d0de9833483144a1342a02e788cb27d7527af8d200cef803da0f3320be",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 8.669,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.373725,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 1.137833,
+                "peak_grid_kw": 2.828,
+                "peak_reduction_percent": -52.8746,
+                "score": -155.67293,
+                "terminal_soc": 0.130754,
+                "total_cost": 1.429337,
+                "total_reward": -134.978223
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.593175,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -9.305667,
+                "peak_grid_kw": 2.975,
+                "peak_reduction_percent": -65.5724,
+                "score": -172.491696,
+                "terminal_soc": 0.123239,
+                "total_cost": 1.481953,
+                "total_reward": -142.540469
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.64155,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -3.832867,
+                "peak_grid_kw": 2.908,
+                "peak_reduction_percent": -54.8948,
+                "score": -174.78397,
+                "terminal_soc": 0.106061,
+                "total_cost": 1.506583,
+                "total_reward": -151.292903
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.49935,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -1.250433,
+                "peak_grid_kw": 2.535,
+                "peak_reduction_percent": -48.000833,
+                "score": -164.530503,
+                "terminal_soc": 0.125923,
+                "total_cost": 1.4391,
+                "total_reward": -144.829997
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.5694,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -8.743333,
+                "peak_grid_kw": 1.619,
+                "peak_reduction_percent": 10.5471,
+                "score": -105.99257,
+                "terminal_soc": 0.503298,
+                "total_cost": 1.38624,
+                "total_reward": -106.714077
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005731-8dd92d44",
+          "seed": 260727,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005731-8dd92d44/evaluations/eval-5d7474c76b.json",
+          "test_artifact_sha256": "74096c8d8f6328845ce21472c8f09185e1a64ca976ef3244dde46bdf604111c0",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sarsa"
+        },
+        {
+          "config_sha256": "1acc56426fdab6f958837c14983a840a63581083be476a390165fa544745ee23",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 8.655,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.27285,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 4.4338,
+                "peak_grid_kw": 3.062,
+                "peak_reduction_percent": -63.981467,
+                "score": -156.216145,
+                "terminal_soc": 0.132901,
+                "total_cost": 1.38465,
+                "total_reward": -132.397078
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.224025,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 8.3675,
+                "peak_grid_kw": 2.962,
+                "peak_reduction_percent": -61.035367,
+                "score": -148.575184,
+                "terminal_soc": 0.12646,
+                "total_cost": 1.34464,
+                "total_reward": -127.508037
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.371625,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 1.972,
+                "peak_grid_kw": 2.428,
+                "peak_reduction_percent": -38.8384,
+                "score": -147.585529,
+                "terminal_soc": 0.169941,
+                "total_cost": 1.446417,
+                "total_reward": -132.838969
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.4266,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -2.477033,
+                "peak_grid_kw": 2.501,
+                "peak_reduction_percent": -49.8148,
+                "score": -162.132771,
+                "terminal_soc": 0.111966,
+                "total_cost": 1.417543,
+                "total_reward": -141.216038
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.5694,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -8.743333,
+                "peak_grid_kw": 1.619,
+                "peak_reduction_percent": 10.5471,
+                "score": -105.99257,
+                "terminal_soc": 0.503298,
+                "total_cost": 1.38624,
+                "total_reward": -106.714077
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005741-4edce7be",
+          "seed": 260728,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005741-4edce7be/evaluations/eval-a4dd71c811.json",
+          "test_artifact_sha256": "8f0ea68478878d8ba09060adb1965feb5257d97bb671931cf3f66dddebe9a890",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "expected_sarsa"
+        }
+      ]
+    },
+    "uci_household_power_5min": {
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "baseline_cost": {
+              "mean": 1.649124,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 1.8564,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 1.878938,
+              "stddev": 0.029663
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 32.532367,
+              "stddev": 3.130943
+            },
+            "peak_grid_kw": {
+              "mean": 3.276511,
+              "stddev": 0.078954
+            },
+            "peak_reduction_percent": {
+              "mean": -97.053622,
+              "stddev": 5.385632
+            },
+            "score": {
+              "mean": -106.032444,
+              "stddev": 4.398961
+            },
+            "terminal_soc": {
+              "mean": 0.110803,
+              "stddev": 0.003347
+            },
+            "total_cost": {
+              "mean": 1.049727,
+              "stddev": 0.017539
+            },
+            "total_reward": {
+              "mean": -80.223942,
+              "stddev": 2.069398
+            }
+          },
+          "expected_sarsa": {
+            "baseline_cost": {
+              "mean": 1.649124,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 1.8564,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 1.85965,
+              "stddev": 0.084996
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 35.4597,
+              "stddev": 4.875075
+            },
+            "peak_grid_kw": {
+              "mean": 3.305467,
+              "stddev": 0.142473
+            },
+            "peak_reduction_percent": {
+              "mean": -86.579344,
+              "stddev": 15.255077
+            },
+            "score": {
+              "mean": -102.374188,
+              "stddev": 9.731177
+            },
+            "terminal_soc": {
+              "mean": 0.106598,
+              "stddev": 0.001437
+            },
+            "total_cost": {
+              "mean": 1.075759,
+              "stddev": 0.040669
+            },
+            "total_reward": {
+              "mean": -81.92633,
+              "stddev": 4.726446
+            }
+          },
+          "pid": {
+            "baseline_cost": {
+              "mean": 1.649124,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 1.8564,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 3.766557,
+              "stddev": 0.0
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": -63.6819,
+              "stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "mean": 2.189533,
+              "stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "mean": -45.4247,
+              "stddev": 0.0
+            },
+            "score": {
+              "mean": -175.945656,
+              "stddev": 0.0
+            },
+            "terminal_soc": {
+              "mean": 0.739224,
+              "stddev": 0.0
+            },
+            "total_cost": {
+              "mean": 2.018842,
+              "stddev": 0.0
+            },
+            "total_reward": {
+              "mean": -132.303016,
+              "stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "baseline_cost": {
+              "mean": 1.649124,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 1.8564,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 1.877932,
+              "stddev": 0.056285
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 32.660067,
+              "stddev": 3.908799
+            },
+            "peak_grid_kw": {
+              "mean": 3.280889,
+              "stddev": 0.156121
+            },
+            "peak_reduction_percent": {
+              "mean": -95.794122,
+              "stddev": 8.304675
+            },
+            "score": {
+              "mean": -105.800311,
+              "stddev": 8.627431
+            },
+            "terminal_soc": {
+              "mean": 0.105793,
+              "stddev": 0.00079
+            },
+            "total_cost": {
+              "mean": 1.045913,
+              "stddev": 0.024967
+            },
+            "total_reward": {
+              "mean": -80.546689,
+              "stddev": 3.803019
+            }
+          },
+          "sarsa": {
+            "baseline_cost": {
+              "mean": 1.649124,
+              "stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "mean": 1.8564,
+              "stddev": 0.0
+            },
+            "carbon_kg": {
+              "mean": 1.891178,
+              "stddev": 0.034099
+            },
+            "constraint_violations": {
+              "mean": 0.0,
+              "stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "mean": 30.685633,
+              "stddev": 2.241937
+            },
+            "peak_grid_kw": {
+              "mean": 3.314267,
+              "stddev": 0.108347
+            },
+            "peak_reduction_percent": {
+              "mean": -95.859144,
+              "stddev": 5.740506
+            },
+            "score": {
+              "mean": -108.99447,
+              "stddev": 0.503913
+            },
+            "terminal_soc": {
+              "mean": 0.111519,
+              "stddev": 0.002036
+            },
+            "total_cost": {
+              "mean": 1.065807,
+              "stddev": 0.024956
+            },
+            "total_reward": {
+              "mean": -82.925066,
+              "stddev": 2.626539
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "expected_sarsa",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 1,
+          "pid": 0,
+          "q_learning": 1,
+          "sarsa": 1
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "Hebrail, G. & Berard, A. (2006). Individual Household Electric Power Consumption. UCI Machine Learning Repository. DOI: 10.24432/C58K54.",
+        "description": "约四年一分钟真实用电记录聚合为五分钟时间序列；用于大规模能源调度算法基准，不宣称为港口实绩。",
+        "environment_type": "energy_storage",
+        "evidence_level": "measured_public_benchmark",
+        "factor_coverage": {
+          "carbon": "documented_experimental_default",
+          "energy_load": "measured",
+          "port_operations": "not_applicable",
+          "tariff": "documented_experimental_default",
+          "weather": "missing"
+        },
+        "id": "uci_household_power_5min",
+        "label": "UCI Household Power · 5-minute large benchmark",
+        "license": "CC BY 4.0",
+        "load_kw_max": 9.7212,
+        "load_kw_median": 0.6336,
+        "load_kw_min": 0.0764,
+        "mapping": {
+          "load_kw": "load_kw",
+          "timestamp": "timestamp"
+        },
+        "optional_fields": [
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "vessel_count",
+          "anchored_vessels",
+          "slow_vessels",
+          "avg_sog_knots",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/uci_household_power_5min.csv",
+        "port_data": false,
+        "required_fields": [
+          "timestamp",
+          "load_kw"
+        ],
+        "row_count": 409887,
+        "sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+        "source_type": "public_benchmark",
+        "source_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
+        "step_minutes": 5.0,
+        "time_end": "2010-11-26T21:00:00",
+        "time_start": "2006-12-16T17:20:00",
+        "timezone": "Europe/Paris"
+      },
+      "runs": [
+        {
+          "config_sha256": "a1b993a5118afabc517690aa4aa5953b0a6202688e3f74e7ab9d358645b4d8b6",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 17.487,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.881233,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 33.685967,
+                "peak_grid_kw": 3.282933,
+                "peak_reduction_percent": -91.890233,
+                "score": -103.416836,
+                "terminal_soc": 0.104719,
+                "total_cost": 1.042844,
+                "total_reward": -80.13513
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.927003,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 28.276167,
+                "peak_grid_kw": 3.3884,
+                "peak_reduction_percent": -96.411433,
+                "score": -109.586087,
+                "terminal_soc": 0.114381,
+                "total_cost": 1.053117,
+                "total_reward": -82.331981
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.793687,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 41.698133,
+                "peak_grid_kw": 3.121533,
+                "peak_reduction_percent": -68.9614,
+                "score": -88.687552,
+                "terminal_soc": 0.106866,
+                "total_cost": 1.025832,
+                "total_reward": -77.782245
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.894648,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 35.012333,
+                "peak_grid_kw": 3.218267,
+                "peak_reduction_percent": -89.522533,
+                "score": -99.890001,
+                "terminal_soc": 0.114382,
+                "total_cost": 1.034931,
+                "total_reward": -78.085921
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -63.6819,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -175.945656,
+                "terminal_soc": 0.739224,
+                "total_cost": 2.018842,
+                "total_reward": -132.303016
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005801-a6e66bde",
+          "seed": 260726,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005801-a6e66bde/evaluations/eval-3c0ae03c37.json",
+          "test_artifact_sha256": "6c5ce7f5155687e4e235235650b608a36a950381f6b371284f0ac43be4e92961",
+          "test_best_algorithm_id": "expected_sarsa",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sarsa"
+        },
+        {
+          "config_sha256": "593e0a07f91574d913415aa7240568ffbac1fcd5ddb40c65ecceb60390611cc4",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 17.605,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.807405,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 36.851233,
+                "peak_grid_kw": 3.088667,
+                "peak_reduction_percent": -88.1533,
+                "score": -96.629224,
+                "terminal_soc": 0.106598,
+                "total_cost": 1.016986,
+                "total_reward": -76.108397
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.90122,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 30.105633,
+                "peak_grid_kw": 3.393333,
+                "peak_reduction_percent": -102.597367,
+                "score": -109.042731,
+                "terminal_soc": 0.109819,
+                "total_cost": 1.043631,
+                "total_reward": -80.046037
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.805607,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 34.882333,
+                "peak_grid_kw": 3.468667,
+                "peak_reduction_percent": -106.171733,
+                "score": -107.972232,
+                "terminal_soc": 0.108209,
+                "total_cost": 1.075997,
+                "total_reward": -79.456472
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.90477,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 28.115667,
+                "peak_grid_kw": 3.388133,
+                "peak_reduction_percent": -99.8345,
+                "score": -108.249802,
+                "terminal_soc": 0.10633,
+                "total_cost": 1.039885,
+                "total_reward": -79.562269
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -63.6819,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -175.945656,
+                "terminal_soc": 0.739224,
+                "total_cost": 2.018842,
+                "total_reward": -132.303016
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005838-5a12a28c",
+          "seed": 260727,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005838-5a12a28c/evaluations/eval-2db4228f59.json",
+          "test_artifact_sha256": "7f2e4eaa4ffa31c187b7a09480d97693a980731612247f9418733a6fd203451b",
+          "test_best_algorithm_id": "q_learning",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "expected_sarsa"
+        },
+        {
+          "config_sha256": "a07f8a528db9d812abf68cdf9c46624001e0c9fe11d432c79be57befd130aa00",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 17.631,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.945157,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 27.443,
+                "peak_grid_kw": 3.471067,
+                "peak_reduction_percent": -107.338833,
+                "score": -117.354873,
+                "terminal_soc": 0.106061,
+                "total_cost": 1.07791,
+                "total_reward": -85.39654
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.84531,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 33.6751,
+                "peak_grid_kw": 3.161067,
+                "peak_reduction_percent": -88.568633,
+                "score": -108.354592,
+                "terminal_soc": 0.110356,
+                "total_cost": 1.100673,
+                "total_reward": -86.397179
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.979655,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 29.798633,
+                "peak_grid_kw": 3.3262,
+                "peak_reduction_percent": -84.6049,
+                "score": -110.46278,
+                "terminal_soc": 0.104719,
+                "total_cost": 1.125449,
+                "total_reward": -88.540273
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 1.837397,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 34.4691,
+                "peak_grid_kw": 3.223133,
+                "peak_reduction_percent": -101.803833,
+                "score": -109.957528,
+                "terminal_soc": 0.111697,
+                "total_cost": 1.074366,
+                "total_reward": -83.023635
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -63.6819,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -175.945656,
+                "terminal_soc": 0.739224,
+                "total_cost": 2.018842,
+                "total_reward": -132.303016
+              }
+            }
+          ],
+          "run_id": "rl-20260726T005915-2379e959",
+          "seed": 260728,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260726T005915-2379e959/evaluations/eval-3e693a489f.json",
+          "test_artifact_sha256": "cdef39b178d9d8fb5c90e0a831e988d525126c5c75dde1931f20370e003a5881",
+          "test_best_algorithm_id": "sarsa",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sarsa"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-07-26T01:00:27+00:00",
+  "pass_definition": "All scheduled runs completed, temporal and rendering boundaries held, and evidence hashes were generated. PASS does not mean RL beat PID or production targets were met.",
+  "passed": true,
+  "schema_version": "xiaoyi-rl-dataset-benchmark.v1",
+  "scope_notice": "Public offline benchmark and calibrated planning sandbox only. No field productivity, live-control, safety-certification or production-SLA claim is made.",
+  "selected_evidence_runs": {
+    "legacy_uci_smoke": "rl-20260724T120838-ecbd3029",
+    "noaa_la_lb_ais_2024_12_25_1min": "rl-20260726T005952-2cb0d59c",
+    "uci_appliances_energy": "rl-20260726T005721-852c2777",
+    "uci_household_power_5min": "rl-20260726T005801-a6e66bde"
+  }
+}

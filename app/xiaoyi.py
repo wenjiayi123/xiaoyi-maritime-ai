@@ -463,9 +463,9 @@ class XiaoyiAI:
                 )
                 return (
                     f"{direct_answer}\n\n"
-                    f"索引依据：《{hit.chunk.title}》（仅摘录当前检索索引中的直接回答）。\n\n"
+                    f"我核对的索引依据是《{hit.chunk.title}》（仅摘录当前检索索引）。\n\n"
                     f"{status}\n\n"
-                    "证据边界：未在已登记索引中出现的专业结论，本次不作补写。"
+                    "当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。"
                 )
 
         extracts: list[str] = []
@@ -505,10 +505,10 @@ class XiaoyiAI:
                 "非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。"
             )
         return (
-            "严格证据回答（仅摘录当前检索索引）：\n\n"
+            "根据当前索引，我能确认的重点是：\n\n"
             + "\n".join(f"- {item}" for item in extracts)
             + f"\n\n{status}\n\n"
-            "证据边界：未在上述索引片段出现的专业结论，本次不作补写。"
+            "上述片段没有覆盖的专业结论，我先不补写；你可以继续指定港口、业务对象或适用日期。"
         )
 
     def _insufficient_evidence_answer(
@@ -741,7 +741,7 @@ class XiaoyiAI:
             "这些官方资料包含发布页摘要、目录定位与发布方指南，不自动等同于法规或标准全文；"
             "每条专业证据均保留来源、版本、机构和内容校验哈希。\n\n"
             "我聚焦港口调度、船舶运营、航运SOP规范、能碳优化、海事合规五大场景，可提供严格证据知识问答、标准流程生成、设备告警处置建议、航运数据辅助决策、结构化报告，以及学术研究中的术语梳理、资料检索线索和论文框架辅助。\n\n"
-            "除回答问题外，我还能把一句自然语言指令拆解为可视化、可暂停、可审计的工作台操作链，自动完成页面跳转、数据读取、知识检索、来源核验、任务推进、报告生成和结果回写。项目已经预留 TOS、PCS、EMS、EAM、VTS、AIS、气象海洋与国际贸易单一窗口等真实港口接口契约，也为港航数字孪生和多智能体强化学习系统保留协同入口。\n\n"
+            "除回答问题外，我还能把一句自然语言指令拆解为可视化、可暂停、可审计的工作台操作链，自动完成页面跳转、数据读取、知识检索、来源核验、任务推进、报告生成和结果回写。项目已经预留 TOS、PCS、EMS、EAM、VTS、AIS、气象海洋与国际贸易单一窗口等真实港口接口契约，也为港航数字孪生和强化学习训练实验室保留协同入口。\n\n"
             "我的原则是专业结论有索引依据，实时状态有可追溯数据源依据，生产写操作有当前授权依据。未接入真实系统时，我会明确标注运营沙箱动态合成数据；涉及安全、调度、设备控制和对外申报时，我只完成辅助分析与写操作预检，不绕过人工确认和生产系统权限。"
         )
         if intent == "identity":
@@ -1004,10 +1004,7 @@ class XiaoyiAI:
             f"结论：{conclusion}\n\n"
             f"依据：{titles}。\n\n"
             f"关键知识点：\n{bullets}\n\n"
-            "现场应用：落地时需要结合具体对象、时间窗口、系统数据、现场记录和人工确认要求。\n\n"
-            "Conclusion: The answer is based on the retrieved port and shipping knowledge and should be applied together with the actual object, time window, system data, site records, and human-confirmation requirements.\n\n"
-            f"Knowledge basis: {titles}.\n\n"
-            "Key points: The evidence-based points are listed above for traceability."
+            "现场应用：落地时需要结合具体对象、时间窗口、系统数据、现场记录和人工确认要求。"
         )
 
     def _ops_answer(self, question: str, intent: str, points: list[str], titles: str) -> str:
@@ -1016,11 +1013,7 @@ class XiaoyiAI:
             "结论：需要结合港口现场状态、系统数据、设备状态和人工确认来判断。\n\n"
             f"依据知识：{titles}。\n\n"
             f"主要判断点：\n{bullets}\n\n"
-            "建议动作：先确认现场对象和时间窗口，再核对系统数据与设备状态；涉及安全、合规、计费或生产影响时进入人工确认闭环。\n\n"
-            "Conclusion: This should be judged together with on-site port status, system data, equipment status, and human confirmation.\n\n"
-            f"Knowledge basis: {titles}.\n\n"
-            "Main judgement points: The bullet points above list the source-grounded checks and evidence points.\n\n"
-            "Recommended action: First confirm the on-site object and time window, then verify system data and equipment status. If safety, compliance, billing, or production impact is involved, proceed through human confirmation."
+            "建议动作：先确认现场对象和时间窗口，再核对系统数据与设备状态；涉及安全、合规、计费或生产影响时进入人工确认闭环。"
         )
 
     def _sop_answer(self, question: str, intent: str, points: list[str], titles: str, hits: list[SearchHit]) -> str:
@@ -1035,18 +1028,12 @@ class XiaoyiAI:
             "4. 人工确认：涉及安全、合规、计费、客户承诺、系统降级或生产影响时必须人工确认。\n"
             "5. 审计沉淀：记录原因、动作、负责人、结果和可复用 playbook。"
         )
-        english_block = self._english_sop_block(groups)
         return (
             f"处理结论：{conclusion}\n\n"
             f"知识依据：{titles}。\n\n"
             f"现场检查点：\n{bullets}\n\n"
             f"处置步骤：\n{step_block}\n\n"
-            "人工确认与记录：涉及人员安全、消防、危险品、能源切断、监管通报、客户承诺或复工恢复时，必须由值班长、专业负责人或合规人员确认，并保留时间、地点、对象、动作、负责人和证据链。\n\n"
-            f"Handling conclusion: {english_block['conclusion']}\n\n"
-            f"Knowledge basis: {titles}.\n\n"
-            "On-site checks: The bullet points above list the source-grounded checks and operational evidence.\n\n"
-            f"Response steps:\n{english_block['steps']}\n\n"
-            "Human confirmation and records: For personnel safety, firefighting, dangerous goods, energy isolation, regulatory reporting, customer commitments, or work resumption, confirm with the duty lead, responsible specialist, or compliance owner and preserve the full evidence chain."
+            "人工确认与记录：涉及人员安全、消防、危险品、能源切断、监管通报、客户承诺或复工恢复时，必须由值班长、专业负责人或合规人员确认，并保留时间、地点、对象、动作、负责人和证据链。"
         )
 
     def _brief_answer(self, question: str, intent: str, points: list[str], titles: str) -> str:
@@ -1055,11 +1042,7 @@ class XiaoyiAI:
             f"简报结论：{one_line}\n\n"
             f"问题类型：{intent}\n"
             f"知识来源：{titles}\n"
-            "建议：用于汇报时突出业务背景、关键指标、处置动作和人工确认边界。\n\n"
-            f"Briefing conclusion: {one_line}\n\n"
-            f"Issue type: {intent}\n"
-            f"Knowledge source: {titles}\n"
-            "Suggestion: For reporting, highlight business context, key metrics, handling actions, and the human-confirmation boundary."
+            "建议：用于汇报时突出业务背景、关键指标、处置动作和人工确认边界。"
         )
 
     def _format_bullets(self, points: list[str]) -> str:

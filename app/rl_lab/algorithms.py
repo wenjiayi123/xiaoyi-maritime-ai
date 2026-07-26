@@ -8,6 +8,11 @@ from typing import Any, Callable, Optional
 
 from app.rl_lab.datasets import EnergyRecord
 from app.rl_lab.environment import ACTIONS, EnergySchedulingEnvironment, EnvironmentParameters
+from app.rl_lab.port_environment import (
+    PORT_ACTION_CAPACITY_FACTORS,
+    PortOperationsEnvironment,
+    PortOperationsParameters,
+)
 
 
 ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
@@ -18,6 +23,8 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "type": "off_policy_td_control",
         "trainable": True,
         "description": "离策略时序差分控制，更新目标使用下一状态最大动作价值。",
+        "update_equation": "Q(s,a) <- Q(s,a) + alpha[r + gamma max_a' Q(s',a') - Q(s,a)]",
+        "compatible_environments": ["energy_storage", "port_operations"],
     },
     {
         "id": "sarsa",
@@ -26,6 +33,8 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "type": "on_policy_td_control",
         "trainable": True,
         "description": "同策略时序差分控制，训练目标跟随实际探索动作。",
+        "update_equation": "Q(s,a) <- Q(s,a) + alpha[r + gamma Q(s',a') - Q(s,a)]",
+        "compatible_environments": ["energy_storage", "port_operations"],
     },
     {
         "id": "expected_sarsa",
@@ -34,6 +43,8 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "type": "expected_on_policy_td_control",
         "trainable": True,
         "description": "用 epsilon-greedy 策略下的期望动作价值降低更新方差。",
+        "update_equation": "Q(s,a) <- Q(s,a) + alpha[r + gamma E_pi Q(s',a') - Q(s,a)]",
+        "compatible_environments": ["energy_storage", "port_operations"],
     },
     {
         "id": "double_q_learning",
@@ -42,6 +53,8 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "type": "double_estimator_off_policy_td",
         "trainable": True,
         "description": "双价值表解耦动作选择与评估，缓解最大化偏差。",
+        "update_equation": "随机更新Q_A或Q_B；动作选择与目标评估使用不同价值表",
+        "compatible_environments": ["energy_storage", "port_operations"],
     },
     {
         "id": "pid",
@@ -49,7 +62,9 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "family": "control_theory",
         "type": "proportional_integral_derivative_controller",
         "trainable": False,
-        "description": "控制理论基线，用峰值目标、SOC误差和积分/微分项生成储能动作。",
+        "description": "控制理论基线：能源环境跟踪峰值与SOC，港口环境跟踪队列与积压，并遵守相同动作约束。",
+        "update_equation": "u_t = Kp*e_t + Ki*sum(e_t) + Kd*(e_t-e_t-1)",
+        "compatible_environments": ["energy_storage", "port_operations"],
     },
 )
 
@@ -163,7 +178,7 @@ def _episode_epsilon(episode: int, episodes: int, start: float, end: float) -> f
 def train_tabular_policy(
     algorithm_id: str,
     records: list[EnergyRecord],
-    parameters: EnvironmentParameters,
+    parameters: EnvironmentParameters | PortOperationsParameters,
     *,
     episodes: int,
     horizon_steps: int,
@@ -174,18 +189,33 @@ def train_tabular_policy(
     epsilon_end: float,
     progress: Callable[[int, dict[str, Any]], None],
     cancelled: Callable[[], bool],
+    environment_type: str = "energy_storage",
 ) -> tuple[TrainedPolicy, list[dict[str, Any]]]:
     if algorithm_id not in RL_ALGORITHM_IDS:
         raise ValueError(f"unsupported trainable algorithm: {algorithm_id}")
     rng = random.Random(seed)
-    environment = EnergySchedulingEnvironment(
-        records,
-        parameters,
-        horizon_steps=horizon_steps,
-        seed=seed,
-        split_name="train",
-        render_mode=None,
-    )
+    if environment_type == "port_operations":
+        if not isinstance(parameters, PortOperationsParameters):
+            raise TypeError("port_operations requires PortOperationsParameters")
+        environment: EnergySchedulingEnvironment | PortOperationsEnvironment = PortOperationsEnvironment(
+            records,
+            parameters,
+            horizon_steps=horizon_steps,
+            seed=seed,
+            split_name="train",
+            render_mode=None,
+        )
+    else:
+        if not isinstance(parameters, EnvironmentParameters):
+            raise TypeError("energy_storage requires EnvironmentParameters")
+        environment = EnergySchedulingEnvironment(
+            records,
+            parameters,
+            horizon_steps=horizon_steps,
+            seed=seed,
+            split_name="train",
+            render_mode=None,
+        )
     q_table: dict[str, list[float]] = {}
     secondary: Optional[dict[str, list[float]]] = {} if algorithm_id == "double_q_learning" else None
     curve: list[dict[str, Any]] = []
@@ -292,24 +322,66 @@ def _pid_action(
     return action, integral, normalized_error
 
 
+def _port_pid_action(
+    environment: PortOperationsEnvironment,
+    controller: PIDPolicy,
+    integral: float,
+    previous_error: float,
+) -> tuple[int, float, float]:
+    record = environment.records[environment.index]
+    queue = max(0.0, record.anchored_vessels or 0.0) + max(0.0, record.slow_vessels or 0.0)
+    target = max(1.0, environment.parameters.maximum_backlog * 0.20)
+    normalized_error = (environment.backlog + queue * 0.25 - target) / target
+    risk = environment.weather_risk(record)
+    normalized_error -= risk * 1.6
+    integral = max(-4.0, min(4.0, integral + normalized_error))
+    derivative = normalized_error - previous_error
+    command = controller.kp * normalized_error + controller.ki * integral + controller.kd * derivative
+    target_factor = min(1.30, max(0.65, 1.0 + command * 0.18))
+    action = min(
+        range(len(PORT_ACTION_CAPACITY_FACTORS)),
+        key=lambda index: abs(PORT_ACTION_CAPACITY_FACTORS[index] - target_factor),
+    )
+    valid_mask = environment.valid_action_mask()
+    if not valid_mask[action]:
+        allowed = [index for index, valid in enumerate(valid_mask) if valid]
+        action = min(allowed, key=lambda index: abs(PORT_ACTION_CAPACITY_FACTORS[index] - target_factor))
+    return action, integral, normalized_error
+
+
 def evaluate_policy(
     algorithm_id: str,
     policy: TrainedPolicy | PIDPolicy,
     records: list[EnergyRecord],
-    parameters: EnvironmentParameters,
+    parameters: EnvironmentParameters | PortOperationsParameters,
     *,
     horizon_steps: int,
     seed: int,
     render: bool,
+    environment_type: str = "energy_storage",
 ) -> dict[str, Any]:
-    environment = EnergySchedulingEnvironment(
-        records,
-        parameters,
-        horizon_steps=horizon_steps,
-        seed=seed,
-        split_name="test" if render else "validation",
-        render_mode="trace" if render else None,
-    )
+    if environment_type == "port_operations":
+        if not isinstance(parameters, PortOperationsParameters):
+            raise TypeError("port_operations requires PortOperationsParameters")
+        environment: EnergySchedulingEnvironment | PortOperationsEnvironment = PortOperationsEnvironment(
+            records,
+            parameters,
+            horizon_steps=horizon_steps,
+            seed=seed,
+            split_name="test" if render else "validation",
+            render_mode="trace" if render else None,
+        )
+    else:
+        if not isinstance(parameters, EnvironmentParameters):
+            raise TypeError("energy_storage requires EnvironmentParameters")
+        environment = EnergySchedulingEnvironment(
+            records,
+            parameters,
+            horizon_steps=horizon_steps,
+            seed=seed,
+            split_name="test" if render else "validation",
+            render_mode="trace" if render else None,
+        )
     max_start = len(records) - horizon_steps - 1
     starts = [0, max(0, max_start // 2), max(0, max_start)]
     episodes: list[dict[str, Any]] = []
@@ -324,14 +396,27 @@ def evaluate_policy(
         while not done:
             if algorithm_id == "pid":
                 assert isinstance(policy, PIDPolicy)
-                action, integral, previous_error = _pid_action(
-                    environment.records[environment.index],
-                    environment.soc,
-                    parameters,
-                    policy,
-                    integral,
-                    previous_error,
-                )
+                if isinstance(environment, PortOperationsEnvironment):
+                    action, integral, previous_error = _port_pid_action(
+                        environment, policy, integral, previous_error
+                    )
+                else:
+                    assert isinstance(parameters, EnvironmentParameters)
+                    action, integral, previous_error = _pid_action(
+                        environment.records[environment.index],
+                        environment.soc,
+                        parameters,
+                        policy,
+                        integral,
+                        previous_error,
+                    )
+                    valid_mask = environment.valid_action_mask()
+                    if not valid_mask[action]:
+                        allowed = [index for index, valid in enumerate(valid_mask) if valid]
+                        action = min(
+                            allowed,
+                            key=lambda index: abs(ACTIONS[index] - ACTIONS[action]),
+                        )
             else:
                 assert isinstance(policy, TrainedPolicy)
                 action = policy.action(state, environment.valid_action_mask(), rng)
@@ -343,28 +428,50 @@ def evaluate_policy(
         if render:
             all_frames.extend({**frame, "evaluation_episode": evaluation_index + 1} for frame in environment.frames)
     numeric_keys = (
-        "total_reward",
-        "total_cost",
-        "baseline_cost",
-        "cost_saving_percent",
-        "peak_grid_kw",
-        "baseline_peak_kw",
-        "peak_reduction_percent",
-        "carbon_kg",
-        "constraint_violations",
-        "terminal_soc",
+        (
+            "total_reward",
+            "served_units",
+            "average_backlog_units",
+            "wait_proxy_hours",
+            "capacity_utilization_percent",
+            "constraint_violations",
+            "terminal_backlog_units",
+        )
+        if environment_type == "port_operations"
+        else (
+            "total_reward",
+            "total_cost",
+            "baseline_cost",
+            "cost_saving_percent",
+            "peak_grid_kw",
+            "baseline_peak_kw",
+            "peak_reduction_percent",
+            "carbon_kg",
+            "constraint_violations",
+            "terminal_soc",
+        )
     )
     aggregate = {
         key: round(sum(float(item[key]) for item in episodes) / len(episodes), 6)
         for key in numeric_keys
     }
-    aggregate["score"] = round(
-        aggregate["total_reward"]
-        - aggregate["constraint_violations"] * 20
-        + aggregate["cost_saving_percent"] * 0.4
-        + aggregate["peak_reduction_percent"] * 0.4,
-        6,
-    )
+    if environment_type == "port_operations":
+        aggregate["score"] = round(
+            aggregate["total_reward"] - aggregate["constraint_violations"] * 20,
+            6,
+        )
+        aggregate["metric_boundary"] = (
+            "AIS fields are measured observations; served, backlog, wait and score are calibrated "
+            "scenario outputs and are not terminal production KPIs."
+        )
+    else:
+        aggregate["score"] = round(
+            aggregate["total_reward"]
+            - aggregate["constraint_violations"] * 20
+            + aggregate["cost_saving_percent"] * 0.4
+            + aggregate["peak_reduction_percent"] * 0.4,
+            6,
+        )
     return {
         "algorithm_id": algorithm_id,
         "metrics": aggregate,
@@ -373,4 +480,5 @@ def evaluate_policy(
         "rendering_performed": render,
         "render_split": "test" if render else None,
         "validation_split": not render,
+        "environment_type": environment_type,
     }

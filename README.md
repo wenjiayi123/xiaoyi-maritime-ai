@@ -18,7 +18,7 @@
 <p align="center">
   <a href="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/ci.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e.svg" /></a>
-  <img alt="Version" src="https://img.shields.io/badge/release-v0.3.0-7057ff.svg" />
+  <img alt="Version" src="https://img.shields.io/badge/release-v0.4.0-7057ff.svg" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" />
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-evidence%20gateway-009688?logo=fastapi&logoColor=white" />
   <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-0.9236-0ea5e9.svg" />
@@ -31,6 +31,7 @@
   <a href="#系统架构--architecture">系统架构 / Architecture</a> ·
   <a href="#快速运行--quick-start">快速运行 / Quick start</a> ·
   <a href="reports/maritime_rag_benchmark_v1.md">基准报告 / Benchmark</a> ·
+  <a href="reports/rl_dataset_benchmark_v1.md">RL证据 / RL evidence</a> ·
   <a href="docs/OPEN_SOURCE_READINESS.md">开源审计 / Audit</a>
 </p>
 
@@ -46,6 +47,8 @@
 | 同快照对照 / Same-snapshot baseline | MRR <strong>0.8507 → 0.9236</strong>（+7.29个百分点 / pp） | Hybrid Sparse vs BM25-only |
 | 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 <strong>100%</strong><br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all <strong>100%</strong></sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
 | 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 <strong>11/11通过</strong><br><sub>Refusal, jurisdiction, date, and live-data boundaries: <strong>11/11 passed</strong></sub> | `python scripts/run_rag_benchmark.py verify --deep` |
+| RL 数据规模 / RL dataset scale | 原 <strong>19,735</strong> 行 + 大规模 <strong>409,887</strong> 行（<strong>20.77×</strong>）+ NOAA港区AIS <strong>710</strong> 个实测分钟桶 | `reports/rl_dataset_benchmark_v1.json` |
+| RL 固定对比 / Fixed RL comparison | <strong>3</strong> 数据集 × <strong>3</strong> 种子 × 4 RL + PID；训练不渲染，测试后回放，所有算法平均投影约束违例 <strong>0</strong> | `python scripts/run_rl_dataset_benchmark.py verify` |
 
 > [!NOTE]
 > 这些数字来自仓库固定发布验收集，不是第三方用户研究、生产SLA、法律意见或全球知识覆盖率。小懿默认将“公开/整理知识”“运营沙箱”“授权实时接口”和“生产动作权限”分开标识。
@@ -60,7 +63,7 @@
 | 法规治理 / Regulatory governance | 辖区、施行日期、官方来源要求、全文版权边界<br><sub>Jurisdiction, effective date, official-source requirement, copyright boundary</sub> | 回答不替代主管机关或法律意见<br><sub>Answers do not replace authorities or legal advice</sub> |
 | SOP决策 / SOP decision support | 告警解释、对象追问、步骤任务、报告生成<br><sub>Alert explanation, entity clarification, stepwise tasks, reports</sub> | 高风险任务强制 `requires_human_confirmation`<br><sub>High-risk tasks force `requires_human_confirmation`</sub> |
 | 运营沙箱 / Operations sandbox | 船舶、泊位、设备、能耗、预警与任务API<br><sub>Vessel, berth, equipment, energy, alert, and task APIs</sub> | 未验证网关显示“等待接入港口”，不冒充生产实绩<br><sub>Unverified gateways display “awaiting port connection,” never production performance</sub> |
-| RL实验室 / RL laboratory | Q-learning、SARSA、Expected SARSA、Double Q + PID | 公开UCI时序基准，不宣称港口现场收益<br><sub>Public UCI time-series benchmark; no site-benefit claim</sub> |
+| RL实验室 / RL laboratory | Q-learning、SARSA、Expected SARSA、Double Q + PID；能源与AIS港口作业双环境 | UCI用于算法规模，AIS用于交通语义；服务量/等待为校准代理，不宣称现场收益 |
 | 平台工程 / Platform engineering | FastAPI、SSE、JWT/RBAC、SQLite、幂等、限流、审计<br><sub>FastAPI, SSE, JWT/RBAC, SQLite, idempotency, rate limits, audit</sub> | 外部模型调用受隐私、证据和角色门禁约束<br><sub>External model calls are privacy-, evidence-, and role-gated</sub> |
 | 可观测性 / Observability | readiness、Prometheus、JSON日志、请求追踪、熔断<br><sub>Readiness, Prometheus, JSON logs, request tracing, circuit breaker</sub> | 未配置依赖失败关闭并返回可诊断状态<br><sub>Unconfigured dependencies fail closed with diagnosable status</sub> |
 
@@ -95,6 +98,31 @@ flowchart LR
   <img src="web/xiaoyi-port-diagram.svg" alt="小懿港航知识、运营和安全治理架构" width="96%" />
 </p>
 
+## 产品证据截图 / Product evidence
+
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/rl-evidence-center.png" alt="训练中心、算法矩阵、小懿训练顾问和全系统助手同屏联动" />
+      <br><sub><strong>训练证据同屏：</strong>三套数据血缘、五算法矩阵、观测/动作/目标、小懿训练顾问与系统按钮联动。</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/rl-training-configuration.png" alt="真实RL五算法与数据集训练配置" />
+      <br><sub><strong>真实训练配置：</strong>三套公开数据、4 RL + PID、回合/时域/种子与训练无渲染边界。</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/rl-port-environment-contract.png" alt="AIS驱动港口环境观测动作目标函数与约束" />
+      <br><sub><strong>环境契约：</strong>11项观测、5项动作、目标函数、安全约束和生产写入边界可直接核对。</sub>
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/screenshots/xiaoyi-grounded-conversation.png" alt="小懿港航运营证据对话与现场边界" />
+      <br><sub><strong>小懿对话：</strong>自然语言研判、证据状态、沙箱/生产边界和人工确认保持同步。</sub>
+    </td>
+  </tr>
+</table>
+
 ## 项目结构 / Repository map
 
 ```text
@@ -114,11 +142,15 @@ flowchart LR
     kb/                  # 港航知识库 / maritime knowledge base
     evaluation/          # 固定检索与证据评测 / pinned retrieval and policy set
     public/              # 公开RL数据与血缘 / public RL data and provenance
+    port_profiles/       # 可替换港口参数与边界 / swappable port profiles
     rl_datasets.json     # 数据集目录 / dataset registry
     xiaoyi_index.json    # 检索索引 / retrieval index
   scripts/
     build_index.py       # 构建知识索引 / build knowledge index
     fetch_public_rl_dataset.py # 下载并校验公开RL数据 / fetch and verify
+    fetch_large_public_rl_dataset.py # 409,887行大规模基准 / large benchmark
+    fetch_noaa_port_ais_dataset.py # NOAA港区AIS场景 / public port AIS
+    run_rl_dataset_benchmark.py # 三数据集多种子RL证据 / multi-seed RL evidence
     run_rag_benchmark.py # 固定RAG基准与哈希报告 / benchmark and hash report
   web/
     index.html           # Web交互页面 / Web interface
@@ -235,18 +267,24 @@ RL板块不再回放其他项目的历史训练曲线。当前实现会在后台
 Q-learning、SARSA、Expected SARSA 和 Double Q-learning，并用 PID 作为控制
 理论基线。训练百分比来自已完成 episode 数，模型按算法保存并计算 SHA-256。
 
-默认数据为 UCI Appliances Energy Prediction 的 19,735 条真实十分钟级能源与
-气象观测（CC BY 4.0，DOI `10.24432/C5VC8G`）。它是公开算法基准，不是港口
-实绩。数据按时间切成训练/验证/保留测试段；训练强制不渲染，训练全部结束后
-测试接口才生成轨迹。
+仓库同时保留三套数据：UCI Appliances 的 19,735 条原基准、UCI Household
+Power 聚合得到的 409,887 条五分钟级大规模基准，以及 NOAA
+Los Angeles–Long Beach 港区 710 个包含 AIS 消息的一分钟实测交通桶。前两套
+证明算法规模与回归稳定性，不是港口实绩；AIS中的船舶数、航速、航行状态和
+船型为公开观测，服务量、积压、等待和得分为校准沙箱代理。
 
 The RL panel no longer replays historical curves from another project. It runs Q-learning, SARSA, Expected SARSA, and Double Q-learning in a real background worker, with PID as the control-theory baseline. Progress is derived from completed episodes; each algorithm artifact is saved and SHA-256 hashed.
 
-The default dataset contains 19,735 genuine ten-minute energy and weather observations from the UCI Appliances Energy Prediction dataset (CC BY 4.0, DOI `10.24432/C5VC8G`). It is a public algorithm benchmark, not port performance. Data is split chronologically into train, validation, and sealed test segments. Training is forced headless, and only the post-training evaluation endpoint creates trajectories.
+The repository retains the original 19,735-row UCI benchmark, a 409,887-row five-minute UCI benchmark, and 710 observed minute buckets from public NOAA AIS messages in the Los Angeles–Long Beach port area. UCI data demonstrates algorithm scale, not port performance. AIS vessel count, speed, navigation status, and vessel class are measured; service, backlog, waiting, and score are calibrated sandbox proxies. Every dataset is split chronologically into train, validation, and sealed test segments. Training is headless and only post-training evaluation creates trajectories.
 
 ```bash
 # 仓库已带数据；可从UCI重建 / bundled data; optionally rebuild from pinned UCI source
 .venv/bin/python scripts/fetch_public_rl_dataset.py
+.venv/bin/python scripts/fetch_large_public_rl_dataset.py
+.venv/bin/python scripts/fetch_noaa_port_ais_dataset.py
+
+# 复验固定三数据集×三种子报告 / verify the pinned multi-dataset report
+.venv/bin/python scripts/run_rl_dataset_benchmark.py verify
 
 # 运行全部测试 / run all tests
 .venv/bin/python -m pytest -q
@@ -258,17 +296,22 @@ The default dataset contains 19,735 genuine ten-minute energy and weather observ
 GET  /api/rl-lab/health
 GET  /api/rl-lab/algorithms
 GET  /api/rl-lab/datasets
+GET  /api/rl-lab/contracts
+GET  /api/rl-lab/evidence
+POST /api/rl-lab/advisor
 POST /api/rl-lab/runs
 GET  /api/rl-lab/runs/{run_id}
 POST /api/rl-lab/runs/{run_id}/cancel
 POST /api/rl-lab/runs/{run_id}/evaluate
 ```
 
-接入港口时提供至少包含 `timestamp,load_kw` 的CSV并设置
-`XIAOYI_RL_DATASET_PATH`；可选接入电价、碳强度和气象列，不需要修改训练器。
-完整说明见[可复现RL能源调度实验室](docs/RL_AGV_ENERGY_MISSION_GUIDE.md)。
+能源环境最少提供 `timestamp,load_kw`；港口作业环境最少提供
+`timestamp,vessel_count,anchored_vessels,avg_sog_knots`，并设置
+`XIAOYI_RL_ENVIRONMENT_TYPE=port_operations` 与港口 profile。字段名不同只需
+配置 JSON 映射，不改训练器。完整说明见[港口RL可替换数据契约](docs/PORT_RL_DATA_CONTRACT.md)
+和[落地执行清单](docs/PORT_RL_LANDING_PLAN.md)。
 
-For a port dataset, provide a CSV containing at least `timestamp,load_kw` and set `XIAOYI_RL_DATASET_PATH`. Price, carbon-intensity, and weather columns are optional, and the trainer does not need modification. See the [reproducible RL energy-dispatch laboratory](docs/RL_AGV_ENERGY_MISSION_GUIDE.md).
+The energy environment requires `timestamp,load_kw`. The port-operations environment requires `timestamp,vessel_count,anchored_vessels,avg_sog_knots`, `XIAOYI_RL_ENVIRONMENT_TYPE=port_operations`, and a port profile. Site columns are mapped through JSON without changing the trainer. See the [swappable port RL contract](docs/PORT_RL_DATA_CONTRACT.md) and [landing checklist](docs/PORT_RL_LANDING_PLAN.md).
 
 - 港口由哪些核心业务模块组成？ / What are the core operating domains of a port?
 - 集装箱码头从船舶靠泊到离港的流程是什么？ / What is the container-terminal workflow from berthing to departure?
