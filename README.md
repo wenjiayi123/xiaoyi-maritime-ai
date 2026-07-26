@@ -55,6 +55,11 @@
 >
 > These figures come from the repository’s pinned release-acceptance set—not a third-party user study, production SLA, legal opinion, or global knowledge-coverage estimate. Xiaoyi explicitly separates curated public knowledge, the operations sandbox, authorized live interfaces, and production-action authority.
 
+<p align="center">
+  <img src="docs/screenshots/rl-evidence-center.png" alt="训练中心、算法矩阵、小懿训练顾问和全系统助手同屏联动" width="96%" />
+  <br><sub><strong>固定证据总览：</strong>同屏核对三套数据血缘、五算法矩阵、观测/动作/目标、小懿训练顾问和后端按钮联动。</sub>
+</p>
+
 ## 能力全景 / Capability map
 
 | 能力平面 / Plane | 已实现 / Implemented | 工程边界 / Guardrail |
@@ -97,31 +102,6 @@ flowchart LR
 <p align="center">
   <img src="web/xiaoyi-port-diagram.svg" alt="小懿港航知识、运营和安全治理架构" width="96%" />
 </p>
-
-## 产品证据截图 / Product evidence
-
-<table>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="docs/screenshots/rl-evidence-center.png" alt="训练中心、算法矩阵、小懿训练顾问和全系统助手同屏联动" />
-      <br><sub><strong>训练证据同屏：</strong>三套数据血缘、五算法矩阵、观测/动作/目标、小懿训练顾问与系统按钮联动。</sub>
-    </td>
-    <td width="50%" valign="top">
-      <img src="docs/screenshots/rl-training-configuration.png" alt="真实RL五算法与数据集训练配置" />
-      <br><sub><strong>真实训练配置：</strong>三套公开数据、4 RL + PID、回合/时域/种子与训练无渲染边界。</sub>
-    </td>
-  </tr>
-  <tr>
-    <td width="50%" valign="top">
-      <img src="docs/screenshots/rl-port-environment-contract.png" alt="AIS驱动港口环境观测动作目标函数与约束" />
-      <br><sub><strong>环境契约：</strong>11项观测、5项动作、目标函数、安全约束和生产写入边界可直接核对。</sub>
-    </td>
-    <td width="50%" valign="top">
-      <img src="docs/screenshots/xiaoyi-grounded-conversation.png" alt="小懿港航运营证据对话与现场边界" />
-      <br><sub><strong>小懿对话：</strong>自然语言研判、证据状态、沙箱/生产边界和人工确认保持同步。</sub>
-    </td>
-  </tr>
-</table>
 
 ## 项目结构 / Repository map
 
@@ -206,6 +186,11 @@ Xiaoyi is a compact AI assistant for maritime and port operations. It combines a
 
 The operations dashboard consumes a continuously generated backend sandbox event stream. It uses production-shaped entities, timestamps, quality codes, latency, and source adapters while remaining explicitly labelled non-production. A live integration retains the `port-ops.v1` contract and a read-only gateway. High-risk tasks still return `requires_human_confirmation: true`; real data never grants write authority automatically.
 
+<p align="center">
+  <img src="docs/screenshots/xiaoyi-grounded-conversation.png" alt="小懿港航运营证据对话、现场数据边界和人工确认" width="96%" />
+  <br><sub><strong>证据约束对话：</strong>现场数据未接入时明确拒绝生成运营实绩，同时保留自然语言研判、证据状态和人工确认入口。</sub>
+</p>
+
 ## 港口运营数据 API / Port-operations API
 
 ```text
@@ -277,6 +262,11 @@ The RL panel no longer replays historical curves from another project. It runs Q
 
 The repository retains the original 19,735-row UCI benchmark, a 409,887-row five-minute UCI benchmark, and 710 observed minute buckets from public NOAA AIS messages in the Los Angeles–Long Beach port area. UCI data demonstrates algorithm scale, not port performance. AIS vessel count, speed, navigation status, and vessel class are measured; service, backlog, waiting, and score are calibrated sandbox proxies. Every dataset is split chronologically into train, validation, and sealed test segments. Training is headless and only post-training evaluation creates trajectories.
 
+<p align="center">
+  <img src="docs/screenshots/rl-training-configuration.png" alt="真实RL五算法、三套公开数据与训练隔离配置" width="96%" />
+  <br><sub><strong>真实训练配置：</strong>三套公开数据、4 RL + PID、回合/时域/随机种子及训练无渲染、测试后回放边界均由后端接收。</sub>
+</p>
+
 ```bash
 # 仓库已带数据；可从UCI重建 / bundled data; optionally rebuild from pinned UCI source
 .venv/bin/python scripts/fetch_public_rl_dataset.py
@@ -312,6 +302,11 @@ POST /api/rl-lab/runs/{run_id}/evaluate
 和[落地执行清单](docs/PORT_RL_LANDING_PLAN.md)。
 
 The energy environment requires `timestamp,load_kw`. The port-operations environment requires `timestamp,vessel_count,anchored_vessels,avg_sog_knots`, `XIAOYI_RL_ENVIRONMENT_TYPE=port_operations`, and a port profile. Site columns are mapped through JSON without changing the trainer. See the [swappable port RL contract](docs/PORT_RL_DATA_CONTRACT.md) and [landing checklist](docs/PORT_RL_LANDING_PLAN.md).
+
+<p align="center">
+  <img src="docs/screenshots/rl-port-environment-contract.png" alt="AIS驱动港口环境观测动作目标函数安全约束与生产写入边界" width="96%" />
+  <br><sub><strong>港口环境契约：</strong>11项观测、5项动作、目标函数、硬约束、动作屏蔽和生产写入边界可直接与站点字段逐项核对。</sub>
+</p>
 
 - 港口由哪些核心业务模块组成？ / What are the core operating domains of a port?
 - 集装箱码头从船舶靠泊到离港的流程是什么？ / What is the container-terminal workflow from berthing to departure?
@@ -359,6 +354,11 @@ See the [maritime knowledge catalogue](docs/PORT_MARITIME_KNOWLEDGE_CATALOG.md) 
 小懿只承担港航知识、RAG、上下文识别、能力路由、结果解释和审计，不复制能碳驾驶舱、数字孪生平台、马六甲沙盘或航行模拟器的业务功能。跨系统能力默认 `offline`，不访问其他系统；dry-run 只检查契约，显式配置为 `live` 后也只允许登记的 GET 只读能力。
 
 Xiaoyi owns maritime knowledge, RAG, context resolution, capability routing, result explanation, and audit. It does not duplicate the CarbonOps cockpit, digital-twin platform, Malacca sandbox, or sailing simulator. Cross-system capabilities default to `offline`; dry-run verifies only contracts, and even explicit `live` mode permits registered read-only GET capabilities only.
+
+<p align="center">
+  <img src="docs/screenshots/xiaoyi-intelligence-hub-evidence.png" alt="小懿智能联动中心七项能力、跨系统隔离和RAG评测闭环" width="96%" />
+  <br><sub><strong>联动与评测闭环：</strong>7/7代表小懿平台能力已登记；标题同步给出4个系统与11项只读能力边界，并展示知识快照、检索对照、证据策略和持久审计。</sub>
+</p>
 
 ```text
 GET  /api/hub/systems                            四系统目录 / four-system catalogue
