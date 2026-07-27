@@ -8,6 +8,7 @@ from pathlib import Path
 from threading import RLock
 from typing import Literal, Optional
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 
 from fastapi import APIRouter, HTTPException, Query
@@ -35,7 +36,7 @@ _TARGETS: dict[LinkedTarget, dict[str, object]] = {
         "url": os.getenv("XIAOYI_SIMULATOR_URL", "http://127.0.0.1:8000/").strip(),
         "health_url": os.getenv(
             "XIAOYI_PORT_DT_HEALTH_URL",
-            "http://127.0.0.1:8000/api/twin/fidelity",
+            "http://127.0.0.1:8000/health/live",
         ).strip(),
         "root": Path(
             os.getenv("XIAOYI_SIMULATOR_ROOT", str(_PROJECT_ROOT / ".integrations/port-dt-multi"))
@@ -91,17 +92,7 @@ class LinkedSystemsRuntime(BaseModel):
     safety_boundary: str = "只启动登记的本机仿真服务；不开启生产写入，不下发真实设备或船舶指令。"
 
 
-def _probe_target(target: LinkedTarget) -> tuple[LinkedState, str]:
-    spec = _TARGETS[target]
-    if target == "port-dt-multi":
-        simulator = simulator_launcher.simulator_status()
-        if simulator.state == "port_conflict":
-            return "port_conflict", simulator.message
-        if simulator.state != "online":
-            return "offline", simulator.message
-        health_url = f"{simulator.url.rstrip('/')}/api/twin/fidelity"
-    else:
-        health_url = str(spec["health_url"])
+def _probe_json_health(health_url: str) -> tuple[LinkedState, str]:
     request = Request(health_url, method="GET", headers={"Accept": "application/json"})
     try:
         with urlopen(request, timeout=1.2) as response:
@@ -122,6 +113,53 @@ def _probe_target(target: LinkedTarget) -> tuple[LinkedState, str]:
         return "port_conflict", "目标端口已有其他服务监听，但未返回登记的业务健康响应。"
     except (URLError, TimeoutError, OSError):
         return "offline", "服务尚未启动。"
+
+
+def _probe_ui(ui_url: str) -> tuple[LinkedState, str]:
+    request = Request(ui_url, method="GET", headers={"Accept": "text/html"})
+    try:
+        with urlopen(request, timeout=1.2) as response:
+            body = response.read(64_000).decode("utf-8", "replace").lower()
+            if getattr(response, "status", 200) != 200:
+                return "offline", "前端页面尚未就绪。"
+            content_type = str(response.headers.get("Content-Type", "")).lower()
+            if "text/html" not in content_type and "<html" not in body and "<!doctype" not in body:
+                return "port_conflict", "前端端口返回了非 HTML 内容，已阻止复用。"
+            return "online", "前端页面已就绪。"
+    except HTTPError as exc:
+        if exc.code in {401, 403, 404, 405}:
+            return "port_conflict", f"前端端口已被其他服务占用（HTTP {exc.code}）。"
+        return "offline", f"前端页面返回 HTTP {exc.code}，尚未就绪。"
+    except RemoteDisconnected:
+        return "port_conflict", "前端端口已有其他服务监听，但未返回登记的页面。"
+    except (URLError, TimeoutError, OSError):
+        return "offline", "前端页面尚未启动。"
+
+
+def _probe_target(target: LinkedTarget) -> tuple[LinkedState, str]:
+    spec = _TARGETS[target]
+    ui_url = str(spec["url"])
+    if target == "port-dt-multi":
+        simulator = simulator_launcher.simulator_status()
+        if simulator.state == "port_conflict":
+            return "port_conflict", simulator.message
+        if simulator.state != "online":
+            return "offline", simulator.message
+        configured_path = urlparse(str(spec["health_url"])).path or "/health/live"
+        health_url = f"{simulator.url.rstrip('/')}{configured_path}"
+        ui_url = f"{simulator.url.rstrip('/')}/"
+    else:
+        health_url = str(spec["health_url"])
+
+    health_state, health_message = _probe_json_health(health_url)
+    if health_state != "online":
+        return health_state, health_message
+    ui_state, ui_message = _probe_ui(ui_url)
+    if ui_state == "offline":
+        return "offline", f"业务后端已在线，但{ui_message}"
+    if ui_state != "online":
+        return ui_state, ui_message
+    return "online", "业务健康接口与前端页面均已就绪。"
 
 
 def _managed_process(target: LinkedTarget) -> tuple[bool, Optional[int], Optional[int]]:
@@ -161,9 +199,19 @@ def _start_registered_process(target: LinkedTarget) -> None:
     spec = _TARGETS[target]
     root = Path(spec["root"])
     command = tuple(str(part) for part in spec["command"])
+    energy_frontend_only = False
+    if target == "energy-cockpit":
+        backend_state, _ = _probe_json_health(str(spec["health_url"]))
+        energy_frontend_only = backend_state == "online"
+        if energy_frontend_only:
+            command = ("/bin/bash", str(root / "scripts/run_frontend.sh"))
     if not root.is_dir() or not command or not Path(command[-1]).is_file():
         raise HTTPException(status_code=503, detail=f"未找到登记的{spec['name']}项目或启动脚本。")
-    if target == "energy-cockpit" and not (root / "backend/.venv/bin/python").is_file():
+    if (
+        target == "energy-cockpit"
+        and not energy_frontend_only
+        and not (root / "backend/.venv/bin/python").is_file()
+    ):
         raise HTTPException(status_code=503, detail="能碳驾驶舱后端 Python 环境不可用。")
     if target == "malacca-sandbox" and not (root / "node_modules/.bin/vite").is_file():
         raise HTTPException(status_code=503, detail="马六甲推演依赖不完整，请先恢复 node_modules。")
@@ -172,8 +220,38 @@ def _start_registered_process(target: LinkedTarget) -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     env = os.environ.copy()
     env["OPEN_BROWSER"] = "0"
-    if target == "malacca-sandbox":
-        env["PORT"] = "5174"
+    if target == "energy-cockpit" and energy_frontend_only:
+        env["FRONTEND_HOST"] = "127.0.0.1"
+        env["FRONTEND_PORT"] = str(urlparse(str(spec["url"])).port or 5173)
+        health_parts = urlparse(str(spec["health_url"]))
+        env["VITE_API_TARGET"] = f"{health_parts.scheme}://{health_parts.netloc}"
+    elif target == "malacca-sandbox":
+        env["PORT"] = str(urlparse(str(spec["url"])).port or 5174)
+        node_bin = Path(
+            os.getenv(
+                "XIAOYI_NODE_BIN_DIR",
+                str(
+                    Path.home()
+                    / ".cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin"
+                ),
+            )
+        ).expanduser()
+        pnpm_bin = Path(
+            os.getenv(
+                "XIAOYI_PNPM_BIN_DIR",
+                str(
+                    Path.home()
+                    / ".cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback"
+                ),
+            )
+        ).expanduser()
+        path_parts = [
+            str(path)
+            for path in (node_bin, pnpm_bin)
+            if path.is_dir()
+        ]
+        if path_parts:
+            env["PATH"] = os.pathsep.join([*path_parts, env.get("PATH", "")])
     try:
         with log_path.open("ab", buffering=0) as log_file:
             _processes[target] = subprocess.Popen(
@@ -197,6 +275,11 @@ def _launch_target(target: LinkedTarget) -> LinkedSystemRuntime:
         current.message = "服务已在线，小懿将直接复用并继续流程。"
         return current
     if current.state == "starting":
+        if target == "energy-cockpit":
+            backend_state, _ = _probe_json_health(str(_TARGETS[target]["health_url"]))
+            if backend_state != "online":
+                _start_registered_process(target)
+                return _runtime(target)
         current.already_running = True
         return current
     if current.state == "port_conflict":

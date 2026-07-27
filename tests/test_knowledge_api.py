@@ -10,13 +10,13 @@ def test_knowledge_status_reports_real_inventory() -> None:
     response = client.get("/api/knowledge/status")
     assert response.status_code == 200
     payload = response.json()
-    assert payload["document_count"] == 112
-    assert payload["chunk_count"] == 708
-    assert payload["official_verified_documents"] == 60
+    assert payload["document_count"] == 129
+    assert payload["chunk_count"] == 882
+    assert payload["official_verified_documents"] == 68
     assert payload["official_full_text_documents"] == 0
     assert payload["official_summary_documents"] > 0
     assert payload["official_locator_documents"] > 0
-    assert payload["internal_curated_documents"] == 52
+    assert payload["internal_curated_documents"] == 61
     assert payload["completeness_claim"] == "partial_auditable_coverage"
     assert len(payload["index_sha256"]) == 64
     assert payload["strict_evidence_default"] is True
@@ -44,8 +44,8 @@ def test_source_catalog_separates_official_and_internal_material() -> None:
     official = client.get("/api/knowledge/sources", params={"official_only": True})
     assert all_sources.status_code == 200
     assert official.status_code == 200
-    assert len(all_sources.json()) == 112
-    assert len(official.json()) == 60
+    assert len(all_sources.json()) == 129
+    assert len(official.json()) == 68
     assert all(item["official"] for item in official.json())
     assert all(item["content_scope"] for item in official.json())
     assert all(item["jurisdictions"] for item in official.json())

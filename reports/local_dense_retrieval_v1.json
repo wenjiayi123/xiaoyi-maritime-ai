@@ -1,0 +1,68 @@
+{
+  "schema_version": "1.0",
+  "probe_id": "dense-retrieval-28fad2e51acc",
+  "status": "completed",
+  "started_at": "2026-07-27T00:18:57.198469+00:00",
+  "elapsed_seconds": 0.743,
+  "query": "船期 ETA 变了怎么更新？",
+  "index_status": {
+    "configured": true,
+    "enabled": true,
+    "model": "xiaoyi-embedding-0.6b",
+    "index_path": "data/xiaoyi_vector_index.json",
+    "record_count": 882,
+    "dimensions": 1024,
+    "last_error": null,
+    "notice": "真实稠密向量召回已启用；Sparse/BM25仍作为可审计对照与回退。"
+  },
+  "top_results": [
+    {
+      "rank": 1,
+      "score": 0.879367,
+      "chunk_id": "55_vessel_schedule_port_call_qa:7",
+      "title": "船期 ETA 变了怎么更新",
+      "content_hash": "0f75817da41e65b4788bc2378f8054f46f33f5fc365609a7b8e6fd5f8698a530"
+    },
+    {
+      "rank": 2,
+      "score": 0.650508,
+      "chunk_id": "120_vessel_berth_productivity_daily_qa:16",
+      "title": "多方时间不一致怎么办",
+      "content_hash": "ae4fd085353a4249c4ea19851a7366d61feaa1241b07bfcd0afeb12c057642a0"
+    },
+    {
+      "rank": 3,
+      "score": 0.646385,
+      "chunk_id": "55_vessel_schedule_port_call_qa:25",
+      "title": "这条船的 ETA 是几点",
+      "content_hash": "be04a2eea7275d6b9243e8c78c46f8d3731c01f592771fc93af1df0afae1d14d"
+    },
+    {
+      "rank": 4,
+      "score": 0.616633,
+      "chunk_id": "12_vessel_port_call:2",
+      "title": "ETA、ETB、ETD",
+      "content_hash": "050311a44d016a1034f254ea99ea10f8b303d403b3b5aad1f10b9e432e65b750"
+    },
+    {
+      "rank": 5,
+      "score": 0.605249,
+      "chunk_id": "55_vessel_schedule_port_call_qa:2",
+      "title": "ETA 是什么",
+      "content_hash": "450802b74b3cf8bb23b6a73eeb3430f46914e7051c9cd54d82da3e9f4ac51c5a"
+    }
+  ],
+  "evidence": {
+    "vector_index": {
+      "path": "data/xiaoyi_vector_index.json",
+      "bytes": 19260779,
+      "sha256": "eeb832e1f64335c391ecee32cf7bb7f2756153a61464dbf76d27ffac83e0ccd0"
+    },
+    "embedding_model_receipt": {
+      "path": ".runtime/models/xiaoyi-embedding-0.6b-q8-0.receipt.json",
+      "bytes": 350,
+      "sha256": "b08addca6b0dbfca1ece76d1ce89f76fc67560fbc27711d508d3e41c17680b71"
+    }
+  },
+  "claim_boundary": "Cosine similarity is a retrieval signal only. This single query proves that the local 1024-dimensional index and query encoder work together; it is not a retrieval-quality, entailment, or answer-accuracy benchmark."
+}

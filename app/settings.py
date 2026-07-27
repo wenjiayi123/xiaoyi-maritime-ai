@@ -59,11 +59,27 @@ class Settings:
     model_timeout_seconds: float
     model_max_retries: int
     model_external_data_allowed: bool
+    model_temperature: float
+    model_top_p: float
+    model_top_k: int
+    model_presence_penalty: float
+    model_max_tokens: int
+    model_adapter_id: str
+    minimum_answer_review_seconds: float
+    embedding_base_url: str
+    embedding_model: str
+    embedding_timeout_seconds: float
     log_level: str
 
     @property
     def production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def model_endpoint_is_local(self) -> bool:
+        return self.model_base_url.startswith(
+            ("http://127.0.0.1", "http://localhost", "http://[::1]")
+        )
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -97,6 +113,33 @@ class Settings:
             model_timeout_seconds=_number("XIAOYI_MODEL_TIMEOUT_SECONDS", 30.0, minimum=1.0),
             model_max_retries=_integer("XIAOYI_MODEL_MAX_RETRIES", 2, minimum=0),
             model_external_data_allowed=_boolean("XIAOYI_MODEL_EXTERNAL_DATA_ALLOWED", False),
+            model_temperature=_number("XIAOYI_MODEL_TEMPERATURE", 0.25),
+            model_top_p=_number("XIAOYI_MODEL_TOP_P", 0.8),
+            model_top_k=_integer("XIAOYI_MODEL_TOP_K", 20, minimum=1),
+            model_presence_penalty=_number(
+                "XIAOYI_MODEL_PRESENCE_PENALTY",
+                0.3,
+            ),
+            model_max_tokens=_integer("XIAOYI_MODEL_MAX_TOKENS", 1400, minimum=64),
+            model_adapter_id=os.getenv("XIAOYI_MODEL_ADAPTER_ID", "").strip(),
+            minimum_answer_review_seconds=_number(
+                "XIAOYI_MINIMUM_ANSWER_REVIEW_SECONDS",
+                _number("XIAOYI_GROUNDED_REVIEW_SECONDS", 0.0),
+                minimum=0.0,
+            ),
+            embedding_base_url=os.getenv(
+                "XIAOYI_EMBEDDING_BASE_URL",
+                "",
+            ).rstrip("/"),
+            embedding_model=os.getenv(
+                "XIAOYI_EMBEDDING_MODEL",
+                "xiaoyi-embedding-0.6b",
+            ),
+            embedding_timeout_seconds=_number(
+                "XIAOYI_EMBEDDING_TIMEOUT_SECONDS",
+                60.0,
+                minimum=1.0,
+            ),
             log_level=os.getenv("XIAOYI_LOG_LEVEL", "INFO").upper(),
         )
 
@@ -115,9 +158,13 @@ class Settings:
                 blockers.append("openai_compatible 模型缺少 XIAOYI_MODEL_BASE_URL")
             if not self.model_name:
                 blockers.append("openai_compatible 模型缺少 XIAOYI_MODEL_NAME")
-            if not self.model_api_key and not self.model_base_url.startswith(("http://127.0.0.1", "http://localhost")):
+            if not self.model_api_key and not self.model_endpoint_is_local:
                 blockers.append("远程模型接口缺少 XIAOYI_MODEL_API_KEY")
-            if self.production and not self.model_external_data_allowed:
+            if (
+                self.production
+                and not self.model_endpoint_is_local
+                and not self.model_external_data_allowed
+            ):
                 blockers.append("远程模型发送证据前必须显式设置 XIAOYI_MODEL_EXTERNAL_DATA_ALLOWED=true")
         return blockers
 

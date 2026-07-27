@@ -59,6 +59,108 @@ class Evidence(BaseModel):
     citation_role: Literal["supporting", "locator_only"] = "supporting"
 
 
+class QueryAnalysis(BaseModel):
+    original_question: str
+    standalone_question: str
+    resolution: Literal[
+        "independent",
+        "history_resolved",
+        "clarification_required",
+    ] = "independent"
+    inherited_from_answer_id: Optional[str] = None
+    subquestions: list[str] = Field(default_factory=list)
+    dimensions: list[str] = Field(default_factory=list)
+    complexity: int = Field(1, ge=1, le=5)
+    requires_clarification: bool = False
+    clarification_reason: Optional[str] = None
+
+
+class SubquestionSupport(BaseModel):
+    question: str
+    covered: bool = False
+    evidence_ids: list[str] = Field(default_factory=list)
+    refusal_reason: Optional[str] = None
+
+
+class ClaimSupport(BaseModel):
+    claim: str
+    citation_indices: list[int] = Field(default_factory=list)
+    evidence_ids: list[str] = Field(default_factory=list)
+    citation_valid: bool = False
+    alignment_score: float = Field(0.0, ge=0.0, le=1.0)
+    alignment_basis: Literal["exact", "lexical", "none"] = "none"
+    numeric_tokens: list[str] = Field(default_factory=list)
+    unsupported_numeric_tokens: list[str] = Field(default_factory=list)
+    numeric_integrity: bool = True
+    supported: bool = False
+
+
+class AnswerVerification(BaseModel):
+    status: Literal["passed", "needs_review", "not_applicable"] = "not_applicable"
+    claim_count: int = 0
+    supported_claim_count: int = 0
+    citation_coverage: float = Field(0.0, ge=0.0, le=1.0)
+    citation_validity: float = Field(0.0, ge=0.0, le=1.0)
+    evidence_alignment: float = Field(0.0, ge=0.0, le=1.0)
+    numeric_integrity: float = Field(0.0, ge=0.0, le=1.0)
+    claims: list[ClaimSupport] = Field(default_factory=list)
+    issues: list[str] = Field(default_factory=list)
+    scope_notice: str = (
+        "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值"
+        "是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+    )
+
+
+class EvidenceConflict(BaseModel):
+    left_evidence_id: str
+    right_evidence_id: str
+    conflict_type: Literal["status_polarity", "version_divergence"]
+    detail: str
+
+
+class EvidenceHealth(BaseModel):
+    status: Literal["healthy", "degraded", "conflict", "not_applicable"] = (
+        "not_applicable"
+    )
+    freshness: Literal[
+        "current",
+        "mixed",
+        "review_due",
+        "unknown",
+        "not_applicable",
+    ] = "not_applicable"
+    supporting_evidence_count: int = 0
+    official_evidence_count: int = 0
+    review_due_evidence_ids: list[str] = Field(default_factory=list)
+    freshness_unknown_evidence_ids: list[str] = Field(default_factory=list)
+    conflicts: list[EvidenceConflict] = Field(default_factory=list)
+    issues: list[str] = Field(default_factory=list)
+    scope_notice: str = (
+        "冲突检测只识别同主题证据中的强状态极性和版本元数据分歧；"
+        "未检出冲突不等于事实或法律结论已被证明。"
+    )
+
+
+class DecisionReadiness(BaseModel):
+    status: Literal[
+        "ready",
+        "ready_with_review",
+        "partial",
+        "needs_clarification",
+        "needs_live_data",
+        "needs_full_text",
+        "insufficient_evidence",
+        "evidence_conflict",
+        "sandbox_only",
+        "not_applicable",
+    ] = "not_applicable"
+    risk_level: Literal["low", "medium", "high"] = "low"
+    blockers: list[str] = Field(default_factory=list)
+    next_action: str = ""
+    requires_human_confirmation: bool = False
+    rationale: str = ""
+
+
 class ChatResponse(BaseModel):
     app: str
     mode: Mode
@@ -84,3 +186,12 @@ class ChatResponse(BaseModel):
     generation_model: Optional[str] = None
     generation_fallback: bool = False
     generation_notice: Optional[str] = None
+    query_analysis: Optional[QueryAnalysis] = None
+    subquestion_support: list[SubquestionSupport] = Field(default_factory=list)
+    evidence_coverage: float = Field(0.0, ge=0.0, le=1.0)
+    answer_verification: AnswerVerification = Field(default_factory=AnswerVerification)
+    evidence_health: EvidenceHealth = Field(default_factory=EvidenceHealth)
+    decision_readiness: DecisionReadiness = Field(default_factory=DecisionReadiness)
+    completion_status: Literal["complete", "partial", "refused", "not_applicable"] = (
+        "complete"
+    )

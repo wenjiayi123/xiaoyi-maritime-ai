@@ -39,7 +39,28 @@ def normalize_operator_question(question: str) -> str:
 
 
 def clarification_for(question: str) -> tuple[str, list[str]] | None:
-    compact = re.sub(r"\s+", "", question)
+    compact = re.sub(r"[\s，。！？、,.!?；;：:]+", "", question)
+    if compact in {
+        "怎么办",
+        "怎么处理",
+        "如何处理",
+        "怎么优化",
+        "如何优化",
+        "怎么安排",
+        "如何安排",
+        "怎么降",
+        "如何降低",
+    }:
+        return (
+            "我可以继续，但还缺少要处理的业务对象。你是在问船舶靠泊、泊位计划、"
+            "堆场、闸口、设备、能源负荷、单证，还是人员安排？给出其中一个对象，"
+            "我会直接返回判断顺序、处置步骤和需要确认的岗位。",
+            [
+                "港口如何削峰？",
+                "堆场快满了怎么处理？",
+                "泊位冲突怎么协调？",
+            ],
+        )
     if any(term in compact for term in ("该船舶", "这条船", "那条船")) and not re.search(
         r"(?:IMO\s*\d{7}|[A-Z][A-Z\s-]{4,}|B\d{2}|泊位\d+)", question
     ):
@@ -64,6 +85,45 @@ def is_sandbox_runtime_question(question: str) -> bool:
     ):
         return False
     has_scope = any(term in compact for term in ("工作台", "沙箱", "样板港区", "当前告警", "本班"))
+    requests_runtime_handover = any(
+        term in compact
+        for term in (
+            "帮我整理交班",
+            "生成交班",
+            "整理当前交班",
+            "汇总本班交班",
+        )
+    )
+    asks_generic_handover_knowledge = (
+        "交班" in compact
+        and not has_scope
+        and not requests_runtime_handover
+        and (
+            bool(
+                re.search(
+                    r"(?:要|该|应|需要)?交(?:接)?(?:什么|哪些)"
+                    r"|交班(?:内容|清单|事项|流程|要求|注意)"
+                    r"|怎么(?:做)?交班",
+                    compact,
+                )
+            )
+            or any(
+                term in compact
+                for term in (
+                    "包含什么",
+                    "需要交接",
+                    "哪些事项",
+                    "注意什么",
+                    "最少包含",
+                    "不能漏",
+                )
+            )
+        )
+    )
+    if asks_generic_handover_knowledge:
+        # “交班要交什么”是在问通用岗位知识，不是在读取当前工作台。
+        # 只有显式的当前/本班/沙箱范围或“帮我整理交班”类动作才进入运行态。
+        return False
     has_known_sandbox_entity = any(
         term in compact
         for term in (
@@ -88,11 +148,23 @@ def is_sandbox_runtime_question(question: str) -> bool:
         for term in (
             "当前", "现在", "今天", "今日", "本班", "要不要", "需不需要",
             "情况", "怎么样", "状态", "怎么了", "还没", "在线", "增开",
-            "多少", "忙吗", "交班", "先处理", "优先处理",
+            "多少", "忙吗", "交班",
         )
     )
-    explicitly_requests_live = "实时" in compact or bool(
-        re.search(r"\b(?:cn[a-z]{2,}|imo)\s*[-:]?\s*[a-z0-9-]{4,}\b", question, re.IGNORECASE)
+    named_vessel = bool(
+        re.search(r"[\u4e00-\u9fff]{2,10}轮", question)
+        or re.search(r"\b[A-Z][A-Z0-9 -]{2,24}\s+(?:VSL|VESSEL)\b", question)
+    )
+    explicitly_requests_live = (
+        "实时" in compact
+        or bool(
+            re.search(
+                r"\b(?:cn[a-z]{2,}|imo)\s*[-:]?\s*[a-z0-9-]{4,}\b",
+                question,
+                re.IGNORECASE,
+            )
+        )
+        or (named_vessel and has_runtime_intent)
     )
     # Existing showcase questions without a production identifier continue to
     # use the visibly labelled sandbox. A request for an explicit live value or

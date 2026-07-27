@@ -1,0 +1,321 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "xiaoyi-maritime-model-benchmark-v7",
+  "profile": "lora-r96-v3-repaired-smoke",
+  "generated_at": "2026-07-27T04:07:42+00:00",
+  "endpoint": "http://127.0.0.1:8010/api/chat/stream",
+  "case_source": "data/evaluation/maritime_question_universe_benchmark_v6.json",
+  "case_source_sha256": "71ea3bb4166dceadefda1e9063a7c9c16db95f15f48c6950cc2158b95ab1bc39",
+  "workforce_case_source": null,
+  "workforce_case_source_sha256": null,
+  "methodology": {
+    "retrieval": "BEIR-aligned Recall@5, MRR@10 and nDCG@10 with repository qrels.",
+    "generation": "RAGAS-aligned deterministic proxies for context precision/recall, response relevancy and faithfulness, plus citation/numeric verifier.",
+    "latency": "MLPerf-style TTFT, TPOT, total latency and output tokens/s.",
+    "limitations": [
+      "Repository-authored fixed cases, not an independent expert blind study.",
+      "RAGAS-aligned deterministic proxies are not RAGAS LLM-judge scores.",
+      "Single-user localhost measurements are not a concurrency SLA."
+    ]
+  },
+  "summary": {
+    "case_count": 3,
+    "operational_case_count": 3,
+    "boundary_case_count": 0,
+    "workforce_daily_case_count": 0,
+    "workforce_daily_passed_count": 0,
+    "workforce_daily_pass_rate": 0.0,
+    "workforce_daily_group_coverage": 0.0,
+    "passed_count": 3,
+    "pass_rate": 1.0,
+    "retrieval": {
+      "recall_at_5": 1.0,
+      "mrr_at_10": 1.0,
+      "ndcg_at_10": 1.0
+    },
+    "generation": {
+      "required_term_recall": 0.0,
+      "required_term_case_count": 0,
+      "citation_verification_pass_rate": 1.0,
+      "faithfulness_proxy": 1.0,
+      "response_relevancy_proxy": 0.9333
+    },
+    "latency": {
+      "ttft_p50_seconds": 0.9836,
+      "ttft_p95_seconds": 1.6236,
+      "total_p50_seconds": 1.0097,
+      "total_p95_seconds": 1.7054,
+      "tokens_per_second_after_first_mean": 0.0,
+      "tokenizer_status": "exact_training_architecture_tokenizer",
+      "metric_scope": "MLPerf-style single-stream TTFT, TPOT and output token rate; this is a local engineering benchmark, not an MLPerf submission."
+    },
+    "generation_provider_counts": {
+      "local_grounded_rag": 3
+    },
+    "latency_by_provider": {
+      "local_grounded_rag": {
+        "case_count": 3,
+        "ttft_p50_seconds": 0.9836,
+        "ttft_p95_seconds": 1.6236,
+        "total_p50_seconds": 1.0097
+      }
+    },
+    "failed_ids": [],
+    "domains": {
+      "port_basics": {
+        "case_count": 2,
+        "passed_count": 2,
+        "required_term_recall": 0.0
+      },
+      "shipping": {
+        "case_count": 1,
+        "passed_count": 1,
+        "required_term_recall": 0.0
+      }
+    }
+  },
+  "rows": [
+    {
+      "case_type": "operational",
+      "id": "basics-formal",
+      "domain": "port_basics",
+      "question": "港口定义是什么",
+      "answer": "港口是船舶进出、靠泊、装卸货物、上下旅客、补给维修和物流集散的综合枢纽。现代港口还承担航运、仓储、通关、供应链、能源管理和信息协同功能。 [E1]\n\n我核对的索引依据是《港口定义》（仅摘录当前检索索引）。\n\n来源状态：该回答来自已登记的项目内部整理资料，非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。\n\n当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。",
+      "generation_provider": "local_grounded_rag",
+      "generation_model": "xiaoyi-indexed-answer-v2",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "01_port_basics.md",
+      "retrieved_sources": [
+        "01_port_basics.md",
+        "00_knowledge_catalog.md",
+        "108_china_border_health_quarantine_law.md",
+        "00_knowledge_map.md",
+        "01_port_basics.md",
+        "01_port_basics.md",
+        "52_cn_gbt42809_automated_terminal_tos.md",
+        "62_cn_work_safety_law.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.375,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港口是船舶进出、靠泊、装卸货物、上下旅客、补给维修和物流集散的综合枢纽。现代港口还承担航运、仓储、通关、供应链、能源管理和信息协同功能。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "01_port_basics:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.6935,
+        "ttft_seconds": 1.6947,
+        "total_seconds": 1.7827,
+        "output_tokens": 133,
+        "tokens_per_second_after_first": null,
+        "tpot_seconds": null
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "case_type": "operational",
+      "id": "basics-daily",
+      "domain": "port_basics",
+      "question": "港区一般分哪些区域",
+      "answer": "港区通常包括航道、锚地、泊位、前沿作业区、堆场、闸口、仓库、监管区和后方陆域；具体划分应以目标港口总平面和现场管理边界为准。 [E1]\n\n我核对的索引依据是《港口核心区域》（仅摘录当前检索索引）。\n\n来源状态：该回答来自已登记的项目内部整理资料，非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。\n\n当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。",
+      "generation_provider": "local_grounded_rag",
+      "generation_model": "xiaoyi-indexed-answer-v2",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "01_port_basics.md",
+      "retrieved_sources": [
+        "01_port_basics.md",
+        "00_knowledge_catalog.md",
+        "00_knowledge_map.md",
+        "01_port_basics.md",
+        "01_port_basics.md",
+        "01_port_basics.md",
+        "01_port_basics.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.7143,
+        "context_recall": 1.0,
+        "response_relevancy": 0.8,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港区通常包括航道、锚地、泊位、前沿作业区、堆场、闸口、仓库、监管区和后方陆域；具体划分应以目标港口总平面和现场管理边界为准。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "01_port_basics:3"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.535,
+        "ttft_seconds": 0.5357,
+        "total_seconds": 0.5576,
+        "output_tokens": 136,
+        "tokens_per_second_after_first": null,
+        "tpot_seconds": null
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "case_type": "operational",
+      "id": "shipping-formal",
+      "domain": "shipping",
+      "question": "班轮航线模式是什么",
+      "answer": "班轮运输按固定航线、固定船期和公布运价组织，适合集装箱和稳定班期业务；不定期船运输根据货源与合同灵活安排，常见于干散货和大宗商品运输。 [E1]\n\n我核对的索引依据是《航线模式》（仅摘录当前检索索引）。\n\n来源状态：该回答来自已登记的项目内部整理资料，非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。\n\n当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。",
+      "generation_provider": "local_grounded_rag",
+      "generation_model": "xiaoyi-indexed-answer-v2",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "02_shipping_basics.md",
+      "retrieved_sources": [
+        "02_shipping_basics.md",
+        "00_knowledge_catalog.md",
+        "103_my_active_shipping_notices_2026.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "37_port_qa_form_taxonomy.md",
+        "21_routes_liner_network.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "班轮运输按固定航线、固定船期和公布运价组织，适合集装箱和稳定班期业务；不定期船运输根据货源与合同灵活安排，常见于干散货和大宗商品运输。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "02_shipping_basics:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.9829,
+        "ttft_seconds": 0.9836,
+        "total_seconds": 1.0097,
+        "output_tokens": 134,
+        "tokens_per_second_after_first": null,
+        "tpot_seconds": null
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    }
+  ]
+}

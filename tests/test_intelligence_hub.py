@@ -191,12 +191,12 @@ def test_priority_7_benchmark_and_feedback_review_loop(tmp_path: Path) -> None:
     assert payload["policy_benchmark_count"] == 20
     assert payload["resume_safe_metrics"]["fixed_test_case_count"] == 35
     assert payload["resume_safe_metrics"]["hybrid_hit_at_5"] == 1.0
-    assert payload["resume_safe_metrics"]["bm25_hit_at_5"] == 1.0
-    assert payload["resume_safe_metrics"]["hit_at_5_lift_percentage_points"] == 0.0
-    assert payload["retrieval"]["test"]["hybrid"]["hit_at_1"] == 0.875
-    assert payload["retrieval"]["test"]["baseline"]["hit_at_1"] == 0.75
-    assert payload["resume_safe_metrics"]["hybrid_mrr"] == 0.9236
-    assert payload["resume_safe_metrics"]["bm25_mrr"] == 0.8507
+    assert payload["resume_safe_metrics"]["bm25_hit_at_5"] == 0.9583
+    assert payload["resume_safe_metrics"]["hit_at_5_lift_percentage_points"] == 4.17
+    assert payload["retrieval"]["test"]["hybrid"]["hit_at_1"] == 1.0
+    assert payload["retrieval"]["test"]["baseline"]["hit_at_1"] == 0.9583
+    assert payload["resume_safe_metrics"]["hybrid_mrr"] == 1.0
+    assert payload["resume_safe_metrics"]["bm25_mrr"] == 0.9583
     assert payload["resume_safe_metrics"]["unsupported_answer_block_rate"] == 1.0
     assert payload["policy"]["test"]["temporal_applicability_accuracy"] == 1.0
     assert payload["policy"]["test"]["live_data_boundary_pass_rate"] == 1.0

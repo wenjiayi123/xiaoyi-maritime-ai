@@ -64,6 +64,55 @@ def test_launcher_rejects_arbitrary_command_target() -> None:
     assert response.status_code == 422
 
 
+def test_probe_requires_backend_and_frontend(monkeypatch) -> None:
+    monkeypatch.setattr(
+        linked_system_launcher,
+        "_probe_json_health",
+        lambda _url: ("online", "backend ready"),
+    )
+    monkeypatch.setattr(
+        linked_system_launcher,
+        "_probe_ui",
+        lambda _url: ("offline", "前端页面尚未启动。"),
+    )
+
+    state, message = linked_system_launcher._probe_target("energy-cockpit")
+
+    assert state == "offline"
+    assert "后端已在线" in message
+    assert "前端页面尚未启动" in message
+
+
+def test_energy_launcher_repairs_missing_backend_when_frontend_is_managed(monkeypatch) -> None:
+    runtime = linked_system_launcher.LinkedSystemRuntime(
+        target="energy-cockpit",
+        name="能碳驾驶舱",
+        state="starting",
+        running=False,
+        managed_by_xiaoyi=True,
+        pid=4242,
+        url="http://127.0.0.1:5173/",
+        message="前端在线，后端尚未启动。",
+    )
+    started: list[str] = []
+    monkeypatch.setattr(linked_system_launcher, "_runtime", lambda _target: runtime)
+    monkeypatch.setattr(
+        linked_system_launcher,
+        "_probe_json_health",
+        lambda _url: ("offline", "backend missing"),
+    )
+    monkeypatch.setattr(
+        linked_system_launcher,
+        "_start_registered_process",
+        lambda target: started.append(target),
+    )
+
+    result = linked_system_launcher._launch_target("energy-cockpit")
+
+    assert result.state == "starting"
+    assert started == ["energy-cockpit"]
+
+
 def test_rl_lab_no_longer_launches_external_showcase_systems() -> None:
     root = Path(__file__).resolve().parents[1]
     script = (root / "web/app.js").read_text(encoding="utf-8")

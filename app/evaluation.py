@@ -448,8 +448,11 @@ def run_benchmark(top_k: int = 5) -> dict[str, Any]:
         and test_retrieval["evidence_hash_completeness_rate"] == 1.0
         and test_retrieval["jurisdiction_routing_accuracy"] == 1.0
         and test_retrieval["global_scope_neutrality_accuracy"] == 1.0
-        and test_policy["policy_safety_pass_rate"] >= 0.90
+        and test_policy["policy_safety_pass_rate"] == 1.0
         and test_policy["unsupported_answer_block_rate"] == 1.0
+        and test_policy["jurisdiction_routing_accuracy"] == 1.0
+        and test_policy["temporal_applicability_accuracy"] == 1.0
+        and test_policy["live_data_boundary_pass_rate"] == 1.0
     )
     average_best_coverage = round(
         statistics.fmean(row["best_coverage"] for row in retrieval_rows),

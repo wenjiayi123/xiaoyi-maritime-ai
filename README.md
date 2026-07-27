@@ -1,13 +1,13 @@
 <table>
   <tr>
     <td width="64%" valign="middle">
-      <p><code>MARITIME RAG · EVIDENCE GOVERNANCE · SOP COPILOT</code></p>
-      <h1>小懿 AI · 港航行业智能问答与SOP决策助手</h1>
-      <h3>Xiaoyi AI · Evidence-Grounded Maritime RAG &amp; Operations Copilot</h3>
+      <p><code>OPEN-WEIGHT LLM · RAG · LORA · EVIDENCE GOVERNANCE</code></p>
+      <h1>小懿 AI · 港航垂直行业生成式大模型研发项目</h1>
+      <h3>Xiaoyi AI · Open-Weight Maritime LLM with RAG, LoRA &amp; Evidence Governance</h3>
       <p><strong>研发作者：</strong>温家懿 · <strong>Research Author:</strong> Wen Jiayi</p>
       <p><strong>把港航问答从“模型说了什么”，提升为“证据来自哪里、适用于哪个辖区和日期、何时必须拒答、谁允许推进任务”的可审计决策链。</strong></p>
-      <p><em>A governance-first maritime assistant where retrieval, jurisdiction, temporal applicability, refusal, task progression, and audit evidence are independently reviewable.</em></p>
-      <p><strong>112</strong> 登记文档 · <strong>708</strong> 知识分块 · <strong>60</strong> 官方来源 · <strong>11/11</strong> 证据策略门禁</p>
+      <p><em>A local generative maritime model stack where retrieval, adaptation, jurisdiction, temporal applicability, refusal, and audit evidence remain independently reviewable.</em></p>
+      <p><strong>129</strong> 登记文档 · <strong>882</strong> 知识分块 · <strong>68</strong> 官方来源 · <strong>260</strong> 题六版本基准</p>
     </td>
     <td width="36%" align="center">
       <img src="web/assets/xiaoyi-ai-port-hero.png" alt="小懿AI港航助手原始形象" width="300" />
@@ -21,7 +21,7 @@
   <img alt="Version" src="https://img.shields.io/badge/release-v0.4.0-7057ff.svg" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" />
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-evidence%20gateway-009688?logo=fastapi&logoColor=white" />
-  <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-0.9236-0ea5e9.svg" />
+  <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-1.0000-0ea5e9.svg" />
   <img alt="Production boundary" src="https://img.shields.io/badge/high--risk%20actions-human%20gated-e87945.svg" />
 </p>
 
@@ -31,6 +31,13 @@
   <a href="#系统架构--architecture">系统架构 / Architecture</a> ·
   <a href="#快速运行--quick-start">快速运行 / Quick start</a> ·
   <a href="reports/maritime_rag_benchmark_v1.md">基准报告 / Benchmark</a> ·
+  <a href="reports/maritime_decision_readiness_benchmark_v3.md">决策保障 / Decision assurance</a> ·
+  <a href="reports/maritime_claim_alignment_benchmark_v4.md">证据对齐 / Evidence alignment</a> ·
+  <a href="reports/maritime_daily_operations_benchmark_v5.md">日常问答 / Daily operations</a> ·
+  <a href="reports/maritime_question_universe_benchmark_v6.md">问题全集 / Question universe</a> ·
+  <a href="docs/GENERATIVE_MODEL_STACK.md">生成式模型栈 / Generative stack</a> ·
+  <a href="reports/local_rag_lora_e2e_v3.json">本机LoRA证据 / Local LoRA evidence</a> ·
+  <a href="docs/TOP_TIER_MARITIME_ASSISTANT_ROADMAP.md">升级路线 / Roadmap</a> ·
   <a href="reports/rl_dataset_benchmark_v1.md">RL证据 / RL evidence</a> ·
   <a href="docs/OPEN_SOURCE_READINESS.md">开源审计 / Audit</a>
 </p>
@@ -41,12 +48,20 @@
 
 | 证据维度 / Evidence dimension | 固定结果 / Pinned result | 可复验入口 / Verification entry |
 |---|---:|---|
-| 知识快照 / Knowledge snapshot | <strong>112</strong>份文档、<strong>708</strong>个分块、<strong>60</strong>份官方核验来源<br><sub><strong>112</strong> documents, <strong>708</strong> chunks, <strong>60</strong> officially verified sources</sub> | `data/xiaoyi_index.json` + `data/source_registry.json` |
+| 知识快照 / Knowledge snapshot | <strong>129</strong>份文档、<strong>882</strong>个分块、<strong>68</strong>份官方核验来源<br><sub><strong>129</strong> documents, <strong>882</strong> chunks, <strong>68</strong> officially verified sources</sub> | `data/xiaoyi_index.json` + `data/source_registry.json` |
+| 稠密向量索引 / Dense vector index | `0.6B-Embedding` 为 <strong>882</strong> 个分块生成 <strong>1024</strong> 维本地向量；内容哈希失配即失效<br><sub><strong>882</strong> local embeddings × <strong>1024</strong> dimensions with content-hash invalidation</sub> | `reports/local_dense_retrieval_v1.json` |
+| 本机 LoRA 工程闭环 / Local LoRA loop | 面向17.29亿参数训练基座，Rank 96训练<strong>104,595,456</strong>个适配器参数；含适配器总参数18.25亿，占<strong>5.730723%</strong>。<strong>841</strong>条监督样本按来源隔离为<strong>622/94/125</strong>，64步后8例验证/测试loss分别下降<strong>43.55% / 40.49%</strong>，产出 PEFT + GGUF | `reports/local_lora_inference_v3.json` + `reports/local_rag_lora_e2e_v3.json` |
+| 港航端到端模型评测 / Maritime model benchmark | BEIR对齐检索、RAGAS概念对齐确定性代理与MLPerf风格TTFT；核心港航/证据边界<strong>35/35</strong>，港航人员日常题<strong>16/16</strong>；所有问答统一保留<strong>至少3秒可见核验窗口</strong>，单机单流非官方提交 | `reports/maritime_model_benchmark_v7_lora_r96.json` |
 | 固定测试 / Fixed release acceptance | <strong>35</strong>题：24题检索 + 11题证据策略<br><sub><strong>35</strong> tests: 24 retrieval + 11 evidence-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
-| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>87.50% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1.json` |
-| 同快照对照 / Same-snapshot baseline | MRR <strong>0.8507 → 0.9236</strong>（+7.29个百分点 / pp） | Hybrid Sparse vs BM25-only |
+| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>100% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1.json` |
+| 同快照对照 / Same-snapshot baseline | MRR <strong>0.9583 → 1.0000</strong>（+4.17个百分点 / pp） | Hybrid Sparse vs BM25-only |
 | 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 <strong>100%</strong><br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all <strong>100%</strong></sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
 | 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 <strong>11/11通过</strong><br><sub>Refusal, jurisdiction, date, and live-data boundaries: <strong>11/11 passed</strong></sub> | `python scripts/run_rag_benchmark.py verify --deep` |
+| 助手困难集 / Assistant challenge set | 多轮、复杂拆解、对抗边界各 <strong>20/20</strong>，v2 合计 <strong>60/60</strong><br><sub>Dialogue, decomposition, and adversarial boundaries: <strong>20/20</strong> each</sub> | `reports/maritime_assistant_benchmark_v2.json` |
+| 决策保障 / Decision assurance | 真实问答决策就绪 <strong>14/14</strong>；冲突/新鲜度/失败关闭 <strong>16/16</strong><br><sub>Decision readiness <strong>14/14</strong>; conflict, freshness, and fail-closed assurance <strong>16/16</strong></sub> | `reports/maritime_decision_readiness_benchmark_v3.json` |
+| 主张—证据对齐 / Claim–evidence alignment | 引用角色 <strong>6/6</strong>；词面对齐 <strong>6/6</strong>；数字/日期/量值 <strong>8/8</strong><br><sub>Citation roles <strong>6/6</strong>; lexical alignment <strong>6/6</strong>; numeric/date/value integrity <strong>8/8</strong></sub> | `reports/maritime_claim_alignment_benchmark_v4.json` |
+| 日常运营问答 / Daily operations Q&A | 能源、船舶泊位、堆场闸口、班组协同、单证、设备各 <strong>10/10</strong>；模糊/实时边界 <strong>3/3</strong><br><sub>Six frontline categories: <strong>10/10</strong> each; clarification/live-data boundaries: <strong>3/3</strong></sub> | `reports/maritime_daily_operations_benchmark_v5.json` |
+| 港口问题全集 / Port question universe | <strong>15</strong>业务域 × <strong>26</strong>问题形式 = <strong>390</strong>意图单元、<strong>780</strong>正式/日常矩阵问法；分域固定题<strong>30/30</strong>、安全边界<strong>5/5</strong><br><sub><strong>390</strong> intent cells and <strong>780</strong> formal/daily matrix prompts; fixed domain cases <strong>30/30</strong>, boundaries <strong>5/5</strong></sub> | `docs/PORT_QUESTION_UNIVERSE.md` + `reports/maritime_question_universe_benchmark_v6.json` |
 | RL 数据规模 / RL dataset scale | 原 <strong>19,735</strong> 行 + 大规模 <strong>409,887</strong> 行（<strong>20.77×</strong>）+ NOAA港区AIS <strong>710</strong> 个实测分钟桶 | `reports/rl_dataset_benchmark_v1.json` |
 | RL 固定对比 / Fixed RL comparison | <strong>3</strong> 数据集 × <strong>3</strong> 种子 × 4 RL + PID；训练不渲染，测试后回放，所有算法平均投影约束违例 <strong>0</strong> | `python scripts/run_rl_dataset_benchmark.py verify` |
 
@@ -64,8 +79,9 @@
 
 | 能力平面 / Plane | 已实现 / Implemented | 工程边界 / Guardrail |
 |---|---|---|
-| 港航RAG / Maritime RAG | Hybrid Sparse + BM25对照、来源路由、证据融合、结构化引用<br><sub>Hybrid Sparse with BM25 baseline, source routing, evidence fusion, structured citations</sub> | 无匹配证据时拒答，不补造条款<br><sub>Refuses without matching evidence; never invents clauses</sub> |
-| 法规治理 / Regulatory governance | 辖区、施行日期、官方来源要求、全文版权边界<br><sub>Jurisdiction, effective date, official-source requirement, copyright boundary</sub> | 回答不替代主管机关或法律意见<br><sub>Answers do not replace authorities or legal advice</sub> |
+| 港航RAG / Maritime RAG | open-weight 真实稠密向量 + Hybrid Sparse/BM25 对照、跨轮问题改写、复杂问题分解、证据融合、逐项引用及词面对齐校验<br><sub>open-weight dense vectors plus Hybrid Sparse/BM25, history-aware rewriting, decomposition, evidence fusion and citation verification</sub> | 余弦相似度只参与召回，不冒充事实证明；普通问题无匹配证据时继续回答并在底部提示，高风险实时/法规事实保留核验边界 |
+| 本地生成模型 / Local generative model | Apache-2.0 `4B` Q4_K_M 作为默认生成档；`1.7B` Q8_0 + Rank 96建立1.046亿可训练参数的本机 LoRA 训练/推理闭环<br><sub>4B quality profile plus an exact-base 1.7B Rank-96 LoRA profile</sub> | 1.7B 适配器绝不挂到 4B；隔离loss只证明固定样本上的优化信号，回答质量仍需更大未见集和港航专家盲评 |
+| 法规治理 / Regulatory governance | 辖区、施行日期、官方来源要求、全文版权边界、证据冲突与新鲜度<br><sub>Jurisdiction, applicability date, official-source and full-text boundaries, conflict and freshness checks</sub> | 冲突证据阻断决策；回答不替代主管机关或法律意见<br><sub>Conflicts block decision readiness; answers do not replace authorities or legal advice</sub> |
 | SOP决策 / SOP decision support | 告警解释、对象追问、步骤任务、报告生成<br><sub>Alert explanation, entity clarification, stepwise tasks, reports</sub> | 高风险任务强制 `requires_human_confirmation`<br><sub>High-risk tasks force `requires_human_confirmation`</sub> |
 | 运营沙箱 / Operations sandbox | 船舶、泊位、设备、能耗、预警与任务API<br><sub>Vessel, berth, equipment, energy, alert, and task APIs</sub> | 未验证网关显示“等待接入港口”，不冒充生产实绩<br><sub>Unverified gateways display “awaiting port connection,” never production performance</sub> |
 | RL实验室 / RL laboratory | Q-learning、SARSA、Expected SARSA、Double Q + PID；能源与AIS港口作业双环境 | UCI用于算法规模，AIS用于交通语义；服务量/等待为校准代理，不宣称现场收益 |
@@ -77,7 +93,7 @@
 ```mermaid
 flowchart LR
   subgraph Sources["Knowledge & Runtime Sources / 知识与运行来源"]
-    KB["112 docs / 708 chunks"]
+    KB["129 docs / 882 chunks"]
     REG["Authority registry\n官方来源与辖区"]
     OPS["Sandbox or verified live adapter\n沙箱或验证实时适配器"]
   end
@@ -127,6 +143,10 @@ flowchart LR
     xiaoyi_index.json    # 检索索引 / retrieval index
   scripts/
     build_index.py       # 构建知识索引 / build knowledge index
+    build_vector_index.py # 可恢复的1024维稠密索引 / resumable dense index
+    build_lora_dataset.py # 来源隔离的LoRA数据 / source-isolated LoRA data
+    train_lora.py        # PEFT LoRA训练与审计报告 / PEFT LoRA training
+    export_lora_gguf.py  # 导出llama.cpp LoRA / export GGUF adapter
     fetch_public_rl_dataset.py # 下载并校验公开RL数据 / fetch and verify
     fetch_large_public_rl_dataset.py # 409,887行大规模基准 / large benchmark
     fetch_noaa_port_ais_dataset.py # NOAA港区AIS场景 / public port AIS
@@ -146,7 +166,26 @@ Use the project launcher. On first run it creates `.venv`, installs runtime depe
 
 ```bash
 cd <xiaoyi-ai-repository>
+.venv/bin/python scripts/local_model.py install-runtime
+export XIAOYI_LOCAL_MODEL_PATH=/absolute/path/to/maritime-generation-4b-q4-k-m.gguf
+export XIAOYI_EMBEDDING_MODEL_PATH=/absolute/path/to/maritime-embedding-0.6b-q8-0.gguf
 bash run.sh
+```
+
+模型权重不进入公共仓库，部署时通过环境变量提供本地 GGUF 路径；公开注册表仅保留
+参数规模、量化、字节数、上下文和可选 SHA-256 校验契约。模型存在且已安装
+`llama-server` 时，`run.sh` 自动启用“4B 本地生成 + RAG + 回答后证据门禁”；
+否则安全回退到确定性严格证据回答器。完整模型规模、LoRA 数据/训练和硬件边界见
+[生成式大模型方案](docs/GENERATIVE_MODEL_STACK.md)。
+
+Model weights are not committed. Supply local GGUF paths through environment
+variables; the public registry retains only parameter count, quantization,
+artifact size, context limits, and optional checksum contracts.
+
+默认使用 4B 流畅生成档；显式验证本机 LoRA 档：
+
+```bash
+XIAOYI_LOCAL_MODEL_PROFILE=lora bash run.sh
 ```
 
 也可以手动运行：<br>
@@ -178,9 +217,9 @@ python -m app.cli "小懿的核心能力是什么？" --mode expert
 
 ## 系统说明 / System behavior
 
-小懿是面向港航场景的小型 AI 助手。它采用本地港航知识库和 RAG 检索，结合专业问答、SOP 生成、告警解释和运营建议。默认 `local_rules` 生成路径不依赖外部模型；也可显式配置 OpenAI-compatible 模型网关。只有已通过证据门禁、不含沙箱运营数据且完成外发授权的回答才允许发往外部模型；其他情况保留本地严格证据答案。
+小懿是面向港航场景的本地生成式 AI 助手。它采用开源 4B 量化生成档、本地港航知识库和 RAG 检索，结合专业问答、SOP 生成、告警解释和运营建议；同时以可在本机完成反向传播的 1.7B 训练/推理档执行 LoRA，学习港航表达与回答逻辑。1.7B 适配器不会跨参数规模套到 4B。当前事实、私有资料和法规版本仍由 RAG 提供，生成结果继续通过引用、主张和数字完整性门禁。模型不可用或门禁不通过时自动回退到 `local_rules` 严格证据答案；只有远程模型才需要显式资料外发授权。
 
-Xiaoyi is a compact AI assistant for maritime and port operations. It combines a local maritime knowledge base and RAG retrieval with professional Q&A, SOP generation, alert explanation, and operational guidance. The default `local_rules` path does not depend on an external model; an OpenAI-compatible gateway can be configured explicitly. Only answers that pass the evidence gate, contain no sandbox operational data, and receive outbound authorization may reach an external model; all other cases retain the local strict-evidence answer.
+Xiaoyi is now an open-weight generative maritime model stack: 4B provides the default local dialogue layer, 0.6B-Embedding adds dense retrieval alongside Sparse/BM25, and an exact-base 1.7B profile supports reproducible LoRA engineering on this Intel Mac. RAG remains authoritative for current, private, and jurisdiction-sensitive facts; citation, claim-alignment, and numeric-integrity gates can reject a generated rewrite and retain the deterministic strict-evidence answer. The 1.7B adapter is never attached to the 4B model, and remote data egress still requires explicit authorization.
 
 运营看板默认使用后端持续生成的运营沙箱事件流。它具有生产形态的业务对象、时间戳、质量码、延迟和来源适配器，但明确标记为非生产实绩。切换生产时保持 `port-ops.v1` 契约并配置只读数据网关；高风险任务仍返回 `requires_human_confirmation: true`，不会因接入真实数据自动获得写权限。
 
@@ -377,19 +416,32 @@ POST /api/evaluation/feedback/{id}/review        审核入待审区 / reviewed i
 
 Open “智能联动中心 / Intelligence Hub” from the left navigation to inspect 7/7 capability status, the system registry, safe cross-system previews, RAG evaluation, and the feedback loop. See the [intelligence-hub guide](docs/XIAOYI_INTELLIGENCE_HUB.md) for verification.
 
+### 四系统真实联动 / Executable four-system linkage
+
+左侧“四系统联动”会实际校验并连接港口数字孪生、能碳驾驶舱、马六甲沙盘和航行模拟器，而不是只提供启动链接。网页系统采用后端健康接口与前端页面双重身份校验；缺少的组件按固定端口契约补启动，已验证在线的服务直接复用。每次业务调用返回 trace ID、耗时和 SHA-256 回执。航行模拟器采用单次消费桥接，执行完成后清除控制指令并恢复原航线，避免重复移动。完整流程见 [四系统联动中心说明](docs/FOUR_SYSTEM_LINKAGE.md)。
+
+“Four-system linkage” validates and connects the port digital twin, energy-carbon cockpit, Malacca sandbox, and sailing simulator. It performs verified local calls, returns trace/duration/SHA-256 receipts, reuses identity-checked services, and fails closed on port conflicts.
+
 ## 可复现港航 RAG 与证据安全基准 / Reproducible maritime RAG and evidence-safety benchmark
 
-仓库提供 60 题固定版本评测集：40 题检索、20 题证据策略；其中 35
-题构成 v1 固定测试分区。当前知识快照为 112 份文档、708 个分块和 60
-份官方核验来源。测试分区的 24 个检索题上，Hybrid Sparse 的
-Hit@1/3/5 为 87.50%/100%/100%，BM25-only 为
-75.00%/95.83%/100%；Hybrid 在首位命中率上提升 12.50 个百分点，
-MRR 为 0.9236 对 0.8507（+7.29 个百分点）。Hit@5 同为 100%，不把
-已经饱和的 Top-5 指标包装成提升。
-11 个策略测试覆盖条款级拒答、无依据回答阻断、辖区路由、法规日期切换和
-实时数据边界，当前为 11/11。
+仓库发布六套版本化固定基准，合计 260 题。v1 包含 40 题检索和 20 题证据
+策略，其中 35 题构成固定发布测试分区；v2 新增 60 题困难集，分别检验多轮
+上下文改写、复杂问题分治和对抗性证据边界；v3 新增 30 题决策保障集，
+检验决策就绪度、证据冲突、新鲜度、风险级别和升级动作；v4 新增 20 题
+主张—证据对齐集，检验引用角色、词面对齐及数字、日期、量值完整性；v5 新增
+60 题日常运营集，覆盖能源、船舶泊位、堆场闸口、班组协同、单证和设备，并
+单列 3 个模糊问法/实时边界用例；v6 建立 15 个业务域 × 26 种问题形式的
+390 个意图单元与 780 条正式/日常矩阵问法，并抽取 30 题分域固定集，另列
+5 题澄清、实时与官方全文边界。当前知识快照为 129 份文档、
+882 个分块和 68 份官方核验来源。v1 测试分区的 24 个检索题上，Hybrid
+Sparse 的 Hit@1/3/5 为 100%/100%/100%，BM25-only 为
+95.83%/95.83%/95.83%；MRR 为 1.0000 对 0.9583（+4.17 个百分点）。
+11 个策略测试全部通过。v2 的多轮、复杂拆解与对抗边界分别为
+20/20、20/20、20/20；v3 的真实问答链路与合成保障分别为 14/14、16/16；
+v4 的引用、对齐与数值门禁分别为 6/6、6/6、8/8；v5 六类日常问答均为
+10/10，边界用例 3/3；v6 分域固定题 30/30，边界用例 5/5。
 
-The repository publishes a fixed 60-question set: 40 retrieval cases and 20 evidence-policy cases, with 35 forming the pinned v1 test partition. The knowledge snapshot contains 112 documents, 708 chunks, and 60 officially verified sources. Across the 24 retrieval questions in the test partition, Hybrid Sparse reaches Hit@1/3/5 of 87.50%/100%/100%, versus 75.00%/95.83%/100% for BM25-only. Hybrid improves first-rank hit rate by 12.50 percentage points and MRR from 0.8507 to 0.9236 (+7.29 percentage points). Since both methods already reach 100% Hit@5, the README does not misrepresent the saturated Top-5 metric as an improvement. Eleven policy tests cover clause-level refusal, unsupported-answer blocking, jurisdiction routing, regulation-date switching, and live-data boundaries; all 11 pass.
+The repository publishes six versioned fixed benchmarks totaling 260 cases. v1 contains 40 retrieval and 20 evidence-policy cases, with 35 in the pinned release-test partition. v2 adds 60 challenge cases for dialogue rewriting, compound-question decomposition, and adversarial evidence boundaries. v3 adds 30 decision-assurance cases for readiness, conflict, freshness, risk, and escalation actions. v4 adds 20 cases for citation roles, deterministic lexical claim–evidence alignment, and numeric/date/value integrity. v5 adds 60 daily-operations cases across energy, vessel/berth, yard/gate, shift coordination, documents, and equipment, plus three separately counted clarification/live-data boundary checks. v6 defines 390 intent cells and 780 formal/daily matrix prompts across 15 domains and 26 question forms, then tests 30 pinned domain cases plus five separately counted safety-boundary cases. The current snapshot contains 129 documents, 882 chunks, and 68 officially verified sources. On the 24 v1 retrieval tests, Hybrid Sparse reaches Hit@1/3/5 of 100%/100%/100%, versus 95.83%/95.83%/95.83% for BM25-only; MRR is 1.0000 versus 0.9583 (+4.17 percentage points). All 11 v1 policy tests pass. The three v2 categories each pass 20/20; v3 passes 14/14 query-chain and 16/16 assurance cases; v4 passes 6/6 citation, 6/6 alignment, and 8/8 numeric-integrity cases; all six v5 daily categories pass 10/10 and the boundary checks pass 3/3; v6 passes 30/30 domain cases and 5/5 boundary cases.
 
 ```bash
 # 快速哈希核验 / verify report-bound data, index, and policy-code hashes
@@ -400,13 +452,40 @@ The repository publishes a fixed 60-question set: 40 retrieval cases and 20 evid
 
 # 重新生成报告 / regenerate the report
 .venv/bin/python scripts/run_rag_benchmark.py run
+
+# 核验/复跑 v2 助手困难集 / verify or rerun the v2 assistant challenge set
+.venv/bin/python scripts/run_assistant_benchmark.py verify
+.venv/bin/python scripts/run_assistant_benchmark.py run
+
+# 核验/复跑 v3 决策保障 / verify or rerun v3 decision assurance
+.venv/bin/python scripts/run_decision_benchmark.py verify
+.venv/bin/python scripts/run_decision_benchmark.py run
+
+# 核验/复跑 v4 主张—证据对齐 / verify or rerun v4 claim-evidence alignment
+.venv/bin/python scripts/run_alignment_benchmark.py verify
+.venv/bin/python scripts/run_alignment_benchmark.py run
+
+# 核验/复跑 v5 港口日常问答 / verify or rerun the v5 daily-operations set
+.venv/bin/python scripts/run_daily_operations_benchmark.py verify
+.venv/bin/python scripts/run_daily_operations_benchmark.py run
+
+# 生成问题全集并核验/复跑 v6 / build the universe and verify or rerun v6
+.venv/bin/python scripts/build_port_question_universe.py
+.venv/bin/python scripts/run_question_universe_benchmark.py verify
+.venv/bin/python scripts/run_question_universe_benchmark.py run
 ```
 
 固定题集、[JSON证据报告](reports/maritime_rag_benchmark_v1.json)和
-[可读报告](reports/maritime_rag_benchmark_v1.md)随仓库发布。该测试分区用于
-v1 发布验收，并在工程修复中暴露过缺陷，因此不是“从未查看的独立留出集”；
-题目由项目维护，也不是第三方用户研究。上述数字是仓库基准上的检索与安全
-指标，不是港口生产收益、全球知识覆盖率、法律意见或线上 SLA。
+[可读报告](reports/maritime_rag_benchmark_v1.md)，以及
+[v2 困难集报告](reports/maritime_assistant_benchmark_v2.md)和
+[v3 决策保障报告](reports/maritime_decision_readiness_benchmark_v3.md)、
+[v4 主张—证据对齐报告](reports/maritime_claim_alignment_benchmark_v4.md)和
+[v5 日常运营问答报告](reports/maritime_daily_operations_benchmark_v5.md)、
+[v6 港口问题全集报告](reports/maritime_question_universe_benchmark_v6.md)和
+[正式/日常问题清单](docs/PORT_QUESTION_UNIVERSE.md)
+随仓库发布。六套题集都由项目维护、在开发中可见，不是“从未查看的独立留出集”或第三方
+用户研究。上述数字是仓库基准上的检索与安全指标，不是港口生产收益、全球
+知识覆盖率、法律意见或线上 SLA。
 
 The fixed questions, [JSON evidence report](reports/maritime_rag_benchmark_v1.json), and [readable report](reports/maritime_rag_benchmark_v1.md) ship with the repository. The partition is a v1 release-acceptance set that has exposed defects during engineering fixes; it is not a never-inspected independent holdout, and it is maintained by this project rather than a third-party user study. These are repository retrieval and safety metrics—not port-production benefits, global knowledge coverage, legal advice, or an online SLA.
 

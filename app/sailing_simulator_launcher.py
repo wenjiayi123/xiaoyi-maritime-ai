@@ -25,6 +25,12 @@ _GODOT_BINARY = Path(
 ).expanduser()
 _PROJECT_CONFIG = _SAILING_ROOT / "project.godot"
 _LOG_PATH = _XIAOYI_ROOT / ".runtime" / "sailing-simulator.log"
+_BRIDGE_DIR = Path(
+    os.getenv(
+        "XIAOYI_SAILING_BRIDGE_DIR",
+        str(_XIAOYI_ROOT / ".runtime" / "sailing-bridge"),
+    )
+).expanduser()
 _launch_lock = RLock()
 _sailing_process: Optional[subprocess.Popen[bytes]] = None
 _launched_at: Optional[float] = None
@@ -202,11 +208,15 @@ def launch_sailing_simulator(
             raise HTTPException(status_code=503, detail=current.message)
 
         _LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        _BRIDGE_DIR.mkdir(parents=True, exist_ok=True)
         try:
             with _LOG_PATH.open("ab", buffering=0) as log_file:
+                env = os.environ.copy()
+                env["XIAOYI_SIM_BRIDGE_DIR"] = str(_BRIDGE_DIR)
                 _sailing_process = subprocess.Popen(
                     [str(_GODOT_BINARY), "--path", str(_SAILING_ROOT)],
                     cwd=str(_SAILING_ROOT),
+                    env=env,
                     stdin=subprocess.DEVNULL,
                     stdout=log_file,
                     stderr=subprocess.STDOUT,

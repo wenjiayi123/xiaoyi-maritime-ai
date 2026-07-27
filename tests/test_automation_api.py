@@ -79,8 +79,11 @@ def test_launch_simulator_command_builds_whitelisted_runtime_sequence() -> None:
 def test_explicit_system_launch_commands_keep_separate_targets() -> None:
     cases = {
         "启动港口数字孪生": ("launch_port_digital_twin", "port-dt-multi"),
+        "启动孪生": ("launch_port_digital_twin", "port-dt-multi"),
         "启动能碳驾驶舱": ("launch_energy_cockpit", "energy-cockpit"),
+        "启动能碳": ("launch_energy_cockpit", "energy-cockpit"),
         "启动马六甲推演": ("launch_malacca_sandbox", "malacca-sandbox"),
+        "启动沙盘": ("launch_malacca_sandbox", "malacca-sandbox"),
     }
 
     for command, (intent, target) in cases.items():

@@ -364,19 +364,29 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
     has_launch_verb = any(word in text for word in ["启动", "打开", "运行", "进入"])
     linked_launch_specs = (
         (
-            any(word in text for word in ["数字孪生", "港口ai运营中枢", "港口ai平台"]),
+            any(word in text for word in [
+                "数字孪生", "港口ai运营中枢", "港口ai平台", "孪生系统", "孪生平台",
+            ])
+            or text in {"启动孪生", "打开孪生", "运行孪生", "进入孪生"},
             "port-dt-multi",
             "港口数字孪生",
             "launch_port_digital_twin",
         ),
         (
-            any(word in text for word in ["能碳驾驶舱", "能耗驾驶舱", "能源驾驶舱"]),
+            any(word in text for word in [
+                "能碳驾驶舱", "能耗驾驶舱", "能源驾驶舱",
+            ])
+            or text in {"启动能碳", "打开能碳", "运行能碳", "进入能碳"},
             "energy-cockpit",
             "能碳驾驶舱",
             "launch_energy_cockpit",
         ),
         (
-            "马六甲" in text and any(word in text for word in ["推演", "沙盘", "系统"]),
+            (
+                "马六甲" in text
+                and any(word in text for word in ["推演", "沙盘", "系统"])
+            )
+            or text in {"启动沙盘", "打开沙盘", "运行沙盘", "进入沙盘"},
             "malacca-sandbox",
             "马六甲推演",
             "launch_malacca_sandbox",

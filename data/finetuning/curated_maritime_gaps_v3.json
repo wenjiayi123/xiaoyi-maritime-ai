@@ -1,0 +1,171 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "xiaoyi-curated-maritime-gaps-v3",
+  "review_status": "human_curated",
+  "purpose": "Target omissions observed in the 2026-07-27 maritime v7 baseline without copying held-out benchmark questions.",
+  "baseline_report": "reports/maritime_model_benchmark_v7_baseline.json",
+  "examples": [
+    {
+      "id": "gap-arrival-window-01",
+      "source": "curated_v7_vessel_coordination_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "船方报的时间一会儿一变，泊位怎么跟"},
+        {"role": "assistant", "content": "用统一挂靠标识维护预计、请求、计划和实际事件，所有时间变化都记录来源、版本、更新时间和下一次更新时间；同步校核泊位、引航、拖轮、货物、单证及服务就绪状态。涉及航速调整必须由船长和船公司在安全、天气与合同条件下决定，码头不能替船方下达航行指令。"}
+      ]
+    },
+    {
+      "id": "gap-gate-congestion-02",
+      "source": "curated_v7_terminal_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "集卡都堵到港外了，能不能直接多开入口"},
+        {"role": "assistant", "content": "先区分预约波峰、单证异常、识别故障、查验、车道能力、场内接纳和外部道路影响，优先清除处理时间最长的瓶颈。增开入口前必须确认人员、系统和场内容量；如果场内拥堵未解除，只扩入口会把排队转移到堆场。应同步做预约错峰、现场分流和车道动态调整。"}
+      ]
+    },
+    {
+      "id": "gap-roro-stowage-03",
+      "source": "curated_v7_special_cargo_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "滚装车辆装船前现场要怎么组织"},
+        {"role": "assistant", "content": "按航次、车型、尺寸、危险属性、装卸顺序、钥匙和车辆状态设置预排区，控制单向流、坡道能力、司机和引导人员，并同步船舶积载与场地容量。不得为了追赶效率压缩安全间距，也不能跳过车辆检查和系固确认。"}
+      ]
+    },
+    {
+      "id": "gap-vgm-fields-04",
+      "source": "curated_v7_document_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "收到集装箱核实重量后还要校验什么"},
+        {"role": "assistant", "content": "VGM是载货集装箱经核实的总重量信息。接收后至少核对箱号、总重量、单位、称重或计算方法、提交主体、提交时间和有效状态，再按当前适用规则进入配载与安全作业流程；箱号或状态不一致时不能直接放行给配载。"}
+      ]
+    },
+    {
+      "id": "gap-sea-rail-key-05",
+      "source": "curated_v7_intermodal_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "船、码头和铁路的数据总对不起来怎么协同"},
+        {"role": "assistant", "content": "先为同一票箱建立跨船期、码头和班列的业务主键，再对齐船期、班列、箱源、海关状态、堆场箱位、装卸线、短驳和到站接收窗口。所有里程碑保留来源、版本和时间，重点处理箱号状态不一致、船转铁等待、错过班列和空箱返程。"}
+      ]
+    },
+    {
+      "id": "gap-rail-delay-06",
+      "source": "curated_v7_intermodal_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "铁路侧临时晚点，哪些货先保护"},
+        {"role": "assistant", "content": "先确认预计到达、受影响箱量、堆场容量、船期和客户窗口，优先保护近期装船、冷链与高时效货物。评估改班列、公路短驳等替代运力、临时堆存或客户改约，同时保留成本与责任边界；未确认海关和目的站接收条件前不得擅自改线。"}
+      ]
+    },
+    {
+      "id": "gap-structure-defect-07",
+      "source": "curated_v7_engineering_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "发现码头前沿结构异常，现场先怎么管控"},
+        {"role": "assistant", "content": "立即标记位置、范围和发现时间，限制可能加剧风险的靠泊、荷载和车辆活动，通知工程、安全及运营责任人，并保存照片、测量、碰撞和荷载记录。是否继续使用、限载或关闭必须由合格工程人员评估批准，现场班组不得凭经验自行恢复。"}
+      ]
+    },
+    {
+      "id": "gap-fire-recovery-08",
+      "source": "curated_v7_safety_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "港区火警处置完后能马上恢复装卸吗"},
+        {"role": "assistant", "content": "不能。先确认报警响应、人员清点、能源与危险区域隔离、余火和复燃风险、设备与结构状态，并保留现场与处置记录。只有消防、现场指挥及有权责任岗位按预案完成检查和授权后才能复工；未经确认不得因船期压力恢复装卸。"}
+      ]
+    },
+    {
+      "id": "gap-charge-dispute-09",
+      "source": "curated_v7_commercial_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "客户质疑账单，客服能先答应打折吗"},
+        {"role": "assistant", "content": "不能在证据未齐时承诺减免或赔付。先锁定客户、业务对象、费目、计费期间、数量、费率版本和触发事件，再核对合同、费率表、系统事件、作业记录与已开票信息；事实核对和责任判断分开，任何调整都保留原始值、审批和依据。"}
+      ]
+    },
+    {
+      "id": "gap-cargo-damage-10",
+      "source": "curated_v7_commercial_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "收货人反映货损，码头先收哪些材料"},
+        {"role": "assistant", "content": "保存业务单据、交接记录、箱体与封志、理货残损、照片视频、设备和作业记录、温度或冲击数据、时间线及各方通知，区分发现时间、可能发生环节和后续减损动作。责任与赔付应由合同、法务、保险和相关承运主体基于证据审核，现场不能先行认责。"}
+      ]
+    },
+    {
+      "id": "gap-cross-team-blocker-11",
+      "source": "curated_v7_people_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "船期协调会上大家都说等别的部门，怎么收口"},
+        {"role": "assistant", "content": "把讨论收敛为明确业务对象、当前事实、唯一阻断项、需要谁决定和截止时间，指定一名牵头责任人。每个部门只领取可验证动作并约定反馈格式；会后固化决策、待办、责任人和超时升级路径，不能用继续开会替代责任闭环。"}
+      ]
+    },
+    {
+      "id": "gap-volume-forecast-12",
+      "source": "curated_v7_planning_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "未来一周箱量预测应该怎么给调度用"},
+        {"role": "assistant", "content": "结合已确认船期和订舱、历史季节性、航线变化、客户计划、取消率、天气及口岸事件建立基线与上下界，随最新实际滚动修正。输出必须标明假设、数据截止时间和误差范围；预测只能支持资源预排，不能替代船公司与客户的正式计划。"}
+      ]
+    },
+    {
+      "id": "gap-ai-operational-use-13",
+      "source": "curated_v7_ai_governance_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "系统给了一个泊位调整建议，值班员可以照着下发吗"},
+        {"role": "assistant", "content": "不能直接下发。先核对业务对象、数据时间与质量、证据覆盖、约束完整性、假设、风险、替代方案和回退条件，再与现场状态及有权岗位确认。缺实时数据、正式规则或关键约束时只能作为分析框架；离线评分或历史测试通过不能自动转化为生产授权。"}
+      ]
+    },
+    {
+      "id": "gap-live-data-14",
+      "source": "curated_v7_ai_governance_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "你直接告诉我现在港里作业量有多少"},
+        {"role": "assistant", "content": "当前没有已验证的实时生产数据，不能编造作业量。请连接TOS生产系统或正式统计系统，并提供港区、指标口径、统计时段和接口时间戳；数据返回后我可以协助核对吞吐量、作业量或在港量的定义与计算。"}
+      ]
+    },
+    {
+      "id": "gap-vessel-live-15",
+      "source": "curated_v7_ai_governance_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "帮我查一条船今晚到底什么时候进港"},
+        {"role": "assistant", "content": "需要船名或IMO/MMSI、目标港区和日期，并连接已验证的TOS泊位计划、AIS/VTS或船期系统。没有实时生产数据和时间戳时不能给出确定进港时间，也不能把历史计划或估算冒充现场实况。"}
+      ]
+    },
+    {
+      "id": "gap-official-limit-16",
+      "source": "curated_v7_regulatory_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "告诉我国际防污染规则里的精确数值要求"},
+        {"role": "assistant", "content": "需要先明确污染物或设备类型、船舶适用条件、辖区和日期，并核验现行官方全文及修正案。当前没有覆盖该具体数值的官方全文证据时，我不能给出或猜测限值；可以先提供发布机构和正式文本定位路径，取得原文后再逐条引用。"}
+      ]
+    },
+    {
+      "id": "gap-dangerous-separation-17",
+      "source": "curated_v7_regulatory_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "危险货物堆放距离给我一个确定数字"},
+        {"role": "assistant", "content": "隔离距离取决于货物类别、包装或罐型、数量、作业环节、港口辖区、设施条件和适用日期。没有现行官方全文、货物联合国编号和现场制度时不能编造统一数字；应由危险货物专业人员按正式规则与码头制度核验后确定。"}
+      ]
+    },
+    {
+      "id": "gap-clarification-18",
+      "source": "curated_v7_dialogue_gaps",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "这个怎么弄"},
+        {"role": "assistant", "content": "请先告诉我具体业务对象和场景，例如船舶、泊位、箱区、闸口、设备、单证、法规或能碳问题，以及港区、时间和你希望得到的结果；信息补齐后我再给出港航处置步骤。"}
+      ]
+    }
+  ]
+}

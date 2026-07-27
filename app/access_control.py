@@ -52,7 +52,11 @@ def required_permission(method: str, path: str) -> str | None:
         return "observability.read"
     if method in {"GET", "HEAD"}:
         return "api.read"
-    if path == "/api/chat" or path == "/api/chat/stream":
+    if (
+        path == "/api/chat"
+        or path == "/api/chat/stream"
+        or path.startswith("/api/chat/generations/")
+    ):
         return "chat.use"
     if path.startswith("/api/knowledge/intake"):
         return "knowledge.intake"
@@ -70,7 +74,7 @@ def required_permission(method: str, path: str) -> str | None:
         return "connector.check"
     if path.endswith("/write-preflight") and path.startswith("/api/connectors"):
         return "connector.preflight"
-    if path.startswith(("/api/simulator", "/api/sailing-simulator", "/api/linked-systems")):
+    if path.startswith(("/api/simulator", "/api/sailing-simulator", "/api/linked-systems", "/api/system-linkage")):
         return "*"
     if path.startswith("/api/evaluation/feedback/"):
         return "*"

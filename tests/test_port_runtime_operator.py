@@ -4,7 +4,10 @@ from fastapi.testclient import TestClient
 import pytest
 
 from app.main import app
-from app.operator_assistant import normalize_operator_question
+from app.operator_assistant import (
+    is_sandbox_runtime_question,
+    normalize_operator_question,
+)
 from app.port_runtime import SandboxPortDataSource, create_port_data_source
 from app.xiaoyi import XiaoyiAI
 
@@ -60,6 +63,50 @@ def test_workbench_question_uses_traceable_sandbox_state() -> None:
     assert "SYNTHETIC_VALIDATED" in result.answer
     assert "不是现场生产实绩" in result.answer
     assert result.evidence[0].source == "XIAOYI-PORT-SANDBOX"
+
+
+@pytest.mark.parametrize(
+    "question",
+    [
+        "港口交班要交什么？",
+        "港口交班交什么？",
+        "值班交班清单有哪些？",
+        "交班有哪些事项不能漏？",
+    ],
+)
+def test_generic_handover_question_uses_knowledge_rag_not_sandbox(
+    question: str,
+) -> None:
+    assert is_sandbox_runtime_question(question) is False
+
+    result = XiaoyiAI().ask(
+        question,
+        mode="brief",
+        strict_evidence=True,
+    )
+
+    assert result.intent != "operator_runtime_assist"
+    assert result.source_quality != "sandbox_runtime"
+    assert result.grounded is True
+    assert result.evidence
+    assert "未闭环" in result.answer
+    assert "负责人" in result.answer
+    assert "下次动作时间" in result.answer
+
+
+def test_explicit_handover_summary_request_still_uses_runtime_snapshot() -> None:
+    question = "帮我整理交班"
+
+    assert is_sandbox_runtime_question(question) is True
+    result = XiaoyiAI().ask(question, mode="ops", strict_evidence=True)
+
+    assert result.intent == "operator_runtime_assist"
+    assert result.source_quality == "sandbox_runtime"
+    assert "船舶" in result.answer
+    assert "设备" in result.answer
+    assert "堆场" in result.answer
+    assert "闸口" in result.answer
+    assert "待跟进" in result.answer
 
 
 def test_explicit_live_asset_query_does_not_fall_back_to_sandbox() -> None:

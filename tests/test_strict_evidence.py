@@ -97,11 +97,35 @@ def test_shore_power_safety_procedure_uses_new_official_regulation_index() -> No
 def test_identity_uses_live_knowledge_inventory_and_end_to_end_positioning() -> None:
     result = XiaoyiAI().ask("你是谁，你能干什么？")
 
-    assert "112 份港航专业文档" in result.answer
-    assert "708 个可检索知识片段" in result.answer
-    assert "60 份" in result.answer
+    assert "129 份港航专业文档" in result.answer
+    assert "882 个可检索知识片段" in result.answer
+    assert "68 份" in result.answer
     assert "不自动等同于法规或标准全文" in result.answer
     assert "结果回写" in result.answer
+
+
+def test_identity_recognizes_origin_wording() -> None:
+    result = XiaoyiAI().ask("你来自哪里？")
+
+    assert result.intent == "identity"
+    assert result.refusal_reason is None
+    assert "我是小懿" in result.answer
+    assert "我是小懿AI" not in result.answer
+    assert "由AI博士温家懿研发" in result.answer
+    assert "独立研发" not in result.answer
+    assert "随时可交流的港航数字同事" in result.answer
+
+
+def test_identity_recognizes_developer_wording_without_hallucination() -> None:
+    for question in ("谁研发的？", "谁研制了小懿？", "小懿是谁设计的？"):
+        result = XiaoyiAI().ask(question)
+
+        assert result.intent == "identity"
+        assert result.refusal_reason is None
+        assert "由AI博士温家懿研发" in result.answer
+        assert "独立研发" not in result.answer
+        assert "海贼王" not in result.answer
+        assert "One Piece" not in result.answer
 
 
 def test_high_risk_evidence_policy_cannot_be_disabled_by_request_flag() -> None:

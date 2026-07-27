@@ -39,7 +39,7 @@ def _candidate_ports() -> tuple[int, ...]:
     if _CONFIGURED_URL:
         parsed = urlparse(_CONFIGURED_URL)
         return (int(parsed.port or 80),)
-    raw = os.getenv("XIAOYI_SIMULATOR_PORTS", "8000,8001,8002")
+    raw = os.getenv("XIAOYI_SIMULATOR_PORTS", "8000")
     ports: list[int] = []
     for item in raw.split(","):
         try:
@@ -48,7 +48,7 @@ def _candidate_ports() -> tuple[int, ...]:
             continue
         if 1024 <= port <= 65535 and port not in ports:
             ports.append(port)
-    return tuple(ports or [8000, 8001, 8002])
+    return tuple(ports or [8000])
 
 
 _SIMULATOR_PORTS = _candidate_ports()
@@ -210,6 +210,22 @@ def launch_simulator(payload: SimulatorLaunchRequest) -> SimulatorRuntime:
         port = current.port
         env = os.environ.copy()
         env["PORT_DT_SERVER_PORT"] = str(port)
+        env["PORT_DT_ENABLE_DESKTOP_INTEGRATIONS"] = "1"
+        env["XIAOYI_AI_BASE_URL"] = os.getenv(
+            "XIAOYI_AI_BASE_URL",
+            "http://127.0.0.1:8010",
+        )
+        env["XIAOYI_AI_PROJECT"] = str(_PROJECT_ROOT)
+        env["XIAOYI_AI_START_COMMAND"] = os.getenv(
+            "XIAOYI_AI_START_COMMAND",
+            f"/bin/bash {str(_PROJECT_ROOT / 'run.sh')}",
+        )
+        sailing_root = os.getenv("XIAOYI_SAILING_SIMULATOR_ROOT", "")
+        godot_binary = os.getenv("XIAOYI_GODOT_BINARY", "")
+        if sailing_root:
+            env["SAILING_SIM_PROJECT"] = sailing_root
+        if godot_binary:
+            env["SAILING_SIM_GODOT"] = godot_binary
         _LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         try:
             with _LOG_PATH.open("ab", buffering=0) as log_file:

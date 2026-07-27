@@ -11,7 +11,7 @@
     "知识库":"Knowledge Base", "港航知识库":"Maritime Knowledge Base", "训练中心":"Training Center", "任务中心":"Action Center",
     "管理员":"Administrator", "小懿AI":"Xiaoyi AI", "您的港航智能助手":"Your Maritime Intelligence Copilot",
     "新建对话":"New Dialogue", "对话历史":"Dialogue History", "常用指令":"Quick Commands",
-    "我的收藏":"Favorites", "接口中心":"Connector Center", "智能联动中心":"Intelligence Hub", "RAG评测闭环":"RAG Evaluation Loop", "推荐指令":"Recommended Prompts",
+    "我的收藏":"Favorites", "接口中心":"Connector Center", "智能联动中心":"Intelligence Hub", "四系统联动":"Four-System Linkage", "RAG评测闭环":"RAG Evaluation Loop", "推荐指令":"Recommended Prompts",
     "今日港口运营概况":"Today's Port Operations", "碳排放分析与建议":"Carbon Analysis & Advice",
     "船舶调度优化方案":"Vessel Scheduling Optimization", "岸桥作业效率分析":"Quay Crane Efficiency",
     "异常事件预警汇总":"Alert Summary", "深海模式":"Deep Sea Mode", "极夜模式":"Midnight Mode",
@@ -99,6 +99,51 @@
     return String(value || "").replace(/\s+/g, " ").trim();
   }
 
+  function displayEvidenceMarkers(value) {
+    return String(value || "").replace(/\[E(\d+)\]/g, "[来源$1]");
+  }
+
+  function isUrgentEvidenceAnswer(question, answer) {
+    return /(?:着火|失火|起火|火灾|冒烟|爆炸|泄漏|溢油|触电|伤亡|受伤|碰撞|事故|危险品|紧急|应急|报警|疏散|警戒)/.test(
+      `${question || ""}\n${answer || ""}`
+    );
+  }
+
+  function renderStructuredAnswer(target, value, question = "", intent = "") {
+    if (!target) return;
+    const displayed = displayEvidenceMarkers(value);
+    const urgent = isUrgentEvidenceAnswer(question, displayed);
+    const fragment = document.createDocumentFragment();
+    let inEvidenceBlock = false;
+    displayed.split("\n").forEach((line, index, lines) => {
+      const trimmed = line.trim();
+      if (trimmed.startsWith("证据锁定结论：")) inEvidenceBlock = true;
+      if (
+        trimmed.startsWith("模型综合建议（需人工复核）：")
+        || trimmed.startsWith("生成式综合分析")
+      ) {
+        inEvidenceBlock = false;
+      }
+      const text = document.createElement("span");
+      const cited = /\[来源\d+\]/.test(line);
+      const evidenceLine = inEvidenceBlock || cited;
+      if (evidenceLine) {
+        text.className = `answer-evidence-line ${urgent ? "danger" : "normal"}`;
+        if (trimmed.startsWith("证据锁定结论：")) {
+          text.classList.add("answer-evidence-heading");
+        }
+      } else if (trimmed.startsWith("模型综合建议（需人工复核）：")) {
+        text.className = "answer-model-heading";
+      } else if (intent === "energy_carbon" && trimmed) {
+        text.className = "answer-general-line";
+      }
+      text.textContent = line;
+      fragment.append(text);
+      if (index < lines.length - 1) fragment.append(document.createTextNode("\n"));
+    });
+    target.replaceChildren(fragment);
+  }
+
   function refreshBilingualLayer(root = document) {
     const nodes = root === document ? [...document.body.querySelectorAll("*")] : [root, ...(root.querySelectorAll?.("*") || [])];
     nodes.forEach((element) => {
@@ -150,11 +195,16 @@
     avatar: "xiaoyi_avatar_v1",
     agentMode: "xiaoyi_agent_mode_v1",
     strictEvidence: "xiaoyi_strict_evidence_v1",
-    sessionId: "xiaoyi_session_id_v1"
+    sessionId: "xiaoyi_session_id_v1",
+    turns: "xiaoyi_conversation_turns_v2"
   };
 
+  function createSessionId() {
+    return `web-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+  }
+
   const persistentSessionId = localStorage.getItem(STORAGE.sessionId)
-    || `web-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+    || createSessionId();
   localStorage.setItem(STORAGE.sessionId, persistentSessionId);
 
   const fallbackDashboard = {
@@ -262,11 +312,14 @@
     currentQuestion: "帮我分析一下今日港口的能耗情况",
     currentAnswer: $("#answer")?.textContent || "",
     currentEvidence: [],
+    currentVerification: null,
     currentMode: "ops",
     currentIntent: "energy_analysis",
     currentConfidence: "高",
     activeController: null,
+    activeGenerationId: null,
     generationId: 0,
+    thinkingTickerStop: null,
     activeTask: null,
     activeReport: null,
     confirmedTaskIds: new Set(),
@@ -284,8 +337,13 @@
     rlCenterLoading: false,
     rlAdvisorMessages: [],
     linkedStartup: null,
+    systemLinkage: null,
+    systemLinkageBusy: null,
     lastFocused: null,
-    sessionId: persistentSessionId
+    sessionId: persistentSessionId,
+    conversationTurns: loadArray(STORAGE.turns).filter(
+      (item) => item.sessionId === persistentSessionId
+    )
   };
 
   function loadArray(key) {
@@ -311,10 +369,6 @@
     const number = Number(value);
     if (!Number.isFinite(number)) return "—";
     return number.toLocaleString("zh-CN", { minimumFractionDigits: digits, maximumFractionDigits: digits });
-  }
-
-  function formatClock(date = new Date()) {
-    return `${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}:${String(date.getSeconds()).padStart(2,"0")}`;
   }
 
   function formatShortTime(value) {
@@ -361,11 +415,12 @@
     }
   }
 
-  async function streamChat(payload, signal, onToken) {
+  async function streamChat(payload, signal, onToken, generationId) {
     const headers = new Headers({ "Content-Type":"application/json", "Accept":"text/event-stream" });
     const accessToken = sessionStorage.getItem("xiaoyi_access_token");
     if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
     headers.set("X-Xiaoyi-Trace-Id", globalThis.crypto?.randomUUID?.() || `trace-${Date.now()}`);
+    headers.set("X-Xiaoyi-Generation-Id", generationId);
     const response = await fetch("/api/chat/stream", {
       method:"POST", headers, signal, body:JSON.stringify(payload)
     });
@@ -406,6 +461,18 @@
     return completed;
   }
 
+  async function cancelGenerationOnServer(generationId) {
+    if (!generationId) return;
+    const headers = new Headers();
+    const accessToken = sessionStorage.getItem("xiaoyi_access_token");
+    if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+    headers.set("X-Xiaoyi-Trace-Id", globalThis.crypto?.randomUUID?.() || `trace-${Date.now()}`);
+    await fetch(`/api/chat/generations/${encodeURIComponent(generationId)}`, {
+      method:"DELETE",
+      headers
+    });
+  }
+
   function safeUrl(value) {
     try {
       const url = new URL(String(value || ""));
@@ -425,17 +492,9 @@
     setTimeout(() => node.remove(), timeout);
   }
 
-  function startClock() {
-    const update = () => {
-      const now = new Date();
-      $("#clockTime").textContent = formatClock(now);
-      $("#clockDate").textContent = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-      $("#clockWeek").textContent = ["周日","周一","周二","周三","周四","周五","周六"][now.getDay()];
-      const hour = now.getHours();
-      $("#greetingTitle").innerHTML = `${hour < 6 ? "夜深了" : hour < 12 ? "上午好" : hour < 18 ? "下午好" : "晚上好"}！<span>我是小懿AI</span>`;
-    };
-    update();
-    setInterval(update, 1000);
+  function updateGreeting() {
+    const hour = new Date().getHours();
+    $("#greetingTitle").innerHTML = `${hour < 6 ? "夜深了" : hour < 12 ? "上午好" : hour < 18 ? "下午好" : "晚上好"}！<span>我是小懿AI</span>`;
   }
 
   function setView(view, options = {}) {
@@ -756,7 +815,7 @@
       idle:["您好！我是小懿AI","您的港航智能助手","智能感知在线"],
       understand:["正在理解您的意图","识别目标、约束与风险边界","任务理解中"],
       retrieve:["正在检索港航知识库","正在比对证据与专业规则","知识检索中"],
-      compose:["正在组织专业回答","将建议与证据整理为可执行结论","回答生成中"],
+      compose:["正在融合索引与生成模型","将锁定事实、专业分析和岗位建议组织为完整回答","混合生成中"],
       execute:[`正在执行${step || "智能任务"}`,"每一步均可追溯、可暂停","任务执行中"],
       confirm:["需要您确认后继续","高风险动作不会自动下发","等待人工确认"],
       complete:["任务完成，证据链已保留","您可以继续追问或生成报告","执行完成"]
@@ -803,31 +862,236 @@
     }[value] || value || "未验证";
   }
 
+  function startThinkingTicker(runId) {
+    const stages = [
+      { phase:"understand", label:"解析问题意图与当前会话上下文" },
+      { phase:"understand", label:"识别关键事实、风险等级与回答目标" },
+      { phase:"retrieve", label:"检索本地港航稠密与稀疏知识索引" },
+      { phase:"retrieve", label:"核对证据来源、版本与适用边界" },
+      { phase:"compose", label:"锁定法规、数值与安全相关事实" },
+      { phase:"compose", label:"构建证据约束下的回答骨架" },
+      { phase:"compose", label:"调用本地生成模型进行综合分析" },
+      { phase:"compose", label:"补充港航岗位影响与操作建议" },
+      { phase:"compose", label:"复核引用编号、事实边界与人工确认点" },
+      { phase:"compose", label:"整理表达并准备统一显示完整答案" }
+    ];
+    const liveStages = [
+      "本地模型正在生成完整答案",
+      "持续接收模型结果并检查关键事实",
+      "正在整理岗位化建议与人工确认节点",
+      "推理服务正常，继续整理完整答案"
+    ];
+    const target = $("#answer");
+    let stageIndex = 0;
+    let liveIndex = 0;
+    let stopped = false;
+
+    const render = () => {
+      if (stopped || runId !== state.generationId) return;
+      const inLiveGeneration = stageIndex >= stages.length;
+      const current = inLiveGeneration
+        ? { phase:"compose", label:liveStages[liveIndex % liveStages.length] }
+        : stages[stageIndex];
+      const completed = stages
+        .slice(Math.max(0, Math.min(stageIndex, stages.length) - 4), Math.min(stageIndex, stages.length))
+        .map((item) => `✓ ${item.label}`);
+      const progress = inLiveGeneration
+        ? `生成中 · ${liveIndex + 1}`
+        : `步骤 ${stageIndex + 1}/${stages.length}`;
+      target.classList.remove("error", "typing");
+      target.classList.add("thinking");
+      target.textContent = [...completed, `› ${current.label} · ${progress}`].join("\n");
+      $("#responseStatus").textContent = `${current.label} · 混合生成服务仍在运行`;
+      setReasoning(current.phase);
+    };
+
+    const timer = setInterval(() => {
+      if (runId !== state.generationId) {
+        stop();
+        return;
+      }
+      if (stageIndex < stages.length) stageIndex += 1;
+      else liveIndex += 1;
+      render();
+    }, 900);
+
+    function stop() {
+      if (stopped) return;
+      stopped = true;
+      clearInterval(timer);
+      target.classList.remove("thinking");
+      if (state.thinkingTickerStop === stop) state.thinkingTickerStop = null;
+    }
+
+    state.thinkingTickerStop?.();
+    state.thinkingTickerStop = stop;
+    render();
+    return stop;
+  }
+
   function stopGeneration(announce = false) {
     state.generationId += 1;
+    state.thinkingTickerStop?.();
+    const activeGenerationId = state.activeGenerationId;
+    state.activeGenerationId = null;
+    if (activeGenerationId) {
+      void cancelGenerationOnServer(activeGenerationId).catch(() => {});
+    }
     if (state.activeController) state.activeController.abort();
     state.activeController = null;
-    $("#askBtn").classList.remove("generating");
+    setAskButtonGenerating(false);
     $("#answer").classList.remove("typing");
     $("#reasoningFlow").hidden = true;
     setHeroState("idle");
-    if (announce) toast("已停止生成", "当前已显示的内容已保留。", "warning");
+    if (announce) {
+      $("#responseStatus").textContent = "已停止生成，可以修改问题后重新提问";
+      toast("已停止生成", "当前处理进度已停止，可以立即重新提问。", "warning");
+    }
   }
 
-  async function typeAnswer(text, runId) {
+  function setAskButtonGenerating(active) {
+    const button = $("#askBtn");
+    button.classList.toggle("generating", active);
+    button.setAttribute("aria-label", active ? "停止生成" : "发送");
+    button.title = active ? "停止当前生成" : "发送问题";
+  }
+
+  function scrollConversationToLatestAnswer({ settle = false } = {}) {
+    const pinToBottom = () => {
+      const feed = $("#conversationFeed");
+      if (!feed) return;
+      feed.scrollTop = Math.max(0, feed.scrollHeight - feed.clientHeight);
+      const latestAnswer = $("#assistantMessage");
+      if (!latestAnswer) return;
+      const answerBounds = latestAnswer.getBoundingClientRect();
+      if (answerBounds.bottom > window.innerHeight || answerBounds.top < 0) {
+        latestAnswer.scrollIntoView({
+          block:"end",
+          inline:"nearest",
+          behavior:"auto"
+        });
+      }
+    };
+    pinToBottom();
+    if (settle) {
+      requestAnimationFrame(() => {
+        pinToBottom();
+        requestAnimationFrame(pinToBottom);
+      });
+    }
+  }
+
+  async function typeAnswer(text, runId, delayMs = 18) {
     const target = $("#answer");
     target.classList.remove("error");
     target.classList.add("typing");
     target.textContent = "";
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const chunk = reduced ? text.length : Math.max(2, Math.ceil(text.length / 150));
+    const chunk = reduced ? text.length : Math.max(2, Math.ceil(text.length / 95));
+    let lastScrollAt = 0;
     for (let index = 0; index < text.length; index += chunk) {
       if (runId !== state.generationId) return false;
-      target.textContent = text.slice(0, index + chunk);
-      if (!reduced) await sleep(12);
+      target.textContent = displayEvidenceMarkers(text.slice(0, index + chunk));
+      if (performance.now() - lastScrollAt >= 160) {
+        lastScrollAt = performance.now();
+        scrollConversationToLatestAnswer();
+      }
+      if (!reduced) await sleep(delayMs);
     }
     target.classList.remove("typing");
+    renderStructuredAnswer(target, text, state.currentQuestion, state.currentIntent);
+    scrollConversationToLatestAnswer({ settle:true });
     return true;
+  }
+
+  function createAnswerTypewriter(runId) {
+    const target = $("#answer");
+    const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let displayed = "";
+    let pending = "";
+    let active = false;
+    let cancelled = false;
+    let started = false;
+    let idleWaiters = [];
+    let lastScrollAt = 0;
+
+    const keepLatestVisible = (force = false) => {
+      const now = performance.now();
+      if (!force && now - lastScrollAt < 160) return;
+      lastScrollAt = now;
+      scrollConversationToLatestAnswer({ settle:force });
+    };
+
+    const settleIdle = () => {
+      const waiters = idleWaiters;
+      idleWaiters = [];
+      waiters.forEach((resolve) => resolve());
+    };
+
+    const waitUntilIdle = () => {
+      if (!active && !pending) return Promise.resolve();
+      return new Promise((resolve) => idleWaiters.push(resolve));
+    };
+
+    const drain = async () => {
+      if (active || cancelled) return;
+      active = true;
+      if (!started) {
+        started = true;
+        target.classList.remove("error");
+        target.classList.add("typing");
+        target.textContent = "";
+      }
+      while (pending && !cancelled && runId === state.generationId) {
+        const totalLength = displayed.length + pending.length;
+        const step = reduced ? pending.length : Math.max(1, Math.ceil(totalLength / 110));
+        displayed += pending.slice(0, step);
+        pending = pending.slice(step);
+        target.textContent = displayEvidenceMarkers(displayed);
+        keepLatestVisible();
+        if (!reduced) await sleep(18);
+      }
+      active = false;
+      if (pending && !cancelled && runId === state.generationId) {
+        void drain();
+        return;
+      }
+      settleIdle();
+    };
+
+    return {
+      push(text) {
+        if (cancelled || runId !== state.generationId || !text) return;
+        pending += text;
+        void drain();
+      },
+      async finish(finalText) {
+        if (cancelled || runId !== state.generationId) return false;
+        const expected = String(finalText || "");
+        if (`${displayed}${pending}` !== expected) {
+          if (expected.startsWith(displayed)) {
+            pending = expected.slice(displayed.length);
+          } else {
+            displayed = "";
+            pending = expected;
+            started = false;
+          }
+        }
+        void drain();
+        await waitUntilIdle();
+        if (cancelled || runId !== state.generationId) return false;
+        target.textContent = displayEvidenceMarkers(expected);
+        keepLatestVisible(true);
+        target.classList.remove("typing");
+        return true;
+      },
+      cancel() {
+        cancelled = true;
+        pending = "";
+        target.classList.remove("typing");
+        settleIdle();
+      }
+    };
   }
 
   async function askQuestion(question, mode) {
@@ -851,13 +1115,23 @@
     const evidence = Array.isArray(data.evidence) ? data.evidence : [];
     const officialCount = evidence.filter((item) => item.official && item.source_quality === "official_verified").length;
     const sandboxRuntime = data.source_quality === "sandbox_runtime";
-    if (sandboxRuntime) {
+    const readiness = data.decision_readiness?.status || "";
+    if (readiness === "evidence_conflict") {
+      badge.textContent = "证据冲突·待裁决";
+      badge.classList.add("refused");
+    } else if (readiness === "ready_with_review") {
+      badge.textContent = "有据·需人工复核";
+      badge.classList.add("official");
+    } else if (readiness === "partial") {
+      badge.textContent = "部分就绪";
+      badge.classList.add("partial");
+    } else if (sandboxRuntime) {
       badge.textContent = "沙箱态势·已追溯";
       badge.classList.add("partial");
     } else if (data.refusal_reason || !data.grounded) {
       const liveBoundary = data.refusal_reason === "live_data_connection_required";
-      badge.textContent = liveBoundary ? "实时数据待接入" : data.refusal_reason ? "证据不足·已拒答" : "非专业交互";
-      badge.classList.add(liveBoundary ? "pending" : data.refusal_reason ? "refused" : "pending");
+      badge.textContent = liveBoundary ? "实时数据待接入" : "未检索到本地证据";
+      badge.classList.add("pending");
     } else if (officialCount) {
       badge.textContent = `官方来源 ${officialCount}`;
       badge.classList.add("grounded");
@@ -879,10 +1153,14 @@
     $("#topK").value = String(topK);
     if (question.length < 2) { toast("请输入完整问题", "至少输入 2 个字符。", "warning"); $("#question").focus(); return; }
 
+    $("#question").value = "";
     stopGeneration(false);
     const runId = ++state.generationId;
     const controller = new AbortController();
+    const serverGenerationId = globalThis.crypto?.randomUUID?.()
+      || `gen-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     state.activeController = controller;
+    state.activeGenerationId = serverGenerationId;
     state.currentQuestion = question;
     state.currentMode = mode;
     $("#currentQuestion").textContent = question;
@@ -892,11 +1170,12 @@
     $("#responseStatus").textContent = "小懿正在协同知识库与运营引擎";
     $("#answer").textContent = "正在理解您的目标与业务语境...";
     $("#next").innerHTML = "";
-    $("#askBtn").classList.add("generating");
+    setAskButtonGenerating(true);
     $("#conversationFeed").scrollTop = $("#conversationFeed").scrollHeight;
     $("#modeShortLabel").textContent = modeShort(mode);
     setReasoning("understand");
 
+    const stopThinking = startThinkingTicker(runId);
     try {
       if (state.agentMode) {
         try {
@@ -906,10 +1185,11 @@
           });
           if (runId !== state.generationId) return;
           if (plan.actionable) {
-            state.activeController = null;
+            stopThinking();
             state.currentIntent = plan.intent;
             state.currentAnswer = plan.summary;
             state.currentEvidence = [];
+            state.currentVerification = null;
             $("#analysisTitle").textContent = "智能操作计划";
             $("#analysisDate").textContent = `${plan.actions.length} 个白名单步骤 · 全程审计`;
             $("#responseStatus").textContent = "已识别为界面操作指令，准备逐步执行";
@@ -917,7 +1197,10 @@
             $("#evMetric").textContent = "0";
             $("#confMetric").textContent = `${Math.round(Number(plan.confidence || 0) * 100)}%`;
             $("#intentTag").textContent = plan.intent;
-            $("#answer").textContent = `${plan.summary}\n\n小懿只会执行预置白名单界面动作；任何生产写操作都必须在当前步骤单独确认。`;
+            const planAnswer = `${plan.summary}\n\n小懿只会执行预置白名单界面动作；任何生产写操作都必须在当前步骤单独确认。`;
+            state.currentAnswer = planAnswer;
+            if (!await typeAnswer(planAnswer, runId)) return;
+            state.activeController = null;
             if ($("#groundingBadge")) {
               $("#groundingBadge").textContent = "白名单操作计划";
               $("#groundingBadge").className = "grounding-badge pending";
@@ -936,79 +1219,81 @@
       }
 
       let streamedAnswer = "";
-      let streamStarted = false;
       const request = streamChat(
         { question, mode, top_k:topK, strict_evidence:strictEvidence, session_id:state.sessionId },
         controller.signal,
         (text) => {
           if (runId !== state.generationId) return;
-          if (!streamStarted) {
-            streamStarted = true;
-            streamedAnswer = "";
-            setReasoning("compose");
-            $("#answer").textContent = "";
-            $("#answer").classList.add("typing");
-          }
           streamedAnswer += text;
-          $("#answer").textContent = streamedAnswer;
-          $("#conversationFeed").scrollTop = $("#conversationFeed").scrollHeight;
-        }
+          setReasoning("compose");
+          $("#responseStatus").textContent = "证据检索已完成，正在生成并校验完整答案";
+        },
+        serverGenerationId
       ).then((data) => ({ data })).catch((error) => ({ error }));
 
-      await sleep(260); if (runId !== state.generationId) return;
-      if (!streamStarted) { setReasoning("retrieve"); $("#answer").textContent = state.knowledge.count ? `正在检索 ${state.knowledge.count} 份已登记港航资料与证据片段...` : "正在检索已登记港航索引与证据片段..."; }
-      await sleep(470); if (runId !== state.generationId) return;
-      if (!streamStarted) { setReasoning("compose"); $("#answer").textContent = "正在组织专业回答、风险边界与后续行动..."; }
       const result = await request;
       if (result.error) throw result.error;
       const data = result.data;
       if (runId !== state.generationId) return;
-      state.activeController = null;
+      stopThinking();
       const liveBoundary = data.refusal_reason === "live_data_connection_required";
-      const passThrough = liveBoundary || ["sandbox_not_production", "business_object_required"].includes(data.refusal_reason);
-      const answerCore = data.refusal_reason && !passThrough
-        ? `${data.answer || "已停止生成专业结论。"}\n\n证据策略：${refusalReasonLabel(data.refusal_reason)}`
-        : data.answer;
-      const answer = data.policy_notice && (data.evidence_requirement !== "registered_index" || data.requires_human_review)
-        ? `${answerCore}\n\n适用性与复核：${data.policy_notice}`
-        : answerCore;
-      state.currentAnswer = answer;
-      state.currentEvidence = Array.isArray(data.evidence) ? data.evidence : [];
+      const answer = data.answer;
       state.currentMode = data.mode;
       state.currentIntent = data.intent;
       state.currentConfidence = data.confidence;
       $("#responseKpis").hidden = !["energy_analysis", "energy_carbon"].includes(data.intent);
       $("#analysisTitle").textContent = intentTitle(data.intent);
       const generationLabel = data.generation_fallback ? `${data.generation_provider} 已回退` : data.generation_provider || "local_rules";
-      $("#analysisDate").textContent = data.source_quality === "sandbox_runtime" ? `${new Date().toLocaleDateString("zh-CN")} · 运营沙箱态势 · ${generationLabel}` : `${new Date().toLocaleDateString("zh-CN")} · 严格索引 RAG · ${generationLabel}`;
-      $("#responseStatus").textContent = data.source_quality === "sandbox_runtime"
+      $("#analysisDate").textContent = data.source_quality === "sandbox_runtime" ? `${new Date().toLocaleDateString("zh-CN")} · 运营沙箱态势 · ${generationLabel}` : `${new Date().toLocaleDateString("zh-CN")} · 本地生成式 RAG · ${generationLabel}`;
+      $("#responseStatus").textContent = "融合分析与证据校验已完成，正在统一输出完整答案";
+      if (!await typeAnswer(answer, runId, 24)) return;
+      state.activeController = null;
+      state.activeGenerationId = null;
+      const readiness = data.decision_readiness || null;
+      state.currentAnswer = answer;
+      state.currentEvidence = Array.isArray(data.evidence) ? data.evidence : [];
+      state.currentVerification = data.answer_verification || null;
+      $("#responseStatus").textContent = readiness?.status === "evidence_conflict"
+        ? "支持证据存在冲突，已阻止形成可采用决策"
+        : readiness?.status === "partial"
+        ? data.generation_fallback
+          ? "部分子问题有据，未覆盖部分保持证据边界"
+          : "有据结论已锁定，未覆盖部分已由本机模型补充并等待人工复核"
+        : data.source_quality === "sandbox_runtime"
         ? "已读取动态沙箱事件并保留生产数据边界"
         : liveBoundary ? "已说明实时数据边界与目标接入系统，未使用沙箱数值"
         : data.refusal_reason === "business_object_required" ? "业务对象不明确，等待补充后继续"
-        : data.refusal_reason ? "证据不足，已按安全策略拒绝生成事实" : "港航知识检索与证据分析已完成";
+        : data.intent === "identity" ? "身份与能力介绍已完成 · 本机生成模型参与表达"
+        : !data.grounded ? "模型已正常回答；本地证据不足提醒已附在答案底部" : "港航知识检索与证据分析已完成";
+      if (data.grounded && data.answer_verification?.status === "passed") {
+        $("#responseStatus").textContent += ` · 主张对齐 ${(Number(data.answer_verification.evidence_alignment || 0) * 100).toFixed(0)}% · 数字完整性 ${(Number(data.answer_verification.numeric_integrity || 0) * 100).toFixed(0)}%`;
+      }
       $("#modeMetric").textContent = modeLabel(data.mode);
       $("#evMetric").textContent = String(state.currentEvidence.length);
       $("#confMetric").textContent = data.confidence;
       $("#intentTag").textContent = data.intent;
       $("#evidence").textContent = JSON.stringify(state.currentEvidence);
       updateGroundingState(data);
-      $("#answer").classList.remove("typing");
-      $("#answer").textContent = answer;
       renderNextQuestions(data.next_questions || [], data.mode, data.question);
       saveTopic({ ...data, answer });
+      scrollConversationToLatestAnswer({ settle:true });
       setHeroState("complete");
       setTimeout(() => { if (!state.activeController) setHeroState("idle"); }, 2300);
     } catch (error) {
+      stopThinking();
       if (error.name !== "AbortError" && runId === state.generationId) {
         $("#answer").classList.add("error");
         $("#answer").textContent = `连接受限：${error.message}\n\n当前问题与已显示内容已保留，请检查服务后重试。`;
         $("#responseStatus").textContent = "连接受限，已保留当前进度";
+        scrollConversationToLatestAnswer({ settle:true });
         toast("问答服务连接失败", error.message, "warning", 5000);
       }
     } finally {
+      stopThinking();
       if (runId === state.generationId) {
         state.activeController = null;
-        $("#askBtn").classList.remove("generating");
+        state.activeGenerationId = null;
+        setAskButtonGenerating(false);
         $("#answer").classList.remove("typing");
         $("#reasoningFlow").hidden = true;
       }
@@ -1029,6 +1314,16 @@
     return key ? known[key] : "专业分析结果";
   }
 
+  function readinessLabel(status) {
+    const labels = {
+      ready:"可采用", ready_with_review:"有据但需人工复核", partial:"部分就绪",
+      needs_clarification:"需要补充对象", needs_live_data:"需要实时数据",
+      needs_full_text:"需要官方全文", insufficient_evidence:"证据不足",
+      evidence_conflict:"证据冲突", sandbox_only:"仅限沙箱", not_applicable:"不适用"
+    };
+    return labels[status] || "需要复核";
+  }
+
   function renderNextQuestions(items, mode, baseQuestion) {
     const buttons = items.slice(0, 3).map((item, index) => {
       const text = typeof item === "string" ? item : item.text;
@@ -1045,18 +1340,55 @@
     return value.length > 30 ? `${value.slice(0,30)}...` : value;
   }
 
+  function renderConversationTranscript({ excludeLatest = false } = {}) {
+    const transcript = $("#conversationTranscript");
+    if (!transcript) return;
+    const turns = excludeLatest
+      ? state.conversationTurns.slice(0, -1)
+      : state.conversationTurns;
+    transcript.innerHTML = turns.map((item) => `
+      <section class="transcript-turn" data-transcript-turn="${escapeHtml(item.id)}">
+        <div class="user-bubble-row">
+          <div class="user-bubble"><span>${escapeHtml(item.question)}</span><time>${escapeHtml(formatShortTime(item.createdAt))}</time></div>
+        </div>
+        <div class="transcript-assistant-row">
+          <div class="mini-assistant-avatar"><span class="bot-face"><i></i><b></b></span></div>
+          <div class="transcript-assistant-bubble">${escapeHtml(displayEvidenceMarkers(item.answer))}<footer><span>小懿AI · ${escapeHtml(modeShort(item.mode))}</span><span>${escapeHtml(item.intent || "knowledge")}</span></footer></div>
+        </div>
+        <div class="transcript-divider"></div>
+      </section>
+    `).join("");
+  }
+
   function saveTopic(data) {
     const item = {
-      id:`topic-${Date.now()}-${Math.random().toString(16).slice(2,8)}`,
+      id:data.answer_id || `topic-${Date.now()}-${Math.random().toString(16).slice(2,8)}`,
+      sessionId:data.session_id || state.sessionId,
       title:topicTitle(data.question), question:data.question, answer:data.answer, mode:data.mode,
       intent:data.intent, confidence:data.confidence, evidence:data.evidence || [], next_questions:data.next_questions || [],
       grounded:Boolean(data.grounded), coverage:Number(data.coverage || 0), source_quality:data.source_quality || "unverified",
       refusal_reason:data.refusal_reason || null, strict_evidence:Boolean(data.strict_evidence),
+      decision_readiness:data.decision_readiness || null,
+      evidence_health:data.evidence_health || null,
+      answer_verification:data.answer_verification || null,
       createdAt:new Date().toISOString()
     };
-    state.topics = [item, ...state.topics.filter((old) => old.question !== item.question || old.mode !== item.mode)].slice(0,40);
+    state.topics = [item, ...state.topics.filter((old) => old.id !== item.id)].slice(0,200);
+    state.conversationTurns = [...state.conversationTurns, item].slice(-40);
     persist(STORAGE.topics, state.topics);
+    persist(STORAGE.turns, state.conversationTurns);
+    renderConversationTranscript({ excludeLatest:true });
     updateCounts();
+  }
+
+  function beginNewConversation() {
+    state.sessionId = createSessionId();
+    state.conversationTurns = [];
+    localStorage.setItem(STORAGE.sessionId, state.sessionId);
+    persist(STORAGE.turns, state.conversationTurns);
+    renderConversationTranscript();
+    showWelcome();
+    toast("已新建连续对话", "后续消息会在当前窗口连续显示，并共享同一会话上下文。", "success");
   }
 
   function showWelcome() {
@@ -1072,10 +1404,16 @@
       ? `当前能耗态势：\n• 综合能耗 ${formatNumber(summary.total_energy_mwh)} MWh，较对比基线 ${Number(summary.energy_change_percent) <= 0 ? "下降" : "上升"} ${Math.abs(Number(summary.energy_change_percent)).toFixed(1)}%。\n• 碳排放 ${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e，岸电利用率 ${formatNumber(summary.shore_power_utilization_percent)}%。\n• ${energy.insights?.[0] || "请结合当前作业计划复核能耗变化。"}\n• ${energy.insights?.[1] || "高负荷窗口需要现场值班人员确认。"}\n\n数据边界：${modeName}，来源 ${metadata.source_system}，观测时间 ${formatDateTime(metadata.observed_at)}，质量码 ${metadata.quality_code}。${metadata.live_data_verified ? "" : "当前不是现场生产实绩，不能作为控制依据。"}`
       : "等待接入港口：当前未读取 TOS、AIS、EMS、EAM 或 VTS 的现场数据，因此不展示或推断今日能耗、吞吐量、设备状态和告警数值。港航知识问答与固定 RAG 评测仍可独立使用。";
     state.currentEvidence = live ? [{ id:"runtime:LIVE-PORT", source:metadata.source_system, title:"已验证港口运营数据", score:1, snippet:metadata.data_notice, institution:metadata.source_system, version:metadata.schema_version, official:false, source_quality:"live_verified", verification_status:"live_verified" }] : [];
+    state.currentVerification = null;
     state.currentMode = "ops";
     state.currentIntent = "energy_analysis";
     $("#currentQuestion").textContent = state.currentQuestion;
-    $("#answer").textContent = state.currentAnswer;
+    renderStructuredAnswer(
+      $("#answer"),
+      state.currentAnswer,
+      state.currentQuestion,
+      state.currentIntent
+    );
     $("#responseKpis").hidden = false;
     $("#analysisTitle").textContent = "今日能耗概况";
     $("#responseStatus").textContent = live ? "已读取并验证港口现场数据" : "等待接入港口";
@@ -1087,18 +1425,28 @@
     updateGroundingState(live ? { grounded:true, coverage:1, source_quality:"live_verified", evidence:state.currentEvidence } : { grounded:false, coverage:0, source_quality:"unverified", refusal_reason:"live_data_connection_required", evidence:[] });
     setView("chat", { silent:true });
     applyEnergySummary(state.dashboard.energy || fallbackDashboard.energy);
+    renderConversationTranscript();
     setHeroState("idle");
   }
 
   function restoreTopic(id) {
     const item = state.topics.find((topic) => topic.id === id);
     if (!item) return;
+    if (item.sessionId && item.sessionId !== state.sessionId) {
+      state.sessionId = item.sessionId;
+      localStorage.setItem(STORAGE.sessionId, state.sessionId);
+      state.conversationTurns = state.topics
+        .filter((topic) => topic.sessionId === state.sessionId)
+        .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+      persist(STORAGE.turns, state.conversationTurns);
+    }
     closeModal();
     setView("chat", { silent:true });
     stopGeneration(false);
     state.currentQuestion = item.question || "";
     state.currentAnswer = item.answer || "";
     state.currentEvidence = Array.isArray(item.evidence) ? item.evidence : [];
+    state.currentVerification = item.answer_verification || null;
     state.currentMode = item.mode || "expert";
     state.currentIntent = item.intent || "knowledge";
     state.currentConfidence = item.confidence || "-";
@@ -1106,7 +1454,12 @@
     $("#mode").value = item.mode || "expert";
     $("#modeShortLabel").textContent = modeShort(item.mode);
     $("#currentQuestion").textContent = item.question || "";
-    $("#answer").textContent = item.answer || "";
+    renderStructuredAnswer(
+      $("#answer"),
+      item.answer || "",
+      item.question || "",
+      item.intent || "knowledge"
+    );
     $("#responseKpis").hidden = !["energy_analysis", "energy_carbon"].includes(item.intent);
     $("#analysisTitle").textContent = intentTitle(item.intent);
     $("#responseStatus").textContent = "已恢复历史对话";
@@ -1116,10 +1469,14 @@
     $("#intentTag").textContent = item.intent || "knowledge";
     updateGroundingState(item);
     renderNextQuestions(Array.isArray(item.next_questions) ? item.next_questions : [], item.mode, item.question);
+    renderConversationTranscript({ excludeLatest:true });
   }
 
   function updateCounts() {
-    $("#historyCount").textContent = String(state.topics.length);
+    const sessionCount = new Set(
+      state.topics.map((item) => item.sessionId || "legacy")
+    ).size;
+    $("#historyCount").textContent = String(sessionCount);
     $("#favoriteCount").textContent = String(state.favorites.length);
     const running = state.tasks.filter((task) => task.status === "running").length;
     $("#taskNavBadge").textContent = String(running);
@@ -1242,31 +1599,62 @@
   }
 
   function openHistory() {
-    const body = `<div class="history-toolbar"><span>最近 ${state.topics.length} 个话题保存在本机浏览器中</span><button type="button" class="text-button danger-button" data-modal-action="clear-history">清空历史</button></div><div class="history-list">${state.topics.length ? state.topics.map((item) => `<div class="history-item"><button type="button" data-topic-id="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title || topicTitle(item.question))}</strong><span>${escapeHtml(item.answer || "").slice(0,90)}${String(item.answer || "").length > 90 ? "..." : ""}</span><footer><em>${formatDateTime(item.createdAt)}</em><em>${escapeHtml(modeLabel(item.mode))} · ${escapeHtml(item.intent || "")}</em></footer></button></div>`).join("") : `<div class="task-empty"><div>${icon("history")}<strong>暂无对话历史</strong><span>完成一次提问后会自动保存在这里</span></div></div>`}</div>`;
-    openModal("对话历史", "浏览器保留最近40条；服务端按当前身份与会话执行可配置留存", body, "", "history");
+    const grouped = new Map();
+    state.topics.forEach((item) => {
+      const sessionId = item.sessionId || "legacy";
+      const group = grouped.get(sessionId) || { sessionId, turns:[] };
+      group.turns.push(item);
+      grouped.set(sessionId, group);
+    });
+    const conversations = [...grouped.values()].map((group) => {
+      const turns = group.turns.sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+      return { ...group, turns, first:turns[0], latest:turns[turns.length - 1] };
+    }).sort((left, right) => new Date(right.latest.createdAt) - new Date(left.latest.createdAt));
+    const body = `<div class="history-toolbar"><span>最近 ${conversations.length} 个连续会话保存在本机浏览器中</span><button type="button" class="text-button danger-button" data-modal-action="clear-history">清空历史</button></div><div class="history-list">${conversations.length ? conversations.map((item) => `<div class="history-item"><button type="button" data-conversation-id="${escapeHtml(item.sessionId)}"><strong>${escapeHtml(topicTitle(item.first.question))}</strong><span>${escapeHtml(displayEvidenceMarkers(item.latest.answer || "")).slice(0,90)}${String(item.latest.answer || "").length > 90 ? "..." : ""}</span><footer><em>${formatDateTime(item.latest.createdAt)}</em><em>${item.turns.length} 轮连续对话</em></footer></button></div>`).join("") : `<div class="task-empty"><div>${icon("history")}<strong>暂无对话历史</strong><span>完成一次提问后会自动保存在这里</span></div></div>`}</div>`;
+    openModal("对话历史", "按会话归档；同一窗口消息连续显示并共享上下文", body, "", "history");
   }
 
   async function loadServerConversation() {
-    if (state.topics.length) return;
+    const requestedSessionId = state.sessionId;
+    const localTurns = state.topics
+      .filter((item) => item.sessionId === requestedSessionId)
+      .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+    if (localTurns.length) {
+      state.conversationTurns = localTurns.slice(-40);
+      persist(STORAGE.turns, state.conversationTurns);
+      return;
+    }
     try {
-      const history = await api(`/api/conversations/${encodeURIComponent(state.sessionId)}?limit=40`);
-      state.topics = (history.items || []).map((item) => {
+      const history = await api(`/api/conversations/${encodeURIComponent(requestedSessionId)}?limit=40`);
+      if (state.sessionId !== requestedSessionId) return;
+      const loadedTurns = (history.items || []).map((item) => {
         const response = item.response || {};
         return {
-          id:response.answer_id || item.id, title:topicTitle(item.question), question:item.question,
+          id:response.answer_id || item.id, sessionId:requestedSessionId,
+          title:topicTitle(item.question), question:item.question,
           answer:response.answer || "", mode:response.mode || "expert", intent:response.intent || "knowledge",
           confidence:response.confidence || "-", evidence:response.evidence || [], next_questions:response.next_questions || [],
           grounded:Boolean(response.grounded), coverage:Number(response.coverage || 0), source_quality:response.source_quality || "unverified",
-          refusal_reason:response.refusal_reason || null, strict_evidence:Boolean(response.strict_evidence), createdAt:item.created_at
+          refusal_reason:response.refusal_reason || null, strict_evidence:Boolean(response.strict_evidence),
+          answer_verification:response.answer_verification || null, createdAt:item.created_at
         };
       });
-      if (state.topics.length) persist(STORAGE.topics, state.topics);
+      if (loadedTurns.length) {
+        state.topics = [
+          ...loadedTurns,
+          ...state.topics.filter((item) => item.sessionId !== requestedSessionId)
+        ].slice(0,200);
+        state.conversationTurns = [...loadedTurns]
+          .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+        persist(STORAGE.topics, state.topics);
+        persist(STORAGE.turns, state.conversationTurns);
+      }
       updateCounts();
     } catch { /* production may require a token before history can be restored */ }
   }
 
   function openFavorites() {
-    const body = `<div class="favorite-list">${state.favorites.length ? state.favorites.map((item) => `<div class="favorite-item"><button type="button" data-favorite-id="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(item.answer).slice(0,110)}...</span><footer><em>${formatDateTime(item.createdAt)}</em><em>${escapeHtml(modeLabel(item.mode))}</em></footer></button></div>`).join("") : `<div class="task-empty"><div>${icon("star")}<strong>还没有收藏</strong><span>点击回答右上角的星标即可收藏</span></div></div>`}</div>`;
+    const body = `<div class="favorite-list">${state.favorites.length ? state.favorites.map((item) => `<div class="favorite-item"><button type="button" data-favorite-id="${escapeHtml(item.id)}"><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(displayEvidenceMarkers(item.answer)).slice(0,110)}...</span><footer><em>${formatDateTime(item.createdAt)}</em><em>${escapeHtml(modeLabel(item.mode))}</em></footer></button></div>`).join("") : `<div class="task-empty"><div>${icon("star")}<strong>还没有收藏</strong><span>点击回答右上角的星标即可收藏</span></div></div>`}</div>`;
     openModal("我的收藏", `${state.favorites.length} 条已收藏专业回答`, body, "", "favorites");
   }
 
@@ -1365,6 +1753,173 @@
     }
   }
 
+  const SYSTEM_LINKAGE_CATALOG = [
+    { target:"port-dt-multi", name:"港口数字孪生", english:"PORT DIGITAL TWIN", icon:"agv", action:"自然语言动作映射", detail:"读取孪生态势并将小懿指令映射为可审计 dry-run 动作包" },
+    { target:"energy-cockpit", name:"能碳驾驶舱", english:"ENERGY & CARBON", icon:"chart", action:"离线策略重算", detail:"调用真实能碳后端，重算成本、碳排、岸电与调度指标" },
+    { target:"malacca-sandbox", name:"马六甲推演", english:"PORT SANDBOX", icon:"spark", action:"沙盘与RL读取", detail:"读取公开数据快照、场景态势和训练引擎能力" },
+    { target:"sailing-simulator", name:"航行模拟器", english:"GODOT SAILING SIM", icon:"ship", action:"航行场景验证", detail:"注入航线、船舶与风险事件，回传安全间距、碰撞和碳排结果" }
+  ];
+
+  function linkageStateLabel(runtime = {}) {
+    if (runtime.running) return "ONLINE";
+    if (runtime.state === "starting") return "STARTING";
+    if (runtime.state === "unavailable") return "UNAVAILABLE";
+    if (runtime.state === "error" || runtime.state === "port_conflict") return "ERROR";
+    return "OFFLINE";
+  }
+
+  function linkageResultMarkup(result) {
+    if (!result) return `<div class="system-linkage-empty">尚未执行联动任务</div>`;
+    if (result.status !== "completed") {
+      return `<div class="system-linkage-error">${icon("alert")}<span>${escapeHtml(result.error || "联动执行失败")}</span></div>`;
+    }
+    const summary = result.summary || {};
+    const facts = [];
+    if (result.target === "port-dt-multi") {
+      facts.push(["动作", summary.action_label || summary.action_id || "已映射"]);
+      facts.push(["执行", summary.execution_status || "dry-run"]);
+      facts.push(["人工确认", summary.requires_human_confirm ? "需要" : "不需要"]);
+    } else if (result.target === "energy-cockpit") {
+      facts.push(["场景", summary.scenario_id || "—"]);
+      facts.push(["减排", summary.abatement_ton == null ? "—" : `${formatNumber(summary.abatement_ton, 2)} t`]);
+      facts.push(["节省", summary.total_cost_saving_cny == null ? "—" : `¥${formatNumber(summary.total_cost_saving_cny, 0)}`]);
+      facts.push(["数据集", summary.dataset_id || "—"]);
+    } else if (result.target === "malacca-sandbox") {
+      facts.push(["引擎", summary.engine || "—"]);
+      facts.push(["算法", (summary.algorithms || []).join(" / ") || "—"]);
+      facts.push(["场景", summary.scenario?.id || "—"]);
+      facts.push(["生产写入", summary.production_write_enabled ? "开启" : "关闭"]);
+    } else {
+      facts.push(["安全通过", summary.safePass === true ? "是" : summary.safePass === false ? "否" : "—"]);
+      facts.push(["风险", summary.riskLevel || "—"]);
+      facts.push(["推荐航速", summary.recommendedSpeedKnots == null ? "—" : `${summary.recommendedSpeedKnots} kn`]);
+      facts.push(["最小间距", summary.minClearanceMeters == null ? "—" : `${summary.minClearanceMeters} m`]);
+      facts.push(["碰撞/搁浅", `${summary.collisionCount ?? "—"} / ${summary.groundingCount ?? "—"}`]);
+      facts.push(["碳排变化", summary.carbonDeltaTons == null ? "—" : `${summary.carbonDeltaTons} t`]);
+    }
+    return `<div class="system-linkage-result"><header><strong>${escapeHtml(result.action || "联动任务完成")}</strong><span>${escapeHtml(result.trace_id || "")}</span></header><div>${facts.map(([label,value]) => `<span><small>${escapeHtml(label)}</small><b>${escapeHtml(value)}</b></span>`).join("")}</div><footer><span>${Number(result.duration_ms || 0).toLocaleString("zh-CN")} ms</span><span>SHA-256 ${escapeHtml(String(result.payload_sha256 || "").slice(0,12))}…</span></footer></div>`;
+  }
+
+  function renderSystemLinkage(payload) {
+    state.systemLinkage = payload;
+    const systems = payload.systems || {};
+    if ($("#systemLaunchBadge")) $("#systemLaunchBadge").textContent = `${payload.online_count || 0}/${payload.total || 4}`;
+    if (state.modalKind !== "system-linkage") return;
+    $("#modalSubtitle").textContent = `${payload.online_count || 0}/${payload.total || 4} 个系统在线 · 本机API / Godot文件桥 · 全链路审计`;
+    $("#modalBody").innerHTML = `<div class="system-linkage-hub">
+      <section class="system-linkage-hero">
+        <div><span>LOCAL MULTI-SYSTEM ORCHESTRATION</span><strong>小懿四系统联动控制台</strong><p>统一启动、上下文传递、真实接口调用、模拟器场景注入、结果回写与证据哈希。</p></div>
+        <span class="system-linkage-total">${payload.online_count || 0}<small>/ 4 ONLINE</small></span>
+      </section>
+      <section class="system-linkage-command">
+        <div><label for="systemLinkageCommand">跨系统演示指令</label><textarea id="systemLinkageCommand" rows="2">针对当前港航作业进行态势读取、能碳策略重算和航行风险验证，并回传各系统结果</textarea></div>
+        <button type="button" class="primary-button" data-linkage-run="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}一键联动演示</button>
+        <button type="button" class="outline-button" data-linkage-start="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("play")}启动全部</button>
+        <button type="button" class="outline-button" data-linkage-refresh>${icon("command")}刷新状态</button>
+      </section>
+      <div class="system-linkage-boundary">${icon("alert")}<span>${escapeHtml(payload.execution_boundary || "联动仅面向本机仿真与离线数据，不下发生产指令。")}</span></div>
+      <section class="system-linkage-grid">${SYSTEM_LINKAGE_CATALOG.map((item) => {
+        const node = systems[item.target] || {};
+        const runtime = node.runtime || {};
+        const online = Boolean(runtime.running);
+        const busy = state.systemLinkageBusy === item.target || state.systemLinkageBusy === "all";
+        const stateLabel = linkageStateLabel(runtime);
+        return `<article class="system-linkage-card ${online ? "online" : ""}" data-system-linkage-card="${item.target}">
+          <header><span class="system-linkage-icon">${icon(item.icon)}</span><div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.english)}</small></div><em class="linkage-state ${escapeHtml(String(runtime.state || "offline"))}"><i></i>${escapeHtml(stateLabel)}</em></header>
+          <p>${escapeHtml(item.detail)}</p>
+          <div class="system-linkage-action"><span>真实联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
+          ${busy ? `<div class="system-linkage-running"><i></i><span>正在启动并执行，等待目标系统回写…</span></div>` : linkageResultMarkup(node.last_result)}
+          <footer>
+            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${busy ? "disabled" : ""}>${icon("spark")}${online ? "执行联动" : "启动并联动"}</button>
+            <button type="button" class="drawer-button secondary" data-linkage-open="${item.target}" ${online ? "" : "disabled"}>${icon(item.target === "sailing-simulator" ? "ship" : "play")}${item.target === "sailing-simulator" ? "切换窗口" : "打开系统"}</button>
+          </footer>
+          <small class="system-linkage-message">${escapeHtml(runtime.message || "等待读取运行状态")}</small>
+        </article>`;
+      }).join("")}</section>
+      <footer class="system-linkage-audit"><span>桥接请求：${payload.bridge?.request_exists ? "已生成" : "待生成"}</span><span>桥接结果：${payload.bridge?.result_exists ? "已回写" : "待回写"}</span><span>生产写入：关闭</span></footer>
+    </div>`;
+  }
+
+  async function loadSystemLinkage({ render = true } = {}) {
+    try {
+      const payload = await api("/api/system-linkage/overview", { timeoutMs:15000 });
+      if (render || state.modalKind === "system-linkage") renderSystemLinkage(payload);
+      else {
+        state.systemLinkage = payload;
+        if ($("#systemLaunchBadge")) $("#systemLaunchBadge").textContent = `${payload.online_count || 0}/${payload.total || 4}`;
+      }
+      return payload;
+    } catch (error) {
+      if (state.modalKind === "system-linkage") {
+        $("#modalBody").innerHTML = `<div class="drawer-note"><strong>四系统联动状态读取失败：</strong>${escapeHtml(error.message)}</div>`;
+      }
+      throw error;
+    }
+  }
+
+  async function openSystemLinkage() {
+    openModal("四系统联动中心", "正在读取本机服务、模拟器桥接与最近执行回执", `<div class="task-empty"><div>${icon("spark")}<strong>正在建立联动拓扑</strong><span>读取四个系统的真实运行状态</span></div></div>`, "", "system-linkage");
+    try { await loadSystemLinkage(); } catch { /* modal contains the error */ }
+  }
+
+  async function startSystemLinkage(target) {
+    const targets = target === "all" ? SYSTEM_LINKAGE_CATALOG.map((item) => item.target) : [target];
+    state.systemLinkageBusy = target;
+    if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
+    try {
+      const result = await api("/api/system-linkage/start", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ targets }), timeoutMs:180000
+      });
+      toast(result.all_ready ? "四系统已就绪" : "部分系统未就绪", `${Object.values(result.systems || {}).filter((item) => item.running).length}/${targets.length} 个目标在线`, result.all_ready ? "success" : "warning", 5200);
+    } catch (error) {
+      toast("系统启动失败", error.message, "warning", 6000);
+    } finally {
+      state.systemLinkageBusy = null;
+      await loadSystemLinkage().catch(() => {});
+    }
+  }
+
+  async function runSystemLinkage(target) {
+    const command = String($("#systemLinkageCommand")?.value || "读取当前业务态势并执行联动验证").trim();
+    state.systemLinkageBusy = target;
+    if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
+    try {
+      const response = await api("/api/system-linkage/command", {
+        method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ target, command, session_id:state.sessionId, auto_start:true, wait_seconds:30 }),
+        timeoutMs:240000
+      });
+      toast(response.all_succeeded ? "跨系统联动完成" : "跨系统联动部分完成", `${response.succeeded}/${response.total} 项成功 · ${response.correlation_id}`, response.all_succeeded ? "success" : "warning", 6500);
+    } catch (error) {
+      toast("联动执行失败", error.message, "warning", 6500);
+    } finally {
+      state.systemLinkageBusy = null;
+      await loadSystemLinkage().catch(() => {});
+    }
+  }
+
+  async function openLinkedSystem(target) {
+    const node = state.systemLinkage?.systems?.[target];
+    const runtime = node?.runtime || {};
+    if (!runtime.running) {
+      toast("目标系统尚未在线", runtime.message || "请先启动目标系统。", "warning");
+      return;
+    }
+    if (target === "sailing-simulator") {
+      try {
+        await api("/api/sailing-simulator/focus", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target}), timeoutMs:8000 });
+      } catch (error) {
+        toast("无法切换模拟器窗口", error.message, "warning");
+      }
+      return;
+    }
+    const url = safeUrl(runtime.url);
+    if (!url) return;
+    const opened = window.open(url, "_blank", "noopener,noreferrer");
+    if (!opened) window.location.assign(url);
+  }
+
   function favoriteCurrent() {
     if (!state.currentAnswer) { toast("当前没有可收藏内容", "先完成一次问答。", "warning"); return; }
     const id = `${state.currentQuestion}|${state.currentMode}`;
@@ -1376,9 +1931,13 @@
 
   function openEvidence() {
     const evidence = state.currentEvidence || [];
-    const body = evidence.length ? `<div class="evidence-list">${evidence.map((item,index) => {
+    const verification = state.currentVerification;
+    const verificationBanner = verification && verification.status !== "not_applicable"
+      ? `<div class="drawer-note"><strong>回答后门禁：</strong>${verification.status === "passed" ? "通过" : "需要复核"} · 引用有效性 ${(Number(verification.citation_validity || 0) * 100).toFixed(0)}% · 主张词面对齐 ${(Number(verification.evidence_alignment || 0) * 100).toFixed(0)}% · 数字/日期/量值完整性 ${(Number(verification.numeric_integrity || 0) * 100).toFixed(0)}%<br><small>${escapeHtml(verification.scope_notice || "该门禁不替代事实或法律复核。")}</small></div>`
+      : "";
+    const body = evidence.length ? `${verificationBanner}<div class="evidence-list">${evidence.map((item,index) => {
       const url = safeUrl(item.source_url);
-      return `<article class="evidence-item ${item.official ? "official" : ""}"><header><strong>${String(index+1).padStart(2,"0")} · ${escapeHtml(item.title)}</strong><span>${item.official ? "发布页已核验" : escapeHtml(item.source_quality || "未验证")} · ${item.citation_role === "locator_only" ? "仅定位" : "答案依据"} · 匹配分 ${Number(item.score || 0).toFixed(2)}</span></header><p>${escapeHtml(item.snippet)}</p><dl class="provenance-grid"><div><dt>来源机构</dt><dd>${escapeHtml(item.institution || "内部整理资料")}</dd></div><div><dt>内容范围</dt><dd>${escapeHtml(item.content_scope || "未登记")}</dd></div><div><dt>适用辖区</dt><dd>${escapeHtml((item.jurisdictions || []).join(" / ") || "未登记")}</dd></div><div><dt>法律效力</dt><dd>${escapeHtml(item.legal_force || "未登记")}</dd></div><div><dt>版本</dt><dd>${escapeHtml(item.version || "未登记")}</dd></div><div><dt>验证状态</dt><dd>${escapeHtml(item.verification_status || "未登记")}</dd></div><div><dt>复核状态</dt><dd>${escapeHtml(item.review_status || "未登记")}</dd></div><div><dt>索引文件</dt><dd>${escapeHtml(item.source)}</dd></div><div><dt>文档 SHA-256</dt><dd title="${escapeHtml(item.checksum_sha256 || "")}">${escapeHtml(item.checksum_sha256 || "未建立")}</dd></div><div><dt>片段 SHA-256</dt><dd title="${escapeHtml(item.chunk_checksum_sha256 || "")}">${escapeHtml(item.chunk_checksum_sha256 || "未建立")}</dd></div></dl>${item.citation_role === "locator_only" ? `<p class="source-warning">该证据只用于打开官方页面，不构成当前答案的事实依据。</p>` : ""}${url ? `<a class="source-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">打开发布机构原始页面 →</a>` : `<p class="source-warning">当前资料没有外部原始链接，仅可视为内部整理来源。</p>`}</article>`;
+      return `<article class="evidence-item ${item.official ? "official" : ""}"><header><strong>来源 ${String(index+1).padStart(2,"0")} · ${escapeHtml(item.title)}</strong><span>${item.official ? "发布页已核验" : escapeHtml(item.source_quality || "未验证")} · ${item.citation_role === "locator_only" ? "仅定位" : "答案依据"} · 匹配分 ${Number(item.score || 0).toFixed(2)}</span></header><p>${escapeHtml(item.snippet)}</p><dl class="provenance-grid"><div><dt>来源机构</dt><dd>${escapeHtml(item.institution || "内部整理资料")}</dd></div><div><dt>内容范围</dt><dd>${escapeHtml(item.content_scope || "未登记")}</dd></div><div><dt>适用辖区</dt><dd>${escapeHtml((item.jurisdictions || []).join(" / ") || "未登记")}</dd></div><div><dt>法律效力</dt><dd>${escapeHtml(item.legal_force || "未登记")}</dd></div><div><dt>版本</dt><dd>${escapeHtml(item.version || "未登记")}</dd></div><div><dt>验证状态</dt><dd>${escapeHtml(item.verification_status || "未登记")}</dd></div><div><dt>复核状态</dt><dd>${escapeHtml(item.review_status || "未登记")}</dd></div><div><dt>索引文件</dt><dd>${escapeHtml(item.source)}</dd></div><div><dt>文档 SHA-256</dt><dd title="${escapeHtml(item.checksum_sha256 || "")}">${escapeHtml(item.checksum_sha256 || "未建立")}</dd></div><div><dt>片段 SHA-256</dt><dd title="${escapeHtml(item.chunk_checksum_sha256 || "")}">${escapeHtml(item.chunk_checksum_sha256 || "未建立")}</dd></div></dl>${item.citation_role === "locator_only" ? `<p class="source-warning">该证据只用于打开官方页面，不构成当前答案的事实依据。</p>` : ""}${url ? `<a class="source-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">打开发布机构原始页面 →</a>` : `<p class="source-warning">当前资料没有外部原始链接，仅可视为内部整理来源。</p>`}</article>`;
     }).join("")}</div>` : `<div class="task-empty"><div>${icon("book")}<strong>当前没有索引证据</strong><span>专业模式会在证据不足时明确拒答，不会用生成内容冒充来源</span></div></div>`;
     openModal("依据与来源", `${evidence.length} 条已索引证据 · 来源、版本与校验和可审计`, body, "", "evidence");
   }
@@ -2147,7 +2706,7 @@
       return `已按 ${report.analysis_range || range} 周期生成报告 ${report.id}，可从执行轨迹导出。`;
     }
     if (action.kind === "new_chat") {
-      await guidedFocus('[data-agent-target="new-chat"]', action.label, false, 460); showWelcome(); return "已新建对话。";
+      await guidedFocus('[data-agent-target="new-chat"]', action.label, false, 460); beginNewConversation(); return "已新建连续对话。";
     }
     if (action.kind === "show_history") {
       await guidedFocus('[data-agent-target="history"]', action.label, false, 460); openHistory(); return "已打开对话历史。";
@@ -2512,12 +3071,13 @@
     state.currentIntent = intent;
     state.currentMode = mode;
     state.currentEvidence = evidence;
+    state.currentVerification = null;
     state.currentConfidence = confidence;
     $("#question").value = question;
     $("#currentQuestion").textContent = question;
     $("#userMessageTime").textContent = formatShortTime();
     $("#userBubbleRow").hidden = false;
-    $("#answer").textContent = answer;
+    void typeAnswer(answer, state.generationId);
     $("#responseKpis").hidden = !["energy_analysis", "energy_carbon"].includes(intent);
     $("#analysisTitle").textContent = intentTitle(intent);
     $("#analysisDate").textContent = `${new Date().toLocaleDateString("zh-CN")} · 小懿端到端智能操作`;
@@ -3072,6 +3632,14 @@
       if (categoryButton) { setView("knowledge"); $("#knowledgeSearch").value = categoryButton.dataset.knowledgeTag; renderKnowledge(categoryButton.dataset.knowledgeTag); return; }
       const topicButton = event.target.closest("[data-topic-id]");
       if (topicButton) { restoreTopic(topicButton.dataset.topicId); return; }
+      const conversationButton = event.target.closest("[data-conversation-id]");
+      if (conversationButton) {
+        const turns = state.topics
+          .filter((item) => (item.sessionId || "legacy") === conversationButton.dataset.conversationId)
+          .sort((left, right) => new Date(left.createdAt) - new Date(right.createdAt));
+        if (turns.length) restoreTopic(turns[turns.length - 1].id);
+        return;
+      }
       const favoriteButton = event.target.closest("[data-favorite-id]");
       if (favoriteButton) {
         const item = state.favorites.find((entry) => entry.id === favoriteButton.dataset.favoriteId);
@@ -3094,6 +3662,14 @@
       if (rangeButton) { loadEnergy(rangeButton.dataset.range, rangeButton.closest("#analyticsRange") ? "analytics" : "rail"); return; }
       const taskAction = event.target.closest("[data-task-action]");
       if (taskAction) { taskAction.dataset.taskAction === "auto" ? autoRunTask() : advanceTask(); return; }
+      const linkageRun = event.target.closest("[data-linkage-run]");
+      if (linkageRun) { await runSystemLinkage(linkageRun.dataset.linkageRun); return; }
+      const linkageStart = event.target.closest("[data-linkage-start]");
+      if (linkageStart) { await startSystemLinkage(linkageStart.dataset.linkageStart); return; }
+      const linkageOpen = event.target.closest("[data-linkage-open]");
+      if (linkageOpen) { await openLinkedSystem(linkageOpen.dataset.linkageOpen); return; }
+      const linkageRefresh = event.target.closest("[data-linkage-refresh]");
+      if (linkageRefresh) { await loadSystemLinkage(); return; }
       const modalAction = event.target.closest("[data-modal-action]");
       if (modalAction) { await handleModalAction(modalAction.dataset.modalAction); return; }
       const actionButton = event.target.closest("[data-action]");
@@ -3109,13 +3685,14 @@
   function handleAction(action) {
     const actions = {
       home:() => setView("chat", { silent:true }),
-      "new-chat":showWelcome,
+      "new-chat":beginNewConversation,
       history:openHistory,
       commands:openCommands,
       favorites:openFavorites,
       theme:() => toggleTheme(),
       connectors:openConnectors,
       "intelligence-hub":openIntelligenceHub,
+      "system-linkage":openSystemLinkage,
       "rag-evaluation":() => openIntelligenceHub("evaluation"),
       "hub-run-demo":runHubDemo,
       "hub-run-evaluation":runHubEvaluation,
@@ -3193,9 +3770,15 @@
   }
 
   async function init() {
-    initBilingualLayer(); restorePreferences(); startClock(); bindEvents(); updateCounts();
+    initBilingualLayer(); restorePreferences(); updateGreeting(); bindEvents(); updateCounts();
     await Promise.allSettled([loadDashboard(), loadKnowledge(), loadTasksAndTemplates(), loadConnectorSummary(), loadServerConversation()]);
+    void loadSystemLinkage({ render:false }).catch(() => {});
     showWelcome();
+    if (state.conversationTurns.length) {
+      const latest = state.conversationTurns[state.conversationTurns.length - 1];
+      const stored = state.topics.find((item) => item.id === latest.id);
+      if (stored) restoreTopic(stored.id);
+    }
     setInterval(() => { if (!document.hidden) void loadDashboard(true); }, 15000);
   }
 

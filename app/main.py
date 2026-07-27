@@ -1,8 +1,10 @@
 import json
+import time
 from contextlib import asynccontextmanager
+from typing import Any
 from uuid import uuid4
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
@@ -11,6 +13,8 @@ from fastapi.responses import HTMLResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.automation import router as automation_router
+from app.answer_verification import verify_response
+from app.decision_assurance import assess_response
 from app.advanced_rl_missions import router as advanced_rl_router
 from app.capability_hub import router as capability_hub_router
 from app.config import APP_NAME, APP_VERSION, DEFAULT_TOP_K, KB_DIR, WEB_DIR
@@ -23,12 +27,13 @@ from app.governance import router as governance_router
 from app.knowledge_api import get_knowledge_status, router as knowledge_router
 from app.knowledge_intake import router as knowledge_intake_router
 from app.linked_system_launcher import router as linked_system_launcher_router
-from app.models import ChatRequest, ChatResponse
+from app.models import ChatRequest, ChatResponse, QueryAnalysis
 from app.model_gateway import model_gateway, router as model_router
 from app.observability import telemetry
 from app.operations import router as operations_router
 from app.operator_assistant import operator_scenarios
 from app.orchestrator import router as orchestrator_router
+from app.query_intelligence import build_query_analysis
 from app.rl_mission import router as rl_mission_router
 from app.rl_lab import router as rl_lab_router
 from app.runtime_store import runtime_store
@@ -37,6 +42,7 @@ from app.sailing_simulator_launcher import router as sailing_simulator_launcher_
 from app.simulator_launcher import router as simulator_launcher_router
 from app.settings import settings
 from app.system_api import router as system_router
+from app.system_linkage import router as system_linkage_router
 from app.xiaoyi import XiaoyiAI
 
 
@@ -63,7 +69,7 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=[
         "Authorization", "Content-Type", "X-Request-ID", "X-Xiaoyi-Trace-Id", "X-Idempotency-Key",
-        "X-Xiaoyi-Actor", "X-Xiaoyi-Role",
+        "X-Xiaoyi-Actor", "X-Xiaoyi-Role", "X-Xiaoyi-Generation-Id",
     ],
 )
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.allowed_hosts))
@@ -91,6 +97,7 @@ app.include_router(linked_system_launcher_router)
 app.include_router(conversations_router)
 app.include_router(model_router)
 app.include_router(system_router)
+app.include_router(system_linkage_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -132,19 +139,79 @@ def frontline_operator_scenarios() -> dict[str, object]:
     }
 
 
-def _answer(payload: ChatRequest, request: Request) -> ChatResponse:
-    response = engine.ask(
-        payload.question,
-        mode=payload.mode,
-        top_k=payload.top_k,
-        strict_evidence=payload.strict_evidence,
-        jurisdiction=payload.jurisdiction,
-        as_of_date=payload.as_of_date,
+def _prepare_answer(payload: ChatRequest, request: Request):
+    identity = request_identity(request)
+    history = (
+        runtime_store.list_chat_turns(
+            payload.session_id,
+            actor_id=identity.actor_id,
+            allow_all=False,
+            limit=6,
+        )
+        if settings.chat_retention_enabled
+        else []
     )
-    response = model_gateway.enhance(payload.question, response)
+    query_analysis = build_query_analysis(payload.question, history=history)
+    if len(query_analysis.subquestions) > 1:
+        response = engine.ask_compound(
+            query_analysis.standalone_question,
+            query_analysis.subquestions,
+            mode=payload.mode,
+            top_k=payload.top_k,
+            strict_evidence=payload.strict_evidence,
+            jurisdiction=payload.jurisdiction,
+            as_of_date=payload.as_of_date,
+        )
+    else:
+        response = engine.ask(
+            query_analysis.standalone_question,
+            mode=payload.mode,
+            top_k=payload.top_k,
+            strict_evidence=payload.strict_evidence,
+            jurisdiction=payload.jurisdiction,
+            as_of_date=payload.as_of_date,
+            retrieval_queries=query_analysis.subquestions,
+        )
+    response = response.model_copy(
+        update={
+            "question": payload.question,
+            "query_analysis": query_analysis,
+        }
+    )
+    return identity, history, query_analysis, response
+
+
+def _generation_history(
+    history: list[dict[str, Any]],
+    query_analysis: QueryAnalysis,
+) -> list[dict[str, Any]]:
+    if query_analysis.resolution != "history_resolved":
+        return []
+    return history[:1]
+
+
+def _finalize_answer(
+    payload: ChatRequest,
+    request: Request,
+    identity,
+    query_analysis,
+    response: ChatResponse,
+) -> ChatResponse:
+    response = response.model_copy(
+        update={"answer_verification": verify_response(response)}
+    )
+    evidence_health, decision_readiness = assess_response(
+        response,
+        query_analysis,
+    )
+    response = response.model_copy(
+        update={
+            "evidence_health": evidence_health,
+            "decision_readiness": decision_readiness,
+        }
+    )
     answer_id = f"answer-{uuid4().hex}"
     response = response.model_copy(update={"session_id": payload.session_id, "answer_id": answer_id})
-    identity = request_identity(request)
     if settings.chat_retention_enabled:
         runtime_store.save_chat_turn(
             session_id=payload.session_id,
@@ -159,13 +226,41 @@ def _answer(payload: ChatRequest, request: Request) -> ChatResponse:
         actor_role=identity.role,
         action="chat.answer",
         resource=payload.session_id,
-        risk_level="low",
+        risk_level=response.decision_readiness.risk_level,
         outcome="success",
         request={"question": payload.question, "mode": payload.mode, "strict_evidence": payload.strict_evidence},
-        response={"answer_id": answer_id, "intent": response.intent, "grounded": response.grounded},
-        detail="问答结果已通过证据策略并返回；审计仅保存请求与结果哈希。",
+        response={
+            "answer_id": answer_id,
+            "intent": response.intent,
+            "grounded": response.grounded,
+            "query_resolution": query_analysis.resolution,
+            "citation_verification": response.answer_verification.status,
+            "evidence_alignment": response.answer_verification.evidence_alignment,
+            "numeric_integrity": response.answer_verification.numeric_integrity,
+            "evidence_health": response.evidence_health.status,
+            "decision_readiness": response.decision_readiness.status,
+        },
+        detail="问答结果已记录证据策略与回答校验指标；校验结果不阻断生成答案，审计仅保存请求与结果哈希。",
     )
     return response
+
+
+def _answer(payload: ChatRequest, request: Request) -> ChatResponse:
+    review_started_at = time.monotonic()
+    identity, history, query_analysis, response = _prepare_answer(payload, request)
+    response = model_gateway.enhance(
+        query_analysis.standalone_question,
+        response,
+        history=_generation_history(history, query_analysis),
+        review_started_at=review_started_at,
+    )
+    return _finalize_answer(
+        payload,
+        request,
+        identity,
+        query_analysis,
+        response,
+    )
 
 
 @app.post("/api/chat", response_model=ChatResponse)
@@ -175,7 +270,12 @@ def chat(payload: ChatRequest, request: Request) -> ChatResponse:
 
 @app.post("/api/chat/stream")
 def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
-    response = _answer(payload, request)
+    review_started_at = time.monotonic()
+    generation_id = (
+        request.headers.get("X-Xiaoyi-Generation-Id")
+        or f"xiaoyi-{uuid4().hex}"
+    )
+    identity, history, query_analysis, prepared_response = _prepare_answer(payload, request)
 
     def natural_chunks(text: str, target: int = 28, maximum: int = 52):
         start = 0
@@ -192,14 +292,37 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
 
     def events():
         metadata = {
-            "answer_id": response.answer_id,
-            "session_id": response.session_id,
-            "intent": response.intent,
-            "generation_provider": response.generation_provider,
+            "session_id": payload.session_id,
+            "intent": prepared_response.intent,
+            "generation_provider": model_gateway.status()["provider"],
         }
         yield f"event: metadata\ndata: {json.dumps(metadata, ensure_ascii=False)}\n\n"
-        for chunk in natural_chunks(response.answer):
+        stream = model_gateway.enhance_stream(
+            query_analysis.standalone_question,
+            prepared_response,
+            history=_generation_history(history, query_analysis),
+            review_started_at=review_started_at,
+            generation_id=generation_id,
+        )
+        streamed = False
+        while True:
+            try:
+                chunk = next(stream)
+            except StopIteration as completed:
+                response = completed.value
+                break
+            streamed = True
             yield f"event: token\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        if not streamed:
+            for chunk in natural_chunks(response.answer):
+                yield f"event: token\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        response = _finalize_answer(
+            payload,
+            request,
+            identity,
+            query_analysis,
+            response,
+        )
         yield f"event: done\ndata: {response.model_dump_json()}\n\n"
 
     return StreamingResponse(
@@ -207,6 +330,14 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
         media_type="text/event-stream",
         headers={"Cache-Control": "no-cache, no-store", "X-Accel-Buffering": "no"},
     )
+
+
+@app.delete("/api/chat/generations/{generation_id}")
+def cancel_chat_generation(generation_id: str) -> dict[str, object]:
+    try:
+        return model_gateway.cancel_generation(generation_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 def custom_openapi() -> dict[str, object]:

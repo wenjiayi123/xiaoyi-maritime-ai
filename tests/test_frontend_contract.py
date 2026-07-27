@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 INDEX_HTML = ROOT / "web" / "index.html"
 APP_JS = ROOT / "web" / "app.js"
+STYLES_CSS = ROOT / "web" / "styles.css"
 
 
 class _IdCollector(HTMLParser):
@@ -63,6 +64,8 @@ def test_required_frontend_dom_ids_exist_once() -> None:
         "knowledgeChunkCount",
         "knowledgeOfficialCount",
         "connectorNavBadge",
+        "systemLaunchHubBtn",
+        "systemLaunchBadge",
         "rlCenterGate",
         "rlCenterEvidenceStrip",
         "rlCenterAlgorithmMatrix",
@@ -91,6 +94,18 @@ def test_agent_and_strict_evidence_controls_default_to_enabled() -> None:
     assert "checked" in strict
 
 
+def test_frontend_displays_internal_evidence_ids_as_chinese_source_markers() -> None:
+    _, javascript = _read_frontend()
+
+    assert (
+        'return String(value || "").replace(/\\[E(\\d+)\\]/g, "[来源$1]");'
+        in javascript
+    )
+    assert "displayEvidenceMarkers(text.slice(0, index + chunk))" in javascript
+    assert "displayEvidenceMarkers(expected)" in javascript
+    assert "displayEvidenceMarkers(item.answer)" in javascript
+
+
 def test_frontend_calls_required_backend_surfaces() -> None:
     _, javascript = _read_frontend()
     required_endpoints = {
@@ -112,6 +127,8 @@ def test_frontend_calls_required_backend_surfaces() -> None:
         "/api/runtime/status",
         "/api/system/readiness",
         "/api/system/info",
+        "/api/system-linkage/overview",
+        "/api/system-linkage/command",
         "/api/models",
         "/api/governance/identity",
         "/api/rl-lab/health",
@@ -162,6 +179,19 @@ def test_intelligence_hub_has_visible_entry_and_seven_priority_runtime() -> None
     assert "Hybrid Hit@5" in javascript
 
 
+def test_four_system_linkage_has_visible_entry_and_execution_controls() -> None:
+    html, javascript = _read_frontend()
+
+    assert 'id="systemLaunchHubBtn"' in html
+    assert 'data-action="system-linkage"' in html
+    assert 'data-agent-target="system-linkage"' in html
+    assert "SYSTEM_LINKAGE_CATALOG" in javascript
+    assert 'data-linkage-run="all"' in javascript
+    assert 'data-linkage-start="all"' in javascript
+    assert "runSystemLinkage" in javascript
+    assert "openLinkedSystem" in javascript
+
+
 def test_professional_catalog_has_visible_entry_and_interactive_filters() -> None:
     html, javascript = _read_frontend()
 
@@ -179,7 +209,8 @@ def test_live_data_boundary_answer_is_not_replaced_by_generic_refusal() -> None:
     _, javascript = _read_frontend()
 
     assert 'data.refusal_reason === "live_data_connection_required"' in javascript
-    assert "data.refusal_reason && !passThrough" in javascript
+    assert "const answer = data.answer" in javascript
+    assert "证据策略：" not in javascript
     assert "实时数据待接入" in javascript
     assert "未使用沙箱数值" in javascript
 
@@ -194,6 +225,26 @@ def test_chat_request_sends_strict_evidence_flag() -> None:
     ), "聊天请求必须在 JSON body 中显式传递 strict_evidence"
 
 
+def test_chat_surfaces_decision_readiness_and_evidence_conflict() -> None:
+    _, javascript = _read_frontend()
+
+    assert "readinessLabel" in javascript
+    assert "data.decision_readiness" in javascript
+    assert "data.evidence_health" in javascript
+    assert "证据冲突·待裁决" in javascript
+    assert "模型已正常回答；本地证据不足提醒已附在答案底部" in javascript
+
+
+def test_chat_surfaces_claim_alignment_and_numeric_integrity() -> None:
+    _, javascript = _read_frontend()
+
+    assert "data.answer_verification" in javascript
+    assert "主张对齐" in javascript
+    assert "主张词面对齐" in javascript
+    assert "数字/日期/量值完整性" in javascript
+    assert "verification.scope_notice" in javascript
+
+
 def test_frontend_uses_persistent_session_and_session_only_access_token() -> None:
     _, javascript = _read_frontend()
 
@@ -205,6 +256,101 @@ def test_frontend_uses_persistent_session_and_session_only_access_token() -> Non
     assert "response.body.getReader()" in javascript
     assert 'eventName === "token"' in javascript
     assert 'eventName === "done"' in javascript
+    assert "xiaoyi_conversation_turns_v2" in javascript
+    assert "conversationTranscript" in javascript
+    assert "beginNewConversation" in javascript
+    assert "data-conversation-id" in javascript
+
+
+def test_all_new_chat_answers_use_visible_typewriter_rendering() -> None:
+    html, javascript = _read_frontend()
+    styles = STYLES_CSS.read_text(encoding="utf-8")
+
+    assert "function createAnswerTypewriter(runId)" in javascript
+    assert "async function typeAnswer(text, runId, delayMs = 18)" in javascript
+    assert "function startThinkingTicker(runId)" in javascript
+    assert "已等待" not in javascript
+    assert "performance.now() - startedAt" not in javascript
+    assert "混合生成服务仍在运行" in javascript
+    assert "调用本地生成模型进行综合分析" in javascript
+    assert "持续接收模型结果并检查关键事实" in javascript
+    assert "选择低延迟证据回答或本地生成模型" not in javascript
+    assert "stopThinking()" in javascript
+    assert "streamedAnswer += text" in javascript
+    assert "answerWriter.push(text)" not in javascript
+    assert "await answerWriter.finish(answer)" not in javascript
+    assert "await typeAnswer(answer, runId, 24)" in javascript
+    assert "await typeAnswer(planAnswer, runId)" in javascript
+    assert "void typeAnswer(answer, state.generationId)" in javascript
+    assert "function setAskButtonGenerating(active)" in javascript
+    assert "function cancelGenerationOnServer(generationId)" in javascript
+    assert 'headers.set("X-Xiaoyi-Generation-Id", generationId)' in javascript
+    assert "/api/chat/generations/" in javascript
+    assert "state.activeGenerationId = serverGenerationId" in javascript
+    assert 'active ? "停止生成" : "发送"' in javascript
+    assert "可以立即重新提问" in javascript
+    assert 'id="responseStatus" hidden aria-hidden="true"' in html
+    assert "stop-label" not in html
+    assert re.search(
+        r"\.answer\.thinking\{[^}]*min-height:104px;[^}]*overflow:hidden;"
+        r"[^}]*contain:layout paint",
+        styles,
+    )
+    assert re.search(
+        r"\.send-button\{[^}]*width:36px;[^}]*height:36px;[^}]*"
+        r"border-radius:50%",
+        styles,
+    )
+    assert re.search(
+        r"\.send-button\.generating\{[^}]*width:36px;[^}]*height:36px;[^}]*"
+        r"background:linear-gradient\(145deg,#d94e61,#9e263b\)",
+        styles,
+    )
+    assert "function scrollConversationToLatestAnswer" in javascript
+    assert "scrollConversationToLatestAnswer({ settle:true })" in javascript
+    assert 'latestAnswer.scrollIntoView({' in javascript
+    assert 'block:"end"' in javascript
+    assert "function renderStructuredAnswer" in javascript
+    assert "function isUrgentEvidenceAnswer" in javascript
+    assert "answer-evidence-line" in javascript
+    assert ".answer-evidence-line.normal{color:#69e1ae" in styles
+    assert ".answer-evidence-line.danger{color:#ff7f8d" in styles
+
+
+def test_chat_buffers_stream_and_atomically_displays_verified_answer() -> None:
+    _, javascript = _read_frontend()
+
+    completed = javascript.index("const data = result.data;")
+    intent_update = javascript.index("state.currentIntent = data.intent;", completed)
+    finish = javascript.index("await typeAnswer(answer, runId, 24)", completed)
+
+    assert completed < intent_update < finish
+    assert "融合分析与证据校验已完成，正在统一输出完整答案" in javascript
+    assert "证据检索已完成，正在生成并校验完整答案" in javascript
+    assert "streamedAnswer += text" in javascript
+    assert (
+        'data.intent === "identity" ? "身份与能力介绍已完成 · 本机生成模型参与表达"'
+        in javascript
+    )
+
+
+def test_submitted_chat_clears_input_and_hero_bubble_points_to_avatar() -> None:
+    _, javascript = _read_frontend()
+    styles = STYLES_CSS.read_text(encoding="utf-8")
+
+    validation = javascript.index("if (question.length < 2)")
+    clear_input = javascript.index('$("#question").value = "";', validation)
+    begin_generation = javascript.index("stopGeneration(false);", validation)
+    assert validation < clear_input < begin_generation
+    assert re.search(
+        r"\.voice-bubble::after\{[^}]*right:27px;[^}]*"
+        r"border-right-color:#0c5388",
+        styles,
+    )
+    assert not re.search(
+        r"\.voice-bubble::after\{[^}]*left:27px",
+        styles,
+    )
 
 
 def test_non_energy_operator_answer_hides_unrelated_energy_kpis() -> None:

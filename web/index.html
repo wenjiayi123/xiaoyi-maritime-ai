@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
   <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
   <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20260726-rl-center-1">
+  <link rel="stylesheet" href="/web/styles.css?v=20260727-thinking-clean-r28">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -64,8 +64,7 @@
       <div class="top-tools">
         <button class="icon-button sidebar-toggle-button" type="button" data-action="toggle-sidebar" aria-label="打开功能侧栏"><svg><use href="#i-command"/></svg></button>
         <button class="icon-button rail-toggle-button" type="button" data-action="toggle-rail" aria-label="打开运营看板"><svg><use href="#i-chart"/></svg></button>
-        <button class="system-time" type="button" data-action="system-status" aria-label="查看系统状态">
-          <strong id="clockTime">--:--:--</strong><span id="clockDate">----</span><span id="clockWeek">--</span>
+        <button class="system-status-indicator" type="button" data-action="system-status" aria-label="查看系统状态">
           <i class="live-dot"></i>
         </button>
         <button class="icon-button notification-button" type="button" data-action="notifications" data-agent-target="notifications" aria-label="查看通知"><svg><use href="#i-bell"/></svg><span id="notificationBadge">0</span></button>
@@ -89,6 +88,7 @@
           <button type="button" data-action="favorites" data-agent-target="favorites"><svg><use href="#i-star"/></svg><span>我的收藏</span><b id="favoriteCount">0</b></button>
           <button type="button" id="connectorCenterBtn" data-action="connectors" data-agent-target="connectors"><svg><use href="#i-command"/></svg><span>接口中心</span><b class="connector-nav-badge" id="connectorNavBadge">待接入</b></button>
           <button type="button" id="intelligenceHubBtn" data-action="intelligence-hub" data-agent-target="intelligence-hub"><svg><use href="#i-spark"/></svg><span>智能联动中心</span><b class="hub-nav-badge">7/7</b></button>
+          <button type="button" id="systemLaunchHubBtn" data-action="system-linkage" data-agent-target="system-linkage"><svg><use href="#i-play"/></svg><span>四系统联动</span><b class="system-launch-nav-badge" id="systemLaunchBadge">0/4</b></button>
           <button type="button" id="ragEvaluationBtn" data-action="rag-evaluation" data-agent-target="rag-evaluation"><svg><use href="#i-check"/></svg><span>RAG评测闭环</span><b class="rag-nav-badge">评测</b></button>
         </div>
 
@@ -129,6 +129,7 @@
               </div>
 
               <div class="conversation-feed" id="conversationFeed" aria-live="polite">
+                <div class="conversation-transcript" id="conversationTranscript"></div>
                 <div class="user-bubble-row" id="userBubbleRow">
                   <div class="user-bubble"><span id="currentQuestion">帮我分析一下今日港口的能耗情况</span><time id="userMessageTime">09:24</time></div>
                 </div>
@@ -137,7 +138,7 @@
                   <div class="mini-assistant-avatar"><span class="bot-face"><i></i><b></b></span></div>
                   <div class="assistant-response-card">
                     <header class="response-header">
-                      <div><strong>小懿AI</strong><span id="responseStatus">已完成运营数据分析</span></div>
+                      <div><strong>小懿AI</strong><span id="responseStatus" hidden aria-hidden="true"></span></div>
                       <div class="response-actions">
                         <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">等待接入港口</span>
                         <span class="grounding-badge pending" id="groundingBadge" aria-live="polite">等待验证</span>
@@ -353,6 +354,6 @@
   <button id="clearTopicsBtn" type="button" hidden></button>
   <span id="kbChip" hidden></span>
 
-  <script src="/web/app.js?v=20260726-rl-center-1" defer></script>
+  <script src="/web/app.js?v=20260727-thinking-clean-r28" defer></script>
 </body>
 </html>

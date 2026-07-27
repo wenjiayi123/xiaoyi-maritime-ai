@@ -1,0 +1,327 @@
+{
+  "benchmark_id": "xiaoyi-maritime-claim-evidence-alignment-v4",
+  "schema_version": "4.0",
+  "scope": "仓库维护、开发可见的确定性引用对齐基准；验证证据编号、支持型证据、主张词面对齐和数字日期量值完整性，不是外部盲测、语义蕴含证明、事实正确率、法律正确率或线上SLA。",
+  "base_benchmarks": {
+    "v1_case_count": 60,
+    "v2_case_count": 60,
+    "v3_case_count": 30
+  },
+  "cases": [
+    {
+      "id": "citation-001",
+      "category": "citation",
+      "answer": "托运人负责取得并提交 VGM。[E1]",
+      "evidence": [
+        {
+          "id": "vgm-1",
+          "title": "VGM责任主体",
+          "snippet": "托运人负责取得并提交 VGM，用于编制积载计划。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_citation_validity": 1.0
+    },
+    {
+      "id": "citation-002",
+      "category": "citation",
+      "answer": "The shipper must submit verified gross mass.[E1]",
+      "evidence": [
+        {
+          "id": "vgm-2",
+          "title": "Verified gross mass",
+          "snippet": "The shipper must submit verified gross mass before loading."
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_citation_validity": 1.0
+    },
+    {
+      "id": "citation-003",
+      "category": "citation",
+      "answer": "VGM 是核实的集装箱总重量，托运人负责取得并提交。[E1][E2]",
+      "evidence": [
+        {
+          "id": "vgm-3a",
+          "title": "VGM定义",
+          "snippet": "VGM 是核实的集装箱总重量。"
+        },
+        {
+          "id": "vgm-3b",
+          "title": "责任主体",
+          "snippet": "托运人负责取得并提交 VGM。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_citation_validity": 1.0
+    },
+    {
+      "id": "citation-004",
+      "category": "citation",
+      "answer": "VGM 是核实的集装箱总重量。[E9]",
+      "evidence": [
+        {
+          "id": "vgm-4",
+          "title": "VGM定义",
+          "snippet": "VGM 是核实的集装箱总重量。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_citation_validity": 0.0,
+      "expected_issue": "证据编号"
+    },
+    {
+      "id": "citation-005",
+      "category": "citation",
+      "answer": "该规则已经生效。[E1]",
+      "evidence": [
+        {
+          "id": "locator-1",
+          "title": "官方目录",
+          "snippet": "该页面只用于定位正式文本。",
+          "citation_role": "locator_only"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_citation_validity": 0.0,
+      "expected_issue": "证据编号"
+    },
+    {
+      "id": "citation-006",
+      "category": "citation",
+      "answer": "泊位计划用于安排船舶靠离泊和泊位资源。",
+      "evidence": [
+        {
+          "id": "berth-1",
+          "title": "泊位计划",
+          "snippet": "泊位计划用于安排船舶靠离泊和泊位资源。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_citation_validity": 0.0,
+      "expected_issue": "缺少逐项证据编号"
+    },
+    {
+      "id": "alignment-001",
+      "category": "alignment",
+      "answer": "该船舶已经获得免检资格。[E1]",
+      "evidence": [
+        {
+          "id": "unrelated-1",
+          "title": "VGM作业",
+          "snippet": "VGM 用于集装箱配载与安全作业。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_alignment_max": 0.29,
+      "expected_issue": "词面主题对齐不足"
+    },
+    {
+      "id": "alignment-002",
+      "category": "alignment",
+      "answer": "托运人应负责提交 VGM。[E1]",
+      "evidence": [
+        {
+          "id": "paraphrase-1",
+          "title": "VGM提交责任",
+          "snippet": "VGM 由托运人负责取得并提交。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_alignment_min": 0.3
+    },
+    {
+      "id": "alignment-003",
+      "category": "alignment",
+      "answer": "港口国监督检查程序。[E1]",
+      "evidence": [
+        {
+          "id": "psc-1",
+          "title": "港口国监督检查程序",
+          "snippet": "主管机关发布的检查程序摘要。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_alignment_min": 1.0
+    },
+    {
+      "id": "alignment-004",
+      "category": "alignment",
+      "answer": "靠泊计划需要协调船舶、泊位和拖轮资源。[E1]",
+      "evidence": [
+        {
+          "id": "berth-2",
+          "title": "靠泊计划",
+          "snippet": "靠泊计划需要协调船舶、泊位和拖轮资源。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_alignment_min": 1.0
+    },
+    {
+      "id": "alignment-005",
+      "category": "alignment",
+      "answer": "危险货物申报完成后可直接免除现场检查。[E1]",
+      "evidence": [
+        {
+          "id": "dg-1",
+          "title": "危险货物申报",
+          "snippet": "危险货物申报资料应按主管机关要求提交并保留记录。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_alignment_max": 0.29,
+      "expected_issue": "词面主题对齐不足"
+    },
+    {
+      "id": "alignment-006",
+      "category": "alignment",
+      "answer": "MARPOL Annex I covers prevention of pollution by oil.[E1]",
+      "evidence": [
+        {
+          "id": "marpol-1",
+          "title": "MARPOL Annex I",
+          "snippet": "MARPOL Annex I covers prevention of pollution by oil."
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_alignment_min": 1.0
+    },
+    {
+      "id": "numeric-001",
+      "category": "numeric",
+      "answer": "该措施可把等待时间降低 25%。[E1]",
+      "evidence": [
+        {
+          "id": "metric-1",
+          "title": "靠泊协调",
+          "snippet": "该措施用于协调靠泊计划，实际效果需要现场验证。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_numeric_integrity": 0.0,
+      "expected_unsupported_numeric": ["25%"]
+    },
+    {
+      "id": "numeric-002",
+      "category": "numeric",
+      "answer": "本次固定测试通过率为 100%。[E1]",
+      "evidence": [
+        {
+          "id": "metric-2",
+          "title": "固定测试报告",
+          "snippet": "本次固定测试通过率为 100%。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_numeric_integrity": 1.0
+    },
+    {
+      "id": "numeric-003",
+      "category": "numeric",
+      "answer": "该通告自 2026年8月16日 生效。[E1]",
+      "evidence": [
+        {
+          "id": "date-1",
+          "title": "通告生效日期",
+          "snippet": "该通告自 2026年8月15日 生效。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_numeric_integrity": 0.0,
+      "expected_unsupported_numeric": ["date:2026-08-16"]
+    },
+    {
+      "id": "numeric-004",
+      "category": "numeric",
+      "answer": "该通告自 2026年8月15日 生效。[E1]",
+      "evidence": [
+        {
+          "id": "date-2",
+          "title": "通告生效日期",
+          "snippet": "该通告自 2026-08-15 生效。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_numeric_integrity": 1.0
+    },
+    {
+      "id": "numeric-005",
+      "category": "numeric",
+      "answer": "该区域的装载上限为 25吨。[E1]",
+      "evidence": [
+        {
+          "id": "unit-1",
+          "title": "装载上限",
+          "snippet": "该区域的装载上限为 25千克。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_numeric_integrity": 0.0,
+      "expected_unsupported_numeric": ["25吨"]
+    },
+    {
+      "id": "numeric-006",
+      "category": "numeric",
+      "answer": "该泊位长度为 350米。[E1]",
+      "evidence": [
+        {
+          "id": "unit-2",
+          "title": "泊位尺度",
+          "snippet": "该泊位长度为 350 米。"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_numeric_integrity": 1.0
+    },
+    {
+      "id": "numeric-007",
+      "category": "numeric",
+      "answer": "现场需要 3艘 拖轮协助。[E1]",
+      "evidence": [
+        {
+          "id": "count-1",
+          "title": "拖轮安排",
+          "snippet": "现场需要 2 艘拖轮协助。"
+        }
+      ],
+      "expected_status": "needs_review",
+      "expected_supported_claims": 0,
+      "expected_numeric_integrity": 0.0,
+      "expected_unsupported_numeric": ["3艘"]
+    },
+    {
+      "id": "numeric-008",
+      "category": "numeric",
+      "answer": "官方现行文本位于 MPASA1996-RG7 页面。[E1]",
+      "evidence": [
+        {
+          "id": "url-1",
+          "title": "新加坡港口条例",
+          "snippet": "官方现行文本：https://sso.agc.gov.sg/SL/MPASA1996-RG7"
+        }
+      ],
+      "expected_status": "passed",
+      "expected_supported_claims": 1,
+      "expected_numeric_integrity": 1.0
+    }
+  ]
+}

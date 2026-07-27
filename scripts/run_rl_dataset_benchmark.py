@@ -15,10 +15,10 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from app.config import BASE_DIR
-from app.rl_lab.algorithms import ALL_ALGORITHM_IDS
-from app.rl_lab.datasets import dataset_catalog, file_sha256
-from app.rl_lab.service import RLLabService
+from app.config import BASE_DIR  # noqa: E402
+from app.rl_lab.algorithms import ALL_ALGORITHM_IDS  # noqa: E402
+from app.rl_lab.datasets import dataset_catalog, file_sha256  # noqa: E402
+from app.rl_lab.service import RLLabService  # noqa: E402
 
 
 REPORT_JSON = BASE_DIR / "reports" / "rl_dataset_benchmark_v1.json"

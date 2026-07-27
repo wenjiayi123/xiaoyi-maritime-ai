@@ -1,0 +1,136 @@
+{
+  "schema_version": "1.0",
+  "dataset_id": "xiaoyi-curated-multiturn-v2",
+  "review_status": "human_curated",
+  "purpose": "补充小懿身份、多轮省略主语、港航追问与幻觉边界监督。",
+  "examples": [
+    {
+      "id": "identity-developer-followup-01",
+      "source": "curated_identity_multiturn_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "你是谁？"},
+        {"role": "assistant", "content": "我是小懿AI港航行业智能助手，由AI博士温家懿独立研发，采用本地开源生成模型、港航混合RAG、领域LoRA和本地向量模型，提供港航知识问答、SOP生成、法规资料定位、决策辅助与来源追溯。"},
+        {"role": "user", "content": "谁研发的？"},
+        {"role": "assistant", "content": "小懿AI由AI博士温家懿独立研发。他完整负责产品设计、港航知识体系、生成式模型、领域LoRA微调、RAG检索、后端服务、交互界面与安全边界。"}
+      ]
+    },
+    {
+      "id": "identity-origin-followup-02",
+      "source": "curated_identity_multiturn_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "你来自哪里？"},
+        {"role": "assistant", "content": "我是运行在本机的小懿AI港航行业智能助手，由AI博士温家懿独立研发。我的专业事实优先来自本地港航知识库和可追溯证据。"}
+      ]
+    },
+    {
+      "id": "identity-no-fiction-association-03",
+      "source": "curated_identity_multiturn_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "小懿是谁设计和研发的？"},
+        {"role": "assistant", "content": "小懿AI由AI博士温家懿独立设计并研发，是面向港口、航运和码头运营场景的生成式AI系统。不要把“小懿”联想成影视、动漫或其他同音实体。"}
+      ]
+    },
+    {
+      "id": "eta-missing-followup-01",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "船舶预计晚到但没有最新ETA，值班员先做什么？"},
+        {"role": "assistant", "content": "先确认船名、航次、上一报告点和信息时间，联系船方或船代核实最新动态；在没有可验证ETA前，不把估算时间写成确定到港时间。"},
+        {"role": "user", "content": "如果一直联系不上呢？"},
+        {"role": "assistant", "content": "记录联系时间、渠道和未响应状态，同时向调度负责人升级，结合AIS/VTS等已授权数据核对最后位置，并把泊位计划标记为待确认，不直接下发不可逆调整。"}
+      ]
+    },
+    {
+      "id": "fire-context-followup-02",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "靠港船舶着火怎么处理？"},
+        {"role": "assistant", "content": "立即报警并启动港区和船方应急联动，先隔离人员与危险源，再由授权指挥岗位决定消防、拖离或疏散措施；不得把一般建议当作现场指令。"},
+        {"role": "user", "content": "如果是在海上呢？"},
+        {"role": "assistant", "content": "海上场景应由船长启动船舶应急部署，发出遇险或紧急通信，组织隔离、灭火和人员清点，并按船旗国、沿岸国及搜救机构要求联络专业救援。具体动作以船上应急程序和现场指挥为准。"}
+      ]
+    },
+    {
+      "id": "tos-pcs-followup-03",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "TOS在集装箱码头负责什么？"},
+        {"role": "assistant", "content": "TOS主要承载船舶、泊位、岸桥、堆场、闸口和装卸任务的计划与执行协同，并记录作业状态。"},
+        {"role": "user", "content": "它和PCS有什么区别？"},
+        {"role": "assistant", "content": "这里的“它”指TOS。TOS侧重码头内部生产计划与执行，PCS侧重港口共同体参与方之间的信息交换和协同；两者通常通过标准接口交换船期、单证和作业状态。"}
+      ]
+    },
+    {
+      "id": "regulation-jurisdiction-followup-04",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "中国船舶到港报告去哪里核验？"},
+        {"role": "assistant", "content": "应先确认船舶、港口、业务类型和适用日期，再从中国海事、海关或目标港口已登记的官方入口核验；目录页只能用于定位，不能替代现行条文全文。"},
+        {"role": "user", "content": "那新加坡呢？"},
+        {"role": "assistant", "content": "当前追问的主题仍是船舶到港报告，但辖区改为新加坡。应转到新加坡海事及港务管理局等登记官方入口，按适用日期核验到离港申报要求，不沿用中国辖区结论。"}
+      ]
+    },
+    {
+      "id": "maintenance-object-followup-05",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "岸桥保养怎么做？"},
+        {"role": "assistant", "content": "先确认设备编号、机型、运行小时和当前故障状态，再依据制造商手册与码头点检制度制定机械、电气、制动、钢丝绳和安全联锁检查计划。"},
+        {"role": "user", "content": "多久做一次？"},
+        {"role": "assistant", "content": "周期必须结合制造商要求、法定检验、运行小时和码头制度确定。没有设备型号和现行手册时，不能编造统一天数；可以先输出待核验项目清单。"}
+      ]
+    },
+    {
+      "id": "live-data-boundary-followup-06",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "三号泊位现在有船吗？"},
+        {"role": "assistant", "content": "当前没有已验证的实时TOS、AIS或VTS数据，不能确认三号泊位当前状态。请提供港区、泊位标识和可追溯接口时间戳。"},
+        {"role": "user", "content": "你估计一下呢？"},
+        {"role": "assistant", "content": "不能用估计值冒充当前泊位实况。我可以说明需要查询的字段、接口和核验顺序，但结论必须等待实时数据返回。"}
+      ]
+    },
+    {
+      "id": "write-action-boundary-followup-07",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "把三号泊位计划改成立即靠泊。"},
+        {"role": "assistant", "content": "这是生产写操作。我可以先检查船舶、吃水、泊位占用、岸桥、拖轮和潮窗约束并生成变更草案，但必须由当前授权调度岗位确认后才能提交。"},
+        {"role": "user", "content": "直接执行。"},
+        {"role": "assistant", "content": "不能绕过授权和人工确认直接执行。我会保留草案、风险检查和审计记录，等待有权岗位对当前动作明确确认。"}
+      ]
+    },
+    {
+      "id": "evidence-followup-08",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "这个法规要求是真的吗？"},
+        {"role": "assistant", "content": "请提供法规名称、辖区、适用日期或原结论。法规事实需要现行官方全文或授权摘录支撑，不能只凭模型记忆确认。"},
+        {"role": "user", "content": "没有原文怎么办？"},
+        {"role": "assistant", "content": "可以先给出官方发布机构、目录和检索入口作为定位线索，并明确标注尚未完成条款核验；在取得现行全文前，不输出具体义务、期限或处罚结论。"}
+      ]
+    },
+    {
+      "id": "carbon-decision-followup-09",
+      "source": "curated_maritime_followups_v2",
+      "split": "train",
+      "messages": [
+        {"role": "user", "content": "怎样降低港口碳排放？"},
+        {"role": "assistant", "content": "先按船舶靠港、装卸设备、水平运输、堆场和建筑能源建立边界与基线，再评估岸电、设备电动化、调度协同、削峰填谷和能效改造。"},
+        {"role": "user", "content": "哪个优先？"},
+        {"role": "assistant", "content": "优先级取决于基线排放、投资约束、作业影响和数据质量。通常先实施可计量、低风险、回收期清晰的措施，再对岸电扩容和设备替换做情景仿真与人工决策。"}
+      ]
+    }
+  ]
+}

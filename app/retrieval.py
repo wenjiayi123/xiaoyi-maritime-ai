@@ -7,12 +7,14 @@ import re
 from collections import Counter
 from dataclasses import asdict, dataclass, field
 from datetime import date
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from app.config import INDEX_PATH, KB_DIR, SOURCE_REGISTRY_PATH
 from app.provenance import SourceProvenance, load_source_registry
+from app.vector_retrieval import get_dense_vector_index
 
 
 DOMAIN_TERMS = [
@@ -275,6 +277,7 @@ DOMAIN_TERMS = [
     "交接班记录",
     "异常处置记录",
 ]
+DOMAIN_TERMS_CASEFOLD = frozenset(item.casefold() for item in DOMAIN_TERMS)
 
 QUERY_SYNONYMS = {
     "失火": ["火灾", "火情", "消防", "烟雾", "人员疏散"],
@@ -344,6 +347,7 @@ class SearchHit:
     coverage: float = 0.0
     lexical_score: float = 0.0
     semantic_score: float = 0.0
+    dense_score: float = 0.0
     rerank_score: float = 0.0
     retrieval_method: str = "hybrid_sparse_v2"
 
@@ -372,6 +376,7 @@ def _split_markdown(
     )
     source_hash = document_hash or _sha256_file(path)
     chunks: list[KnowledgeChunk] = []
+    document_title = path.stem
     current_title = path.stem
     current_lines: list[str] = []
     section_index = 0
@@ -383,7 +388,12 @@ def _split_markdown(
             current_lines = []
             return
         section_index += 1
-        text = f"{current_title}\n{body}"
+        title_context = (
+            current_title
+            if current_title == document_title
+            else f"{document_title}\n{current_title}"
+        )
+        text = f"{title_context}\n{body}"
         chunks.append(
             KnowledgeChunk(
                 id=f"{path.stem}:{section_index}",
@@ -401,7 +411,11 @@ def _split_markdown(
     for line in raw.splitlines():
         if line.startswith("#"):
             flush()
-            current_title = line.lstrip("#").strip() or path.stem
+            heading_level = len(line) - len(line.lstrip("#"))
+            heading = line.lstrip("#").strip() or path.stem
+            if heading_level == 1:
+                document_title = heading
+            current_title = heading
         else:
             current_lines.append(line)
     flush()
@@ -434,8 +448,9 @@ def _expand_query_terms(query: str, terms: list[str]) -> list[str]:
     return sorted(dict.fromkeys(expanded))
 
 
+@lru_cache(maxsize=4096)
 def _term_weight(term: str) -> float:
-    if any(term.lower() == item.lower() for item in DOMAIN_TERMS):
+    if term.casefold() in DOMAIN_TERMS_CASEFOLD:
         return 8.0
     if re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_/-]{1,}", term):
         return 6.0
@@ -465,8 +480,9 @@ def _evidence_query_terms(query: str) -> list[str]:
     return sorted(dict.fromkeys(meaningful))
 
 
+@lru_cache(maxsize=4096)
 def _coverage_weight(term: str) -> float:
-    if any(term.lower() == item.lower() for item in DOMAIN_TERMS):
+    if term.casefold() in DOMAIN_TERMS_CASEFOLD:
         return 4.0
     if re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_/-]{1,}", term):
         return 3.0
@@ -627,6 +643,7 @@ class KnowledgeBase:
             self._semantic_feature_set(f"{chunk.title}\n{chunk.text}")
             for chunk in self.chunks
         ]
+        self._dense_index = get_dense_vector_index()
         self._document_frequencies: Counter[str] = Counter()
         for tokens in self._search_tokens:
             self._document_frequencies.update(set(tokens))
@@ -780,6 +797,10 @@ class KnowledgeBase:
         query_semantic_features = self._semantic_feature_set(query)
         evidence_terms = _evidence_query_terms(query)
         query_lower = query.lower()
+        try:
+            dense_scores = self._dense_index.scores(query, self.chunks)
+        except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
+            dense_scores = {}
         acronym_terms = [term for term in query_terms if re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_/-]{1,}", term)]
         requested_jurisdictions = {
             str(item).strip().upper() for item in (jurisdictions or ()) if str(item).strip()
@@ -854,9 +875,10 @@ class KnowledgeBase:
                 query_semantic_features,
                 self._semantic_feature_sets[index],
             )
+            dense_score = dense_scores.get(chunk.id, 0.0)
             lexical_score = score + bm25_score * 4.0
 
-            if lexical_score > 0 or semantic_score >= 0.055:
+            if lexical_score > 0 or semantic_score >= 0.055 or dense_score >= 0.2:
                 matched_terms, coverage = _match_coverage(
                     f"{chunk.title}\n{chunk.text}",
                     evidence_terms,
@@ -877,7 +899,14 @@ class KnowledgeBase:
                 if chunk.provenance.review_status == "current":
                     provenance_bonus += 1.0
                 title_bonus = sum(1 for term in evidence_terms if term.lower() in title_lower) * 2.0
-                rerank_score = lexical_score + semantic_score * 35.0 + coverage * 28.0 + provenance_bonus + title_bonus
+                rerank_score = (
+                    lexical_score
+                    + semantic_score * 35.0
+                    + dense_score * 45.0
+                    + coverage * 28.0
+                    + provenance_bonus
+                    + title_bonus
+                )
                 hits.append(
                     SearchHit(
                         chunk=chunk,
@@ -887,7 +916,13 @@ class KnowledgeBase:
                         coverage=coverage,
                         lexical_score=round(lexical_score, 3),
                         semantic_score=round(semantic_score, 4),
+                        dense_score=round(dense_score, 4),
                         rerank_score=round(rerank_score, 3),
+                        retrieval_method=(
+                            "hybrid_dense_sparse_v3"
+                            if dense_scores
+                            else "hybrid_sparse_v2"
+                        ),
                     )
                 )
 

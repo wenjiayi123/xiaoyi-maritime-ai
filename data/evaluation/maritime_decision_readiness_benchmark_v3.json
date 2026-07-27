@@ -1,0 +1,239 @@
+{
+  "benchmark_id": "xiaoyi-maritime-decision-readiness-v3",
+  "schema_version": "3.0",
+  "scope": "仓库维护、开发可见的确定性决策保障基准；验证决策就绪度、证据冲突、新鲜度和升级动作，不是外部盲测、生产安全认证、法律正确率或线上SLA。",
+  "base_benchmarks": {
+    "v1_case_count": 60,
+    "v2_case_count": 60
+  },
+  "query_cases": [
+    {
+      "id": "ready-query-001",
+      "question": "当前 IMO 1234567 船舶的实时 ETA 是多少？",
+      "mode": "expert",
+      "expected_status": "needs_live_data",
+      "expected_risk": "high",
+      "expected_blocker": "verified_live_source_missing"
+    },
+    {
+      "id": "ready-query-002",
+      "question": "当前集装箱 TLLU1234567 在哪里？",
+      "mode": "expert",
+      "expected_status": "needs_live_data",
+      "expected_risk": "high",
+      "expected_blocker": "verified_live_source_missing"
+    },
+    {
+      "id": "ready-query-003",
+      "question": "MARPOL 的具体油类排放限值是什么？",
+      "mode": "expert",
+      "expected_status": "needs_full_text",
+      "expected_risk": "high",
+      "expected_blocker": "authorized_full_text_missing"
+    },
+    {
+      "id": "ready-query-004",
+      "question": "新加坡港危险品申报具体时限是多少？",
+      "mode": "expert",
+      "expected_status": "needs_full_text",
+      "expected_risk": "high",
+      "expected_blocker": "authorized_full_text_missing"
+    },
+    {
+      "id": "ready-query-005",
+      "question": "AGV-023现在还能继续派任务吗？",
+      "mode": "ops",
+      "expected_status": "sandbox_only",
+      "expected_risk": "medium",
+      "expected_blocker": "production_data_unverified"
+    },
+    {
+      "id": "ready-query-006",
+      "question": "南闸口要不要增开？",
+      "mode": "ops",
+      "expected_status": "sandbox_only",
+      "expected_risk": "medium",
+      "expected_blocker": "production_data_unverified"
+    },
+    {
+      "id": "ready-query-007",
+      "question": "新加坡船舶到港官方程序入口在哪里？",
+      "mode": "expert",
+      "expected_status": "ready_with_review",
+      "expected_risk": "medium",
+      "expected_health": "healthy",
+      "expected_freshness": "current"
+    },
+    {
+      "id": "ready-query-008",
+      "question": "英国2026年港口国监督法规从哪里核验？",
+      "mode": "expert",
+      "expected_status": "ready_with_review",
+      "expected_risk": "medium",
+      "expected_health": "healthy",
+      "expected_freshness": "current"
+    },
+    {
+      "id": "ready-query-009",
+      "question": "什么是泊位计划？",
+      "mode": "expert",
+      "expected_status": "ready",
+      "expected_risk": "low",
+      "expected_health": "healthy"
+    },
+    {
+      "id": "ready-query-010",
+      "question": "VGM 是什么？",
+      "mode": "expert",
+      "expected_status": "ready",
+      "expected_risk": "low",
+      "expected_health": "healthy"
+    },
+    {
+      "id": "ready-query-011",
+      "question": "你好",
+      "mode": "expert",
+      "expected_status": "not_applicable",
+      "expected_risk": "low",
+      "expected_health": "not_applicable"
+    },
+    {
+      "id": "ready-query-012",
+      "question": "那这个要求呢？",
+      "mode": "expert",
+      "expected_status": "needs_clarification",
+      "expected_risk": "medium",
+      "expected_blocker": "ambiguous_context"
+    },
+    {
+      "id": "ready-query-013",
+      "question": "新加坡船舶到港官方程序在哪里，同时当前这艘船 ETA 是多少？",
+      "mode": "expert",
+      "expected_status": "needs_clarification",
+      "expected_risk": "medium",
+      "expected_blocker": "ambiguous_context"
+    },
+    {
+      "id": "ready-query-014",
+      "question": "新加坡和马来西亚的船舶到港官方程序入口分别在哪里？",
+      "mode": "expert",
+      "expected_status": "ready_with_review",
+      "expected_risk": "medium",
+      "expected_health": "healthy"
+    }
+  ],
+  "assurance_cases": [
+    {
+      "id": "ready-assurance-001",
+      "scenario": "polarity_conflict",
+      "expected_status": "evidence_conflict",
+      "expected_health": "conflict",
+      "expected_conflict_type": "status_polarity"
+    },
+    {
+      "id": "ready-assurance-002",
+      "scenario": "version_divergence",
+      "expected_status": "evidence_conflict",
+      "expected_health": "conflict",
+      "expected_conflict_type": "version_divergence"
+    },
+    {
+      "id": "ready-assurance-003",
+      "scenario": "cross_jurisdiction_opposite",
+      "expected_status": "ready_with_review",
+      "expected_health": "healthy"
+    },
+    {
+      "id": "ready-assurance-004",
+      "scenario": "different_topic_opposite",
+      "expected_status": "ready_with_review",
+      "expected_health": "healthy"
+    },
+    {
+      "id": "ready-assurance-005",
+      "scenario": "citation_failure",
+      "expected_status": "insufficient_evidence",
+      "expected_health": "healthy",
+      "expected_blocker": "citation_integrity_failed"
+    },
+    {
+      "id": "ready-assurance-006",
+      "scenario": "review_due",
+      "expected_status": "ready_with_review",
+      "expected_health": "degraded",
+      "expected_freshness": "review_due",
+      "expected_blocker": "source_review_due"
+    },
+    {
+      "id": "ready-assurance-007",
+      "scenario": "review_invalid",
+      "expected_status": "ready_with_review",
+      "expected_health": "degraded",
+      "expected_freshness": "review_due",
+      "expected_blocker": "source_review_due"
+    },
+    {
+      "id": "ready-assurance-008",
+      "scenario": "official_freshness_missing",
+      "expected_status": "ready_with_review",
+      "expected_health": "healthy",
+      "expected_freshness": "unknown"
+    },
+    {
+      "id": "ready-assurance-009",
+      "scenario": "official_current",
+      "expected_status": "ready_with_review",
+      "expected_health": "healthy",
+      "expected_freshness": "current"
+    },
+    {
+      "id": "ready-assurance-010",
+      "scenario": "internal_current",
+      "expected_status": "ready",
+      "expected_health": "healthy",
+      "expected_freshness": "current"
+    },
+    {
+      "id": "ready-assurance-011",
+      "scenario": "insufficient_evidence",
+      "expected_status": "insufficient_evidence",
+      "expected_health": "not_applicable",
+      "expected_blocker": "supporting_evidence_missing"
+    },
+    {
+      "id": "ready-assurance-012",
+      "scenario": "partial_answer",
+      "expected_status": "partial",
+      "expected_health": "healthy",
+      "expected_blocker": "partial_evidence_coverage"
+    },
+    {
+      "id": "ready-assurance-013",
+      "scenario": "sandbox",
+      "expected_status": "sandbox_only",
+      "expected_health": "healthy",
+      "expected_blocker": "production_data_unverified"
+    },
+    {
+      "id": "ready-assurance-014",
+      "scenario": "live_refusal",
+      "expected_status": "needs_live_data",
+      "expected_health": "not_applicable",
+      "expected_blocker": "verified_live_source_missing"
+    },
+    {
+      "id": "ready-assurance-015",
+      "scenario": "full_text_refusal",
+      "expected_status": "needs_full_text",
+      "expected_health": "not_applicable",
+      "expected_blocker": "authorized_full_text_missing"
+    },
+    {
+      "id": "ready-assurance-016",
+      "scenario": "business_object_refusal",
+      "expected_status": "needs_clarification",
+      "expected_health": "not_applicable",
+      "expected_blocker": "business_object_missing"
+    }
+  ]
+}

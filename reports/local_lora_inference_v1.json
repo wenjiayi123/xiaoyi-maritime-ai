@@ -1,0 +1,106 @@
+{
+  "schema_version": "1.0",
+  "probe_id": "local-generation-d17bd09d8439",
+  "status": "completed",
+  "profile": "lora",
+  "started_at": "2026-07-26T23:41:34.188391+00:00",
+  "elapsed_seconds": 34.951,
+  "request": {
+    "model": "xiaoyi-maritime-1.7b-lora",
+    "prompt": "船舶预计晚到但没有最新ETA时，值班员应该怎么处理？",
+    "temperature": 0.2,
+    "max_tokens": 160
+  },
+  "response": {
+    "model": "xiaoyi-maritime-1.7b-lora",
+    "system_fingerprint": "b10107-c0bc8591e",
+    "finish_reason": "stop",
+    "content": "当船舶预计晚到但没有最新ETA时，值班员应采取以下措施：\n\n1. **确认信息**：与船长或相关负责人核实当前情况，了解延误原因及预计延误时间。\n\n2. **更新航行计划**：根据已知信息，调整船舶的航行计划，确保航行安全和符合港口要求。\n\n3. **通知相关人员**：及时通知船长、港口值班人员及相关部门，确保信息透明。\n\n4. **保持沟通**：持续关注延误情况，及时更新信息，避免信息滞后。\n\n5. **遵守规定**：确保所有操作符合港口和航运公司的规定，避免因延误引发额外风险。\n\n建议值班员保持冷静，科学应对，确保航行安全和信息准确。",
+    "usage": {
+      "completion_tokens": 157,
+      "prompt_tokens": 54,
+      "total_tokens": 211,
+      "prompt_tokens_details": {
+        "cached_tokens": 0
+      }
+    },
+    "timings": {
+      "cache_n": 0,
+      "prompt_n": 54,
+      "prompt_ms": 2881.033,
+      "prompt_per_token_ms": 53.35246296296296,
+      "prompt_per_second": 18.74327715093857,
+      "predicted_n": 157,
+      "predicted_ms": 32028.021,
+      "predicted_per_token_ms": 204.00013375796178,
+      "predicted_per_second": 4.901957570216405
+    }
+  },
+  "evidence": {
+    "model_registry": {
+      "path": "data/model_registry.json",
+      "bytes": 5165,
+      "sha256": "631c1ee865436204a6c41e96016ddfb97673631dd47224f706e3536b4116d4a3"
+    },
+    "dataset_manifest": {
+      "path": ".runtime/finetuning/xiaoyi-maritime-sft-v1/manifest.json",
+      "bytes": 2295,
+      "sha256": "a18d881aa47192a75e93a3c6476933ee3a7539bbafe47268c4888e32790cf999"
+    },
+    "training_report": {
+      "path": "artifacts/lora/xiaoyi-maritime-1.7b/training_report.json",
+      "bytes": 1895,
+      "sha256": "9e3d705ede2cce327770bfa79aa6d58c935429865f1b156b445e8c4f17d8b4a5"
+    },
+    "lora_gguf": {
+      "path": "artifacts/lora/xiaoyi-maritime-1.7b/xiaoyi-maritime-1.7b-f16.gguf",
+      "bytes": 17459840,
+      "sha256": "d2d5eb1604b8a7391be37688ed5224f4fa65702468ebe77d110eff6e03d14016"
+    }
+  },
+  "training_summary": {
+    "run_id": "lora-20260726T233831Z",
+    "status": "completed",
+    "base_model": {
+      "model_id": "xiaoyi-local-training-1.7b",
+      "revision": "private-pinned-artifact",
+      "inference_model_id": "xiaoyi-local-1.7b-q8-0",
+      "license": "Apache-2.0"
+    },
+    "dataset": {
+      "directory": ".runtime/finetuning/xiaoyi-maritime-sft-v1",
+      "train_examples": 580,
+      "validation_examples": 94,
+      "train_sha256": "710a5edca41e1e67e1f1d7439956e97613dc034808a0a9f461a8f69e070e23d1",
+      "validation_sha256": "9be4bd943df7c778d77fbd3db4495b2a3d3f570c1beb398e8d5b1961650919bc"
+    },
+    "lora": {
+      "rank": 8,
+      "alpha": 16,
+      "dropout": 0.05,
+      "trainable_parameters": 8716288,
+      "all_parameters": 1729291264,
+      "trainable_percent": 0.504038
+    },
+    "training": {
+      "seed": 20260727,
+      "max_steps": 3,
+      "max_length": 96,
+      "learning_rate": 0.0001,
+      "losses": [
+        7.16253662109375,
+        7.3305277824401855,
+        5.7772650718688965
+      ],
+      "initial_validation_loss": 4.4940876960754395,
+      "final_validation_loss": 3.8054611682891846,
+      "validation_cases": 1,
+      "duration_seconds": 35.12,
+      "started_at": "2026-07-26T23:38:31.765522+00:00",
+      "finished_at": "2026-07-26T23:39:06.695007+00:00"
+    },
+    "adapter_sha256": "1edf0c13c2d62cebb7cd1437550813c6992ff04fbd7928e5af973d987b6760e7",
+    "claim_boundary": "This is a local SFT/LoRA engineering run. Loss is an optimization signal, not proof of answer accuracy, field performance, or legal correctness."
+  },
+  "claim_boundary": "This probe proves that a pinned local model profile produced tokens through the OpenAI-compatible runtime. It is not an accuracy, expert-quality, production-port, or legal-correctness benchmark."
+}

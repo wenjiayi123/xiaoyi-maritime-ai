@@ -12,6 +12,13 @@ JURISDICTION_LABELS = {
     "CN": "中国",
     "SG": "新加坡",
     "MY": "马来西亚",
+    "US": "美国",
+    "EU": "欧盟",
+    "GB": "英国",
+    "AU": "澳大利亚",
+    "JP": "日本",
+    "NL": "荷兰",
+    "REGIONAL": "区域港口国监督体系",
 }
 
 JURISDICTION_TERMS = {
@@ -34,16 +41,78 @@ JURISDICTION_TERMS = {
         "Tanjung Pelepas",
         "Malaysia",
     ),
-    "GLOBAL": ("国际规则", "国际公约", "全球", "IMO", "ILO", "IHO", "WCO", "WTO"),
+    "US": (
+        "美国",
+        "美利坚合众国",
+        "USCG",
+        "U.S. Coast Guard",
+        "eCFR",
+        "United States",
+    ),
+    "EU": (
+        "欧盟",
+        "EUR-Lex",
+        "EMSA",
+        "European Union",
+    ),
+    "GB": (
+        "英国",
+        "MCA",
+        "Maritime and Coastguard Agency",
+        "United Kingdom",
+    ),
+    "AU": (
+        "澳大利亚",
+        "AMSA",
+        "Australia",
+    ),
+    "JP": (
+        "日本",
+        "MLIT",
+        "Japan Coast Guard",
+        "Japan",
+    ),
+    "NL": (
+        "荷兰",
+        "鹿特丹",
+        "Port of Rotterdam",
+        "Netherlands",
+        "Rotterdam",
+    ),
+    "REGIONAL": (
+        "巴黎备忘录",
+        "东京备忘录",
+        "Paris MoU",
+        "Tokyo MOU",
+        "港口国监督区域",
+    ),
+    "GLOBAL": (
+        "国际规则",
+        "国际公约",
+        "全球",
+        "IMO",
+        "ILO",
+        "IHO",
+        "WCO",
+        "WTO",
+        "MARPOL",
+        "SOLAS",
+        "STCW",
+        "COLREG",
+        "ISPS",
+    ),
 }
 
 OFFICIAL_QUERY_TERMS = (
     "法规", "标准", "规范", "强制", "合规", "海关", "海事", "监管", "公约",
     "法律", "条例", "办法", "规定", "处罚", "罚款", "危险品", "危险货物",
-    "消防", "火灾", "边检", "检疫", "环保", "污染", "排放", "职业安全",
+    "消防", "火灾", "边检", "检疫", "职业安全",
+    "环境法规", "环保规定", "污染物排放标准", "排放限值", "排污许可",
     "停航", "封航", "MARPOL", "SOLAS", "ISPS", "IMO", "IHO", "国标", "GB/", "GB ",
     "原文", "全文", "条款", "申报时限", "允许误差", "法定限值", "豁免条件",
     "官方", "法典", "通告", "规程", "生效日期", "是否生效",
+    "监督", "PSC", "eCFR", "MCA", "MSN", "AMSA", "Marine Order",
+    "Paris MoU", "Tokyo MOU",
 )
 
 CLAUSE_LEVEL_TERMS = (
@@ -63,6 +132,8 @@ CLAUSE_LEVEL_TERMS = (
     "法定限值",
     "豁免条件",
     "具体条件",
+    "具体罚则",
+    "法定最低",
     "例外条件",
     "法律责任",
     "责任上限",
@@ -115,6 +186,15 @@ LOCATOR_FACT_TERMS = (
     "核验入口",
     "核对哪部",
     "应核对",
+    "分哪些类型",
+    "有哪些类型",
+    "类别",
+    "从哪里",
+    "哪里核验",
+    "可以查什么",
+    "能查什么",
+    "能否证明",
+    "是否能证明",
 )
 
 FULL_TEXT_SCOPES = {"official_full_text", "official_excerpt"}
@@ -181,13 +261,25 @@ def requires_full_text_evidence(question: str) -> bool:
         return True
     if re.search(r"(?:具体|法定).{0,12}(?:限值|时限|期限|金额|幅度|误差)", compact):
         return True
+    if re.search(r"法定.{0,12}(?:时数|小时|天数|数值|最低)", compact):
+        return True
     return any(term in compact for term in CLAUSE_LEVEL_TERMS)
 
 
 def requires_official_evidence(question: str, intent: str | None = None) -> bool:
     upper_question = question.upper()
-    return intent == "compliance" or any(
+    return (
+        intent == "compliance"
+        or (
+            bool(detect_jurisdictions(question))
+            and any(
+                term in question
+                for term in ("入口", "从哪里", "哪里查", "哪里核验")
+            )
+        )
+        or any(
         term.upper() in upper_question for term in OFFICIAL_QUERY_TERMS
+        )
     )
 
 

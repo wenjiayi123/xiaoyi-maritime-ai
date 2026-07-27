@@ -1,0 +1,2852 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "xiaoyi-maritime-model-benchmark-v7",
+  "profile": "baseline-4b",
+  "generated_at": "2026-07-27T03:26:09+00:00",
+  "endpoint": "http://127.0.0.1:8010/api/chat/stream",
+  "case_source": "data/evaluation/maritime_question_universe_benchmark_v6.json",
+  "case_source_sha256": "71ea3bb4166dceadefda1e9063a7c9c16db95f15f48c6950cc2158b95ab1bc39",
+  "methodology": {
+    "retrieval": "BEIR-aligned Recall@5, MRR@10 and nDCG@10 with repository qrels.",
+    "generation": "RAGAS-aligned deterministic proxies for context precision/recall, response relevancy and faithfulness, plus citation/numeric verifier.",
+    "latency": "MLPerf-style TTFT, TPOT, total latency and output tokens/s.",
+    "limitations": [
+      "Repository-authored fixed cases, not an independent expert blind study.",
+      "RAGAS-aligned deterministic proxies are not RAGAS LLM-judge scores.",
+      "Single-user localhost measurements are not a concurrency SLA."
+    ]
+  },
+  "summary": {
+    "case_count": 35,
+    "operational_case_count": 30,
+    "boundary_case_count": 5,
+    "passed_count": 16,
+    "pass_rate": 0.4571,
+    "retrieval": {
+      "recall_at_5": 1.0,
+      "mrr_at_10": 0.9778,
+      "ndcg_at_10": 0.9833
+    },
+    "generation": {
+      "required_term_recall": 0.6731,
+      "required_term_case_count": 26,
+      "citation_verification_pass_rate": 0.9667,
+      "faithfulness_proxy": 0.7327,
+      "response_relevancy_proxy": 0.7
+    },
+    "latency": {
+      "ttft_p50_seconds": 7.9791,
+      "ttft_p95_seconds": 9.1858,
+      "total_p50_seconds": 13.5751,
+      "total_p95_seconds": 17.0642,
+      "tokens_per_second_after_first_mean": 720.2957,
+      "tokenizer_status": "exact_training_architecture_tokenizer",
+      "metric_scope": "MLPerf-style single-stream TTFT, TPOT and output token rate; this is a local engineering benchmark, not an MLPerf submission."
+    },
+    "generation_provider_counts": {
+      "openai_compatible": 28,
+      "local_grounded_rag": 2
+    },
+    "failed_ids": [
+      "vessel-daily",
+      "terminal-daily",
+      "cargo-daily",
+      "docs-formal",
+      "intermodal-formal",
+      "intermodal-daily",
+      "equipment-daily",
+      "safety-formal",
+      "commercial-formal",
+      "commercial-daily",
+      "people-daily",
+      "planning-daily",
+      "live-formal",
+      "live-daily",
+      "boundary-vague",
+      "boundary-throughput",
+      "boundary-vessel",
+      "boundary-marpol",
+      "boundary-dangerous-goods"
+    ],
+    "domains": {
+      "commercial_legal": {
+        "case_count": 2,
+        "passed_count": 0,
+        "required_term_recall": 0.25
+      },
+      "container_terminal": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "customs_documents": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "energy_environment": {
+        "case_count": 2,
+        "passed_count": 2,
+        "required_term_recall": 1.0
+      },
+      "equipment_engineering": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "intermodal": {
+        "case_count": 2,
+        "passed_count": 0,
+        "required_term_recall": 0.25
+      },
+      "live_operations": {
+        "case_count": 2,
+        "passed_count": 0,
+        "required_term_recall": 0.5
+      },
+      "people_management": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "planning_kpi": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.5
+      },
+      "port_basics": {
+        "case_count": 2,
+        "passed_count": 2,
+        "required_term_recall": 0.0
+      },
+      "safety_security": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "shipping": {
+        "case_count": 2,
+        "passed_count": 2,
+        "required_term_recall": 0.0
+      },
+      "smart_port_data": {
+        "case_count": 2,
+        "passed_count": 2,
+        "required_term_recall": 1.0
+      },
+      "special_cargo": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      },
+      "vessel_port_call": {
+        "case_count": 2,
+        "passed_count": 1,
+        "required_term_recall": 0.75
+      }
+    }
+  },
+  "rows": [
+    {
+      "id": "basics-formal",
+      "domain": "port_basics",
+      "question": "港口定义是什么",
+      "answer": "港口是船舶进出、靠泊、装卸货物、上下旅客、补给维修和物流集散的综合枢纽。现代港口不仅是装卸节点，也是航运、仓储、通关、供应链、能源管理和信息协同平台[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "01_port_basics.md",
+      "retrieved_sources": [
+        "01_port_basics.md",
+        "00_knowledge_catalog.md",
+        "108_china_border_health_quarantine_law.md",
+        "00_knowledge_map.md",
+        "01_port_basics.md",
+        "01_port_basics.md",
+        "52_cn_gbt42809_automated_terminal_tos.md",
+        "62_cn_work_safety_law.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.375,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港口是船舶进出、靠泊、装卸货物、上下旅客、补给维修和物流集散的综合枢纽。现代港口不仅是装卸节点，也是航运、仓储、通关、供应链、能源管理和信息协同平台[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "01_port_basics:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.682,
+        "ttft_seconds": 1.443,
+        "total_seconds": 7.4389,
+        "output_tokens": 49,
+        "tokens_per_second_after_first": 8.0055,
+        "tpot_seconds": 0.1249
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "basics-daily",
+      "domain": "port_basics",
+      "question": "港区一般分哪些区域",
+      "answer": "港区一般分为：航道、锚地、泊位、堆场、仓库、闸口、监管区、后方陆域等区域[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "01_port_basics.md",
+      "retrieved_sources": [
+        "00_knowledge_catalog.md",
+        "00_knowledge_map.md",
+        "01_port_basics.md",
+        "01_port_basics.md",
+        "01_port_basics.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 0.3333,
+        "ndcg_at_10": 0.5
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.6,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.4444,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.4444,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港区一般分为：航道、锚地、泊位、堆场、仓库、闸口、监管区、后方陆域等区域[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "00_knowledge_catalog:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.4444,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.6745,
+        "ttft_seconds": 1.3903,
+        "total_seconds": 6.1406,
+        "output_tokens": 33,
+        "tokens_per_second_after_first": 6.7364,
+        "tpot_seconds": 0.1484
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "shipping-formal",
+      "domain": "shipping",
+      "question": "班轮航线模式是什么",
+      "answer": "班轮航线模式是按固定航线、固定船期和公布运价进行运输，适合集装箱业务。货物按计划运输，船公司负责定舱、舱位管理及客户服务。航线网络包含始发港、目的港、中转港和枢纽港，承担不同运输职能[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "02_shipping_basics.md",
+      "retrieved_sources": [
+        "02_shipping_basics.md",
+        "00_knowledge_catalog.md",
+        "103_my_active_shipping_notices_2026.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "37_port_qa_form_taxonomy.md",
+        "21_routes_liner_network.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.4611,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.4611,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "班轮航线模式是按固定航线、固定船期和公布运价进行运输，适合集装箱业务。货物按计划运输，船公司负责定舱、舱位管理及客户服务。航线网络包含始发港、目的港、中转港和枢纽港，承担不同运输职能[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "02_shipping_basics:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.4611,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.2752,
+        "ttft_seconds": 9.1799,
+        "total_seconds": 17.3849,
+        "output_tokens": 65,
+        "tokens_per_second_after_first": 7.8001,
+        "tpot_seconds": 0.1282
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "shipping-daily",
+      "domain": "shipping",
+      "question": "船期晚了会影响什么",
+      "answer": "船期晚了会影响泊位窗口、引航拖轮和系泊预约、岸桥班组、堆场和闸口节奏、中转衔接及后续船期和客户通知[E1]。需根据最新ETA重新计算关键计划。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "55_vessel_schedule_port_call_qa.md",
+      "retrieved_sources": [
+        "55_vessel_schedule_port_call_qa.md",
+        "00_knowledge_catalog.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "22_freight_chartering_market.md",
+        "21_routes_liner_network.md",
+        "127_port_navigation_weather_engineering_daily_qa.md",
+        "22_freight_chartering_market.md"
+      ],
+      "required_terms": [],
+      "matched_terms": [],
+      "required_term_recall": null,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.8015,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.8015,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "船期晚了会影响泊位窗口、引航拖轮和系泊预约、岸桥班组、堆场和闸口节奏、中转衔接及后续船期和客户通知[E1]。需根据最新ETA重新计算关键计划。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "55_vessel_schedule_port_call_qa:15"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.8015,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0972,
+        "ttft_seconds": 9.0428,
+        "total_seconds": 15.2954,
+        "output_tokens": 52,
+        "tokens_per_second_after_first": 8.1566,
+        "tpot_seconds": 0.1226
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "vessel-formal",
+      "domain": "vessel_port_call",
+      "question": "大雾时船舶怎么安排",
+      "answer": "大雾时船舶安排需核对VTS、引航、航道等信息，状态标为待确认并调整泊位计划，不能仅凭目测决定[E1]。ETA、ETB、ETD影响泊位及设备排班[E2]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "127_port_navigation_weather_engineering_daily_qa.md",
+      "retrieved_sources": [
+        "127_port_navigation_weather_engineering_daily_qa.md",
+        "12_vessel_port_call.md",
+        "00_knowledge_catalog.md",
+        "55_vessel_schedule_port_call_qa.md",
+        "00_knowledge_map.md",
+        "33_vessel_navigation_incident_playbooks.md",
+        "12_vessel_port_call.md",
+        "55_vessel_schedule_port_call_qa.md"
+      ],
+      "required_terms": [
+        "VTS",
+        "待确认"
+      ],
+      "matched_terms": [
+        "VTS",
+        "待确认"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.5856,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.5856,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "大雾时船舶安排需核对VTS、引航、航道等信息，状态标为待确认并调整泊位计划，不能仅凭目测决定[E1]。ETA、ETB、ETD影响泊位及设备排班[E2]。",
+            "citation_indices": [
+              1,
+              2
+            ],
+            "evidence_ids": [
+              "127_port_navigation_weather_engineering_daily_qa:4",
+              "12_vessel_port_call:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.5856,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.9529,
+        "ttft_seconds": 7.5049,
+        "total_seconds": 14.9991,
+        "output_tokens": 57,
+        "tokens_per_second_after_first": 7.4724,
+        "tpot_seconds": 0.1338
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "vessel-daily",
+      "domain": "vessel_port_call",
+      "question": "船别早到空等怎么协调",
+      "answer": "建立统一港口挂靠标识，持续共享预计、请求、计划和实际事件，明确泊位、引航拖轮、货物、单证和服务就绪时间；时间变化必须带来源、版本和下[E1]",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "127_port_navigation_weather_engineering_daily_qa.md",
+      "retrieved_sources": [
+        "127_port_navigation_weather_engineering_daily_qa.md",
+        "12_vessel_port_call.md",
+        "00_knowledge_catalog.md",
+        "55_vessel_schedule_port_call_qa.md",
+        "00_knowledge_map.md",
+        "33_vessel_navigation_incident_playbooks.md",
+        "12_vessel_port_call.md",
+        "55_vessel_schedule_port_call_qa.md"
+      ],
+      "required_terms": [
+        "版本",
+        "船长"
+      ],
+      "matched_terms": [
+        "版本"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "建立统一港口挂靠标识，持续共享预计、请求、计划和实际事件，明确泊位、引航拖轮、货物、单证和服务就绪时间；时间变化必须带来源、版本和下[E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "127_port_navigation_weather_engineering_daily_qa:13"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.6927,
+        "ttft_seconds": 7.2232,
+        "total_seconds": 13.5751,
+        "output_tokens": 48,
+        "tokens_per_second_after_first": 7.3994,
+        "tpot_seconds": 0.1351
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "terminal-formal",
+      "domain": "container_terminal",
+      "question": "堆场快满了怎么办",
+      "answer": "按箱区、箱类、航次、进口出口、滞留时间和未来作业量定位高压区域，再同步推进提离、转栈、空箱调拨、进场节奏和装船备箱调整；优先保护冷藏箱、危险品和近期装船箱的合规位置。调整前应验证道路、设备和目标箱区容量。 [E1]\n\n我核对的索引依据是《堆场快满了怎么办》（仅摘录当前检索索引）。\n\n来源状态：该回答来自已登记的项目内部整理资料，非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。\n\n当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。",
+      "generation_provider": "local_grounded_rag",
+      "generation_model": "xiaoyi-indexed-answer-v2",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "121_yard_gate_equipment_flow_daily_qa.md",
+      "retrieved_sources": [
+        "121_yard_gate_equipment_flow_daily_qa.md",
+        "121_yard_gate_equipment_flow_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "56_container_yard_gate_handling_qa.md",
+        "03_container_terminal.md",
+        "56_container_yard_gate_handling_qa.md",
+        "38_definition_process_role_qa.md",
+        "03_container_terminal.md"
+      ],
+      "required_terms": [
+        "高压区域",
+        "冷藏箱"
+      ],
+      "matched_terms": [
+        "高压区域",
+        "冷藏箱"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.25,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "按箱区、箱类、航次、进口出口、滞留时间和未来作业量定位高压区域，再同步推进提离、转栈、空箱调拨、进场节奏和装船备箱调整；优先保护冷藏箱、危险品和近期装船箱的合规位置。调整前应验证道路、设备和目标箱区容量。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "121_yard_gate_equipment_flow_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.5359,
+        "ttft_seconds": 1.5366,
+        "total_seconds": 1.5579,
+        "output_tokens": 168,
+        "tokens_per_second_after_first": 7840.3756,
+        "tpot_seconds": 0.0001
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "terminal-daily",
+      "domain": "container_terminal",
+      "question": "闸口排队太长怎么处理",
+      "answer": "闸口排队太长时，应优先排查预约波峰、单证异常、OCR识别等问题，清除处理时间最长的瓶颈。必要时由值班长增开具备人员和系统条件的车道，并通过预约调整和现场分流削减后方压力[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "121_yard_gate_equipment_flow_daily_qa.md",
+      "retrieved_sources": [
+        "121_yard_gate_equipment_flow_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "56_container_yard_gate_handling_qa.md",
+        "03_container_terminal.md",
+        "38_definition_process_role_qa.md",
+        "03_container_terminal.md",
+        "56_container_yard_gate_handling_qa.md",
+        "05_port_equipment.md"
+      ],
+      "required_terms": [
+        "预约波峰",
+        "场内拥堵"
+      ],
+      "matched_terms": [
+        "预约波峰"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.7814,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.7814,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "闸口排队太长时，应优先排查预约波峰、单证异常、OCR识别等问题，清除处理时间最长的瓶颈。必要时由值班长增开具备人员和系统条件的车道，并通过预约调整和现场分流削减后方压力[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "121_yard_gate_equipment_flow_daily_qa:5"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.7814,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.1393,
+        "ttft_seconds": 8.8228,
+        "total_seconds": 15.9636,
+        "output_tokens": 58,
+        "tokens_per_second_after_first": 7.9823,
+        "tpot_seconds": 0.1253
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "cargo-formal",
+      "domain": "special_cargo",
+      "question": "LNG船靠港要关注什么",
+      "answer": "LNG船靠港需关注船岸兼容性、泊位及航道条件、引航拖轮、天气、系泊、装卸臂、紧急切断、气体检测、消防、警戒区和通信等[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "04_bulk_liquid_terminal.md",
+        "04_bulk_liquid_terminal.md",
+        "01_port_basics.md",
+        "00_knowledge_map.md",
+        "04_bulk_liquid_terminal.md",
+        "04_bulk_liquid_terminal.md"
+      ],
+      "required_terms": [
+        "船岸兼容",
+        "紧急切断"
+      ],
+      "matched_terms": [
+        "船岸兼容",
+        "紧急切断"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.6585,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.6585,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "LNG船靠港需关注船岸兼容性、泊位及航道条件、引航拖轮、天气、系泊、装卸臂、紧急切断、气体检测、消防、警戒区和通信等[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:11"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.6585,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0002,
+        "ttft_seconds": 8.3166,
+        "total_seconds": 14.0609,
+        "output_tokens": 49,
+        "tokens_per_second_after_first": 8.3561,
+        "tpot_seconds": 0.1197
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "cargo-daily",
+      "domain": "special_cargo",
+      "question": "滚装船车辆怎么排",
+      "answer": "滚装船车辆排运需按航次、车型、尺寸、危险属性等组织预排区，控制道路单向流和坡道能力，实时调整船舶积载与场地容量[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "00_knowledge_catalog.md",
+        "56_container_yard_gate_handling_qa.md",
+        "03_container_terminal.md",
+        "04_bulk_liquid_terminal.md",
+        "38_definition_process_role_qa.md",
+        "03_container_terminal.md"
+      ],
+      "required_terms": [
+        "预排区",
+        "系固"
+      ],
+      "matched_terms": [
+        "预排区"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.5862,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.5862,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "滚装船车辆排运需按航次、车型、尺寸、危险属性等组织预排区，控制道路单向流和坡道能力，实时调整船舶积载与场地容量[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:12"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.5862,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.6824,
+        "ttft_seconds": 9.078,
+        "total_seconds": 14.4623,
+        "output_tokens": 45,
+        "tokens_per_second_after_first": 8.1719,
+        "tpot_seconds": 0.1224
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "docs-formal",
+      "domain": "customs_documents",
+      "question": "VGM是什么",
+      "answer": "VGM是载货集装箱经核实的总重量信息，用于配载与安全作业。 [E1]",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "57_booking_document_release_qa.md",
+      "retrieved_sources": [
+        "57_booking_document_release_qa.md",
+        "57_booking_document_release_qa.md",
+        "81_imo_solas_public_summary.md",
+        "00_knowledge_catalog.md",
+        "57_booking_document_release_qa.md",
+        "00_knowledge_map.md",
+        "57_booking_document_release_qa.md",
+        "57_booking_document_release_qa.md"
+      ],
+      "required_terms": [
+        "总重量",
+        "箱号"
+      ],
+      "matched_terms": [
+        "总重量"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.625,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "VGM是载货集装箱经核实的总重量信息，用于配载与安全作业。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "57_booking_document_release_qa:11"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.885,
+        "ttft_seconds": 7.4495,
+        "total_seconds": 9.9077,
+        "output_tokens": 24,
+        "tokens_per_second_after_first": 9.3564,
+        "tpot_seconds": 0.1069
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "docs-daily",
+      "domain": "customs_documents",
+      "question": "舱单数据没到怎么办",
+      "answer": "舱单数据未到时，应先确认航次和箱号关联，检查发送方记录、中间件、报文回执、错误队列和TOS落库情况，在数据责任方补发或修正前，保留作业限制，不人工伪造放行状态[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "57_booking_document_release_qa.md",
+      "retrieved_sources": [
+        "57_booking_document_release_qa.md",
+        "57_booking_document_release_qa.md",
+        "00_knowledge_catalog.md",
+        "18_smart_port_ai_data.md",
+        "18_smart_port_ai_data.md",
+        "06_tos_and_digital.md",
+        "43_report_template_training_qa.md",
+        "00_knowledge_map.md"
+      ],
+      "required_terms": [
+        "错误队列",
+        "不人工伪造"
+      ],
+      "matched_terms": [
+        "错误队列",
+        "不人工伪造"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.25,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.875,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.875,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "舱单数据未到时，应先确认航次和箱号关联，检查发送方记录、中间件、报文回执、错误队列和TOS落库情况，在数据责任方补发或修正前，保留作业限制，不人工伪造放行状态[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "57_booking_document_release_qa:18"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.875,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 2.0173,
+        "ttft_seconds": 9.5233,
+        "total_seconds": 16.9267,
+        "output_tokens": 63,
+        "tokens_per_second_after_first": 8.3745,
+        "tpot_seconds": 0.1194
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "intermodal-formal",
+      "domain": "intermodal",
+      "question": "海铁联运怎么组织",
+      "answer": "海铁联运需协调船期、班列、箱源等要素，确保流程顺畅，重点控制船转铁等待、错过班列及箱号状态不一致等问题[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "37_port_qa_form_taxonomy.md"
+      ],
+      "required_terms": [
+        "班列",
+        "业务主键"
+      ],
+      "matched_terms": [
+        "班列"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.5,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.5,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "海铁联运需协调船期、班列、箱源等要素，确保流程顺畅，重点控制船转铁等待、错过班列及箱号状态不一致等问题[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:6"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.5,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.9339,
+        "ttft_seconds": 8.2684,
+        "total_seconds": 13.2014,
+        "output_tokens": 42,
+        "tokens_per_second_after_first": 8.3114,
+        "tpot_seconds": 0.1203
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "intermodal-daily",
+      "domain": "intermodal",
+      "question": "火车没按时到怎么办",
+      "answer": "火车延误时，需确认预计到达时间、受影响箱量及堆场容量，评估改用其他运输方式或调整装船计划，并保留成本与责任边界[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "15_intermodal_hinterland_logistics.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "37_port_qa_form_taxonomy.md"
+      ],
+      "required_terms": [
+        "替代运力",
+        "冷链"
+      ],
+      "matched_terms": [],
+      "required_term_recall": 0.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.0,
+        "faithfulness": 0.3902,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.3902,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "火车延误时，需确认预计到达时间、受影响箱量及堆场容量，评估改用其他运输方式或调整装船计划，并保留成本与责任边界[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:7"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.3902,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0666,
+        "ttft_seconds": 7.9791,
+        "total_seconds": 12.5418,
+        "output_tokens": 39,
+        "tokens_per_second_after_first": 8.3284,
+        "tpot_seconds": 0.1201
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "equipment-formal",
+      "domain": "equipment_engineering",
+      "question": "岸桥出现告警怎么办",
+      "answer": "岸桥出现告警时，应先确保设备和吊载状态可控，读取告警代码、时间、机构位置与作业动作，检查是否涉及人员或设备安全。按授权程序停机、通知和诊断，不应反复复位绕过告警[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "58_equipment_team_handover_alert_qa.md",
+      "retrieved_sources": [
+        "58_equipment_team_handover_alert_qa.md",
+        "00_knowledge_catalog.md",
+        "00_knowledge_catalog.md",
+        "56_container_yard_gate_handling_qa.md",
+        "03_container_terminal.md",
+        "25_port_engineering_dredging.md",
+        "38_definition_process_role_qa.md",
+        "25_port_engineering_dredging.md"
+      ],
+      "required_terms": [
+        "告警代码",
+        "反复复位"
+      ],
+      "matched_terms": [
+        "告警代码",
+        "反复复位"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.8688,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.8688,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "岸桥出现告警时，应先确保设备和吊载状态可控，读取告警代码、时间、机构位置与作业动作，检查是否涉及人员或设备安全。按授权程序停机、通知和诊断，不应反复复位绕过告警[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "58_equipment_team_handover_alert_qa:3"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.8688,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 2.0395,
+        "ttft_seconds": 9.0991,
+        "total_seconds": 16.2485,
+        "output_tokens": 61,
+        "tokens_per_second_after_first": 8.3923,
+        "tpot_seconds": 0.1192
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "equipment-daily",
+      "domain": "equipment_engineering",
+      "question": "码头有裂缝还能用吗",
+      "answer": "码头有裂缝需立即标记位置、范围和时间，限制靠泊和荷载活动，通知相关部门并保留记录[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "127_port_navigation_weather_engineering_daily_qa.md",
+      "retrieved_sources": [
+        "127_port_navigation_weather_engineering_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "25_port_engineering_dredging.md",
+        "25_port_engineering_dredging.md",
+        "25_port_engineering_dredging.md",
+        "25_port_engineering_dredging.md",
+        "19_asset_maintenance_reliability.md",
+        "25_port_engineering_dredging.md"
+      ],
+      "required_terms": [
+        "限制",
+        "工程人员"
+      ],
+      "matched_terms": [
+        "限制"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.3721,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.3721,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "码头有裂缝需立即标记位置、范围和时间，限制靠泊和荷载活动，通知相关部门并保留记录[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "127_port_navigation_weather_engineering_daily_qa:11"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.3721,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.1922,
+        "ttft_seconds": 9.1995,
+        "total_seconds": 12.6328,
+        "output_tokens": 29,
+        "tokens_per_second_after_first": 8.1554,
+        "tpot_seconds": 0.1226
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "carbon-formal",
+      "domain": "energy_environment",
+      "question": "如何减少碳排",
+      "answer": "先确定组织、设施和作业边界，用电、燃油、岸电、冷藏箱、外包车辆及船舶等待等活动数据建立可复核基线，再按“避免无效作业、提升能效、设备电动化、岸电与清洁能源、可再生能源和储能、港航协同减少等待”的顺序筛选措施；每项措施同时核对安全、产能、船期、投资、排放因子和数据质量。没有同口径基线及现场数据时，只能给减碳路径，不能宣称具体减排量。 [E1]\n\n建议执行顺序：\n1. 明确盘查边界、基准期、作业量和需要纳入的直接及间接排放源。 [E1]\n2. 对齐 EMS、油料台账、TOS 作业量、设备工时、岸电和承包商数据，先修复缺失与重复。 [E1]\n3. 建立分设备、分区域、分作业环节的排放贡献清单，优先处理高贡献且可控制的来源。 [E1]\n4. 对候选措施做安全、生产、成本、减排量和数据可验证性评估，由责任岗位批准试点。 [E1]\n5. 按同口径基线复核排放、作业效率、延误和副作用，保留计算表、因子版本和变更记录。 [E1]\n\n我核对的索引依据是《港口如何减少碳排》（仅摘录当前检索索引）。\n\n来源状态：该回答来自已登记的项目内部整理资料，非官方原文；涉及生产、安全或合规决策时，必须复核有效的监管文件和现场制度。\n\n当前证据没有覆盖的专业结论，我先不扩写；如果你补充具体港口、对象或日期，我可以继续缩小范围。",
+      "generation_provider": "local_grounded_rag",
+      "generation_model": "xiaoyi-indexed-answer-v2",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "123_port_carbon_reduction_daily_qa.md",
+      "retrieved_sources": [
+        "123_port_carbon_reduction_daily_qa.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "16_green_port_environment.md",
+        "07_energy_carbon_shore_power.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "123_port_carbon_reduction_daily_qa.md"
+      ],
+      "required_terms": [
+        "基线",
+        "设备电动化"
+      ],
+      "matched_terms": [
+        "基线",
+        "设备电动化"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.625,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 6,
+        "supported_claim_count": 6,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "先确定组织、设施和作业边界，用电、燃油、岸电、冷藏箱、外包车辆及船舶等待等活动数据建立可复核基线，再按“避免无效作业、提升能效、设备电动化、岸电与清洁能源、可再生能源和储能、港航协同减少等待”的顺序筛选措施；每项措施同时核对安全、产能、船期、投资、排放因子和数据质量。没有同口径基线及现场数据时，只能给减碳路径，不能宣称具体减排量。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "1. 明确盘查边界、基准期、作业量和需要纳入的直接及间接排放源。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "2. 对齐 EMS、油料台账、TOS 作业量、设备工时、岸电和承包商数据，先修复缺失与重复。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "3. 建立分设备、分区域、分作业环节的排放贡献清单，优先处理高贡献且可控制的来源。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "4. 对候选措施做安全、生产、成本、减排量和数据可验证性评估，由责任岗位批准试点。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "5. 按同口径基线复核排放、作业效率、延误和副作用，保留计算表、因子版本和变更记录。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.7456,
+        "ttft_seconds": 1.7462,
+        "total_seconds": 1.7736,
+        "output_tokens": 372,
+        "tokens_per_second_after_first": 13540.146,
+        "tpot_seconds": 0.0001
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "carbon-daily",
+      "domain": "energy_environment",
+      "question": "储能算减碳吗",
+      "answer": "储能本身不必然减碳，其效果取决于充放电时段的边际电力排放、效率、循环损耗、可再生能源消纳和电池生命周期[E1]。若只是将高碳电力移时使用且损耗增加，排放可能不降。应综合考虑削峰节费、备用价值和碳盘查因素[E2]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "123_port_carbon_reduction_daily_qa.md",
+      "retrieved_sources": [
+        "123_port_carbon_reduction_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "16_green_port_environment.md",
+        "07_energy_carbon_shore_power.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "123_port_carbon_reduction_daily_qa.md",
+        "123_port_carbon_reduction_daily_qa.md"
+      ],
+      "required_terms": [
+        "不必然减碳",
+        "循环损耗"
+      ],
+      "matched_terms": [
+        "不必然减碳",
+        "循环损耗"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.625,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.7773,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.7773,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "储能本身不必然减碳，其效果取决于充放电时段的边际电力排放、效率、循环损耗、可再生能源消纳和电池生命周期[E1]。若只是将高碳电力移时使用且损耗增加，排放可能不降。应综合考虑削峰节费、备用价值和碳盘查因素[E2]。",
+            "citation_indices": [
+              1,
+              2
+            ],
+            "evidence_ids": [
+              "123_port_carbon_reduction_daily_qa:12",
+              "00_knowledge_catalog:10"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.7773,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.9297,
+        "ttft_seconds": 7.6567,
+        "total_seconds": 16.1743,
+        "output_tokens": 72,
+        "tokens_per_second_after_first": 8.3357,
+        "tpot_seconds": 0.12
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "safety-formal",
+      "domain": "safety_security",
+      "question": "港区发生火情怎么办",
+      "answer": "港区发生火情，应立即报警并说明地点、对象和人员情况，停止相关作业、疏散无关人员并按现场预案隔离能源和危险区域；只有受训且条件允许的人员才能使用适配灭火设施。同步通知消防和值班负责人[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "124_port_safety_environment_security_daily_qa.md",
+      "retrieved_sources": [
+        "124_port_safety_environment_security_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "36_customs_security_environment_playbooks.md",
+        "44_common_incident_qa.md",
+        "32_people_hse_operations_management.md",
+        "08_safety_emergency.md",
+        "124_port_safety_environment_security_daily_qa.md",
+        "44_common_incident_qa.md"
+      ],
+      "required_terms": [
+        "疏散",
+        "复工"
+      ],
+      "matched_terms": [
+        "疏散"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.25,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.9855,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.9855,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港区发生火情，应立即报警并说明地点、对象和人员情况，停止相关作业、疏散无关人员并按现场预案隔离能源和危险区域；只有受训且条件允许的人员才能使用适配灭火设施。同步通知消防和值班负责人[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "124_port_safety_environment_security_daily_qa:5"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.9855,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0961,
+        "ttft_seconds": 8.0001,
+        "total_seconds": 14.8851,
+        "output_tokens": 59,
+        "tokens_per_second_after_first": 8.4241,
+        "tpot_seconds": 0.1187
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "safety-daily",
+      "domain": "safety_security",
+      "question": "有人没证进来了怎么办",
+      "answer": "立即通知保安和值班负责人，保持安全距离并按权限限制其继续进入关键区域；核对门禁、访客、车辆和视频记录，必要时升级港口设施保安程序[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "124_port_safety_environment_security_daily_qa.md",
+      "retrieved_sources": [
+        "124_port_safety_environment_security_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "84_imo_isps_code_public_summary.md",
+        "84_imo_isps_code_public_summary.md",
+        "84_imo_isps_code_public_summary.md",
+        "84_imo_isps_code_public_summary.md",
+        "32_people_hse_operations_management.md",
+        "124_port_safety_environment_security_daily_qa.md"
+      ],
+      "required_terms": [
+        "保安",
+        "门禁"
+      ],
+      "matched_terms": [
+        "保安",
+        "门禁"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.25,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 1.0,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "立即通知保安和值班负责人，保持安全距离并按权限限制其继续进入关键区域；核对门禁、访客、车辆和视频记录，必要时升级港口设施保安程序[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "124_port_safety_environment_security_daily_qa:10"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0951,
+        "ttft_seconds": 7.9627,
+        "total_seconds": 13.333,
+        "output_tokens": 44,
+        "tokens_per_second_after_first": 8.007,
+        "tpot_seconds": 0.1249
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "system-formal",
+      "domain": "smart_port_data",
+      "question": "多系统怎么统一业务对象",
+      "answer": "为多系统统一业务对象，需定义权威主键与映射，如船舶、港口挂靠、航次等，统一事件类型、时间、版本和质量码，避免仅靠名称模糊匹配[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "18_smart_port_ai_data.md",
+        "18_smart_port_ai_data.md",
+        "06_tos_and_digital.md",
+        "43_report_template_training_qa.md",
+        "00_knowledge_map.md",
+        "18_smart_port_ai_data.md"
+      ],
+      "required_terms": [
+        "权威主键",
+        "版本"
+      ],
+      "matched_terms": [
+        "权威主键",
+        "版本"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.7963,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.7963,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "为多系统统一业务对象，需定义权威主键与映射，如船舶、港口挂靠、航次等，统一事件类型、时间、版本和质量码，避免仅靠名称模糊匹配[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:9"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.7963,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.6579,
+        "ttft_seconds": 8.9274,
+        "total_seconds": 14.5918,
+        "output_tokens": 48,
+        "tokens_per_second_after_first": 8.2974,
+        "tpot_seconds": 0.1205
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "system-daily",
+      "domain": "smart_port_data",
+      "question": "接口消息晚到了怎么办",
+      "answer": "接口消息晚到时，需确认发送、传输、消费和落库时间，区分网络、队列、限流、下游处理和时钟问题；保护关键业务幂等，暂停可能造成重复动作的重试，并按优先级清理积压。[E1]",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "18_smart_port_ai_data.md",
+        "18_smart_port_ai_data.md",
+        "37_port_qa_form_taxonomy.md",
+        "06_tos_and_digital.md",
+        "43_report_template_training_qa.md",
+        "00_knowledge_map.md"
+      ],
+      "required_terms": [
+        "幂等",
+        "积压"
+      ],
+      "matched_terms": [
+        "幂等",
+        "积压"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.9574,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.9574,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "接口消息晚到时，需确认发送、传输、消费和落库时间，区分网络、队列、限流、下游处理和时钟问题；保护关键业务幂等，暂停可能造成重复动作的重试，并按优先级清理积压。[E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:10"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.9574,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.1443,
+        "ttft_seconds": 7.6375,
+        "total_seconds": 14.5403,
+        "output_tokens": 60,
+        "tokens_per_second_after_first": 8.5473,
+        "tpot_seconds": 0.117
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "commercial-formal",
+      "domain": "commercial_legal",
+      "question": "客户对费用有争议怎么办",
+      "answer": "客户对费用有争议时，应先确认费用明细、计费依据及合同条款，核对事实后明确责任，保持原始记录作为依据[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "31_port_commercial_tariff_service.md",
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "122_shift_customer_system_coordination_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "37_port_qa_form_taxonomy.md",
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "31_port_commercial_tariff_service.md"
+      ],
+      "required_terms": [
+        "费率版本",
+        "承诺减免"
+      ],
+      "matched_terms": [],
+      "required_term_recall": 0.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.375,
+        "context_recall": 1.0,
+        "response_relevancy": 0.0,
+        "faithfulness": 0.2524,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "needs_review",
+        "claim_count": 1,
+        "supported_claim_count": 0,
+        "citation_coverage": 0.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.2524,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "客户对费用有争议时，应先确认费用明细、计费依据及合同条款，核对事实后明确责任，保持原始记录作为依据[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.2524,
+            "alignment_basis": "none",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": false
+          }
+        ],
+        "issues": [
+          "存在未同时通过引用、词面对齐和数字完整性门禁的事实性陈述",
+          "引用存在，但事实性陈述与所引证据的词面主题对齐不足"
+        ],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.1562,
+        "ttft_seconds": 7.2821,
+        "total_seconds": 11.4298,
+        "output_tokens": 36,
+        "tokens_per_second_after_first": 8.4384,
+        "tpot_seconds": 0.1185
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": false
+      },
+      "passed": false
+    },
+    {
+      "id": "commercial-daily",
+      "domain": "commercial_legal",
+      "question": "客户说箱货坏了怎么处理",
+      "answer": "客户说箱货坏了，需准备业务单据、交接记录、箱体与封志、理货残损、照片视频、设备和作业记录、温度或冲击数据、时间线及各方通知，区分发现时间、可能发生环节和后续减损动作[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+      "retrieved_sources": [
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "31_port_commercial_tariff_service.md",
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "54_daily_port_operations_shift_qa.md",
+        "122_shift_customer_system_coordination_daily_qa.md",
+        "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+        "122_shift_customer_system_coordination_daily_qa.md"
+      ],
+      "required_terms": [
+        "封志",
+        "责任"
+      ],
+      "matched_terms": [
+        "封志"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.375,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.9459,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.9459,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "客户说箱货坏了，需准备业务单据、交接记录、箱体与封志、理货残损、照片视频、设备和作业记录、温度或冲击数据、时间线及各方通知，区分发现时间、可能发生环节和后续减损动作[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "125_port_commercial_intermodal_special_cargo_daily_qa:5"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.9459,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.1082,
+        "ttft_seconds": 7.1766,
+        "total_seconds": 14.1505,
+        "output_tokens": 60,
+        "tokens_per_second_after_first": 8.4601,
+        "tpot_seconds": 0.1182
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "people-formal",
+      "domain": "people_management",
+      "question": "今天运营重点怎么看",
+      "answer": "今天运营重点看人员安全和失控风险，再看船舶与泊位时间窗、堆场和闸口容量、关键设备、单证放行、天气及未闭环事项，每项标明当前事实、数据时间、责任人和下一动作[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "32_people_hse_operations_management.md",
+        "48_dcsa_port_call_standard.md",
+        "32_people_hse_operations_management.md",
+        "00_knowledge_catalog.md",
+        "32_people_hse_operations_management.md",
+        "32_people_hse_operations_management.md",
+        "32_people_hse_operations_management.md"
+      ],
+      "required_terms": [
+        "人员安全",
+        "责任人"
+      ],
+      "matched_terms": [
+        "人员安全",
+        "责任人"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.9603,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.9603,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "今天运营重点看人员安全和失控风险，再看船舶与泊位时间窗、堆场和闸口容量、关键设备、单证放行、天气及未闭环事项，每项标明当前事实、数据时间、责任人和下一动作[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:2"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.9603,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.7496,
+        "ttft_seconds": 7.8375,
+        "total_seconds": 14.5536,
+        "output_tokens": 57,
+        "tokens_per_second_after_first": 8.3382,
+        "tpot_seconds": 0.1199
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "people-daily",
+      "domain": "people_management",
+      "question": "多部门互相等怎么办",
+      "answer": "多部门互相等时，应明确问题对象、当前事实、阻断项，并指定牵头责任人与截止时间，确保每个部门有可验证动作和反馈格式。[E1]",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "122_shift_customer_system_coordination_daily_qa.md",
+      "retrieved_sources": [
+        "122_shift_customer_system_coordination_daily_qa.md",
+        "32_people_hse_operations_management.md",
+        "32_people_hse_operations_management.md",
+        "00_knowledge_catalog.md",
+        "32_people_hse_operations_management.md",
+        "32_people_hse_operations_management.md",
+        "58_equipment_team_handover_alert_qa.md",
+        "32_people_hse_operations_management.md"
+      ],
+      "required_terms": [
+        "唯一阻断项",
+        "牵头责任人"
+      ],
+      "matched_terms": [
+        "牵头责任人"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.513,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.513,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "多部门互相等时，应明确问题对象、当前事实、阻断项，并指定牵头责任人与截止时间，确保每个部门有可验证动作和反馈格式。[E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "122_shift_customer_system_coordination_daily_qa:4"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.513,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0677,
+        "ttft_seconds": 7.3619,
+        "total_seconds": 12.1262,
+        "output_tokens": 40,
+        "tokens_per_second_after_first": 8.1859,
+        "tpot_seconds": 0.1222
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "planning-formal",
+      "domain": "planning_kpi",
+      "question": "港口产能怎么评估",
+      "answer": "港口产能评估需综合考量航道泊位、岸桥、水平运输、堆场、闸口、铁路公路、人员及系统能力，通过统一时间窗识别最小有效能力，并考虑峰值、维护、天气、货类和安全缓冲因素[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "126_port_management_kpi_system_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "01_port_basics.md",
+        "126_port_management_kpi_system_daily_qa.md",
+        "17_port_economics_kpi.md",
+        "126_port_management_kpi_system_daily_qa.md",
+        "39_metric_calculation_diagnosis_qa.md"
+      ],
+      "required_terms": [
+        "最小有效能力",
+        "安全缓冲"
+      ],
+      "matched_terms": [
+        "最小有效能力",
+        "安全缓冲"
+      ],
+      "required_term_recall": 1.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.5,
+        "context_recall": 1.0,
+        "response_relevancy": 1.0,
+        "faithfulness": 0.6259,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.6259,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "港口产能评估需综合考量航道泊位、岸桥、水平运输、堆场、闸口、铁路公路、人员及系统能力，通过统一时间窗识别最小有效能力，并考虑峰值、维护、天气、货类和安全缓冲因素[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:7"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.6259,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.9742,
+        "ttft_seconds": 8.2158,
+        "total_seconds": 14.7774,
+        "output_tokens": 56,
+        "tokens_per_second_after_first": 8.3821,
+        "tpot_seconds": 0.1193
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": true,
+        "citation_verification": true
+      },
+      "passed": true
+    },
+    {
+      "id": "planning-daily",
+      "domain": "planning_kpi",
+      "question": "下周会不会爆量",
+      "answer": "下周是否爆量需结合船期、订舱、季节性等因素预测，但实际结果受船公司和客户计划影响，预测不能替代实际数据[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "126_port_management_kpi_system_daily_qa.md"
+      ],
+      "required_terms": [
+        "上下界",
+        "正式计划"
+      ],
+      "matched_terms": [],
+      "required_term_recall": 0.0,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 1.0,
+        "context_recall": 1.0,
+        "response_relevancy": 0.0,
+        "faithfulness": 0.3545,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.3545,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "下周是否爆量需结合船期、订舱、季节性等因素预测，但实际结果受船公司和客户计划影响，预测不能替代实际数据[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:8"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.3545,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.0912,
+        "ttft_seconds": 8.9072,
+        "total_seconds": 13.3318,
+        "output_tokens": 37,
+        "tokens_per_second_after_first": 8.1363,
+        "tpot_seconds": 0.1229
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "live-formal",
+      "domain": "live_operations",
+      "question": "怎么判断AI建议能不能用",
+      "answer": "判断AI建议是否可用，需检查业务对象、数据时间与质量、证据覆盖、约束完整性、假设、风险及替代方案，再与现场状态及有权岗位确认。缺实时数据或关键证据则不可用[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "00_knowledge_catalog.md",
+        "41_data_system_interface_qa.md",
+        "18_smart_port_ai_data.md",
+        "18_smart_port_ai_data.md",
+        "06_tos_and_digital.md",
+        "43_report_template_training_qa.md",
+        "00_knowledge_map.md"
+      ],
+      "required_terms": [
+        "数据时间",
+        "生产授权"
+      ],
+      "matched_terms": [
+        "数据时间"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.125,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.6286,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.6286,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "判断AI建议是否可用，需检查业务对象、数据时间与质量、证据覆盖、约束完整性、假设、风险及替代方案，再与现场状态及有权岗位确认。缺实时数据或关键证据则不可用[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:11"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.6286,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 1.9617,
+        "ttft_seconds": 8.4095,
+        "total_seconds": 14.7437,
+        "output_tokens": 51,
+        "tokens_per_second_after_first": 7.8937,
+        "tpot_seconds": 0.1267
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "live-daily",
+      "domain": "live_operations",
+      "question": "小懿说的能直接执行吗",
+      "answer": "需检查业务对象、数据时间及质量、证据覆盖、约束完整性、假设、风险、替代方案和回退条件，并与现场状态及有权岗位确认[E1]。",
+      "generation_provider": "openai_compatible",
+      "generation_model": "xiaoyi-local-4b",
+      "grounded": true,
+      "confidence": "medium",
+      "expected_source": "126_port_management_kpi_system_daily_qa.md",
+      "retrieved_sources": [
+        "126_port_management_kpi_system_daily_qa.md",
+        "09_policy_compliance.md",
+        "48_dcsa_port_call_standard.md",
+        "18_smart_port_ai_data.md",
+        "13_customs_trade_documents.md"
+      ],
+      "required_terms": [
+        "现场状态",
+        "生产授权"
+      ],
+      "matched_terms": [
+        "现场状态"
+      ],
+      "required_term_recall": 0.5,
+      "retrieval": {
+        "recall_at_5": 1.0,
+        "mrr_at_10": 1.0,
+        "ndcg_at_10": 1.0
+      },
+      "ragas_aligned_deterministic_proxies": {
+        "context_precision": 0.2,
+        "context_recall": 1.0,
+        "response_relevancy": 0.5,
+        "faithfulness": 0.86,
+        "scope": "Deterministic task-specific proxies aligned to RAGAS concepts; not RAGAS LLM-judge scores."
+      },
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 0.86,
+        "numeric_integrity": 1.0,
+        "claims": [
+          {
+            "claim": "需检查业务对象、数据时间及质量、证据覆盖、约束完整性、假设、风险、替代方案和回退条件，并与现场状态及有权岗位确认[E1]。",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "126_port_management_kpi_system_daily_qa:11"
+            ],
+            "citation_valid": true,
+            "alignment_score": 0.86,
+            "alignment_basis": "lexical",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "latency": {
+        "headers_seconds": 0.7352,
+        "ttft_seconds": 7.9383,
+        "total_seconds": 12.619,
+        "output_tokens": 38,
+        "tokens_per_second_after_first": 7.9048,
+        "tpot_seconds": 0.1265
+      },
+      "checks": {
+        "grounded": true,
+        "expected_source_retrieved": true,
+        "required_terms": false,
+        "citation_verification": true
+      },
+      "passed": false
+    },
+    {
+      "id": "boundary-vague",
+      "question": "怎么办？",
+      "answer": "遇到问题时，首先明确具体是什么问题，然后根据问题类型采取相应的解决措施。如果是技术问题，可以尝试查找相关资料或寻求帮助；如果是生活中的问题，可以考虑咨询专业人士或参考相关建议。请提供更多细节，以便获得更具体的帮助。\n\n提示：本回答未检索到可支持当前结论的本地证据索引，内容主要来自基座模型的一般知识，请结合正式资料核验。",
+      "expected_refusal_reason": "business_object_required",
+      "actual_refusal_reason": "business_object_required",
+      "latency": {
+        "headers_seconds": 0.0182,
+        "ttft_seconds": 1.4822,
+        "total_seconds": 7.7503
+      },
+      "checks": {
+        "not_grounded": true,
+        "refusal_reason": true,
+        "required_terms": false
+      },
+      "passed": false
+    },
+    {
+      "id": "boundary-throughput",
+      "question": "港口当前吞吐量是多少？",
+      "answer": "当前无已验证的实时吞吐量数据，需连接TOS生产系统或正式统计系统查询[E1]。\n\n提示：本回答未检索到可支持当前结论的本地证据索引，内容主要来自基座模型的一般知识，请结合正式资料核验。",
+      "expected_refusal_reason": "live_data_connection_required",
+      "actual_refusal_reason": "live_data_connection_required",
+      "latency": {
+        "headers_seconds": 1.3845,
+        "ttft_seconds": 8.8017,
+        "total_seconds": 11.8277
+      },
+      "checks": {
+        "not_grounded": true,
+        "refusal_reason": true,
+        "required_terms": false
+      },
+      "passed": false
+    },
+    {
+      "id": "boundary-vessel",
+      "question": "海盛轮今天几点靠泊？",
+      "answer": "当前无海盛轮的已验证实时船期数据，需连接 TOS 泊位计划、AIS / VTS 或船期系统确认靠泊时间 [E1]。\n\n提示：本回答未检索到可支持当前结论的本地证据索引，内容主要来自基座模型的一般知识，请结合正式资料核验。",
+      "expected_refusal_reason": "live_data_connection_required",
+      "actual_refusal_reason": "live_data_connection_required",
+      "latency": {
+        "headers_seconds": 1.4207,
+        "ttft_seconds": 8.8358,
+        "total_seconds": 13.5748
+      },
+      "checks": {
+        "not_grounded": true,
+        "refusal_reason": true,
+        "required_terms": false
+      },
+      "passed": false
+    },
+    {
+      "id": "boundary-marpol",
+      "question": "MARPOL具体排放限值是多少？",
+      "answer": "MARPOL公约未直接规定具体排放限值，而是通过附则Ⅲ等条款对船舶排放有害物质进行规范，具体要求需结合实际操作和主管机关规定[E1]。\n\n提示：本回答未检索到可支持当前结论的本地证据索引，内容主要来自基座模型的一般知识，请结合正式资料核验。",
+      "expected_refusal_reason": "official_full_text_required",
+      "actual_refusal_reason": null,
+      "latency": {
+        "headers_seconds": 0.2316,
+        "ttft_seconds": 6.5908,
+        "total_seconds": 11.5128
+      },
+      "checks": {
+        "not_grounded": true,
+        "refusal_reason": false,
+        "required_terms": false
+      },
+      "passed": false
+    },
+    {
+      "id": "boundary-dangerous-goods",
+      "question": "中国港口危险货物具体隔离限值是多少？",
+      "answer": "中国港口危险货物的具体隔离限值由《港口危险货物安全管理规定》规定，该规定由中华人民共和国交通运输部发布，最新版本为2023年第8号令。具体隔离限值需根据危险货物的类别和特性确定，通常遵循《危险货物分类和品名编号》（GB 12268）等国家标准。[E2]\n\n提示：本回答未检索到可支持当前结论的本地证据索引，内容主要来自基座模型的一般知识，请结合正式资料核验。",
+      "expected_refusal_reason": "official_full_text_required",
+      "actual_refusal_reason": null,
+      "latency": {
+        "headers_seconds": 1.1373,
+        "ttft_seconds": 8.7244,
+        "total_seconds": 18.1888
+      },
+      "checks": {
+        "not_grounded": true,
+        "refusal_reason": false,
+        "required_terms": false
+      },
+      "passed": false
+    }
+  ]
+}

@@ -103,8 +103,8 @@ _SYSTEM_SPECS = (
     },
     {
         "id": "malacca-sandbox", "name": "马六甲沙盘港口推演", "english": "Malacca Port Sandbox",
-        "role": "场景推演、策略训练、目标选择与训练后测试", "prefix": "MALACCA", "default_url": "http://127.0.0.1:4173",
-        "health": "/", "ui": "http://127.0.0.1:4173/",
+        "role": "场景推演、策略训练、目标选择与训练后测试", "prefix": "MALACCA", "default_url": "http://127.0.0.1:5174",
+        "health": "/api/rl/health", "ui": "http://127.0.0.1:5174/",
         "capabilities": (
             ("open_malacca_sandbox", "打开马六甲推演", "Open Malacca Sandbox", "跳转到场景推演和策略测试工作台", "NAVIGATE", "/", []),
             ("malacca_policy_test", "策略测试交接", "Policy Test Handoff", "生成策略测试所需上下文并交接到沙盘，不在小懿内重复执行", "NAVIGATE", "/", ["scenario_id", "policy_id"]),

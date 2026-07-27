@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "benchmark_id": "xiaoyi-maritime-question-universe-v6",
+  "created_at": "2026-07-26",
+  "base_case_count": 230,
+  "scope": "覆盖15个港航业务域的30题正式/日常分层固定集，并单列5题澄清、实时数据与官方全文边界；由本仓库维护且开发可见，不是第三方盲测、全部自由表达证明、现场验收或法律正确率。",
+  "cases": [
+    {"id":"basics-formal","domain":"port_basics","question":"港口定义是什么","expected_source":"01_port_basics.md"},
+    {"id":"basics-daily","domain":"port_basics","question":"港区一般分哪些区域","expected_source":"01_port_basics.md"},
+    {"id":"shipping-formal","domain":"shipping","question":"班轮航线模式是什么","expected_source":"02_shipping_basics.md"},
+    {"id":"shipping-daily","domain":"shipping","question":"船期晚了会影响什么","expected_source":"55_vessel_schedule_port_call_qa.md"},
+
+    {"id":"vessel-formal","domain":"vessel_port_call","question":"大雾时船舶怎么安排","expected_source":"127_port_navigation_weather_engineering_daily_qa.md","required_answer_terms":["VTS","待确认"]},
+    {"id":"vessel-daily","domain":"vessel_port_call","question":"船别早到空等怎么协调","expected_source":"127_port_navigation_weather_engineering_daily_qa.md","required_answer_terms":["版本","船长"]},
+    {"id":"terminal-formal","domain":"container_terminal","question":"堆场快满了怎么办","expected_source":"121_yard_gate_equipment_flow_daily_qa.md","required_answer_terms":["高压区域","冷藏箱"]},
+    {"id":"terminal-daily","domain":"container_terminal","question":"闸口排队太长怎么处理","expected_source":"121_yard_gate_equipment_flow_daily_qa.md","required_answer_terms":["预约波峰","场内拥堵"]},
+
+    {"id":"cargo-formal","domain":"special_cargo","question":"LNG船靠港要关注什么","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["船岸兼容","紧急切断"]},
+    {"id":"cargo-daily","domain":"special_cargo","question":"滚装船车辆怎么排","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["预排区","系固"]},
+    {"id":"docs-formal","domain":"customs_documents","question":"VGM是什么","expected_source":"57_booking_document_release_qa.md","required_answer_terms":["总重量","箱号"]},
+    {"id":"docs-daily","domain":"customs_documents","question":"舱单数据没到怎么办","expected_source":"57_booking_document_release_qa.md","required_answer_terms":["错误队列","不人工伪造"]},
+
+    {"id":"intermodal-formal","domain":"intermodal","question":"海铁联运怎么组织","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["班列","业务主键"]},
+    {"id":"intermodal-daily","domain":"intermodal","question":"火车没按时到怎么办","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["替代运力","冷链"]},
+    {"id":"equipment-formal","domain":"equipment_engineering","question":"岸桥出现告警怎么办","expected_source":"58_equipment_team_handover_alert_qa.md","required_answer_terms":["告警代码","反复复位"]},
+    {"id":"equipment-daily","domain":"equipment_engineering","question":"码头有裂缝还能用吗","expected_source":"127_port_navigation_weather_engineering_daily_qa.md","required_answer_terms":["限制","工程人员"]},
+
+    {"id":"carbon-formal","domain":"energy_environment","question":"如何减少碳排","expected_source":"123_port_carbon_reduction_daily_qa.md","required_answer_terms":["基线","设备电动化"]},
+    {"id":"carbon-daily","domain":"energy_environment","question":"储能算减碳吗","expected_source":"123_port_carbon_reduction_daily_qa.md","required_answer_terms":["不必然减碳","循环损耗"]},
+    {"id":"safety-formal","domain":"safety_security","question":"港区发生火情怎么办","expected_source":"124_port_safety_environment_security_daily_qa.md","required_answer_terms":["疏散","复工"]},
+    {"id":"safety-daily","domain":"safety_security","question":"有人没证进来了怎么办","expected_source":"124_port_safety_environment_security_daily_qa.md","required_answer_terms":["保安","门禁"]},
+
+    {"id":"system-formal","domain":"smart_port_data","question":"多系统怎么统一业务对象","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["权威主键","版本"]},
+    {"id":"system-daily","domain":"smart_port_data","question":"接口消息晚到了怎么办","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["幂等","积压"]},
+    {"id":"commercial-formal","domain":"commercial_legal","question":"客户对费用有争议怎么办","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["费率版本","承诺减免"]},
+    {"id":"commercial-daily","domain":"commercial_legal","question":"客户说箱货坏了怎么处理","expected_source":"125_port_commercial_intermodal_special_cargo_daily_qa.md","required_answer_terms":["封志","责任"]},
+
+    {"id":"people-formal","domain":"people_management","question":"今天运营重点怎么看","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["人员安全","责任人"]},
+    {"id":"people-daily","domain":"people_management","question":"多部门互相等怎么办","expected_source":"122_shift_customer_system_coordination_daily_qa.md","required_answer_terms":["唯一阻断项","牵头责任人"]},
+    {"id":"planning-formal","domain":"planning_kpi","question":"港口产能怎么评估","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["最小有效能力","安全缓冲"]},
+    {"id":"planning-daily","domain":"planning_kpi","question":"下周会不会爆量","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["上下界","正式计划"]},
+
+    {"id":"live-formal","domain":"live_operations","question":"怎么判断AI建议能不能用","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["数据时间","生产授权"]},
+    {"id":"live-daily","domain":"live_operations","question":"小懿说的能直接执行吗","expected_source":"126_port_management_kpi_system_daily_qa.md","required_answer_terms":["现场状态","生产授权"]}
+  ],
+  "boundary_cases": [
+    {"id":"boundary-vague","question":"怎么办？","expected_refusal_reason":"business_object_required","required_answer_terms":["业务对象"]},
+    {"id":"boundary-throughput","question":"港口当前吞吐量是多少？","expected_refusal_reason":"live_data_connection_required","required_answer_terms":["实时生产数据"]},
+    {"id":"boundary-vessel","question":"海盛轮今天几点靠泊？","expected_refusal_reason":"live_data_connection_required","required_answer_terms":["实时生产数据"]},
+    {"id":"boundary-marpol","question":"MARPOL具体排放限值是多少？","expected_refusal_reason":"official_full_text_required","required_answer_terms":["官方全文"]},
+    {"id":"boundary-dangerous-goods","question":"中国港口危险货物具体隔离限值是多少？","expected_refusal_reason":"official_full_text_required","required_answer_terms":["官方全文"]}
+  ]
+}
