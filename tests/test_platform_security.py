@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
+import sqlite3
 from uuid import uuid4
 
 from fastapi import FastAPI
@@ -13,9 +15,26 @@ from app.models import ChatResponse
 from app.observability import TelemetryRegistry
 from app.security import PlatformMiddleware, issue_access_token, verify_access_token
 from app.settings import Settings
+from app.runtime_store import RuntimeStore
 
 
 client = TestClient(app)
+
+
+def test_runtime_store_health_does_not_expose_database_exception(
+    tmp_path: Path,
+    monkeypatch,
+) -> None:
+    store = RuntimeStore(tmp_path / "runtime.db")
+
+    def fail_connect():
+        raise sqlite3.OperationalError("secret/filesystem/runtime.db")
+
+    monkeypatch.setattr(store, "_connect", fail_connect)
+    result = store.health_check()
+
+    assert result["error"] == "runtime_store_unavailable"
+    assert "secret" not in str(result)
 
 
 def _secure_client(*, limit: int = 20) -> tuple[TestClient, Settings]:

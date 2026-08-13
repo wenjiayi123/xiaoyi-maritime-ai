@@ -32,11 +32,11 @@
   <a href="#能力全景--capability-map">能力全景 / Capabilities</a> ·
   <a href="#系统架构--architecture">系统架构 / Architecture</a> ·
   <a href="#快速运行--quick-start">快速运行 / Quick start</a> ·
-  <a href="reports/maritime_rag_benchmark_v1_20260814_r1.md">基准报告 / Benchmark</a> ·
-  <a href="reports/maritime_decision_readiness_benchmark_v3_20260814_r1.md">决策保障 / Decision assurance</a> ·
-  <a href="reports/maritime_claim_alignment_benchmark_v4_20260814_r1.md">证据对齐 / Evidence alignment</a> ·
-  <a href="reports/maritime_daily_operations_benchmark_v5_20260814_r1.md">日常问答 / Daily operations</a> ·
-  <a href="reports/maritime_question_universe_benchmark_v6_20260814_r1.md">问题全集 / Question universe</a> ·
+  <a href="reports/maritime_rag_benchmark_v1_20260814_r2.md">基准报告 / Benchmark</a> ·
+  <a href="reports/maritime_decision_readiness_benchmark_v3_20260814_r2.md">决策保障 / Decision assurance</a> ·
+  <a href="reports/maritime_claim_alignment_benchmark_v4_20260814_r2.md">证据对齐 / Evidence alignment</a> ·
+  <a href="reports/maritime_daily_operations_benchmark_v5_20260814_r2.md">日常问答 / Daily operations</a> ·
+  <a href="reports/maritime_question_universe_benchmark_v6_20260814_r2.md">问题全集 / Question universe</a> ·
   <a href="docs/GENERATIVE_MODEL_STACK.md">生成式模型栈 / Generative stack</a> ·
   <a href="reports/local_rag_lora_e2e_v3.json">本机LoRA证据 / Local LoRA evidence</a> ·
   <a href="docs/TOP_TIER_MARITIME_ASSISTANT_ROADMAP.md">升级路线 / Roadmap</a> ·
@@ -78,22 +78,22 @@ XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 | 本机 LoRA 工程闭环 / Local LoRA loop | 面向17.29亿参数训练基座，Rank 96训练<strong>104,595,456</strong>个适配器参数；含适配器总参数18.25亿，占<strong>5.730723%</strong>。<strong>841</strong>条监督样本按来源隔离为<strong>622/94/125</strong>，64步后8例验证/测试loss分别下降<strong>43.55% / 40.49%</strong>，产出 PEFT + GGUF。当前仅通过工程完整性，因单种子、少量loss样例和无专家配对盲测，<strong>质量准入阻断</strong> | `reports/local_lora_inference_v3.json` + `reports/lora_admission_v1.json` |
 | 港航端到端模型评测 / Maritime model benchmark | BEIR对齐检索、RAGAS概念对齐确定性代理与MLPerf风格TTFT；核心港航/证据边界<strong>35/35</strong>，港航人员日常题<strong>16/16</strong>；所有问答统一保留<strong>至少3秒可见核验窗口</strong>，单机单流非官方提交 | `reports/maritime_model_benchmark_v7_lora_r96.json` |
 | 固定测试 / Fixed release acceptance | <strong>35</strong>题：24题检索 + 11题证据策略<br><sub><strong>35</strong> tests: 24 retrieval + 11 evidence-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
-| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>100% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1_20260814_r1.json` |
+| Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>100% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1_20260814_r2.json` |
 | 同快照对照 / Same-snapshot baseline | MRR <strong>0.9583 → 1.0000</strong>（+4.17个百分点 / pp） | Hybrid Sparse vs BM25-only |
 | 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 <strong>100%</strong><br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all <strong>100%</strong></sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
-| 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 <strong>11/11通过</strong><br><sub>Refusal, jurisdiction, date, and live-data boundaries: <strong>11/11 passed</strong></sub> | `python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1 --deep` |
-| 助手困难集 / Assistant challenge set | 多轮、复杂拆解、对抗边界各 <strong>20/20</strong>，v2 合计 <strong>60/60</strong><br><sub>Dialogue, decomposition, and adversarial boundaries: <strong>20/20</strong> each</sub> | `reports/maritime_assistant_benchmark_v2_20260814_r1.json` |
-| 决策保障 / Decision assurance | 真实问答决策就绪 <strong>14/14</strong>；冲突/新鲜度/失败关闭 <strong>16/16</strong><br><sub>Decision readiness <strong>14/14</strong>; conflict, freshness, and fail-closed assurance: <strong>16/16</strong></sub> | `reports/maritime_decision_readiness_benchmark_v3_20260814_r1.json` |
-| 主张—证据对齐 / Claim–evidence alignment | 引用角色 <strong>6/6</strong>；词面对齐 <strong>6/6</strong>；数字/日期/量值 <strong>8/8</strong><br><sub>Citation roles <strong>6/6</strong>; lexical alignment <strong>6/6</strong>; numeric/date/value integrity <strong>8/8</strong></sub> | `reports/maritime_claim_alignment_benchmark_v4_20260814_r1.json` |
-| 日常运营问答 / Daily operations Q&A | 能源、船舶泊位、堆场闸口、班组协同、单证、设备各 <strong>10/10</strong>；模糊/实时边界 <strong>3/3</strong><br><sub>Six frontline categories: <strong>10/10</strong> each; clarification/live-data boundaries: <strong>3/3</strong></sub> | `reports/maritime_daily_operations_benchmark_v5_20260814_r1.json` |
-| 港口问题全集 / Port question universe | <strong>15</strong>业务域 × <strong>26</strong>问题形式 = <strong>390</strong>意图单元、<strong>780</strong>正式/日常矩阵问法；分域固定题<strong>30/30</strong>、安全边界<strong>5/5</strong><br><sub><strong>390</strong> intent cells and <strong>780</strong> formal/daily matrix prompts; fixed domain cases <strong>30/30</strong>, boundaries <strong>5/5</strong></sub> | `docs/PORT_QUESTION_UNIVERSE.md` + `reports/maritime_question_universe_benchmark_v6_20260814_r1.json` |
+| 安全策略 / Safety policy | 拒答、辖区、日期、实时数据边界 <strong>11/11通过</strong><br><sub>Refusal, jurisdiction, date, and live-data boundaries: <strong>11/11 passed</strong></sub> | `python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2 --deep` |
+| 助手困难集 / Assistant challenge set | 多轮、复杂拆解、对抗边界各 <strong>20/20</strong>，v2 合计 <strong>60/60</strong><br><sub>Dialogue, decomposition, and adversarial boundaries: <strong>20/20</strong> each</sub> | `reports/maritime_assistant_benchmark_v2_20260814_r2.json` |
+| 决策保障 / Decision assurance | 真实问答决策就绪 <strong>14/14</strong>；冲突/新鲜度/失败关闭 <strong>16/16</strong><br><sub>Decision readiness <strong>14/14</strong>; conflict, freshness, and fail-closed assurance: <strong>16/16</strong></sub> | `reports/maritime_decision_readiness_benchmark_v3_20260814_r2.json` |
+| 主张—证据对齐 / Claim–evidence alignment | 引用角色 <strong>6/6</strong>；词面对齐 <strong>6/6</strong>；数字/日期/量值 <strong>8/8</strong><br><sub>Citation roles <strong>6/6</strong>; lexical alignment <strong>6/6</strong>; numeric/date/value integrity <strong>8/8</strong></sub> | `reports/maritime_claim_alignment_benchmark_v4_20260814_r2.json` |
+| 日常运营问答 / Daily operations Q&A | 能源、船舶泊位、堆场闸口、班组协同、单证、设备各 <strong>10/10</strong>；模糊/实时边界 <strong>3/3</strong><br><sub>Six frontline categories: <strong>10/10</strong> each; clarification/live-data boundaries: <strong>3/3</strong></sub> | `reports/maritime_daily_operations_benchmark_v5_20260814_r2.json` |
+| 港口问题全集 / Port question universe | <strong>15</strong>业务域 × <strong>26</strong>问题形式 = <strong>390</strong>意图单元、<strong>780</strong>正式/日常矩阵问法；分域固定题<strong>30/30</strong>、安全边界<strong>5/5</strong><br><sub><strong>390</strong> intent cells and <strong>780</strong> formal/daily matrix prompts; fixed domain cases <strong>30/30</strong>, boundaries <strong>5/5</strong></sub> | `docs/PORT_QUESTION_UNIVERSE.md` + `reports/maritime_question_universe_benchmark_v6_20260814_r2.json` |
 | RL 数据规模 / RL dataset scale | 原 <strong>19,735</strong> 行 + 大规模 <strong>409,887</strong> 行（<strong>20.77×</strong>）+ NOAA港区AIS <strong>710</strong> 个实测分钟桶 | `reports/rl_dataset_benchmark_v1.json` |
 | RL 正式候选准入 / Formal RL admission | <strong>3</strong> 数据集 × <strong>3</strong> 种子 × <strong>320</strong>回合 × 4 RL + PID + SOP规则；时间隔离、训练不渲染、测试后回放、Student-t 95% CI。4个RL候选均未稳定击败验证集强基线，失败证据保留，<strong>policy_admission=false</strong> | `reports/rl_dataset_benchmark_v2.json` + `python scripts/run_rl_dataset_benchmark.py verify` |
 | 港口实时模拟闭环 / Port realtime simulation | <strong>10</strong>业务域、<strong>153</strong>规范字段、<strong>2秒</strong>事件流、<strong>5</strong>个因果场景、<strong>168</strong>台设备对象；单人执行被阻断，双人审批后仅改变模拟状态且可回滚 | `reports/port_realtime_simulator_evidence_v1_20260813.json` + `python scripts/build_realtime_simulator_evidence.py verify`；`physical_dispatch_performed=false` |
 | 提示词注入回归 / Prompt-injection regression | <strong>26</strong>个中英文固定攻击/良性样例；检测precision、recall、良性specificity、攻击隔离率均<strong>1.000</strong> | `reports/prompt_injection_benchmark_v1_20260813.json`；不是外部红队或生产安全认证 |
 | 真实本地模型安全回归 / Live local-model safety probe | THDi 单题保留初始检索/生成失败、中间失败及<strong>1次随机角色指派失败</strong>；v2 修复后命中3条专门证据、5条锁定步骤，整段门禁通过且不再杜撰现场岗位，仍为只读、需人工复核 | `reports/live_model_safety_probe_v2_20260813_role_variation_failure.json` + `...post_fix.json`；单题不是全量安全率 |
 | 现场准入 / Site admission | 字段映射、标定、漂移、影子运行、双人审批、回滚演练、OT/IT安全共<strong>7道门禁</strong>；当前<strong>0/7</strong>完成，`dispatch_allowed=false`、`production_authority=false` | `data/contracts/port_site_admission_v1.json` |
-| 依赖漏洞准入 / Dependency admission | 初始运行依赖<strong>7</strong>条、开发依赖<strong>1</strong>条已知漏洞的失败报告均保留；当前 r3 运行/开发依赖以制品 SHA-256 锁定并均为<strong>0</strong>已知漏洞；本次完整回归<strong>362</strong>项通过 | `reports/dependency_audit_admission_v3.json` + CycloneDX SBOM + `pytest -q` |
+| 依赖漏洞准入 / Dependency admission | 初始运行依赖<strong>7</strong>条、开发依赖<strong>1</strong>条已知漏洞的失败报告均保留；当前 r3 运行/开发依赖以制品 SHA-256 锁定并均为<strong>0</strong>已知漏洞；本次完整回归<strong>365</strong>项通过 | `reports/dependency_audit_admission_v3.json` + CycloneDX SBOM + `pytest -q` |
 
 > [!NOTE]
 > 这些数字来自仓库固定发布验收集，不是第三方用户研究、生产SLA、法律意见或全球知识覆盖率。小懿默认将“独立公共观测”“公开数据校准实时模拟”“授权现场接口”和“生产动作权限”分开标识；153 个字段是契约覆盖，不是 153 项独立现场实测。
@@ -494,49 +494,49 @@ The repository publishes six versioned fixed benchmarks totaling 260 cases. v1 c
 
 ```bash
 # 快速哈希核验 / verify report-bound data, index, and policy-code hashes
-.venv/bin/python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1
+.venv/bin/python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2
 
 # 深度复算60题 / rerun all 60 cases; may take minutes on one CPU core
-.venv/bin/python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1 --deep
+.venv/bin/python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2 --deep
 
 # 追加生成新报告（请换成未使用标签） / append a report with an unused tag
-.venv/bin/python scripts/run_rag_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_rag_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 
 # 核验/复跑 v2 助手困难集 / verify or rerun the v2 assistant challenge set
-.venv/bin/python scripts/run_assistant_benchmark.py verify --output-tag 20260814_r1
-.venv/bin/python scripts/run_assistant_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_assistant_benchmark.py verify --output-tag 20260814_r2
+.venv/bin/python scripts/run_assistant_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 
 # 核验/复跑 v3 决策保障 / verify or rerun v3 decision assurance
-.venv/bin/python scripts/run_decision_benchmark.py verify --output-tag 20260814_r1
-.venv/bin/python scripts/run_decision_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_decision_benchmark.py verify --output-tag 20260814_r2
+.venv/bin/python scripts/run_decision_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 
 # 核验/复跑 v4 主张—证据对齐 / verify or rerun v4 claim-evidence alignment
-.venv/bin/python scripts/run_alignment_benchmark.py verify --output-tag 20260814_r1
-.venv/bin/python scripts/run_alignment_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_alignment_benchmark.py verify --output-tag 20260814_r2
+.venv/bin/python scripts/run_alignment_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 
 # 核验/复跑 v5 港口日常问答 / verify or rerun the v5 daily-operations set
-.venv/bin/python scripts/run_daily_operations_benchmark.py verify --output-tag 20260814_r1
-.venv/bin/python scripts/run_daily_operations_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_daily_operations_benchmark.py verify --output-tag 20260814_r2
+.venv/bin/python scripts/run_daily_operations_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 
 # 生成问题全集并核验/复跑 v6 / build the universe and verify or rerun v6
 .venv/bin/python scripts/build_port_question_universe.py
-.venv/bin/python scripts/run_question_universe_benchmark.py verify --output-tag 20260814_r1
-.venv/bin/python scripts/run_question_universe_benchmark.py run --output-tag 20260814_r1
+.venv/bin/python scripts/run_question_universe_benchmark.py verify --output-tag 20260814_r2
+.venv/bin/python scripts/run_question_universe_benchmark.py run --output-tag 20260814_r3  # always choose a new tag
 ```
 
-固定题集、[JSON证据报告](reports/maritime_rag_benchmark_v1_20260814_r1.json)和
-[可读报告](reports/maritime_rag_benchmark_v1_20260814_r1.md)，以及
-[v2 困难集报告](reports/maritime_assistant_benchmark_v2_20260814_r1.md)和
-[v3 决策保障报告](reports/maritime_decision_readiness_benchmark_v3_20260814_r1.md)、
-[v4 主张—证据对齐报告](reports/maritime_claim_alignment_benchmark_v4_20260814_r1.md)和
-[v5 日常运营问答报告](reports/maritime_daily_operations_benchmark_v5_20260814_r1.md)、
-[v6 港口问题全集报告](reports/maritime_question_universe_benchmark_v6_20260814_r1.md)和
+固定题集、[JSON证据报告](reports/maritime_rag_benchmark_v1_20260814_r2.json)和
+[可读报告](reports/maritime_rag_benchmark_v1_20260814_r2.md)，以及
+[v2 困难集报告](reports/maritime_assistant_benchmark_v2_20260814_r2.md)和
+[v3 决策保障报告](reports/maritime_decision_readiness_benchmark_v3_20260814_r2.md)、
+[v4 主张—证据对齐报告](reports/maritime_claim_alignment_benchmark_v4_20260814_r2.md)和
+[v5 日常运营问答报告](reports/maritime_daily_operations_benchmark_v5_20260814_r2.md)、
+[v6 港口问题全集报告](reports/maritime_question_universe_benchmark_v6_20260814_r2.md)和
 [正式/日常问题清单](docs/PORT_QUESTION_UNIVERSE.md)
 随仓库发布。六套题集都由项目维护、在开发中可见，不是“从未查看的独立留出集”或第三方
 用户研究。上述数字是仓库基准上的检索与安全指标，不是港口生产收益、全球
 知识覆盖率、法律意见或线上 SLA。
 
-The fixed questions, [current JSON evidence report](reports/maritime_rag_benchmark_v1_20260814_r1.json), and [current readable report](reports/maritime_rag_benchmark_v1_20260814_r1.md) ship alongside every preserved historical report. The partition is a v1 release-acceptance set that has exposed defects during engineering fixes; it is not a never-inspected independent holdout or third-party user study. These are repository retrieval and safety metrics—not port-production benefits, global knowledge coverage, legal advice, or an online SLA.
+The fixed questions, [current JSON evidence report](reports/maritime_rag_benchmark_v1_20260814_r2.json), and [current readable report](reports/maritime_rag_benchmark_v1_20260814_r2.md) ship alongside every preserved historical report. The partition is a v1 release-acceptance set that has exposed defects during engineering fixes; it is not a never-inspected independent holdout or third-party user study. These are repository retrieval and safety metrics—not port-production benefits, global knowledge coverage, legal advice, or an online SLA.
 
 简历可用声明与禁用表述见 [简历指标口径](docs/RESUME_CLAIMS.md)。<br>
 See [resume claim semantics](docs/RESUME_CLAIMS.md) for permitted and prohibited wording.

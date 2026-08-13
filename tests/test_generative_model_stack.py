@@ -37,6 +37,26 @@ def test_prompt_security_benchmark_keeps_external_red_team_boundary() -> None:
     assert len(status["report_sha256"]) == 64
 
 
+def test_model_gateway_status_does_not_expose_upstream_exception() -> None:
+    gateway = ModelGateway(Settings.from_env())
+    gateway._record_failure(RuntimeError("secret-host.internal token=do-not-leak"))
+
+    status = gateway.status()
+    assert status["last_error"] == "model_upstream_failure"
+    assert "secret-host" not in json.dumps(status)
+
+
+def test_invalid_vector_index_exposes_only_stable_error_code(tmp_path: Path) -> None:
+    path = tmp_path / "invalid-vector-index.json"
+    path.write_text('{"records": [invalid]}', encoding="utf-8")
+
+    index = DenseVectorIndex(path, base_url="", model="test")
+
+    assert index.records == {}
+    assert index.last_error == "dense_index_load_failed"
+    assert str(path) not in index.last_error
+
+
 def test_model_registry_pins_open_model_artifact_and_adapter_base() -> None:
     registry = json.loads(
         (ROOT / "data" / "model_registry.json").read_text(encoding="utf-8")

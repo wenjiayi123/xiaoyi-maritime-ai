@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import sqlite3
 from datetime import datetime, timedelta, timezone
@@ -11,6 +12,9 @@ from typing import Any, Optional
 from uuid import uuid4
 
 from app.config import RUNTIME_DB_PATH
+
+
+logger = logging.getLogger("xiaoyi.runtime_store")
 
 
 def _now() -> str:
@@ -132,8 +136,13 @@ class RuntimeStore:
                 "integrity": integrity,
                 "path_configured": True,
             }
-        except sqlite3.Error as exc:
-            return {"ok": False, "backend": "sqlite", "error": str(exc)[:300]}
+        except sqlite3.Error:
+            logger.exception("SQLite runtime store health check failed")
+            return {
+                "ok": False,
+                "backend": "sqlite",
+                "error": "runtime_store_unavailable",
+            }
 
     def save_context(self, session_id: str, context: dict[str, Any]) -> dict[str, Any]:
         updated_at = _now()

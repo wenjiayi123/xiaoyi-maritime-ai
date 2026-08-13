@@ -557,7 +557,7 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
             results.append(_execute_target(target, payload, trace_id))
         except Exception:
             logger.exception(
-                "执行联动命令失败 target=%s trace_id=%s", target, trace_id
+                "执行联动命令失败 trace_id=%s", trace_id
             )
             try:
                 runtime_name = _runtime(target).get("name")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import math
 from dataclasses import dataclass
 from pathlib import Path
@@ -9,6 +10,9 @@ from urllib.request import Request, urlopen
 
 from app.config import VECTOR_INDEX_PATH
 from app.settings import settings
+
+
+logger = logging.getLogger("xiaoyi.vector_retrieval")
 
 
 QUERY_INSTRUCTION = (
@@ -114,9 +118,10 @@ class DenseVectorIndex:
                 for item in records
             }
             self.manifest = dict(payload.get("manifest") or {})
-        except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        except (KeyError, OSError, TypeError, ValueError, json.JSONDecodeError):
+            logger.exception("Dense vector index load failed")
             self.records = {}
-            self.last_error = str(exc)
+            self.last_error = "dense_index_load_failed"
 
     @property
     def enabled(self) -> bool:

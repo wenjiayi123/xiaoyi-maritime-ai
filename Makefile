@@ -27,14 +27,14 @@ check:
 release-check: check test
 
 benchmark:
-	@test -n "$(BENCHMARK_TAG)" || (echo "BENCHMARK_TAG is required, e.g. make benchmark BENCHMARK_TAG=20260814_r1" && exit 2)
+	@test -n "$(BENCHMARK_TAG)" || (echo "BENCHMARK_TAG is required and must be new, e.g. make benchmark BENCHMARK_TAG=20260814_r3" && exit 2)
 	python scripts/run_rag_benchmark.py run --output-tag "$(BENCHMARK_TAG)"
 
 benchmark-verify:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2
 
 benchmark-verify-deep:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1 --deep
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2 --deep
 
 sbom:
 	python scripts/build_sbom.py build

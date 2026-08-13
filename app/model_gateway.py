@@ -1013,11 +1013,7 @@ class ModelGateway:
         with self._lock:
             self._failures += 1
             self._consecutive_failures += 1
-            self._last_error = (
-                f"upstream_{type(error).__name__.lower()}"
-                if error
-                else "unknown_model_error"
-            )
+            self._last_error = "model_upstream_failure" if error else "unknown_model_error"
             if self._consecutive_failures >= 3:
                 self._circuit_open_until = time.monotonic() + 60
 
