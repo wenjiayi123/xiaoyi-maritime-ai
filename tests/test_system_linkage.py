@@ -74,6 +74,28 @@ def test_command_returns_trace_and_per_system_receipts(monkeypatch) -> None:
     assert payload["production_write_enabled"] is False
 
 
+def test_command_failure_does_not_expose_internal_exception(monkeypatch) -> None:
+    def fail_execute(target, request, trace_id):
+        raise RuntimeError("secret-host.internal token=do-not-leak")
+
+    monkeypatch.setattr(system_linkage, "_execute_target", fail_execute)
+    monkeypatch.setattr(
+        system_linkage,
+        "_runtime",
+        lambda target: {"target": target, "name": target, "running": False},
+    )
+
+    response = client.post(
+        "/api/system-linkage/command",
+        json={"target": "port-dt-multi", "command": "读取本机联动状态"},
+    )
+
+    assert response.status_code == 200
+    item = response.json()["results"][0]
+    assert item["error"] == "linked_target_execution_failed"
+    assert "secret-host" not in response.text
+
+
 def test_sailing_request_bridge_is_atomic_and_context_aware(
     monkeypatch,
     tmp_path: Path,

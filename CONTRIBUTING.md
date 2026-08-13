@@ -5,7 +5,7 @@
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-dev.lock
+python -m pip install --require-hashes -r requirements-dev.lock
 python scripts/build_index.py
 pytest -q
 ```

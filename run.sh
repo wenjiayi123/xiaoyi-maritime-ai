@@ -91,7 +91,7 @@ if [[ -f "$LOCK_MARKER" ]]; then
 fi
 if [[ "$LOCK_DIGEST" != "$INSTALLED_LOCK_DIGEST" ]] \
   || ! "$PYTHON_BIN" -c 'import fastapi, pydantic, uvicorn' >/dev/null 2>&1; then
-  "$PYTHON_BIN" -m pip install -r requirements.lock
+  "$PYTHON_BIN" -m pip install --require-hashes -r requirements.lock
   printf '%s\n' "$LOCK_DIGEST" >"$LOCK_MARKER"
 fi
 

@@ -8,7 +8,11 @@ from app.operator_assistant import (
     is_sandbox_runtime_question,
     normalize_operator_question,
 )
-from app.port_runtime import SandboxPortDataSource, create_port_data_source
+from app.port_runtime import (
+    HttpPortDataSource,
+    SandboxPortDataSource,
+    create_port_data_source,
+)
 from app.xiaoyi import XiaoyiAI
 
 
@@ -174,3 +178,24 @@ def test_live_adapter_fails_closed_without_gateway(monkeypatch) -> None:
         assert "XIAOYI_PORT_BASE_URL" in str(error)
     else:
         raise AssertionError("live 模式缺少生产网关时必须拒绝启动")
+
+
+def test_live_adapter_requires_exact_gateway_allowlist(monkeypatch) -> None:
+    monkeypatch.setenv("XIAOYI_PORT_BASE_URL", "https://gateway.example.internal/api")
+    monkeypatch.setenv("XIAOYI_PORT_ALLOWED_HOSTS", "other.example.internal")
+
+    with pytest.raises(RuntimeError, match="主机不在"):
+        HttpPortDataSource()
+
+
+def test_live_adapter_accepts_allowlisted_https_and_rejects_freeform_period(
+    monkeypatch,
+) -> None:
+    monkeypatch.setenv("XIAOYI_PORT_BASE_URL", "https://gateway.example.internal/api")
+    monkeypatch.setenv("XIAOYI_PORT_ALLOWED_HOSTS", "gateway.example.internal")
+    source = HttpPortDataSource()
+
+    assert source._scheme == "https"
+    assert source._netloc == "gateway.example.internal"
+    with pytest.raises(ValueError, match="today"):
+        source.energy("../../metadata", datetime.now(timezone.utc))

@@ -3,10 +3,10 @@
 BENCHMARK_TAG ?=
 
 install:
-	python -m pip install -r requirements.lock
+	python -m pip install --require-hashes -r requirements.lock
 
 install-dev:
-	python -m pip install -r requirements-dev.lock
+	python -m pip install --require-hashes -r requirements-dev.lock
 
 run:
 	bash run.sh
@@ -31,10 +31,10 @@ benchmark:
 	python scripts/run_rag_benchmark.py run --output-tag "$(BENCHMARK_TAG)"
 
 benchmark-verify:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260813_r7
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1
 
 benchmark-verify-deep:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260813_r7 --deep
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r1 --deep
 
 sbom:
 	python scripts/build_sbom.py build

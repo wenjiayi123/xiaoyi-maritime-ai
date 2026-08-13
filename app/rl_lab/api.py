@@ -61,8 +61,12 @@ def _evidence_report() -> dict[str, Any]:
         }
     try:
         report = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return {"status": "invalid", "report": None, "notice": f"证据报告不可读取：{exc}"}
+    except (OSError, json.JSONDecodeError):
+        return {
+            "status": "invalid",
+            "report": None,
+            "notice": "证据报告不可读取；请在服务端检查文件权限、JSON格式和审计日志。",
+        }
     return {
         "status": "available",
         "report": report,

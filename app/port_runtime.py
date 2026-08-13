@@ -3,10 +3,12 @@ from __future__ import annotations
 import math
 import os
 import json
+from ipaddress import ip_address
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Literal, Protocol
 from urllib import request
+from urllib.parse import urlencode, urlsplit, urlunsplit
 
 from app.realtime_port_simulator import SIMULATION_NOTICE, realtime_port_simulator
 from app.site_admission import evaluate_live_metadata
@@ -329,30 +331,91 @@ class HttpPortDataSource:
 
     mode: DataMode = "live"
 
+    _RESOURCE_PATHS: dict[str, str] = {
+        "status": "/runtime/status",
+        "overview": "/operations/overview",
+        "energy": "/energy",
+        "alerts": "/alerts",
+        "snapshot": "/runtime/snapshot",
+    }
+
+    class _NoRedirectHandler(request.HTTPRedirectHandler):
+        def redirect_request(self, req, fp, code, msg, headers, newurl):  # type: ignore[no-untyped-def]
+            return None
+
     def __init__(self) -> None:
-        self.base_url = os.getenv("XIAOYI_PORT_BASE_URL", "").strip().rstrip("/")
+        base_url = os.getenv("XIAOYI_PORT_BASE_URL", "").strip().rstrip("/")
         self.token = os.getenv("XIAOYI_PORT_API_TOKEN", "").strip()
         self.timeout_seconds = float(os.getenv("XIAOYI_PORT_TIMEOUT_SECONDS", "5"))
-        if not self.base_url:
+        if not base_url:
             raise RuntimeError(
                 "XIAOYI_PORT_DATA_MODE=live 已启用，但未配置 XIAOYI_PORT_BASE_URL；系统已安全拒绝启动。"
             )
 
-    def _get(self, path: str) -> dict[str, Any]:
+        parsed = urlsplit(base_url)
+        hostname = (parsed.hostname or "").rstrip(".").lower()
+        if not hostname or parsed.username or parsed.password or parsed.query or parsed.fragment:
+            raise RuntimeError("XIAOYI_PORT_BASE_URL 格式无效，禁止凭据、查询参数或片段。")
+        try:
+            is_loopback = ip_address(hostname).is_loopback
+        except ValueError:
+            is_loopback = hostname == "localhost"
+        if parsed.scheme != "https" and not (parsed.scheme == "http" and is_loopback):
+            raise RuntimeError("现场数据网关必须使用 HTTPS；仅回环地址允许 HTTP。")
+
+        allowed_hosts = {
+            item.strip().rstrip(".").lower()
+            for item in os.getenv("XIAOYI_PORT_ALLOWED_HOSTS", "").split(",")
+            if item.strip()
+        }
+        if is_loopback:
+            allowed_hosts.add(hostname)
+        if not allowed_hosts:
+            raise RuntimeError(
+                "live 模式必须配置 XIAOYI_PORT_ALLOWED_HOSTS 主机白名单；系统已安全拒绝启动。"
+            )
+        if hostname not in allowed_hosts:
+            raise RuntimeError("XIAOYI_PORT_BASE_URL 主机不在 XIAOYI_PORT_ALLOWED_HOSTS 白名单。")
+
+        self._scheme = parsed.scheme
+        self._netloc = parsed.netloc
+        self._base_path = parsed.path.rstrip("/")
+        self._opener = request.build_opener(self._NoRedirectHandler())
+
+    def _get(
+        self,
+        resource: Literal["status", "overview", "energy", "alerts", "snapshot"],
+        *,
+        period: Literal["today", "7d", "30d"] | None = None,
+    ) -> dict[str, Any]:
+        path = self._RESOURCE_PATHS[resource]
+        query = ""
+        if resource == "energy":
+            if period not in {"today", "7d", "30d"}:
+                raise ValueError("energy period 仅允许 today、7d 或 30d")
+            query = urlencode({"range": period})
+        elif resource == "alerts":
+            query = urlencode({"status": "active", "limit": 100})
+        url = urlunsplit(
+            (self._scheme, self._netloc, f"{self._base_path}{path}", query, "")
+        )
         headers = {"Accept": "application/json", "User-Agent": "Xiaoyi-Port-Adapter/1.0"}
         if self.token:
             headers["Authorization"] = f"Bearer {self.token}"
-        req = request.Request(f"{self.base_url}{path}", headers=headers, method="GET")
-        with request.urlopen(req, timeout=self.timeout_seconds) as response:  # nosec B310 - deployment-configured gateway
+        req = request.Request(url, headers=headers, method="GET")
+        with self._opener.open(req, timeout=self.timeout_seconds) as response:
             if response.status != 200:
                 raise RuntimeError(f"生产数据网关返回 HTTP {response.status}")
-            payload = json.loads(response.read().decode("utf-8"))
+            raw = response.read(2_000_001)
+            if len(raw) > 2_000_000:
+                raise RuntimeError("生产数据网关响应超过 2 MB 限制")
+            payload = json.loads(raw.decode("utf-8"))
         if not isinstance(payload, dict):
             raise RuntimeError("生产数据网关返回的不是 JSON 对象")
         return payload
 
     def metadata(self, observed_at: datetime) -> dict[str, Any]:
-        payload = self._get("/runtime/status")
+        payload = self._get("status")
         admission = evaluate_live_metadata(payload)
         if not admission["read_only_admission_passed"]:
             reasons = ", ".join(admission["blockers"][:8])
@@ -362,20 +425,22 @@ class HttpPortDataSource:
         return payload
 
     def overview(self, observed_at: datetime) -> dict[str, Any]:
-        return self._get("/operations/overview")
+        return self._get("overview")
 
     def energy(self, period: str, observed_at: datetime) -> dict[str, Any]:
-        return self._get(f"/energy?range={period}")
+        if period not in {"today", "7d", "30d"}:
+            raise ValueError("energy period 仅允许 today、7d 或 30d")
+        return self._get("energy", period=period)  # type: ignore[arg-type]
 
     def alerts(self, observed_at: datetime) -> list[dict[str, Any]]:
-        payload = self._get("/alerts?status=active&limit=100")
+        payload = self._get("alerts")
         items = payload.get("items", [])
         if not isinstance(items, list):
             raise RuntimeError("生产数据网关 alerts.items 格式无效")
         return items
 
     def runtime_snapshot(self, observed_at: datetime) -> dict[str, Any]:
-        return self._get("/runtime/snapshot")
+        return self._get("snapshot")
 
 
 def create_port_data_source() -> PortOperationsDataSource:

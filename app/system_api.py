@@ -33,8 +33,8 @@ def _index_check() -> dict[str, Any]:
         return {"ok": False, "detail": "知识索引文件不存在"}
     try:
         payload = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return {"ok": False, "detail": f"知识索引不可读：{str(exc)[:200]}"}
+    except (OSError, json.JSONDecodeError):
+        return {"ok": False, "detail": "知识索引不可读；请检查服务端日志"}
     chunks = payload.get("chunks") if isinstance(payload, dict) else payload if isinstance(payload, list) else None
     return {
         "ok": isinstance(chunks, list) and len(chunks) > 0,
@@ -46,8 +46,8 @@ def _index_check() -> dict[str, Any]:
 def _dataset_check() -> dict[str, Any]:
     try:
         items = [item.public_dict(inspect_file=False) for item in dataset_catalog().values()]
-    except Exception as exc:
-        return {"ok": False, "detail": str(exc)[:200], "available": 0}
+    except Exception:
+        return {"ok": False, "detail": "RL数据目录不可读；请检查服务端日志", "available": 0}
     available = sum(bool(item["available"]) for item in items)
     return {"ok": available > 0, "available": available, "registered": len(items)}
 

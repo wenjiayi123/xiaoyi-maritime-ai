@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import time
 from datetime import datetime, timezone
@@ -21,6 +22,7 @@ from app.runtime_store import runtime_store
 
 
 router = APIRouter(prefix="/api/system-linkage", tags=["小懿四系统联动网关"])
+logger = logging.getLogger("xiaoyi.system_linkage")
 
 SystemTarget = Literal[
     "port-dt-multi",
@@ -478,14 +480,15 @@ def linkage_overview() -> dict[str, Any]:
         try:
             runtime = _runtime(target)  # type: ignore[arg-type]
             error = None
-        except Exception as exc:  # status aggregation must be best-effort
+        except Exception:  # status aggregation must be best-effort
+            logger.exception("联动状态聚合失败 target=%s", target)
             runtime = {
                 "target": target,
                 "state": "error",
                 "running": False,
-                "message": str(exc),
+                "message": "目标系统状态暂不可用；详细原因已写入服务端日志。",
             }
-            error = str(exc)
+            error = "linked_target_status_unavailable"
         systems[target] = {
             "runtime": runtime,
             "last_result": _last_results.get(target),
@@ -514,12 +517,18 @@ def start_linked_targets(payload: LinkageStartRequest) -> dict[str, Any]:
     for target in list(dict.fromkeys(payload.targets)):
         try:
             results[target] = _ensure_running(target, 30.0)
-        except Exception as exc:
+        except Exception:
+            logger.exception("启动联动目标失败 target=%s", target)
+            try:
+                runtime = _runtime(target)
+            except Exception:
+                runtime = {"target": target}
             results[target] = {
-                **_runtime(target),
+                **runtime,
                 "state": "error",
                 "running": False,
-                "message": str(exc),
+                "message": "目标系统启动失败；详细原因已写入服务端日志。",
+                "error": "linked_target_start_failed",
             }
     return {
         "systems": results,
@@ -546,14 +555,22 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
         trace_id = f"{correlation_id}-{index}"
         try:
             results.append(_execute_target(target, payload, trace_id))
-        except Exception as exc:
+        except Exception:
+            logger.exception(
+                "执行联动命令失败 target=%s trace_id=%s", target, trace_id
+            )
+            try:
+                runtime_name = _runtime(target).get("name")
+            except Exception:
+                runtime_name = target
             results.append(
                 {
                     "trace_id": trace_id,
                     "target": target,
-                    "name": _runtime(target).get("name"),
+                    "name": runtime_name,
                     "status": "failed",
-                    "error": str(exc),
+                    "error": "linked_target_execution_failed",
+                    "message": "联动执行失败；详细原因已写入服务端日志。",
                     "completed_at": _utc_now(),
                 }
             )

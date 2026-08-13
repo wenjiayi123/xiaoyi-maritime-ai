@@ -1,4 +1,4 @@
-FROM python:3.12.11-slim
+FROM python:3.12.11-slim@sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -11,7 +11,7 @@ WORKDIR /app
 RUN groupadd --system xiaoyi && useradd --system --gid xiaoyi --home-dir /app xiaoyi
 
 COPY requirements.lock ./
-RUN python -m pip install --no-cache-dir -r requirements.lock
+RUN python -m pip install --require-hashes --no-cache-dir -r requirements.lock
 
 COPY --chown=xiaoyi:xiaoyi . .
 RUN python scripts/build_index.py \

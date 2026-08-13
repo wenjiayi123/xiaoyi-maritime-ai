@@ -24,8 +24,10 @@ REQUIRED = (
     "reports/dependency_audit_20260813_fixed_dev_v2.json",
     "reports/dependency_audit_20260813_r2_runtime.json",
     "reports/dependency_audit_20260813_r2_dev.json",
-    "reports/dependency_audit_admission_v2.json",
-    "reports/dependency_audit_admission_v2.md",
+    "reports/dependency_audit_20260814_r3_runtime.json",
+    "reports/dependency_audit_20260814_r3_dev.json",
+    "reports/dependency_audit_admission_v3.json",
+    "reports/dependency_audit_admission_v3.md",
     ".github/dependabot.yml", "docs/DEPLOYMENT.md", "docs/ARCHITECTURE.md",
     "docs/RESUME_CLAIMS.md", "data/evaluation/maritime_qa_benchmark_v1.json",
     "docs/GENERATIVE_MODEL_STACK.md", "data/model_registry.json",
@@ -48,6 +50,8 @@ REQUIRED = (
     "reports/maritime_rag_benchmark_v1_20260813_r2.md",
     "reports/maritime_rag_benchmark_v1_20260813_r7.json",
     "reports/maritime_rag_benchmark_v1_20260813_r7.md",
+    "reports/maritime_rag_benchmark_v1_20260814_r1.json",
+    "reports/maritime_rag_benchmark_v1_20260814_r1.md",
     "data/evaluation/maritime_assistant_benchmark_v2.json",
     "scripts/run_assistant_benchmark.py",
     "reports/maritime_assistant_benchmark_v2.json",
@@ -56,6 +60,8 @@ REQUIRED = (
     "reports/maritime_assistant_benchmark_v2_20260813_r2.md",
     "reports/maritime_assistant_benchmark_v2_20260813_r7.json",
     "reports/maritime_assistant_benchmark_v2_20260813_r7.md",
+    "reports/maritime_assistant_benchmark_v2_20260814_r1.json",
+    "reports/maritime_assistant_benchmark_v2_20260814_r1.md",
     "data/evaluation/maritime_decision_readiness_benchmark_v3.json",
     "scripts/run_decision_benchmark.py",
     "reports/maritime_decision_readiness_benchmark_v3.json",
@@ -64,6 +70,8 @@ REQUIRED = (
     "reports/maritime_decision_readiness_benchmark_v3_20260813_r2.md",
     "reports/maritime_decision_readiness_benchmark_v3_20260813_r7.json",
     "reports/maritime_decision_readiness_benchmark_v3_20260813_r7.md",
+    "reports/maritime_decision_readiness_benchmark_v3_20260814_r1.json",
+    "reports/maritime_decision_readiness_benchmark_v3_20260814_r1.md",
     "data/evaluation/maritime_claim_alignment_benchmark_v4.json",
     "scripts/run_alignment_benchmark.py",
     "reports/maritime_claim_alignment_benchmark_v4.json",
@@ -74,6 +82,8 @@ REQUIRED = (
     "reports/maritime_claim_alignment_benchmark_v4_20260813_r2.md",
     "reports/maritime_claim_alignment_benchmark_v4_20260813_r7.json",
     "reports/maritime_claim_alignment_benchmark_v4_20260813_r7.md",
+    "reports/maritime_claim_alignment_benchmark_v4_20260814_r1.json",
+    "reports/maritime_claim_alignment_benchmark_v4_20260814_r1.md",
     "data/evaluation/maritime_daily_operations_benchmark_v5.json",
     "scripts/run_daily_operations_benchmark.py",
     "reports/maritime_daily_operations_benchmark_v5.json",
@@ -82,6 +92,8 @@ REQUIRED = (
     "reports/maritime_daily_operations_benchmark_v5_20260813_r2.md",
     "reports/maritime_daily_operations_benchmark_v5_20260813_r7.json",
     "reports/maritime_daily_operations_benchmark_v5_20260813_r7.md",
+    "reports/maritime_daily_operations_benchmark_v5_20260814_r1.json",
+    "reports/maritime_daily_operations_benchmark_v5_20260814_r1.md",
     "data/evaluation/port_question_universe_v1.json",
     "docs/PORT_QUESTION_UNIVERSE.md",
     "data/evaluation/maritime_question_universe_benchmark_v6.json",
@@ -93,6 +105,8 @@ REQUIRED = (
     "reports/maritime_question_universe_benchmark_v6_20260813_r2.md",
     "reports/maritime_question_universe_benchmark_v6_20260813_r7.json",
     "reports/maritime_question_universe_benchmark_v6_20260813_r7.md",
+    "reports/maritime_question_universe_benchmark_v6_20260814_r1.json",
+    "reports/maritime_question_universe_benchmark_v6_20260814_r1.md",
     "docs/TOP_TIER_MARITIME_ASSISTANT_ROADMAP.md",
     "web/index.html", "web/app.js",
     "docs/PORT_RL_DATA_CONTRACT.md", "docs/PORT_RL_LANDING_PLAN.md",
@@ -293,7 +307,7 @@ def main() -> int:
             errors.append(f"公开RL数据血缘不可验证：{dataset_id}: {exc}")
 
     benchmark_report_path = (
-        ROOT / "reports/maritime_rag_benchmark_v1_20260813_r7.json"
+        ROOT / "reports/maritime_rag_benchmark_v1_20260814_r1.json"
     )
     try:
         benchmark_report = json.loads(
@@ -332,7 +346,7 @@ def main() -> int:
         errors.append(f"RAG基准报告不可验证：{exc}")
 
     assistant_report_path = (
-        ROOT / "reports/maritime_assistant_benchmark_v2_20260813_r7.json"
+        ROOT / "reports/maritime_assistant_benchmark_v2_20260814_r1.json"
     )
     try:
         assistant_report = json.loads(
@@ -360,7 +374,7 @@ def main() -> int:
         errors.append(f"助手困难基准报告不可验证：{exc}")
 
     decision_report_path = (
-        ROOT / "reports/maritime_decision_readiness_benchmark_v3_20260813_r7.json"
+        ROOT / "reports/maritime_decision_readiness_benchmark_v3_20260814_r1.json"
     )
     try:
         decision_report = json.loads(
@@ -391,7 +405,7 @@ def main() -> int:
         errors.append(f"决策保障基准报告不可验证：{exc}")
 
     alignment_report_path = (
-        ROOT / "reports/maritime_claim_alignment_benchmark_v4_20260813_r7.json"
+        ROOT / "reports/maritime_claim_alignment_benchmark_v4_20260814_r1.json"
     )
     try:
         alignment_report = json.loads(
@@ -430,7 +444,7 @@ def main() -> int:
         errors.append(f"主张证据对齐基准报告不可验证：{exc}")
 
     daily_report_path = (
-        ROOT / "reports/maritime_daily_operations_benchmark_v5_20260813_r7.json"
+        ROOT / "reports/maritime_daily_operations_benchmark_v5_20260814_r1.json"
     )
     try:
         daily_report = json.loads(daily_report_path.read_text(encoding="utf-8"))
@@ -467,7 +481,7 @@ def main() -> int:
         errors.append(f"日常问答基准报告不可验证：{exc}")
 
     universe_report_path = (
-        ROOT / "reports/maritime_question_universe_benchmark_v6_20260813_r7.json"
+        ROOT / "reports/maritime_question_universe_benchmark_v6_20260814_r1.json"
     )
     try:
         universe_report = json.loads(
@@ -750,7 +764,7 @@ def main() -> int:
 
     try:
         dependency_admission = json.loads(
-            (ROOT / "reports/dependency_audit_admission_v2.json").read_text(
+            (ROOT / "reports/dependency_audit_admission_v3.json").read_text(
                 encoding="utf-8"
             )
         )
@@ -767,9 +781,9 @@ def main() -> int:
             errors.append("依赖漏洞审计未保留初始7条失败证据")
         if stages["intermediate_dev_failed"]["known_vulnerability_count"] != 1:
             errors.append("依赖漏洞审计未保留开发依赖失败证据")
-        if stages["current_runtime_r2"]["known_vulnerability_count"] != 0:
+        if stages["current_runtime_r3"]["known_vulnerability_count"] != 0:
             errors.append("当前运行依赖漏洞审计仍有已知漏洞")
-        if stages["current_dev_r2"]["known_vulnerability_count"] != 0:
+        if stages["current_dev_r3"]["known_vulnerability_count"] != 0:
             errors.append("当前开发依赖漏洞审计仍有已知漏洞")
         if not dependency_admission.get("admission_passed"):
             errors.append("依赖漏洞发布准入未通过")

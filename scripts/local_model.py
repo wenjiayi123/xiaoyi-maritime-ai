@@ -208,7 +208,18 @@ def install_runtime() -> dict[str, Any]:
                 resolved = (temp_path / member.name).resolve()
                 if temp_path.resolve() not in resolved.parents and resolved != temp_path.resolve():
                     raise ValueError(f"拒绝不安全的压缩包路径：{member.name}")
-            archive.extractall(temp_path)
+                if member.isdir():
+                    resolved.mkdir(parents=True, exist_ok=True)
+                    continue
+                if not member.isfile():
+                    raise ValueError(f"拒绝压缩包特殊项：{member.name}")
+                source = archive.extractfile(member)
+                if source is None:
+                    raise ValueError(f"压缩包文件不可读取：{member.name}")
+                resolved.parent.mkdir(parents=True, exist_ok=True)
+                with source, resolved.open("wb") as output:
+                    shutil.copyfileobj(source, output)
+                resolved.chmod(member.mode & 0o755)
         roots = [item for item in temp_path.iterdir() if item.is_dir()]
         if len(roots) != 1 or not (roots[0] / "llama-server").is_file():
             raise ValueError("llama.cpp压缩包结构不符合预期")

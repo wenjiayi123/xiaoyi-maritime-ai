@@ -200,7 +200,11 @@
   };
 
   function createSessionId() {
-    return `web-${globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+    if (globalThis.crypto?.randomUUID) return `web-${globalThis.crypto.randomUUID()}`;
+    const bytes = new Uint8Array(16);
+    globalThis.crypto.getRandomValues(bytes);
+    const entropy = Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
+    return `web-${Date.now()}-${entropy}`;
   }
 
   const persistentSessionId = localStorage.getItem(STORAGE.sessionId)
@@ -1536,7 +1540,7 @@
 
   function saveTopic(data) {
     const item = {
-      id:data.answer_id || `topic-${Date.now()}-${Math.random().toString(16).slice(2,8)}`,
+      id:data.answer_id || `topic-${createSessionId()}`,
       sessionId:data.session_id || state.sessionId,
       title:topicTitle(data.question), question:data.question, answer:data.answer, mode:data.mode,
       intent:data.intent, confidence:data.confidence, evidence:data.evidence || [], next_questions:data.next_questions || [],

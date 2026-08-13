@@ -16,9 +16,11 @@ RAW_REPORTS = {
     "fixed_dev_v2": ROOT / "reports/dependency_audit_20260813_fixed_dev_v2.json",
     "current_runtime_r2": ROOT / "reports/dependency_audit_20260813_r2_runtime.json",
     "current_dev_r2": ROOT / "reports/dependency_audit_20260813_r2_dev.json",
+    "current_runtime_r3": ROOT / "reports/dependency_audit_20260814_r3_runtime.json",
+    "current_dev_r3": ROOT / "reports/dependency_audit_20260814_r3_dev.json",
 }
-OUTPUT = ROOT / "reports/dependency_audit_admission_v2.json"
-MARKDOWN = ROOT / "reports/dependency_audit_admission_v2.md"
+OUTPUT = ROOT / "reports/dependency_audit_admission_v3.json"
+MARKDOWN = ROOT / "reports/dependency_audit_admission_v3.md"
 
 
 def _sha256(path: Path) -> str:
@@ -63,16 +65,16 @@ def build_payload() -> dict[str, Any]:
     }
     identity = ":".join([*evidence_hashes.values(), *current_lock_hashes.values()])
     return {
-        "schema_version": "xiaoyi.dependency-audit-admission.v2",
-        "run_id": f"depaudit-v2-20260813-{hashlib.sha256(identity.encode()).hexdigest()[:12]}",
+        "schema_version": "xiaoyi.dependency-audit-admission.v3",
+        "run_id": f"depaudit-v3-20260814-{hashlib.sha256(identity.encode()).hexdigest()[:12]}",
         "audit_tool": {"name": "pip-audit", "version": "2.9.0", "vulnerability_service": "PyPI"},
         "python_version": "3.12.13",
         "stages": stages,
         "current_lock_sha256": current_lock_hashes,
         "evidence_sha256": evidence_hashes,
         "admission_passed": (
-            stages["current_runtime_r2"]["known_vulnerability_count"] == 0
-            and stages["current_dev_r2"]["known_vulnerability_count"] == 0
+            stages["current_runtime_r3"]["known_vulnerability_count"] == 0
+            and stages["current_dev_r3"]["known_vulnerability_count"] == 0
         ),
         "production_security_certification": False,
         "boundary": (
@@ -90,7 +92,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     stages = payload["stages"]
     return "\n".join(
         [
-            "# Dependency vulnerability admission v2",
+            "# Dependency vulnerability admission v3",
             "",
             f"- Run ID: `{payload['run_id']}`",
             f"- Tool: pip-audit {payload['audit_tool']['version']} / {payload['audit_tool']['vulnerability_service']}",
@@ -100,13 +102,16 @@ def _render_markdown(payload: dict[str, Any]) -> str:
             f"- Fixed dev v2: **{stages['fixed_dev_v2']['known_vulnerability_count']} findings**",
             f"- Current runtime r2: **{stages['current_runtime_r2']['known_vulnerability_count']} findings**",
             f"- Current dev r2: **{stages['current_dev_r2']['known_vulnerability_count']} findings**",
+            f"- Current runtime r3 with hash-locked artifacts: **{stages['current_runtime_r3']['known_vulnerability_count']} findings**",
+            f"- Current dev r3 with hash-locked artifacts: **{stages['current_dev_r3']['known_vulnerability_count']} findings**",
             f"- Admission: **{'PASS' if payload['admission_passed'] else 'BLOCKED'}**",
             "",
             payload["boundary"],
             "",
-            "The initial runtime report found 7 advisories across Click, Starlette and python-dotenv. ",
-            "The intermediate development report then found one pytest advisory. Lockfiles were regenerated ",
-            "with Python 3.12. The current r2 reports rerun both lockfiles after the final code audit; ",
+            "The initial runtime report found 7 advisories across Click, Starlette and python-dotenv.",
+            "The intermediate development report then found one pytest advisory. Lockfiles were regenerated",
+            "with Python 3.12. The r2 reports are retained unchanged. The current r3 reports scan both",
+            "SHA-256 artifact-locked dependency sets after the security follow-up;",
             "the full application test count is reported separately by the reproducible pytest command.",
             "",
         ]

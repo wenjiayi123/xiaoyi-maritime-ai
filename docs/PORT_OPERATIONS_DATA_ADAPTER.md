@@ -71,6 +71,17 @@ python scripts/build_realtime_simulator_evidence.py verify
 
 推荐接口仍可使用现有只读网关：
 
+```bash
+XIAOYI_PORT_DATA_MODE=live
+XIAOYI_PORT_BASE_URL=https://port-integration.example.internal/api
+XIAOYI_PORT_ALLOWED_HOSTS=port-integration.example.internal
+```
+
+`XIAOYI_PORT_ALLOWED_HOSTS` 必须精确列出网关主机。适配器只接受 HTTPS
+（回环开发地址例外），拒绝 URL 内嵌凭据、非白名单主机、重定向和自由拼接路径；
+只会访问下列固定只读资源，能源范围仅允许 `today`、`7d` 或 `30d`，响应上限
+为 2 MB。
+
 ```text
 GET /runtime/status
 GET /runtime/snapshot

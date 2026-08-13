@@ -26,8 +26,10 @@ def _parse_lock(path: Path) -> dict[str, dict[str, str | None]]:
     packages: dict[str, dict[str, str | None]] = {}
     for raw_line in path.read_text(encoding="utf-8").splitlines():
         line = raw_line.strip()
-        if not line or line.startswith(("#", "-r ")):
+        if not line or line.startswith(("#", "-r ", "--hash=")):
             continue
+        if line.endswith("\\"):
+            line = line[:-1].rstrip()
         match = PIN_PATTERN.fullmatch(line)
         if not match:
             raise ValueError(f"unsupported non-exact requirement in {path.name}: {line}")
