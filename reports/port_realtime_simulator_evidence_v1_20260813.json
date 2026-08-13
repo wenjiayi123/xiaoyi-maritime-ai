@@ -1,0 +1,145 @@
+{
+  "report_id": "xiaoyi-port-realtime-simulator-evidence.v1",
+  "run_id": "port-sim-evidence-20260813T154211Z",
+  "generated_at": "2026-08-13T15:42:11+00:00",
+  "truth_label": "公开数据校准实时模拟",
+  "scope_notice": "公开AIS只校准交通包络，公开能源数据只验证时序接入与特征耦合；泊位、设备、堆场、闸口、能耗量级、天气潮汐和全部业务影响为工程模拟。",
+  "contract": {
+    "path": "data/contracts/port_realtime_telemetry_v1.json",
+    "sha256": "ef2aeb57f66adf08bcb0016219dd37a054d6106a36bbeb74656892f7629a46d3",
+    "domains": 10,
+    "canonical_fields": 153
+  },
+  "implementation": {
+    "path": "app/realtime_port_simulator.py",
+    "sha256": "ce92c1cfca69ef94829c747aa85c1ccb2e370653a546dd55c36a68aca65467f4",
+    "simulation_seed": 20260813,
+    "event_interval_seconds": 2
+  },
+  "calibration_artifacts": {
+    "public_ais": {
+      "path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+      "sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+      "rows": 710,
+      "semantics": "independent_public_AIS_minute_buckets"
+    },
+    "public_energy": {
+      "path": "data/public/uci_appliances_energy.csv",
+      "sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+      "rows": 19735,
+      "semantics": "independent_public_non_port_energy_benchmark"
+    }
+  },
+  "scenario_results": [
+    {
+      "scenario_id": "normal",
+      "scenario_label": "常态联合生产",
+      "port_calls": 5,
+      "ais_tracks": 12,
+      "equipment_assets": 168,
+      "yard_blocks": 12,
+      "gate_objects": 2,
+      "active_alerts": 4,
+      "working_quay_cranes": 15,
+      "low_soc_agv": 1,
+      "grid_demand_kw": 27147.8,
+      "wind_speed_ms": 5.9,
+      "visibility_m": 15108,
+      "quality_gate_passed": true,
+      "physical_constraint_violations": 0,
+      "payload_sha256": "e91f181b310acf4ce33a3891bbfe6ec88b68411fd6bf58032b487f0d6138d676"
+    },
+    {
+      "scenario_id": "vessel_surge",
+      "scenario_label": "船舶集中到港",
+      "port_calls": 5,
+      "ais_tracks": 12,
+      "equipment_assets": 168,
+      "yard_blocks": 12,
+      "gate_objects": 2,
+      "active_alerts": 4,
+      "working_quay_cranes": 15,
+      "low_soc_agv": 1,
+      "grid_demand_kw": 28098.0,
+      "wind_speed_ms": 5.9,
+      "visibility_m": 15108,
+      "quality_gate_passed": true,
+      "physical_constraint_violations": 0,
+      "payload_sha256": "118c659faabe2a143290223a349f1dfd24d5ac76f11b4724c3c3731cf58759ed"
+    },
+    {
+      "scenario_id": "equipment_failure",
+      "scenario_label": "岸桥故障与AGV低电量",
+      "port_calls": 5,
+      "ais_tracks": 12,
+      "equipment_assets": 168,
+      "yard_blocks": 12,
+      "gate_objects": 2,
+      "active_alerts": 5,
+      "working_quay_cranes": 11,
+      "low_soc_agv": 1,
+      "grid_demand_kw": 23814.9,
+      "wind_speed_ms": 5.9,
+      "visibility_m": 15108,
+      "quality_gate_passed": true,
+      "physical_constraint_violations": 0,
+      "payload_sha256": "8376bdb5c13a44952feba192a3c16f7ef255bb53948db3f4965f4b2f42ad2ebb"
+    },
+    {
+      "scenario_id": "energy_peak",
+      "scenario_label": "港区需量高峰",
+      "port_calls": 5,
+      "ais_tracks": 12,
+      "equipment_assets": 168,
+      "yard_blocks": 12,
+      "gate_objects": 2,
+      "active_alerts": 5,
+      "working_quay_cranes": 15,
+      "low_soc_agv": 1,
+      "grid_demand_kw": 28981.0,
+      "wind_speed_ms": 5.9,
+      "visibility_m": 15108,
+      "quality_gate_passed": true,
+      "physical_constraint_violations": 0,
+      "payload_sha256": "92159c8a010285c7568ed6d9990e985c6c640d9f6f00211a2517cb5a690636ba"
+    },
+    {
+      "scenario_id": "storm",
+      "scenario_label": "大风低能见度",
+      "port_calls": 5,
+      "ais_tracks": 12,
+      "equipment_assets": 168,
+      "yard_blocks": 12,
+      "gate_objects": 2,
+      "active_alerts": 5,
+      "working_quay_cranes": 0,
+      "low_soc_agv": 1,
+      "grid_demand_kw": 16084.2,
+      "wind_speed_ms": 18.0,
+      "visibility_m": 2971,
+      "quality_gate_passed": true,
+      "physical_constraint_violations": 0,
+      "payload_sha256": "3274da0a4c5d09eed21052922ce7f30ca199af13a54545bf93f6357b4388bdd1"
+    }
+  ],
+  "closed_loop": {
+    "decision_id": "energy-peak-shave",
+    "blocked_without_two_approvals": true,
+    "approvers_are_distinct": true,
+    "baseline_grid_demand_kw": 28981.0,
+    "executed_grid_demand_kw": 26761.0,
+    "rolled_back_grid_demand_kw": 28981.0,
+    "sandbox_state_updated": true,
+    "physical_dispatch_performed": false,
+    "production_authority": false,
+    "rollback_event": "decision.rolled_back_in_sandbox"
+  },
+  "admission": {
+    "scenario_quality_passed": true,
+    "closed_loop_passed": true,
+    "adapter_replacement_ready": true,
+    "site_data_admission_passed": false,
+    "production_authority": false,
+    "result": "PASS_LOCAL_SIMULATION_ONLY"
+  }
+}

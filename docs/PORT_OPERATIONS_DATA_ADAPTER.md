@@ -1,52 +1,97 @@
-# 小懿港口运营数据适配器
+# 小懿港口实时数据模拟与换源适配器
 
-## 1. 目标
+## 1. 当前交付是什么
 
-小懿的页面、问答、任务和报告统一读取 `PortOperationsDataSource`。默认实现 `SandboxPortDataSource`，用于生成可重复、随时间变化的港口运营沙箱事件；生产实现 `HttpPortDataSource`，只读访问站点集成网关。两者共用 `port-ops.v1`，因此生产切换不需要改前端和业务问答代码。
+小懿默认运行 `PortRealtimeSimulator`，通过 `port-realtime.v1` 产生 2 秒一帧的完整事件快照，再兼容映射到已有 `port-ops.v1` 页面、问答、任务和报告接口。它用于在没有现场端点时真实验收“数据进入—质量门禁—态势展示—约束建议—双人审批—模拟执行—审计—回滚”闭环。
 
-沙箱数据不是生产实绩。所有响应必须同时提供 `data_mode`、`source_system`、`observed_at`、`generated_at`、`quality_code`、`quality_score`、`latency_ms`、`schema_version`、`live_data_verified` 和 `write_enabled`。
+页面和接口统一标注 **公开数据校准实时模拟**。公共 AIS 只用于校准交通变化包络，UCI 公共能源数据只验证时序接入与特征耦合；泊位、设备、堆场、闸口、能耗量级、天气潮汐和业务影响为带物理约束的工程模拟。它们不是上海港或其他港口实测，不是生产 KPI、财务实绩或核证减排。
 
-## 2. 默认沙箱
+## 2. 数据契约
 
-```bash
-export XIAOYI_PORT_DATA_MODE=operations_sandbox
-bash run.sh
-```
+权威契约为 [`data/contracts/port_realtime_telemetry_v1.json`](../data/contracts/port_realtime_telemetry_v1.json)，当前固定：
 
-沙箱每五分钟进入新的事件桶，动态生成船舶挂靠、泊位作业、岸桥、AGV、场桥、堆场、闸口、能耗和告警。相同事件桶可重复，便于测试与面试展示；跨事件桶数值变化，便于验证刷新链路。
+| 项目 | 当前实现 |
+|---|---|
+| 业务域 | 10 个：港口挂靠、AIS/VTS、泊位/海事服务、设备、堆场、闸口/集疏运、能源碳排、气象潮汐、安全维护、治理审计 |
+| 规范字段 | 153 个必需字段；字段覆盖不等于 153 项独立观测 |
+| 事件周期 | 2 秒；包含 `event_time`、`received_at`、`sequence`、`run_id`、`seed` |
+| 场景 | 常态生产、集中到港、设备故障、需量高峰、大风低能见度 |
+| 设备对象 | 18 台岸桥、96 台 AGV、54 台场桥，共 168 台 |
+| 质量门禁 | 完整率、重复、乱序、新鲜度、物理约束、功率平衡、漂移 |
+| 权限 | `physical_dispatch_allowed=false`、`production_authority=false` |
 
-## 3. 生产切换
+关键不变量包括 SOC 0–100%、非负流量/功率/库存、岸桥作业受风速门禁、设备状态决定可用能力、能源供需平衡、同一业务对象稳定主键和事件序列单调递增。场景不是把曲线整体乘系数：例如设备故障会减少工作岸桥并增加故障告警，风暴会触发岸桥停机并降低能见度，需量高峰会增加电网需量并生成 BESS 削峰建议。
 
-```bash
-export XIAOYI_PORT_DATA_MODE=live
-export XIAOYI_PORT_BASE_URL=https://port-integration.example.internal/api
-export XIAOYI_PORT_API_TOKEN='read-only-token'
-export XIAOYI_PORT_TIMEOUT_SECONDS=5
-bash run.sh
-```
-
-生产网关需要提供：
-
-| 网关资源 | 用途 |
-| --- | --- |
-| `GET /runtime/status` | 来源、观测时间、质量和版本校验 |
-| `GET /operations/overview` | 在港船舶、累计吞吐、岸桥与 AGV 指标 |
-| `GET /energy?range=today` | 能耗摘要、时序和洞察 |
-| `GET /alerts?status=active&limit=100` | 活动告警与处置建议 |
-| `GET /runtime/snapshot` | 船舶挂靠、设备、堆场和闸口业务对象 |
-
-`/runtime/status` 必须返回 `data_mode=live`、`live_data_verified=true`、`schema_version=port-ops.v1`。任一条件不满足，适配器拒绝把数据标记为生产实绩。小懿的生产适配器只调用 GET；写操作由独立连接器门禁、单次人工确认和现场权限控制。
-
-## 4. 站点字段映射
-
-生产网关负责把现场 TOS、PCS、EMS、EAM、VTS/AIS 和闸口系统字段映射为统一业务对象。建议保留原系统主键、事件时间、接收时间、站点字段名、转换版本和质量码，避免只保留页面展示值。船名不能作为唯一键，船舶优先使用 IMO 编号；箱、设备、泊位和航次也必须保留稳定标识。
-
-## 5. 验证
+## 3. 本地运行与可复验入口
 
 ```bash
-curl http://127.0.0.1:8010/api/runtime/status
-curl http://127.0.0.1:8010/api/runtime/snapshot
-curl http://127.0.0.1:8010/api/dashboard
+XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 ```
 
-前端点击“运营沙箱/生产数据”标签，可核对适配器、来源系统、港区代码、质量码、延迟、观测时间和真实性声明。
+```bash
+curl -s http://127.0.0.1:8010/api/port-simulator/status
+curl -s http://127.0.0.1:8010/api/port-simulator/contract
+curl -s http://127.0.0.1:8010/api/port-simulator/snapshot
+curl -N http://127.0.0.1:8010/api/port-simulator/stream
+```
+
+浏览器点击“数据分析 → 港口实时数据模拟与决策闭环”。可以切换五种场景、查看 10 域数据、打开数据契约与 SHA-256、分别点击“调度员审批”和“值班长复核”，再执行到模拟状态并回滚。
+
+固定证据包由下列命令追加生成和复验：
+
+```bash
+python scripts/build_realtime_simulator_evidence.py generate
+python scripts/build_realtime_simulator_evidence.py verify
+```
+
+报告保存在 `reports/port_realtime_simulator_evidence_v1_20260813.json/.md`，包含独立 `run_id`、契约/实现/公共数据哈希、五场景结果和单人审批阻断证据。生成新版本时必须新建报告文件或 run_id，不覆盖历史训练、模型、失败实验或旧报告。
+
+## 4. 公开校准来源
+
+| 来源 | 在本模拟器中的作用 | 不允许的解释 |
+|---|---|---|
+| NOAA / MarineCadastre 洛杉矶—长滩 AIS 公共切片，710 个独立分钟桶 | 校准船流时间变化和轨迹数据结构；文件、许可证、时间窗与 SHA-256 见契约和 provenance | 不代表上海港数据；不能把扩展的 2 秒帧数称为独立 AIS 实测量 |
+| UCI Appliances Energy，19,735 行，CC BY 4.0 | 验证采样、时序特征和能源数据适配路径 | 非港口能源数据，不能校准港口真实功率、金额或碳量 |
+| NOAA CO-OPS Data API 契约 | 定义未来可替换的水位、潮汐、风和气象字段及单位/时区要求 | 当前模拟值不是 API 实时返回 |
+| DCSA Port Call 2.0 | 对齐港口挂靠、服务与时间戳语义 | 不表示已接入 DCSA 网络或任何码头 PCS |
+
+所有来源的 URL、访问时间、许可证、字段映射和哈希均登记在契约中；生产环境仍须按实际授权和供应商条款复核。
+
+## 5. 接入港口时只换数据源
+
+现场适配器负责把 TOS、PCS、EMS、EAM、VTS/AIS、METOC、闸口/OCR、岸电和 BESS 数据转换为相同的 `port-realtime.v1` 对象。前端、规则、小懿分析、审批链与审计接口无需重写。
+
+适配器必须同时保留：
+
+- 源系统主键、规范主键、源字段名、映射版本和转换代码哈希；
+- 事件时间、接收时间、时区、采样周期、迟到/乱序/重复语义；
+- 单位、倍率、坐标系、枚举、质量码、空值和异常值处理；
+- 数据所有者、许可证/授权、保留期、敏感等级和访问角色；
+- 原始批次/消息哈希、清洗结果哈希和不可变审计关联 ID。
+
+推荐接口仍可使用现有只读网关：
+
+```text
+GET /runtime/status
+GET /runtime/snapshot
+GET /operations/overview
+GET /energy?range=today
+GET /alerts?status=active&limit=100
+```
+
+`/runtime/status` 只有在站点清单、字段映射、质量、漂移、标定、时区和各自 SHA-256 均满足 [`port_site_admission_v1.json`](../data/contracts/port_site_admission_v1.json) 时，才允许返回 `data_mode=live` 和 `live_data_verified=true`。完整性、重复率、乱序率、物理约束、新鲜度或 PSI 任一失败都必须降级为不可信状态，不能沿用最近成功值伪装在线。
+
+## 6. 生产权限边界
+
+模拟器中的审批、执行和回滚只改变内存/本地模拟状态并写审计事件；它不调用 PLC、TOS、EMS、PCS 或 VTS 写接口。接入真实数据也不会继承模拟审批结果。
+
+生产准入仍须完成七项门禁：现场字段映射、计量标定、漂移基线、只读影子运行、可信身份下的双人审批、回滚演练、OT/IT 安全隔离。全部完成前保持：
+
+```text
+recommendation_only=true
+dispatch_allowed=false
+physical_dispatch_allowed=false
+production_authority=false
+```
+
+故障时按失败关闭处理：停止消费异常源、冻结新建议、显示最后可信时间和缺失字段、降级到人工 SOP；不得静默插值成“实时现场值”，也不得把模拟器自动切成生产源。

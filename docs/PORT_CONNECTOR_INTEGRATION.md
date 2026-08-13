@@ -12,6 +12,12 @@
 
 未经港口方书面授权、接口规范确认、网络开通、凭据签发、字段对账、联调验收和生产变更审批，不得将连接器切换为 `live`，更不得启用写权限。
 
+### 1.1 无现场端点时的完整闭环
+
+默认页面不再用空白卡片代替港口数据，而是接入内置 `PortRealtimeSimulator`：它按 [`port-realtime.v1`](../data/contracts/port_realtime_telemetry_v1.json) 每 2 秒输出 10 个业务域和 153 个规范字段，并固定显示“公开数据校准实时模拟 / SIM”。五种因果场景、质量门禁、双人审批、模拟执行、审计和回滚都可在浏览器验收。
+
+模拟器是连接器联调夹具，不是第九个生产连接器。公共 AIS 只校准交通包络，其他港口量级和影响是工程模拟；`physical_dispatch_performed=false`、`production_authority=false`。现场接入时连接器只需输出同一契约，页面和业务链不用重写，但必须重新完成现场准入，不能沿用模拟审批或模拟质量结论。
+
 ## 2. 支持的连接器目录
 
 | 连接器 ID | 代码 | 系统 | 主要只读能力 | 预留写能力 | 环境变量前缀 |
@@ -170,6 +176,11 @@ API 返回的 `mapping_version: draft-1` 和字段映射仅是规范化数据模
 4. 配置无错误；
 5. 服务端 `ALLOW_WRITE=true`；
 6. 最近一次真实健康检查为 `online` 且 `live_data_verified=true`。
+
+上述条件只允许生成短时写预检标识，并不代表站点生产准入。还必须满足
+`data/contracts/port_site_admission_v1.json` 的现场字段映射、标定、漂移、
+影子运行、双人审批、回滚演练和OT/IT安全门禁；当前七项均为
+`blocked_pending_site`，因此生产调度权限保持关闭。
 
 预检通过后只生成 60 秒有效的授权标识，仍然返回 `dispatch_performed: false`。当前框架没有通用生产下发端点。
 

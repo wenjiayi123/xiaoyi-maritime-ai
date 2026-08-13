@@ -7,7 +7,12 @@ from dataclasses import dataclass
 from typing import Any, Callable, Optional
 
 from app.rl_lab.datasets import EnergyRecord
-from app.rl_lab.environment import ACTIONS, EnergySchedulingEnvironment, EnvironmentParameters
+from app.rl_lab.environment import (
+    ACTIONS,
+    EnergySchedulingEnvironment,
+    EnvironmentParameters,
+    tariff_for,
+)
 from app.rl_lab.port_environment import (
     PORT_ACTION_CAPACITY_FACTORS,
     PortOperationsEnvironment,
@@ -64,6 +69,16 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
         "trainable": False,
         "description": "控制理论基线：能源环境跟踪峰值与SOC，港口环境跟踪队列与积压，并遵守相同动作约束。",
         "update_equation": "u_t = Kp*e_t + Ki*sum(e_t) + Kd*(e_t-e_t-1)",
+        "compatible_environments": ["energy_storage", "port_operations"],
+    },
+    {
+        "id": "sop_rule",
+        "label": "现场 SOP 固定规则基线",
+        "family": "operations_rule",
+        "type": "deterministic_site_sop_proxy",
+        "trainable": False,
+        "description": "能源环境按电价、负荷和SOC执行固定充放电规则；港口环境按积压、锚泊代理和安全动作掩码选择能力档位。规则不读取测试未来值。",
+        "update_equation": "if/then SOP rules over current observation; no learned parameters",
         "compatible_environments": ["energy_storage", "port_operations"],
     },
 )
@@ -165,6 +180,19 @@ class PIDPolicy:
             "controller": "PID",
             "hyperparameters": {"kp": self.kp, "ki": self.ki, "kd": self.kd, "soc_gain": self.soc_gain},
             "trained": False,
+        }
+
+
+@dataclass(frozen=True)
+class ConfiguredBaselinePolicy:
+    algorithm_id: str
+
+    def public_dict(self) -> dict[str, Any]:
+        return {
+            "algorithm_id": self.algorithm_id,
+            "controller": "deterministic_site_sop_proxy",
+            "trained": False,
+            "future_test_rows_used": False,
         }
 
 
@@ -349,9 +377,41 @@ def _port_pid_action(
     return action, integral, normalized_error
 
 
+def _sop_rule_action(
+    environment: EnergySchedulingEnvironment | PortOperationsEnvironment,
+) -> int:
+    valid_mask = environment.valid_action_mask()
+    allowed = [index for index, valid in enumerate(valid_mask) if valid]
+    if not allowed:
+        return len(ACTIONS) // 2
+    if isinstance(environment, PortOperationsEnvironment):
+        record = environment.records[environment.index]
+        queue = max(0.0, record.anchored_vessels or 0.0) + max(
+            0.0, record.slow_vessels or 0.0
+        )
+        pressure = (
+            environment.backlog + queue * 0.25
+        ) / max(1.0, environment.parameters.maximum_backlog)
+        desired = 4 if pressure >= 0.75 else 3 if pressure >= 0.45 else 2 if pressure >= 0.20 else 1
+        return min(allowed, key=lambda index: abs(index - desired))
+    record = environment.records[environment.index]
+    tariff = tariff_for(record)
+    soc = environment.soc
+    target = environment.parameters.terminal_soc_target
+    if tariff >= 0.25 and record.load_kw >= environment.parameters.peak_target_kw:
+        desired = 0 if soc >= target + 0.08 else 1
+    elif tariff <= 0.12 and soc < target + 0.12:
+        desired = 4
+    elif soc < target - 0.03:
+        desired = 3
+    else:
+        desired = 2
+    return min(allowed, key=lambda index: abs(index - desired))
+
+
 def evaluate_policy(
     algorithm_id: str,
-    policy: TrainedPolicy | PIDPolicy,
+    policy: TrainedPolicy | PIDPolicy | ConfiguredBaselinePolicy,
     records: list[EnergyRecord],
     parameters: EnvironmentParameters | PortOperationsParameters,
     *,
@@ -417,6 +477,9 @@ def evaluate_policy(
                             allowed,
                             key=lambda index: abs(ACTIONS[index] - ACTIONS[action]),
                         )
+            elif algorithm_id == "sop_rule":
+                assert isinstance(policy, ConfiguredBaselinePolicy)
+                action = _sop_rule_action(environment)
             else:
                 assert isinstance(policy, TrainedPolicy)
                 action = policy.action(state, environment.valid_action_mask(), rng)
@@ -441,6 +504,8 @@ def evaluate_policy(
         else (
             "total_reward",
             "total_cost",
+            "total_grid_energy_cost",
+            "total_degradation_cost",
             "baseline_cost",
             "cost_saving_percent",
             "peak_grid_kw",
@@ -455,6 +520,12 @@ def evaluate_policy(
         key: round(sum(float(item[key]) for item in episodes) / len(episodes), 6)
         for key in numeric_keys
     }
+    if environment_type == "energy_storage":
+        aggregate["terminal_soc_recovery_rate"] = round(
+            sum(bool(item["terminal_soc_recovered"]) for item in episodes)
+            / len(episodes),
+            6,
+        )
     if environment_type == "port_operations":
         aggregate["score"] = round(
             aggregate["total_reward"] - aggregate["constraint_violations"] * 20,

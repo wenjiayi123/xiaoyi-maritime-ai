@@ -201,7 +201,7 @@ def _scenario(name: str) -> ChatResponse:
                     review_status="unknown",
                 )
             ],
-            source_quality="sandbox_runtime",
+            source_quality="public_data_calibrated_simulation",
             requires_human_review=False,
             refusal_reason="sandbox_not_production",
         )

@@ -92,7 +92,7 @@ export XIAOYI_RL_DATASET_MAPPING='{"timestamp":"event_time","vessel_count":"ais_
 
 1. 字段映射、单位、时区、缺失率和来源通过数据质量检查；
 2. 时间顺序 70%/15%/15% 隔离，测试段训练前不可用；
-3. 4 种 RL 与 PID 使用同一数据划分、时域、随机种子和约束；
+3. 4 种 RL 与 PID、现场SOP规则使用同一数据划分、时域、随机种子和约束；
 4. 至少三个随机种子报告平均值、离散度和优选次数；
 5. 训练阶段 `render_mode=None`，训练后才生成测试轨迹；
 6. 数据、profile、配置、模型和评估文件哈希匹配；

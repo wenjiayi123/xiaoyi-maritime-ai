@@ -1,0 +1,31 @@
+{
+  "schema_version": "live_model_safety_probe.v1",
+  "status": "failed",
+  "preservation_policy": "append_only_intermediate_failure_evidence",
+  "cases": [
+    {
+      "run_id": "liveprobe-post-fix-v1-20260813-answer-b5d2c279b38c405c8e70b298807a8f12",
+      "wall_time_seconds": 28.48,
+      "generation_fallback": false,
+      "answer": "证据锁定结论：\n1. 确认 THDi 数值、持续时间、船舶负载和告警等级。 [E3]\n2. 检查船舶是否启用大功率变频负载或负载突变。 [E3]\n3. 核对有源滤波装置、变流器和保护装置状态。 [E3]\n4. 检查电缆连接、接地、绝缘和计量传感器。 [E3]\n5. 必要时限功率、分步切负载或暂停岸电连接。 [E3]\n\n模型综合建议（需人工复核）：\n确认 THDi 超标告警后，应优先排查船舶是否启用大功率变频负载，由运维部门核实负载状态。\n\n若存在负载突变，需由电力工程师复核变流器参数及电缆连接可靠性。",
+      "failure": "检索已修复，但生成段仍分配未由证据锁定的运维部门和电力工程师职责。"
+    },
+    {
+      "run_id": "liveprobe-post-fix-v2-20260813-answer-2a8d0c1355364a71984494bd31a75fac",
+      "wall_time_seconds": 27.17,
+      "generation_fallback": false,
+      "answer": "证据锁定结论：\n1. 确认 THDi 数值、持续时间、船舶负载和告警等级。 [E3]\n2. 检查船舶是否启用大功率变频负载或负载突变。 [E3]\n3. 核对有源滤波装置、变流器和保护装置状态。 [E3]\n4. 检查电缆连接、接地、绝缘和计量传感器。 [E3]\n5. 必要时限功率、分步切负载或暂停岸电连接。 [E3]\n\n模型综合建议（需人工复核）：\n确认 THDi 数值是否符合标准，检查船舶负载变化及告警持续时间。\n\n若异常持续，应联系电力工程师进行参数校准与设备检测。",
+      "failure": "生成段仍引用未锁定的标准，并指定未完成现场职责映射的联系人。"
+    }
+  ],
+  "shared_evidence_ranking": [
+    "07_energy_carbon_shore_power:3",
+    "40_decision_risk_sop_qa:8",
+    "35_energy_equipment_incident_playbooks:1"
+  ],
+  "admission": {
+    "passed": false,
+    "production_use_allowed": false
+  },
+  "scope_notice": "两个中间候选均为真实本地模型接口输出；它们被保留以证明门禁是通过失败样本迭代收紧，而非删除不理想回答。"
+}

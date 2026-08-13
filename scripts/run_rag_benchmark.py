@@ -46,6 +46,20 @@ def _percent(value: float) -> str:
     return f"{value * 100:.2f}%"
 
 
+def _report_paths(output_tag: str | None) -> tuple[Path, Path]:
+    if not output_tag:
+        return REPORT_JSON, REPORT_MARKDOWN
+    safe_tag = "".join(
+        character for character in output_tag if character.isalnum() or character in {"-", "_"}
+    )
+    if not safe_tag:
+        raise ValueError("output tag must contain a letter or number")
+    return (
+        ROOT / "reports" / f"maritime_rag_benchmark_v1_{safe_tag}.json",
+        ROOT / "reports" / f"maritime_rag_benchmark_v1_{safe_tag}.md",
+    )
+
+
 def _deterministic_projection(benchmark: dict[str, Any]) -> dict[str, Any]:
     return {
         "benchmark_id": benchmark["benchmark_id"],
@@ -112,7 +126,7 @@ python scripts/run_rag_benchmark.py run
 """
 
 
-def run_and_persist() -> int:
+def run_and_persist(*, output_tag: str | None = None) -> int:
     print("running 60-case RAG benchmark; this may take several minutes", flush=True)
     benchmark = run_benchmark(top_k=5)
     report = {
@@ -127,21 +141,23 @@ def run_and_persist() -> int:
         },
         "benchmark": benchmark,
     }
+    report_json, report_markdown = _report_paths(output_tag)
     _write_text_atomic(
-        REPORT_JSON,
+        report_json,
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
     )
-    _write_text_atomic(REPORT_MARKDOWN, _render_markdown(report))
-    print(f"report: {REPORT_JSON}")
-    print(f"markdown: {REPORT_MARKDOWN}")
+    _write_text_atomic(report_markdown, _render_markdown(report))
+    print(f"report: {report_json}")
+    print(f"markdown: {report_markdown}")
     print(f"release_gate: {'PASS' if benchmark['passed'] else 'FAIL'}")
     return 0 if benchmark["passed"] else 1
 
 
-def verify_report(*, deep: bool) -> int:
+def verify_report(*, deep: bool, output_tag: str | None = None) -> int:
     errors: list[str] = []
     try:
-        report = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+        report_json, _ = _report_paths(output_tag)
+        report = json.loads(report_json.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: report unreadable: {exc}")
         return 1
@@ -178,8 +194,10 @@ def main() -> int:
         description="Run or verify the fixed Xiaoyi maritime RAG benchmark."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
-    subparsers.add_parser("run", help="run all cases and replace the report")
+    run = subparsers.add_parser("run", help="run all cases and write a report")
+    run.add_argument("--output-tag", help="append a new tagged report instead of replacing v1")
     verify = subparsers.add_parser("verify", help="verify report evidence hashes")
+    verify.add_argument("--output-tag", help="verify a tagged append-only report")
     verify.add_argument(
         "--deep",
         action="store_true",
@@ -187,8 +205,8 @@ def main() -> int:
     )
     arguments = parser.parse_args()
     if arguments.command == "run":
-        return run_and_persist()
-    return verify_report(deep=arguments.deep)
+        return run_and_persist(output_tag=arguments.output_tag)
+    return verify_report(deep=arguments.deep, output_tag=arguments.output_tag)
 
 
 if __name__ == "__main__":

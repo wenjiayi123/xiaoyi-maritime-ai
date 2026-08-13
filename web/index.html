@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
   <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
   <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20260727-thinking-clean-r28">
+  <link rel="stylesheet" href="/web/styles.css?v=20260813-realtime-port-r1">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -65,7 +65,7 @@
         <button class="icon-button sidebar-toggle-button" type="button" data-action="toggle-sidebar" aria-label="打开功能侧栏"><svg><use href="#i-command"/></svg></button>
         <button class="icon-button rail-toggle-button" type="button" data-action="toggle-rail" aria-label="打开运营看板"><svg><use href="#i-chart"/></svg></button>
         <button class="system-status-indicator" type="button" data-action="system-status" aria-label="查看系统状态">
-          <i class="live-dot"></i>
+          <i class="live-dot" title="本机应用状态；不代表模型、现场数据或生产授权就绪"></i>
         </button>
         <button class="icon-button notification-button" type="button" data-action="notifications" data-agent-target="notifications" aria-label="查看通知"><svg><use href="#i-bell"/></svg><span id="notificationBadge">0</span></button>
         <button class="icon-button" type="button" data-action="settings" data-agent-target="settings" aria-label="设置"><svg><use href="#i-settings"/></svg></button>
@@ -78,7 +78,7 @@
         <div class="assistant-card">
           <div class="assistant-avatar"><span class="bot-face"><i></i><b></b></span><em></em></div>
           <div><strong>小懿AI</strong><span>您的港航智能助手</span></div>
-          <i class="online-dot" title="在线"></i>
+          <i class="online-dot" title="本机界面可用；不代表本地模型或港口系统在线"></i>
         </div>
 
         <div class="side-menu" aria-label="对话功能">
@@ -87,7 +87,7 @@
           <button type="button" data-action="commands"><svg><use href="#i-command"/></svg><span>常用指令</span></button>
           <button type="button" data-action="favorites" data-agent-target="favorites"><svg><use href="#i-star"/></svg><span>我的收藏</span><b id="favoriteCount">0</b></button>
           <button type="button" id="connectorCenterBtn" data-action="connectors" data-agent-target="connectors"><svg><use href="#i-command"/></svg><span>接口中心</span><b class="connector-nav-badge" id="connectorNavBadge">待接入</b></button>
-          <button type="button" id="intelligenceHubBtn" data-action="intelligence-hub" data-agent-target="intelligence-hub"><svg><use href="#i-spark"/></svg><span>智能联动中心</span><b class="hub-nav-badge">7/7</b></button>
+          <button type="button" id="intelligenceHubBtn" data-action="intelligence-hub" data-agent-target="intelligence-hub"><svg><use href="#i-spark"/></svg><span>智能联动中心</span><b class="hub-nav-badge">模块7/7</b></button>
           <button type="button" id="systemLaunchHubBtn" data-action="system-linkage" data-agent-target="system-linkage"><svg><use href="#i-play"/></svg><span>四系统联动</span><b class="system-launch-nav-badge" id="systemLaunchBadge">0/4</b></button>
           <button type="button" id="ragEvaluationBtn" data-action="rag-evaluation" data-agent-target="rag-evaluation"><svg><use href="#i-check"/></svg><span>RAG评测闭环</span><b class="rag-nav-badge">评测</b></button>
         </div>
@@ -140,7 +140,7 @@
                     <header class="response-header">
                       <div><strong>小懿AI</strong><span id="responseStatus" hidden aria-hidden="true"></span></div>
                       <div class="response-actions">
-                        <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">等待接入港口</span>
+                        <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">公开数据校准模拟</span>
                         <span class="grounding-badge pending" id="groundingBadge" aria-live="polite">等待验证</span>
                         <button type="button" class="tiny-icon-button" data-action="favorite-current" aria-label="收藏当前回答"><svg><use href="#i-star"/></svg></button>
                         <button type="button" class="tiny-icon-button" data-action="response-menu" aria-label="更多操作"><svg><use href="#i-more"/></svg></button>
@@ -207,17 +207,17 @@
                 <span id="heroSpeechText">您的港航智能助手</span>
                 <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
               </div>
-              <div class="holo-status"><span></span><strong id="heroStatus">智能感知在线</strong><small>KNOWLEDGE · OPS · SAFETY</small></div>
+              <div class="holo-status"><span></span><strong id="heroStatus">本机应用可用</strong><small>KNOWLEDGE · OPS · SAFETY</small></div>
               <button class="avatar-switch" type="button" data-action="avatar" data-agent-target="avatar-switch"><svg><use href="#i-spark"/></svg><span>切换形象</span><svg><use href="#i-chevron"/></svg></button>
             </section>
           </div>
         </section>
 
         <section class="workspace-view" data-view="decisions">
-          <header class="view-header"><div><p>DECISION INTELLIGENCE</p><h2>决策建议</h2><span>基于运营快照、港航知识库与安全边界生成可追溯建议</span></div><button type="button" class="primary-button" data-task-template="optimize-berth" data-agent-target="task-optimize-berth"><svg><use href="#i-spark"/></svg>生成智能方案</button></header>
+          <header class="view-header"><div><p>DECISION INTELLIGENCE</p><h2>决策建议</h2><span>基于运营快照、港航知识库与安全边界生成可追溯建议</span></div><button type="button" class="primary-button" id="decisionGenerateButton" data-task-template="optimize-berth" data-agent-target="task-optimize-berth"><svg><use href="#i-spark"/></svg>生成智能方案</button></header>
           <div class="decision-layout">
-            <section class="glass-card decision-hero"><div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-bulb"/></svg></span><div><strong>今日决策焦点</strong><small>接入港口后按影响度与紧迫性排序</small></div><span class="demo-badge" data-action="runtime-status">等待接入港口</span></div><div id="decisionCards" class="decision-cards"></div></section>
-            <section class="glass-card risk-board"><div class="card-heading"><span class="heading-icon red"><svg><use href="#i-alert"/></svg></span><div><strong>风险态势</strong><small id="riskAlertSummary">等待告警数据</small></div></div><div class="risk-orbit"><div><strong id="riskHealthScore">--</strong><span>告警健康分</span></div><i class="orbit-one"></i><i class="orbit-two"></i></div><div id="riskLegend" class="risk-legend"></div></section>
+            <section class="glass-card decision-hero"><div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-bulb"/></svg></span><div><strong>今日决策焦点</strong><small>模拟/现场数据共用同一约束计算链</small></div><span class="demo-badge" data-action="runtime-status">公开数据校准模拟</span></div><div id="decisionCards" class="decision-cards"></div></section>
+            <section class="glass-card risk-board"><div class="card-heading"><span class="heading-icon red"><svg><use href="#i-alert"/></svg></span><div><strong>风险态势</strong><small id="riskAlertSummary">等待告警数据</small></div></div><div class="risk-orbit"><div><strong id="riskHealthScore">--</strong><span>现场告警健康分</span></div><i class="orbit-one"></i><i class="orbit-two"></i></div><div id="riskLegend" class="risk-legend"></div></section>
             <section class="glass-card recommendation-flow"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-task"/></svg></span><div><strong>建议执行链</strong><small>先分析，再确认，后执行</small></div></div><div class="execution-chain"><div class="done"><i><svg><use href="#i-check"/></svg></i><span><strong>识别目标</strong><small>完成业务意图解析</small></span></div><em></em><div class="active"><i>2</i><span><strong>评估约束</strong><small>泊位、岸桥、时窗与风险</small></span></div><em></em><div><i>3</i><span><strong>生成方案</strong><small>输出多个候选策略</small></span></div><em></em><div><i>4</i><span><strong>人工确认</strong><small>授权后才可下发</small></span></div></div></section>
           </div>
         </section>
@@ -226,8 +226,28 @@
           <header class="view-header"><div><p>PORT DATA OBSERVATORY</p><h2>数据分析</h2><span>运营、能耗、碳排与设备态势一屏联动</span></div><div class="segmented" id="analyticsRange" data-agent-target="analytics-range"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
           <div class="analytics-grid">
             <div class="analytics-kpis" id="analyticsKpis"></div>
-            <section class="glass-card analytics-chart-card"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-chart"/></svg></span><div><strong>港区能耗与碳排趋势</strong><small id="analyticsUpdated">等待接入港口</small></div><span class="demo-badge" data-action="runtime-status">等待接入港口</span></div><div class="large-chart" id="largeEnergyChart"></div><div class="chart-insight" id="chartInsights"></div></section>
+            <section class="glass-card analytics-chart-card"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-chart"/></svg></span><div><strong>港区能耗与碳排趋势</strong><small id="analyticsUpdated">正在读取模拟流</small></div><span class="demo-badge" data-action="runtime-status">公开数据校准模拟</span></div><div class="large-chart" id="largeEnergyChart"></div><div class="chart-insight" id="chartInsights"></div></section>
             <section class="glass-card efficiency-card"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-leaf"/></svg></span><div><strong>可核验能耗指标</strong><small>直接读取当前能源数据接口</small></div></div><div class="energy-evidence-metrics" id="energyEvidenceMetrics"><span>综合能耗<b>--</b></span><span>碳排放<b>--</b></span><span>碳强度<b>--</b></span><span>岸电利用率<b>--</b></span></div><button type="button" class="outline-button" data-task-template="analyze-energy" data-agent-target="task-analyze-energy">让小懿深度分析</button></section>
+            <section class="glass-card realtime-port-card" id="realtimeSimulatorPanel">
+              <div class="realtime-port-heading">
+                <div><span class="heading-icon cyan"><svg><use href="#i-command"/></svg></span><div><strong>港口实时数据模拟与决策闭环</strong><small id="simulatorStatus">连接事件流中 · 不是现场实测</small></div></div>
+                <div><span class="sim-stream-pill"><i></i>2秒事件流</span><button type="button" class="outline-button" data-action="simulator-lineage">数据契约与血缘</button></div>
+              </div>
+              <div class="simulator-truth-strip"><strong>公开数据校准实时模拟</strong><span>AIS交通包络 + 物理/业务约束工程模型；接入港口后只替换适配器，生产权限仍失败关闭。</span></div>
+              <div class="simulator-scenarios" aria-label="实时模拟场景">
+                <button type="button" class="active" data-simulator-scenario="normal">常态生产</button>
+                <button type="button" data-simulator-scenario="vessel_surge">集中到港</button>
+                <button type="button" data-simulator-scenario="equipment_failure">设备故障</button>
+                <button type="button" data-simulator-scenario="energy_peak">需量高峰</button>
+                <button type="button" data-simulator-scenario="storm">大风低能见度</button>
+              </div>
+              <div class="simulator-kpis" id="simulatorKpis"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>
+              <div class="simulator-domain-grid" id="simulatorDomainGrid"></div>
+              <div class="simulator-closure-grid">
+                <section><header><strong>约束决策与双人审批</strong><span>只改变模拟状态</span></header><div id="simulatorDecisions" class="simulator-decisions"></div></section>
+                <section><header><strong>审计与回滚事件</strong><span>physical_dispatch=false</span></header><div id="simulatorEvents" class="simulator-events"></div></section>
+              </div>
+            </section>
           </div>
         </section>
 
@@ -245,8 +265,9 @@
           <header class="view-header rl-center-header">
             <div><p>PORT RL EVIDENCE CENTER</p><h2>真实训练与证据中心</h2><span>训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动</span></div>
             <div class="view-header-actions">
+              <button type="button" class="outline-button" data-rl-center-action="show-evidence"><svg><use href="#i-check"/></svg>正式证据与失败候选</button>
               <button type="button" class="outline-button" data-rl-center-action="refresh"><svg><use href="#i-history"/></svg>刷新证据</button>
-              <button type="button" class="primary-button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg>配置五算法训练</button>
+              <button type="button" class="primary-button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg>配置六算法对比</button>
             </div>
           </header>
           <div class="rl-center-layout">
@@ -257,7 +278,7 @@
             </section>
 
             <section class="glass-card rl-center-matrix-card">
-              <div class="card-heading"><span class="heading-icon violet"><svg><use href="#i-chart"/></svg></span><div><strong>算法矩阵</strong><small>4 种强化学习算法 + 1 个控制理论基线，共享同一评估门禁</small></div><span class="status-pill"><i></i>5 BASELINES</span></div>
+              <div class="card-heading"><span class="heading-icon violet"><svg><use href="#i-chart"/></svg></span><div><strong>算法矩阵</strong><small>4 种强化学习 + PID控制 + 现场SOP规则，共享同一评估门禁</small></div><span class="status-pill"><i></i>6 CANDIDATES</span></div>
               <div class="rl-center-algorithm-matrix" id="rlCenterAlgorithmMatrix"></div>
             </section>
 
@@ -269,7 +290,7 @@
               <div class="rl-advisor-suggestions">
                 <button type="button" data-rl-advisor-prompt="这次训练的观测、动作、目标函数和硬约束是什么？">解释观测与目标</button>
                 <button type="button" data-rl-advisor-prompt="目前公开数据有多少行、来源和许可是什么，哪套更可信？">比较数据可信度</button>
-                <button type="button" data-rl-advisor-prompt="五种算法的区别是什么，为什么要保留PID？">解释五算法矩阵</button>
+                <button type="button" data-rl-advisor-prompt="六种候选与基线的区别是什么，为什么保留PID和SOP规则？">解释六算法矩阵</button>
               </div>
               <form class="rl-advisor-composer" id="rlAdvisorForm">
                 <textarea id="rlAdvisorInput" rows="1" placeholder="向小懿训练顾问提问..." aria-label="训练顾问问题"></textarea>
@@ -309,12 +330,12 @@
 
       <aside class="right-rail" id="rightRail">
         <section class="rail-card overview-card" id="overviewCard">
-          <header><div><svg><use href="#i-chart"/></svg><strong>实时运营概况</strong><span class="demo-dot" data-action="runtime-status" title="等待接入港口现场数据源">PENDING</span></div><button type="button" data-view-target="analytics">查看更多</button></header>
+          <header><div><svg><use href="#i-chart"/></svg><strong>港区运营数据</strong><span class="demo-dot" data-action="runtime-status" title="公开数据校准实时模拟；不是现场实测">SIM</span></div><button type="button" data-view-target="analytics">查看更多</button></header>
           <div class="overview-grid" id="overviewGrid"><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div><div class="skeleton-block"></div></div>
         </section>
 
         <section class="rail-card energy-card" id="energyCard">
-          <header><div><svg><use href="#i-leaf"/></svg><strong>能耗实时指标</strong><span class="demo-dot" data-action="runtime-status">PENDING</span></div><div class="mini-segmented" id="energyRange"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
+          <header><div><svg><use href="#i-leaf"/></svg><strong>能耗数据链</strong><span class="demo-dot" data-action="runtime-status">SIM</span></div><div class="mini-segmented" id="energyRange"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
           <div class="chart-legend"><span><i class="cyan"></i>能耗 (MWh)</span><span><i class="green"></i>碳排放 (tCO₂e)</span></div>
           <div class="energy-chart" id="energyChart"><div class="chart-loading">正在绘制趋势...</div></div>
         </section>
@@ -354,6 +375,6 @@
   <button id="clearTopicsBtn" type="button" hidden></button>
   <span id="kbChip" hidden></span>
 
-  <script src="/web/app.js?v=20260727-thinking-clean-r28" defer></script>
+  <script src="/web/app.js?v=20260813-realtime-port-r1" defer></script>
 </body>
 </html>

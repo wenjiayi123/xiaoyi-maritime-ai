@@ -57,6 +57,23 @@ class SourceMetadata(BaseModel):
     production_ready: bool
     live_data_verified: bool
     write_enabled: bool
+    truth_label: Optional[str] = None
+    telemetry_schema_version: Optional[str] = None
+    simulation_run_id: Optional[str] = None
+    simulation_seed: Optional[int] = None
+    scenario_id: Optional[str] = None
+    stream_sequence: Optional[int] = None
+    source_dataset_id: Optional[str] = None
+    source_manifest_sha256: Optional[str] = None
+    field_mapping_version: Optional[str] = None
+    field_mapping_sha256: Optional[str] = None
+    contract_sha256: Optional[str] = None
+    payload_sha256: Optional[str] = None
+    quality_report: Optional[dict[str, object]] = None
+    quality_report_sha256: Optional[str] = None
+    sandbox_dispatch_allowed: bool = False
+    physical_dispatch_allowed: bool = False
+    production_authority: bool = False
 
 
 class OperationsOverview(BaseModel):
@@ -95,6 +112,8 @@ class EnergyResponse(BaseModel):
     updated_at: datetime
     summary: EnergySummary
     series: list[EnergyPoint]
+    series_semantics: Literal["non_overlapping_interval_energy"]
+    interval_minutes: int
     insights: list[str]
 
 
@@ -589,6 +608,8 @@ def _energy(period: EnergyRange) -> EnergyResponse:
         updated_at=metadata.observed_at,
         summary=EnergySummary(**payload["summary"]),
         series=[EnergyPoint(**item) for item in payload["series"]],
+        series_semantics=payload["series_semantics"],
+        interval_minutes=payload["interval_minutes"],
         insights=payload["insights"],
     )
 

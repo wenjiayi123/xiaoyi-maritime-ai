@@ -111,6 +111,51 @@ def test_multi_part_retrieval_balances_evidence_coverage() -> None:
     assert "AGV" in result.answer
 
 
+def test_specific_thdi_alarm_prefers_procedure_over_generated_catalog_queries() -> None:
+    result = XiaoyiAI().ask(
+        "岸电 THDi 超标告警应该先检查什么？",
+        mode="sop",
+        top_k=5,
+        strict_evidence=True,
+        retrieval_queries=["岸电 THDi 超标告警应该先检查什么？"],
+    )
+
+    evidence_ids = [item.id for item in result.evidence]
+    assert result.grounded is True
+    assert result.evidence_coverage == 1.0
+    assert len(result.subquestion_support) == 1
+    assert evidence_ids[0].startswith("07_energy_carbon_shore_power:")
+    assert any(
+        item.startswith("35_energy_equipment_incident_playbooks:")
+        for item in evidence_ids
+    )
+    assert not any(
+        item.startswith(("00_knowledge_catalog:", "37_port_qa_form_taxonomy:"))
+        for item in evidence_ids
+    )
+    assert "确认 THDi 数值、持续时间、船舶负载和告警等级" in result.answer
+
+
+def test_official_locator_prefers_requested_directory_over_newer_documents() -> None:
+    singapore = XiaoyiAI().ask(
+        "新加坡船舶到港官方程序入口在哪里？",
+        top_k=5,
+        strict_evidence=True,
+    )
+    malaysia = XiaoyiAI().ask(
+        "马来西亚海事立法应从哪个官方目录开始核验？",
+        top_k=5,
+        strict_evidence=True,
+    )
+
+    assert singapore.grounded is True
+    assert singapore.evidence[0].source == (
+        "101_sg_vessel_arrival_departure_procedures.md"
+    )
+    assert malaysia.grounded is True
+    assert malaysia.evidence[0].source == "102_my_marine_legislation_directory.md"
+
+
 def test_compound_question_answers_supported_part_and_refuses_clause_part() -> None:
     plan = build_query_analysis(
         "VGM 的制度目的是什么，同时 SOLAS VI/2 的条款原文是什么？"

@@ -38,7 +38,10 @@ class EnvironmentParameters:
     minimum_soc: float
     maximum_soc: float
     initial_soc: float
+    terminal_soc_target: float
+    terminal_soc_tolerance: float
     round_trip_efficiency: float
+    degradation_cost_per_kwh: float
     step_hours: float
     peak_target_kw: float
     mean_load_kw: float
@@ -47,12 +50,16 @@ class EnvironmentParameters:
     def public_dict(self) -> dict[str, Any]:
         return {
             "environment_type": "energy_storage",
+            "environment_version": "xiaoyi-energy-env.v2",
             "capacity_kwh": round(self.capacity_kwh, 6),
             "max_power_kw": round(self.max_power_kw, 6),
             "minimum_soc": self.minimum_soc,
             "maximum_soc": self.maximum_soc,
             "initial_soc": self.initial_soc,
+            "terminal_soc_target": self.terminal_soc_target,
+            "terminal_soc_tolerance": self.terminal_soc_tolerance,
             "round_trip_efficiency": self.round_trip_efficiency,
+            "degradation_cost_per_kwh": self.degradation_cost_per_kwh,
             "step_hours": round(self.step_hours, 6),
             "peak_target_kw": round(self.peak_target_kw, 6),
             "mean_load_kw": round(self.mean_load_kw, 6),
@@ -72,7 +79,10 @@ def derive_parameters(records: list[EnergyRecord]) -> EnvironmentParameters:
         minimum_soc=0.10,
         maximum_soc=0.95,
         initial_soc=0.55,
+        terminal_soc_target=0.55,
+        terminal_soc_tolerance=0.02,
         round_trip_efficiency=0.90,
+        degradation_cost_per_kwh=0.02,
         step_hours=step_hours,
         peak_target_kw=percentile(loads, 0.75),
         mean_load_kw=mean_load,
@@ -134,6 +144,8 @@ class EnergySchedulingEnvironment:
         self.soc = parameters.initial_soc
         self.peak_grid_kw = 0.0
         self.total_cost = 0.0
+        self.total_grid_energy_cost = 0.0
+        self.total_degradation_cost = 0.0
         self.total_carbon_kg = 0.0
         self.constraint_violations = 0
         self.frames: list[dict[str, Any]] = []
@@ -148,6 +160,8 @@ class EnergySchedulingEnvironment:
         self.soc = self.parameters.initial_soc
         self.peak_grid_kw = 0.0
         self.total_cost = 0.0
+        self.total_grid_energy_cost = 0.0
+        self.total_degradation_cost = 0.0
         self.total_carbon_kg = 0.0
         self.constraint_violations = 0
         self.frames = []
@@ -179,20 +193,36 @@ class EnergySchedulingEnvironment:
             0.0,
             (self.parameters.maximum_soc - self.soc) * self.parameters.capacity_kwh,
         )
-        return tuple(
-            (
-                abs(factor) * self.parameters.max_power_kw * self.parameters.step_hours
-                <= available_discharge_kwh * efficiency + 1e-9
-            )
-            if factor < 0
-            else (
-                factor * self.parameters.max_power_kw * self.parameters.step_hours
-                <= available_charge_kwh / efficiency + 1e-9
-            )
-            if factor > 0
-            else True
-            for factor in ACTIONS
+        remaining_after_action = max(0, self.horizon_steps - self.steps - 1)
+        maximum_future_soc_gain = (
+            remaining_after_action
+            * self.parameters.max_power_kw
+            * self.parameters.step_hours
+            * efficiency
+            / self.parameters.capacity_kwh
         )
+        mask: list[bool] = []
+        for factor in ACTIONS:
+            requested_kwh = abs(factor) * self.parameters.max_power_kw * self.parameters.step_hours
+            within_physical_bounds = (
+                requested_kwh <= available_discharge_kwh * efficiency + 1e-9
+                if factor < 0
+                else requested_kwh <= available_charge_kwh / efficiency + 1e-9
+                if factor > 0
+                else True
+            )
+            if factor < 0:
+                projected_soc = self.soc - requested_kwh / efficiency / self.parameters.capacity_kwh
+            elif factor > 0:
+                projected_soc = self.soc + requested_kwh * efficiency / self.parameters.capacity_kwh
+            else:
+                projected_soc = self.soc
+            recovery_feasible = (
+                min(self.parameters.maximum_soc, projected_soc + maximum_future_soc_gain)
+                >= self.parameters.terminal_soc_target - self.parameters.terminal_soc_tolerance - 1e-9
+            )
+            mask.append(within_physical_bounds and recovery_feasible)
+        return tuple(mask)
 
     def step(self, action_index: int) -> tuple[tuple[int, ...], float, bool, dict[str, Any]]:
         if not 0 <= action_index < len(ACTIONS):
@@ -217,10 +247,14 @@ class EnergySchedulingEnvironment:
         tariff = tariff_for(record)
         carbon_intensity = carbon_for(record)
         step_energy_kwh = grid_kw * self.parameters.step_hours
-        step_cost = step_energy_kwh * tariff
+        grid_energy_cost = step_energy_kwh * tariff
+        degradation_cost = abs(actual_energy_kwh) * self.parameters.degradation_cost_per_kwh
+        step_cost = grid_energy_cost + degradation_cost
         step_carbon_kg = step_energy_kwh * carbon_intensity
         self.peak_grid_kw = max(self.peak_grid_kw, grid_kw)
         self.total_cost += step_cost
+        self.total_grid_energy_cost += grid_energy_cost
+        self.total_degradation_cost += degradation_cost
         self.total_carbon_kg += step_carbon_kg
         if constrained:
             self.constraint_violations += 1
@@ -231,9 +265,16 @@ class EnergySchedulingEnvironment:
 
         self.steps += 1
         done = self.steps >= self.horizon_steps
+        terminal_recovery_violation = False
         if done:
-            reserve_shortfall = max(0.0, 0.50 - self.soc)
-            reward -= reserve_shortfall * 12.0
+            reserve_shortfall = max(
+                0.0,
+                self.parameters.terminal_soc_target - self.parameters.terminal_soc_tolerance - self.soc,
+            )
+            terminal_recovery_violation = reserve_shortfall > 1e-9
+            if terminal_recovery_violation:
+                self.constraint_violations += 1
+            reward -= reserve_shortfall * 80.0 + (20.0 if terminal_recovery_violation else 0.0)
         frame = {
             "step": self.steps,
             "timestamp": record.timestamp.isoformat(),
@@ -247,9 +288,12 @@ class EnergySchedulingEnvironment:
             "tariff_per_kwh": round(tariff, 6),
             "carbon_kg_per_kwh": round(carbon_intensity, 6),
             "step_cost": round(step_cost, 8),
+            "grid_energy_cost": round(grid_energy_cost, 8),
+            "degradation_cost": round(degradation_cost, 8),
             "step_carbon_kg": round(step_carbon_kg, 8),
             "reward": round(reward, 8),
             "constrained": constrained,
+            "terminal_recovery_violation": terminal_recovery_violation,
             "split": self.split_name,
         }
         if self.render_mode == "trace":
@@ -267,6 +311,8 @@ class EnergySchedulingEnvironment:
         return {
             "total_reward": round(total_reward, 6),
             "total_cost": round(self.total_cost, 8),
+            "total_grid_energy_cost": round(self.total_grid_energy_cost, 8),
+            "total_degradation_cost": round(self.total_degradation_cost, 8),
             "baseline_cost": round(baseline_cost, 8),
             "cost_saving_percent": round((baseline_cost - self.total_cost) / max(1e-9, baseline_cost) * 100, 4),
             "controlled_energy_kwh": round(controlled_energy, 8) if controlled_energy is not None else None,
@@ -277,6 +323,11 @@ class EnergySchedulingEnvironment:
             "carbon_kg": round(self.total_carbon_kg, 8),
             "constraint_violations": self.constraint_violations,
             "terminal_soc": round(self.soc, 6),
+            "terminal_soc_target": self.parameters.terminal_soc_target,
+            "terminal_soc_recovered": (
+                self.soc
+                >= self.parameters.terminal_soc_target - self.parameters.terminal_soc_tolerance - 1e-9
+            ),
             "steps": self.steps,
             "split": self.split_name,
         }

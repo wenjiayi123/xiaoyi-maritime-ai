@@ -6,6 +6,7 @@ from typing import Any
 
 ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
     "id": "energy_storage",
+    "version": "xiaoyi-energy-env.v2",
     "label": "港口能源与储能调度",
     "decision_scope": "在给定负荷、电价、碳强度和储能约束下选择充放电功率档位。",
     "observation": [
@@ -24,9 +25,10 @@ ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
     ],
     "objective": {
         "direction": "maximize",
-        "formula": "-energy_cost - 1.4*peak_excess - 1.5*constraint_violation - 12*terminal_reserve_shortfall",
+        "formula": "-(grid_energy_cost + battery_degradation_cost) - 1.4*peak_excess - safety_penalties - 80*terminal_soc_shortfall",
         "components": [
             "energy_cost",
+            "battery_degradation_cost",
             "peak_excess",
             "soc_constraint_violation",
             "terminal_reserve_shortfall",
@@ -34,6 +36,8 @@ ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
     },
     "hard_constraints": [
         "minimum_soc <= soc <= maximum_soc",
+        "terminal_soc >= initial_soc - 0.02 (hard admission and action-feasibility constraint)",
+        "unsupported grid export receives no revenue",
         "abs(storage_power_kw) <= max_power_kw",
         "training render_mode is None",
         "test rows are unavailable before training completes",
@@ -43,6 +47,7 @@ ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
 
 PORT_OPERATIONS_CONTRACT: dict[str, Any] = {
     "id": "port_operations",
+    "version": "xiaoyi-port-operations-env.v1",
     "label": "AIS驱动的港口交通—服务能力协同",
     "decision_scope": "依据真实交通观测和站点约束选择服务能力档位；输出只作为规划沙箱建议。",
     "observation": [

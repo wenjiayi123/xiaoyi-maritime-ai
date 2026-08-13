@@ -116,6 +116,22 @@ def test_deep_health_metrics_and_secure_response_headers() -> None:
     assert payload["checks"]["runtime_store"]["integrity"] == "ok"
     assert payload["checks"]["knowledge_index"]["chunks"] > 0
     assert payload["checks"]["rl_datasets"]["available"] > 0
+    assert payload["runtime_posture"]["application_ready"] is True
+    assert payload["runtime_posture"]["recommendation_only"] is True
+    assert payload["runtime_posture"]["dispatch_allowed"] is False
+    assert payload["runtime_posture"]["production_authority"] is False
+
+    info = client.get("/api/system/info").json()
+    assert info["recommendation_only"] is True
+    assert info["dispatch_allowed"] is False
+    assert info["production_authority"] is False
+    assert "shadow_operation" in info["authority_admission_requirements"]
+
+    comparison = client.get("/api/system/competitive-benchmark").json()
+    assert comparison["comparison_status"] == "not_claimed_surpassed"
+    assert comparison["superiority_claim_gate"]["passed"] is False
+    assert comparison["xiaoyi_verified_snapshot"]["production_authority"] is False
+    assert len(comparison["artifact_sha256"]) == 64
 
     metrics = client.get("/metrics")
     assert metrics.status_code == 200
@@ -201,4 +217,3 @@ def test_external_model_requires_explicit_data_egress_authorization() -> None:
     assert result.generation_fallback is True
     assert "external_data_not_authorized" in (result.generation_notice or "")
     assert gateway.status()["requests"] == 0
-

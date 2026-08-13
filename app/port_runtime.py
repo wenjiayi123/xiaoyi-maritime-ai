@@ -8,14 +8,14 @@ from datetime import date, datetime, timedelta, timezone
 from typing import Any, Literal, Protocol
 from urllib import request
 
+from app.realtime_port_simulator import SIMULATION_NOTICE, realtime_port_simulator
+from app.site_admission import evaluate_live_metadata
+
 
 DataMode = Literal["operations_sandbox", "live"]
 
 
-SANDBOX_NOTICE = (
-    "港口运营沙箱动态合成数据；字段、时间戳、质量码和生产适配器契约已对齐，"
-    "当前尚未连接任何港口生产源，不可作为现场实绩或控制依据。"
-)
+SANDBOX_NOTICE = SIMULATION_NOTICE
 
 
 class PortOperationsDataSource(Protocol):
@@ -50,7 +50,16 @@ class SandboxPortDataSource:
     mode: DataMode = "operations_sandbox"
     source_system: str = "XIAOYI-PORT-SANDBOX"
     port_code: str = "XPS01"
-    port_name: str = "东海集装箱枢纽样板港区"
+    port_name: str = "公开数据校准样板港区"
+
+    @staticmethod
+    def _is_runtime_request(observed_at: datetime) -> bool:
+        return abs((utc_now() - observed_at).total_seconds()) <= 30
+
+    def _runtime(self, observed_at: datetime) -> dict[str, Any] | None:
+        if not self._is_runtime_request(observed_at):
+            return None
+        return realtime_port_simulator.snapshot()
 
     def _bucket(self, observed_at: datetime) -> int:
         return int(observed_at.timestamp()) // 300
@@ -60,6 +69,9 @@ class SandboxPortDataSource:
         return math.sin(bucket * 0.73 + offset) * 0.55 + math.sin(bucket * 0.19 + offset) * 0.45
 
     def metadata(self, observed_at: datetime) -> dict[str, Any]:
+        runtime = self._runtime(observed_at)
+        if runtime is not None:
+            return runtime["metadata"]
         event_at = observed_at.replace(second=(observed_at.second // 5) * 5)
         return {
             "data_mode": self.mode,
@@ -74,12 +86,18 @@ class SandboxPortDataSource:
             "quality_code": "SYNTHETIC_VALIDATED",
             "quality_score": 0.99,
             "latency_ms": 35 + self._bucket(observed_at) % 41,
-            "production_ready": True,
+            # A schema-compatible sandbox is not a production-ready data source.
+            # Site admission remains fail-closed until a verified live adapter is
+            # calibrated, shadowed and approved.
+            "production_ready": False,
             "live_data_verified": False,
             "write_enabled": False,
         }
 
     def overview(self, observed_at: datetime) -> dict[str, Any]:
+        runtime = self._runtime(observed_at)
+        if runtime is not None:
+            return runtime["overview"]
         local_hour = (observed_at.hour + 8) % 24
         minute = (observed_at.minute // 5) * 5
         day_progress = (local_hour * 60 + minute) / 1440
@@ -134,18 +152,32 @@ class SandboxPortDataSource:
         }
 
     def energy(self, period: str, observed_at: datetime) -> dict[str, Any]:
+        if self._is_runtime_request(observed_at):
+            return realtime_port_simulator.period_energy(period)
         wave = self._wave(observed_at, 0.8)
         if period == "today":
-            labels = [f"{hour:02d}:00" for hour in range(0, 25, 2)]
-            base_values = [205, 294, 478, 735, 986, 1088, 1215, 1162, 1010, 918, 1002, 1138, 1264]
-            values = [round(value * (1 + wave * 0.018 + math.sin(i + self._bucket(observed_at)) * 0.012), 1) for i, value in enumerate(base_values)]
+            # Twelve non-overlapping two-hour intervals.  "24:00" is not emitted
+            # because it belongs to the following operating day.
+            labels = [f"{hour:02d}:00" for hour in range(0, 24, 2)]
+            base_values = [74, 68, 72, 81, 99, 118, 130, 126, 113, 105, 102, 100]
+            raw_values = [
+                value
+                * (1 + wave * 0.018 + math.sin(i + self._bucket(observed_at)) * 0.012)
+                for i, value in enumerate(base_values)
+            ]
             multiplier = 1
+            interval_minutes = 120
         else:
             days = 7 if period == "7d" else 30
             labels = [(date.today() - timedelta(days=days - index - 1)).isoformat() for index in range(days)]
-            values = [round(1120 + ((index * 137) % 310) - (index % 3) * 75 + wave * 24, 1) for index in range(days)]
+            raw_values = [1120 + ((index * 137) % 310) - (index % 3) * 75 + wave * 24 for index in range(days)]
             multiplier = days
+            interval_minutes = 1440
         total = round((1188.4 + wave * 28.0) * multiplier * (0.96 if multiplier > 1 else 1), 1)
+        scale = total / max(sum(raw_values), 1e-9)
+        values = [round(value * scale, 1) for value in raw_values]
+        # Keep the public API invariant exact at its declared 0.1 MWh precision.
+        values[-1] = round(values[-1] + total - sum(values), 1)
         carbon = round(total * 0.284, 1)
         return {
             "summary": {
@@ -167,6 +199,8 @@ class SandboxPortDataSource:
                 }
                 for label, value in zip(labels, values)
             ],
+            "series_semantics": "non_overlapping_interval_energy",
+            "interval_minutes": interval_minutes,
             "insights": [
                 "岸桥与冷藏箱区构成当前主要用能负荷，能耗曲线与作业量变化一致。",
                 "12:00—16:00 为预计高负荷窗口，建议结合船舶作业计划复核峰值。",
@@ -175,6 +209,9 @@ class SandboxPortDataSource:
         }
 
     def alerts(self, observed_at: datetime) -> list[dict[str, Any]]:
+        runtime = self._runtime(observed_at)
+        if runtime is not None:
+            return list(runtime["alerts"])
         wave = self._wave(observed_at, 1.2)
         battery = round(22 + wave * 4)
         return [
@@ -225,6 +262,44 @@ class SandboxPortDataSource:
         ]
 
     def runtime_snapshot(self, observed_at: datetime) -> dict[str, Any]:
+        runtime = self._runtime(observed_at)
+        if runtime is not None:
+            fleet = runtime["fleet_summary"]
+            return {
+                **runtime,
+                "berth_calls": runtime["port_calls"],
+                "equipment_summary": fleet,
+                "equipment": {
+                    "quay_cranes": {
+                        "total": fleet["quay_cranes"]["total"],
+                        "working": fleet["quay_cranes"]["working"],
+                        "standby": fleet["quay_cranes"]["total"] - fleet["quay_cranes"]["working"] - fleet["quay_cranes"]["fault"],
+                        "maintenance": fleet["quay_cranes"]["fault"],
+                    },
+                    "agv": {
+                        "total": fleet["agv"]["total"],
+                        "online": fleet["agv"]["total"] - fleet["agv"]["low_soc"],
+                        "working": fleet["agv"]["working"],
+                        "charging": fleet["agv"]["charging"],
+                    },
+                    "yard_cranes": {
+                        "total": fleet["yard_cranes"]["total"],
+                        "working": fleet["yard_cranes"]["working"],
+                        "maintenance": 0,
+                    },
+                },
+                "equipment_assets": runtime["equipment"],
+                "yard": {
+                    "occupancy_percent": round(sum(item["occupancy_percent"] for item in runtime["yard_blocks"]) / len(runtime["yard_blocks"]), 1),
+                    "reefer_slots_used": sum(item["reefer_slots_used"] for item in runtime["yard_blocks"]),
+                    "dangerous_goods_zone_percent": round(100 * sum(item["dangerous_goods_teu"] for item in runtime["yard_blocks"]) / max(sum(item["occupied_teu"] for item in runtime["yard_blocks"]), 1), 1),
+                },
+                "gate": {
+                    "queue_vehicles": sum(item["queue_vehicles"] for item in runtime["gates"]),
+                    "open_lanes": sum(item["lanes_open"] for item in runtime["gates"]),
+                    "average_turn_time_minutes": round(sum(item["turn_time_minutes"] for item in runtime["gates"]) / len(runtime["gates"]), 1),
+                },
+            }
         wave = self._wave(observed_at)
         return {
             "metadata": self.metadata(observed_at),
@@ -278,11 +353,12 @@ class HttpPortDataSource:
 
     def metadata(self, observed_at: datetime) -> dict[str, Any]:
         payload = self._get("/runtime/status")
-        if payload.get("data_mode") != "live" or payload.get("live_data_verified") is not True:
-            raise RuntimeError("生产数据网关未通过 live_data_verified 校验，已拒绝把数据标记为生产实绩")
-        if payload.get("schema_version") != "port-ops.v1":
-            raise RuntimeError("生产数据网关 schema_version 与 port-ops.v1 不兼容")
+        admission = evaluate_live_metadata(payload)
+        if not admission["read_only_admission_passed"]:
+            reasons = ", ".join(admission["blockers"][:8])
+            raise RuntimeError(f"生产数据网关未通过只读现场准入，已失败关闭：{reasons}")
         payload["write_enabled"] = False
+        payload["site_admission"] = admission
         return payload
 
     def overview(self, observed_at: datetime) -> dict[str, Any]:

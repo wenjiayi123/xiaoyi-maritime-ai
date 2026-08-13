@@ -417,7 +417,7 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
         ]
 
     is_agv_energy_rl = (
-        any(word in text for word in ["rl实验", "rl训练", "强化学习训练", "五算法", "pid基线"])
+        any(word in text for word in ["rl实验", "rl训练", "强化学习训练", "五算法", "六策略", "pid基线"])
         or (
             "agv" in text
             and any(word in text for word in ["充换电", "充电", "能耗", "能源"])
@@ -425,12 +425,12 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
         )
     )
     if is_agv_energy_rl:
-        return "optimize_agv_energy_rl", "运行真实数据驱动的四种RL算法与PID基线训练、隔离测试和审计。", 0.98, [
+        return "optimize_agv_energy_rl", "运行真实数据驱动的四种RL算法、PID与现场SOP规则基线训练、隔离测试和审计。", 0.98, [
             _action("open_rl_mission", "打开可复现RL训练实验室", "rl-mission-core", {"horizon_steps": "72"}, phase="理解"),
             _action("check_rl_systems", "校验公开数据、算法注册表和隔离门禁", "rl-mission-topology", phase="准备"),
             _action("build_rl_scenario", "建立数据哈希与时间顺序训练/验证/测试划分", "rl-mission-scenario", phase="准备"),
             _action("replay_rl_training", "启动真实训练并读取后台进度", "rl-mission-training", phase="分析"),
-            _action("run_rl_competition", "训练完成后在保留测试集渲染五种基线", "rl-mission-race", phase="分析", risk_level="medium"),
+            _action("run_rl_competition", "训练完成后在保留测试集渲染六种候选与基线", "rl-mission-race", phase="分析", risk_level="medium"),
             _action("verify_rl_policy", "核验模型哈希、测试隔离与生产写入锁", "rl-mission-guardrail", phase="核验", risk_level="medium"),
             _action(
                 "dispatch_rl_dry_run",

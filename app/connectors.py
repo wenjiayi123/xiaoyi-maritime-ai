@@ -118,9 +118,12 @@ class WritePreflightResponse(BaseModel):
     connector_id: str
     operation: str
     authorization_id: str
-    authorized: Literal[True] = True
+    authorized: Literal[False] = False
+    preflight_recorded: Literal[True] = True
     dispatch_performed: Literal[False] = False
     human_confirmation_recorded: Literal[True] = True
+    dual_approval_verified: Literal[False] = False
+    production_authority: Literal[False] = False
     authorized_at: datetime
     expires_in_seconds: int
     message: str
@@ -646,8 +649,8 @@ class ConnectorRegistry:
             authorized_at=_now(),
             expires_in_seconds=60,
             message=(
-                "写操作预检已通过，但本端点不会下发生产指令。"
-                "后续站点适配器必须校验此人工确认并记录完整审计轨迹。"
+                "单人写操作预检已记录，但不构成生产授权，本端点不会下发生产指令。"
+                "后续站点适配器必须验证相互独立的短时双人审批、范围和撤销状态。"
             ),
         )
 

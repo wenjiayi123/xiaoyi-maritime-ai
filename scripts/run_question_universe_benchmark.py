@@ -47,6 +47,20 @@ def _percent(value: float) -> str:
     return f"{value * 100:.2f}%"
 
 
+def _report_paths(output_tag: str | None) -> tuple[Path, Path]:
+    if not output_tag:
+        return REPORT_JSON, REPORT_MARKDOWN
+    safe_tag = "".join(
+        character for character in output_tag if character.isalnum() or character in {"-", "_"}
+    )
+    if not safe_tag:
+        raise ValueError("output tag must contain a letter or number")
+    return (
+        ROOT / "reports" / f"maritime_question_universe_benchmark_v6_{safe_tag}.json",
+        ROOT / "reports" / f"maritime_question_universe_benchmark_v6_{safe_tag}.md",
+    )
+
+
 def _markdown(report: dict[str, Any]) -> str:
     result = report["benchmark"]
     knowledge = report["knowledge_snapshot"]
@@ -95,7 +109,7 @@ python scripts/run_question_universe_benchmark.py run
 """
 
 
-def run_and_persist() -> int:
+def run_and_persist(*, output_tag: str | None = None) -> int:
     benchmark = run_question_universe_benchmark()
     status = get_knowledge_status()
     report = {
@@ -115,19 +129,21 @@ def run_and_persist() -> int:
         },
         "benchmark": benchmark,
     }
+    report_json, report_markdown = _report_paths(output_tag)
     _write_atomic(
-        REPORT_JSON,
+        report_json,
         json.dumps(report, ensure_ascii=False, indent=2) + "\n",
     )
-    _write_atomic(REPORT_MARKDOWN, _markdown(report))
+    _write_atomic(report_markdown, _markdown(report))
     print(f"question universe benchmark: {'PASS' if benchmark['passed'] else 'FAIL'}")
-    print(f"report: {REPORT_JSON}")
+    print(f"report: {report_json}")
     return 0 if benchmark["passed"] else 1
 
 
-def verify() -> int:
+def verify(*, output_tag: str | None = None) -> int:
     try:
-        report = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
+        report_json, _ = _report_paths(output_tag)
+        report = json.loads(report_json.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         print(f"ERROR: report unreadable: {exc}")
         return 1
@@ -162,8 +178,13 @@ def verify() -> int:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("command", choices=("run", "verify"))
+    parser.add_argument("--output-tag", help="append or verify a tagged immutable report")
     arguments = parser.parse_args()
-    return run_and_persist() if arguments.command == "run" else verify()
+    return (
+        run_and_persist(output_tag=arguments.output_tag)
+        if arguments.command == "run"
+        else verify(output_tag=arguments.output_tag)
+    )
 
 
 if __name__ == "__main__":

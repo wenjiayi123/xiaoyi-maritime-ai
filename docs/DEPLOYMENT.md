@@ -72,4 +72,4 @@ On restart, unfinished UI tasks are marked cancelled and unfinished automation p
 
 ## Port integration gate
 
-Keep `XIAOYI_PORT_DATA_MODE=operations_sandbox` until a read-only `port-ops.v1` gateway returns `live_data_verified=true`. Production writes require a separately reviewed connector, least-privilege identity, current human confirmation, audit export, rollback, shadow testing, and site acceptance. See [PORT_CONNECTOR_INTEGRATION.md](PORT_CONNECTOR_INTEGRATION.md).
+Keep `XIAOYI_PORT_DATA_MODE=operations_sandbox` until a read-only `port-ops.v1` gateway returns all metadata required by `data/contracts/port_site_admission_v1.json` and passes freshness, completeness, duplication, ordering, physical-constraint, feature-coverage and PSI drift checks. `live_data_verified=true` alone is insufficient. Production writes remain disabled until field mapping, calibration, shadow operation, dual approval, rollback drill, OT/IT allowlisting and site acceptance all have signed evidence. See [PORT_CONNECTOR_INTEGRATION.md](PORT_CONNECTOR_INTEGRATION.md).

@@ -23,12 +23,18 @@ def test_dashboard_returns_production_shaped_sandbox_data() -> None:
 
     payload = response.json()
     assert payload["data_mode"] == "operations_sandbox"
-    assert payload["source_metadata"]["quality_code"] == "SYNTHETIC_VALIDATED"
+    assert payload["source_metadata"]["quality_code"] == "PUBLIC_CALIBRATED_SIMULATION_VALIDATED"
+    assert payload["source_metadata"]["source_type"] == "public_data_calibrated_simulation"
+    assert payload["source_metadata"]["production_ready"] is False
     assert payload["source_metadata"]["live_data_verified"] is False
     assert payload["source_metadata"]["schema_version"] == "port-ops.v1"
     assert len(payload["overview"]["metrics"]) == 4
     assert payload["energy"]["range"] == "today"
-    assert len(payload["energy"]["series"]) == 13
+    assert len(payload["energy"]["series"]) == 12
+    assert payload["energy"]["series_semantics"] == "non_overlapping_interval_energy"
+    assert payload["energy"]["interval_minutes"] == 120
+    assert payload["energy"]["series"][-1]["timestamp"] == "22:00"
+    assert round(sum(item["energy_mwh"] for item in payload["energy"]["series"]), 1) == payload["energy"]["summary"]["total_energy_mwh"]
     assert payload["alerts"]["total"] == 4
     assert {item["task_template_id"] for item in payload["quick_actions"]} >= {
         "analyze-energy",
@@ -41,6 +47,8 @@ def test_energy_ranges_and_alert_filters() -> None:
     assert weekly.status_code == 200
     assert weekly.json()["range"] == "7d"
     assert len(weekly.json()["series"]) == 7
+    assert weekly.json()["interval_minutes"] == 1440
+    assert round(sum(item["energy_mwh"] for item in weekly.json()["series"]), 1) == weekly.json()["summary"]["total_energy_mwh"]
 
     monthly = client.get("/api/energy", params={"period": "30d"})
     assert monthly.status_code == 200

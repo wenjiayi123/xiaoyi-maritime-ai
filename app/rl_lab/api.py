@@ -48,7 +48,11 @@ class AdvisorRequest(BaseModel):
 
 
 def _evidence_report() -> dict[str, Any]:
-    path = Path(__file__).resolve().parents[2] / "reports" / "rl_dataset_benchmark_v1.json"
+    reports_dir = Path(__file__).resolve().parents[2] / "reports"
+    path = reports_dir / "rl_dataset_benchmark_v2.json"
+    legacy_path = reports_dir / "rl_dataset_benchmark_v1.json"
+    if not path.is_file() and legacy_path.is_file():
+        path = legacy_path
     if not path.is_file():
         return {
             "status": "not_generated",
@@ -59,7 +63,12 @@ def _evidence_report() -> dict[str, Any]:
         report = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return {"status": "invalid", "report": None, "notice": f"证据报告不可读取：{exc}"}
-    return {"status": "available", "report": report, "notice": report.get("scope_notice")}
+    return {
+        "status": "available",
+        "report": report,
+        "report_path": str(path.relative_to(path.parents[1])),
+        "notice": report.get("scope_notice"),
+    }
 
 
 @router.get("/health")
@@ -83,7 +92,7 @@ def list_algorithms() -> dict[str, object]:
     return {
         "items": algorithm_catalog(),
         "count": len(ALL_ALGORITHM_IDS),
-        "comparison_rule": "四种RL算法与PID控制基线共享数据划分、时域、环境参数和评估种子。",
+        "comparison_rule": "四种RL算法与PID、现场SOP固定规则两类强基线共享数据划分、时域、环境参数和评估种子。",
         "environment_contracts": environment_contract_catalog(),
     }
 
@@ -188,9 +197,9 @@ def rl_training_advisor(request: AdvisorRequest) -> dict[str, Any]:
     elif any(term in compact for term in ("算法", "区别", "矩阵", "pid")):
         algorithms = algorithm_catalog()
         answer = (
-            "五种基线各自解决的偏差不同：Q-learning看下一状态最大价值，SARSA跟随实际探索动作，"
+            "六种候选与基线各自解决的偏差不同：Q-learning看下一状态最大价值，SARSA跟随实际探索动作，"
             "Expected SARSA对策略分布取期望，Double Q-learning拆分选择与评估以降低最大化偏差；"
-            "PID不学习价值表，只作为控制理论参照。公平比较要求同一数据划分、时域、随机种子和约束。"
+            "PID不学习价值表，SOP代理按当前观测执行固定业务规则；两者共同作为非学习强基线。公平比较要求同一数据划分、时域、随机种子和约束。"
         )
         evidence = [f"{item['id']}:{item['update_equation']}" for item in algorithms]
     elif run:
@@ -222,7 +231,7 @@ def rl_training_advisor(request: AdvisorRequest) -> dict[str, Any]:
         "evidence": [item for item in evidence if item],
         "suggested_actions": [
             {"id": "inspect_contract", "label": "查看观测/动作/目标"},
-            {"id": "open_training", "label": "配置五算法训练"},
+            {"id": "open_training", "label": "配置六策略训练"},
             {"id": "inspect_evidence", "label": "核对数据与模型证据"},
         ],
         "generation_provider": "local_evidence_advisor",

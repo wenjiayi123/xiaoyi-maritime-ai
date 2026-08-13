@@ -15,6 +15,7 @@ from uuid import uuid4
 from app.config import BASE_DIR, DATA_DIR
 from app.rl_lab.algorithms import (
     ALL_ALGORITHM_IDS,
+    ConfiguredBaselinePolicy,
     PIDPolicy,
     RL_ALGORITHM_IDS,
     TrainedPolicy,
@@ -35,7 +36,7 @@ from app.rl_lab.port_environment import derive_port_parameters
 
 
 RUNS_DIR = DATA_DIR / "rl_runs"
-RUN_SCHEMA_VERSION = "xiaoyi-rl-run.v2"
+RUN_SCHEMA_VERSION = "xiaoyi-rl-run.v3"
 
 
 def _now() -> str:
@@ -122,6 +123,9 @@ class RLLabService:
         normalized_config = {
             "dataset_id": dataset_id,
             "environment_type": definition.environment_type,
+            "environment_contract_version": environment_contract(
+                definition.environment_type
+            ).get("version", "unversioned"),
             "algorithms": algorithms,
             "episodes": episodes,
             "horizon_steps": horizon_steps,
@@ -232,7 +236,12 @@ class RLLabService:
             )
             self._update(run_id, lambda item: item.__setitem__("environment", parameters.public_dict()))
             cancel_event = self._cancel_events[run_id]
-            policies: dict[str, TrainedPolicy | PIDPolicy] = {"pid": PIDPolicy()}
+            policies: dict[
+                str, TrainedPolicy | PIDPolicy | ConfiguredBaselinePolicy
+            ] = {
+                "pid": PIDPolicy(),
+                "sop_rule": ConfiguredBaselinePolicy("sop_rule"),
+            }
             completed_total = 0
             selected_rl_algorithms = [item for item in config["algorithms"] if item in RL_ALGORITHM_IDS]
             total = config["episodes"] * len(selected_rl_algorithms)
@@ -289,18 +298,20 @@ class RLLabService:
 
                 self._update(run_id, record_algorithm)
 
-            if "pid" in config["algorithms"]:
-                pid_path = self._run_dir(run_id) / "models" / "pid.json"
-                _atomic_json(pid_path, policies["pid"].public_dict())
+            for baseline_id in ("pid", "sop_rule"):
+                if baseline_id not in config["algorithms"]:
+                    continue
+                baseline_path = self._run_dir(run_id) / "models" / f"{baseline_id}.json"
+                _atomic_json(baseline_path, policies[baseline_id].public_dict())
                 self._update(
                     run_id,
-                    lambda item: item["training"]["algorithms"].__setitem__(
-                        "pid",
+                    lambda item, baseline_id=baseline_id, baseline_path=baseline_path: item["training"]["algorithms"].__setitem__(
+                        baseline_id,
                         {
-                            "status": "configured_control_baseline",
+                            "status": "configured_non_learning_baseline",
                             "episodes": 0,
-                            "artifact": str(pid_path.relative_to(BASE_DIR)),
-                            "artifact_sha256": file_sha256(pid_path),
+                            "artifact": str(baseline_path.relative_to(BASE_DIR)),
+                            "artifact_sha256": file_sha256(baseline_path),
                             "curve": [],
                         },
                     ),
@@ -387,7 +398,9 @@ class RLLabService:
             self._persist(job)
             return self._public(job)
 
-    def _load_policy(self, run_id: str, algorithm_id: str) -> TrainedPolicy | PIDPolicy:
+    def _load_policy(
+        self, run_id: str, algorithm_id: str
+    ) -> TrainedPolicy | PIDPolicy | ConfiguredBaselinePolicy:
         path = self._run_dir(run_id) / "models" / f"{algorithm_id}.json"
         if not path.is_file():
             raise RunConflict(f"model artifact is missing for {algorithm_id}")
@@ -400,6 +413,8 @@ class RLLabService:
                 kd=float(hyper.get("kd", 0.12)),
                 soc_gain=float(hyper.get("soc_gain", 0.35)),
             )
+        if algorithm_id == "sop_rule":
+            return ConfiguredBaselinePolicy("sop_rule")
         return TrainedPolicy.from_dict(payload)
 
     def evaluate_run(self, run_id: str, *, algorithms: Optional[list[str]] = None) -> dict[str, Any]:

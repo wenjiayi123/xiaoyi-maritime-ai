@@ -198,11 +198,13 @@ def sandbox_runtime_answer(question: str) -> str:
     overview = port_data_source.overview(now)
     energy = port_data_source.energy("today", now)
     compact = question.lower().replace(" ", "")
+    truth_label = metadata.get("truth_label") or "运营沙箱"
     boundary = (
-        f"\n\n数据边界：以上来自 {metadata['source_system']} 运营沙箱动态合成事件，"
+        f"\n\n数据边界：以上来自 {metadata['source_system']} 的{truth_label}事件流，"
         f"观测时间 {metadata['observed_at'].isoformat()}，质量码 {metadata['quality_code']}；"
-        "不是现场生产实绩。如用于现场决策，需要接入并核验 TOS、PCS、EMS、EAM、VTS/AIS 等生产系统，"
-        "再由同一数据契约替换沙箱事件。"
+        "公开AIS只校准交通包络，其余港区对象与影响属于物理约束工程模拟，不是现场生产实绩。"
+        "如用于现场决策，需要接入并核验 TOS、PCS、EMS、EAM、VTS/AIS、METOC 等生产系统，"
+        "再由 port-realtime.v1 / port-ops.v1 同一契约替换模拟适配器。"
     )
 
     if "交班" in compact:

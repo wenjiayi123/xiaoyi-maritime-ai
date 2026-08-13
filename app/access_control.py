@@ -68,6 +68,8 @@ def required_permission(method: str, path: str) -> str | None:
         return "automation.execute"
     if path.startswith("/api/tasks") or path.startswith("/api/reports"):
         return "operations.manage"
+    if path.startswith("/api/port-simulator"):
+        return "operations.manage"
     if path.startswith("/api/orchestrator") or "/invoke" in path and path.startswith("/api/hub"):
         return "capability.invoke_read"
     if path.endswith("/health-check") and path.startswith("/api/connectors"):

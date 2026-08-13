@@ -161,8 +161,11 @@ def test_online_status_requires_successful_health_response_and_preflight_does_no
             ),
         ),
     )
-    assert authorization.authorized is True
+    assert authorization.authorized is False
+    assert authorization.preflight_recorded is True
     assert authorization.dispatch_performed is False
+    assert authorization.dual_approval_verified is False
+    assert authorization.production_authority is False
 
 
 def test_unknown_connector_returns_404() -> None:

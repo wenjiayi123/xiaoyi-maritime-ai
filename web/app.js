@@ -37,7 +37,7 @@
     "证据不足时明确拒答，不使用未验证内容补全结论。":"Decline when evidence is insufficient; never fill gaps with unverified content.",
     "调整会应用到下一次提问。":"Changes apply to the next question.",
     "小懿AI 可能会生成不准确的信息，生产系统操作需由授权人员确认。":"AI may be inaccurate. Production actions require authorized confirmation.",
-    "您好！我是小懿AI":"Hello! I am Xiaoyi AI", "智能感知在线":"Intelligence Online", "切换形象":"Switch Avatar",
+    "您好！我是小懿AI":"Hello! I am Xiaoyi AI", "本机应用可用":"Local App Available", "切换形象":"Switch Avatar",
     "生成智能方案":"Generate AI Plan", "今日决策焦点":"Today's Decision Focus", "已按影响度与紧迫性排序":"Ranked by impact and urgency",
     "风险态势":"Risk Posture", "当前 4 项运营提醒":"4 active operational alerts", "综合运行指数":"Composite Operations Index",
     "建议执行链":"Recommendation Workflow", "先分析，再确认，后执行":"Analyze, confirm, then execute",
@@ -55,7 +55,7 @@
     "展开查看":"Explore", "新建智能任务":"New AI Task", "智能任务模板":"AI Task Templates",
     "点击即可创建可视化执行流程":"Create a visual workflow in one click", "执行记录":"Execution History",
     "每一步均保留时间与结果":"Every step retains its time and result", "运营沙箱":"Operations Sandbox",
-    "实时运营概况":"Live Operations Overview", "查看更多":"View More", "能耗实时指标":"Live Energy Metrics",
+    "现场运营接入状态":"Site Operations Connection", "查看更多":"View More", "现场能耗接入状态":"Site Energy Connection",
     "预警与提醒":"Alerts & Notifications", "能源管理":"Energy Management", "设备管理":"Asset Management",
     "港口运营":"Port Operations", "航运调度":"Shipping & Scheduling", "政策法规":"Policies & Regulations",
     "行业标准":"Industry Standards", "案例分析":"Case Studies", "智能任务":"AI Task",
@@ -248,6 +248,8 @@
     const live = data?.source_metadata?.data_mode === "live"
       && data?.source_metadata?.live_data_verified === true;
     if (live) return data;
+    const calibratedSimulation = data?.source_metadata?.source_type === "public_data_calibrated_simulation";
+    if (calibratedSimulation) return { ...data, public_calibrated_simulation:true, public_open_source_waiting:false };
     const overview = data?.overview || fallbackDashboard.overview;
     const energy = data?.energy || fallbackDashboard.energy;
     return {
@@ -260,7 +262,7 @@
           ...item,
           value: 0,
           display_value: "等待接入港口",
-          trend_percent: 0,
+          trend_percent: null,
           trend: "flat",
           status: "warning"
         }))
@@ -295,6 +297,10 @@
     dashboard: fallbackDashboard,
     energy: fallbackDashboard.energy,
     runtimeStatus: null,
+    simulator: null,
+    simulatorContract: null,
+    simulatorEvents: [],
+    simulatorEventSource: null,
     knowledge: { count: 0, files: [], default_top_k: 5, chunk_count: 0, official_verified_documents: 0 },
     knowledgeStatus: null,
     knowledgeSearchResults: [],
@@ -520,8 +526,12 @@
     };
     $("#overviewGrid").innerHTML = (overview?.metrics || []).map((metric) => {
       const [iconName, tone] = iconMap[metric.id] || ["chart", ""];
+      const hasTrend = metric.trend_percent !== null
+        && metric.trend_percent !== undefined
+        && Number.isFinite(Number(metric.trend_percent));
       const direction = Number(metric.trend_percent) >= 0 ? "↑" : "↓";
-      return `<div class="overview-metric"><span class="metric-icon ${tone}">${icon(iconName)}</span><div><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(metric.display_value)}</strong><em>${direction} ${Math.abs(Number(metric.trend_percent || 0)).toFixed(1)}%</em></div></div>`;
+      const trend = hasTrend ? `${direction} ${Math.abs(Number(metric.trend_percent)).toFixed(1)}%` : "趋势不适用";
+      return `<div class="overview-metric"><span class="metric-icon ${tone}">${icon(iconName)}</span><div><span>${escapeHtml(metric.label)}</span><strong>${escapeHtml(metric.display_value)}</strong><em>${trend}</em></div></div>`;
     }).join("");
   }
 
@@ -630,7 +640,11 @@
       ["岸电利用率", formatNumber(s.shore_power_utilization_percent), "%", s.shore_power_change_percent, "#8b78ff"]
     ];
     $("#analyticsKpis").innerHTML = values.map(([label,value,unit,trend,color]) => `<div class="analytics-kpi" style="color:${color}"><span>${label}</span><strong>${value}</strong><small>${unit}</small><em>${Number(trend)<=0?"↓":"↑"} ${Math.abs(Number(trend)).toFixed(1)}%</em></div>`).join("");
-    const modeLabel = energy?.data_mode === "live" && energy?.source_metadata?.live_data_verified ? "生产实绩" : energy?.data_mode === "operations_sandbox" ? "运营沙箱" : "接口离线";
+    const modeLabel = energy?.data_mode === "live" && energy?.source_metadata?.live_data_verified
+      ? "生产实绩"
+      : energy?.source_metadata?.source_type === "public_data_calibrated_simulation"
+        ? "公开数据校准实时模拟"
+        : energy?.data_mode === "operations_sandbox" ? "运营沙箱" : "接口离线";
     $("#analyticsUpdated").textContent = `更新时间 ${formatDateTime(energy?.updated_at || new Date())} · ${modeLabel}`;
     buildChart(energy, $("#largeEnergyChart"), true);
     $("#chartInsights").textContent = energy?.insights?.[0] || "当前综合能耗低于对比基线，建议持续保持岸电优先策略。";
@@ -642,10 +656,13 @@
     const badge = $("#runtimeStatusBadge");
     if (!badge) return;
     const live = metadata?.data_mode === "live" && metadata?.live_data_verified;
-    badge.textContent = live ? "生产数据" : "等待接入港口";
+    const simulation = metadata?.source_type === "public_data_calibrated_simulation";
+    badge.textContent = live ? "生产数据" : simulation ? "公开数据校准模拟" : "等待接入港口";
     badge.title = live
       ? `${metadata.source_system} · ${metadata.quality_code} · ${formatDateTime(metadata.observed_at)}`
-      : "等待接入港口：未验证的沙箱或本地数据不会显示为现场实绩";
+      : simulation
+        ? `${metadata.source_system} · ${metadata.quality_code} · 模拟数据，不是现场实测`
+        : "等待接入港口：未验证的来源不会显示为现场实绩";
   }
 
   async function loadDashboard(silent = false) {
@@ -676,14 +693,16 @@
       return;
     }
     const isLive = status.data_mode === "live" && status.live_data_verified;
-    openModal("运营数据来源", `${isLive ? "生产实绩" : "等待接入港口"} · ${formatDateTime(status.observed_at)}`, `<div class="settings-grid"><div class="setting-row"><div><strong>当前适配器</strong><span>${escapeHtml(status.source_adapter)} · ${escapeHtml(status.schema_version)}</span></div><span class="${isLive ? "status-pill" : "demo-badge"}">${isLive ? "LIVE" : "PENDING"}</span></div><div class="setting-row"><div><strong>来源系统</strong><span>${escapeHtml(status.source_system)} · 港区代码 ${escapeHtml(status.port_code)}</span></div><span>${escapeHtml(status.source_type)}</span></div><div class="setting-row"><div><strong>数据质量</strong><span>观测时间 ${formatDateTime(status.observed_at)} · 延迟 ${status.latency_ms} ms</span></div><span class="status-pill">${escapeHtml(status.quality_code)} · ${(Number(status.quality_score) * 100).toFixed(0)}%</span></div><div class="setting-row"><div><strong>生产替换边界</strong><span>保持 port-ops.v1 契约，实现同一适配器接口后即可切换；写操作仍独立授权。</span></div><span>${isLive ? "已验证" : "等待接入港口"}</span></div><div class="drawer-note"><strong>真实性声明：</strong>${isLive ? escapeHtml(status.data_notice) : "当前未读取港口现场数值；沙箱数据仅用于接口测试，不进入运营看板。"}</div></div>`, "", "runtime-status");
+    const isSimulation = status.source_type === "public_data_calibrated_simulation";
+    const modeLabel = isLive ? "生产实绩" : isSimulation ? "公开数据校准实时模拟" : "等待接入港口";
+    openModal("运营数据来源", `${modeLabel} · ${formatDateTime(status.observed_at)}`, `<div class="settings-grid"><div class="setting-row"><div><strong>当前适配器</strong><span>${escapeHtml(status.source_adapter)} · ${escapeHtml(status.schema_version)}${status.telemetry_schema_version ? ` · ${escapeHtml(status.telemetry_schema_version)}` : ""}</span></div><span class="${isLive ? "status-pill" : "demo-badge"}">${isLive ? "LIVE" : isSimulation ? "SIM" : "PENDING"}</span></div><div class="setting-row"><div><strong>来源系统</strong><span>${escapeHtml(status.source_system)} · 港区代码 ${escapeHtml(status.port_code)}</span></div><span>${escapeHtml(status.source_type)}</span></div><div class="setting-row"><div><strong>数据质量</strong><span>观测时间 ${formatDateTime(status.observed_at)} · 延迟 ${status.latency_ms} ms</span></div><span class="status-pill">${escapeHtml(status.quality_code)} · ${(Number(status.quality_score) * 100).toFixed(0)}%</span></div><div class="setting-row"><div><strong>场景与复现</strong><span>${escapeHtml(status.simulation_run_id || "非模拟源")} · seed=${escapeHtml(status.simulation_seed ?? "不适用")} · sequence=${escapeHtml(status.stream_sequence ?? "不适用")}</span></div><span>${escapeHtml(status.scenario_id || "不适用")}</span></div><div class="setting-row"><div><strong>生产替换边界</strong><span>保持 port-realtime.v1 / port-ops.v1 契约，替换适配器即可；生产写权限独立准入。</span></div><span>${isLive ? "已验证" : "现场待替换"}</span></div><div class="drawer-note"><strong>真实性声明：</strong>${escapeHtml(status.data_notice || "来源声明缺失")}</div><div class="drawer-note"><strong>权限：</strong>sandbox_dispatch_allowed=${String(status.sandbox_dispatch_allowed === true)}；physical_dispatch_allowed=${String(status.physical_dispatch_allowed === true)}；production_authority=${String(status.production_authority === true)}。</div></div>`, `<button type="button" class="drawer-button secondary" data-action="simulator-lineage">查看数据契约与血缘</button><button type="button" class="drawer-button" data-action="close-modal">关闭</button>`, "runtime-status");
   }
 
   async function loadEnergy(range, source = "rail") {
     const controls = source === "analytics" ? "#analyticsRange [data-range]" : "#energyRange [data-range]";
     try {
       const data = await api(`/api/energy?range=${encodeURIComponent(range)}`);
-      const safeData = data?.source_metadata?.data_mode === "live" && data?.source_metadata?.live_data_verified === true
+      const safeData = (data?.source_metadata?.data_mode === "live" && data?.source_metadata?.live_data_verified === true) || data?.source_metadata?.source_type === "public_data_calibrated_simulation"
         ? data
         : { ...data, public_open_source_waiting:true, summary:fallbackDashboard.energy.summary, series:[], insights:["等待接入港口：当前未读取生产能耗数据。"] };
       state.energy = safeData;
@@ -698,6 +717,151 @@
     }
   }
 
+  function simulatorMutationOptions(body) {
+    return {
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "X-Idempotency-Key":`port-sim-${Date.now()}-${Math.random().toString(16).slice(2,10)}`
+      },
+      body:JSON.stringify(body)
+    };
+  }
+
+  function renderSimulator(snapshot) {
+    if (!snapshot || !$("#realtimeSimulatorPanel")) return;
+    state.simulator = snapshot;
+    const simulation = snapshot.simulation || {};
+    const fleet = snapshot.fleet_summary || {};
+    const energy = snapshot.energy || {};
+    const weather = snapshot.weather_tide || {};
+    const yardBlocks = snapshot.yard_blocks || [];
+    const gates = snapshot.gates || [];
+    const alerts = snapshot.alerts || [];
+    const yardOccupancy = yardBlocks.length ? yardBlocks.reduce((sum, item) => sum + Number(item.occupancy_percent || 0), 0) / yardBlocks.length : 0;
+    $("#simulatorStatus").textContent = `${simulation.scenario_label || "模拟场景"} · 序列 ${simulation.sequence ?? "—"} · ${formatDateTime(snapshot.metadata?.observed_at)} · 不是现场实测`;
+    $$('[data-simulator-scenario]').forEach((button) => button.classList.toggle("active", button.dataset.simulatorScenario === simulation.scenario_id));
+    const kpis = [
+      ["船舶/挂靠", (snapshot.port_calls || []).length, "个生产形状对象"],
+      ["在作岸桥", fleet.quay_cranes?.working ?? "—", `共 ${fleet.quay_cranes?.total ?? "—"} 台`],
+      ["AGV可用/低SOC", `${(fleet.agv?.total || 0) - (fleet.agv?.low_soc || 0)}/${fleet.agv?.low_soc || 0}`, "全量96台状态"],
+      ["堆场占用", `${yardOccupancy.toFixed(1)}%`, `${yardBlocks.length} 个箱区`],
+      ["电网需量", `${(Number(energy.grid_demand_kw || 0) / 1000).toFixed(2)} MW`, `限值 ${(Number(energy.peak_limit_kw || 0) / 1000).toFixed(1)} MW`],
+      ["活动事件", alerts.length, `质量门禁 ${snapshot.quality?.gate_passed ? "通过" : "阻断"}`]
+    ];
+    $("#simulatorKpis").innerHTML = kpis.map(([label, value, detail]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><small>${escapeHtml(detail)}</small></div>`).join("");
+    const domainCards = [
+      ["船舶与泊位", `${(snapshot.port_calls || []).filter((item) => ["working","alongside"].includes(item.status)).length} 在泊`, `待靠 ${(snapshot.port_calls || []).filter((item) => ["awaiting_pilot","scheduled"].includes(item.status)).length}`, `AIS轨迹 ${(snapshot.ais_tracks || []).length}`],
+      ["岸桥/场桥/AGV", `QC ${fleet.quay_cranes?.working || 0}/${fleet.quay_cranes?.total || 0}`, `YC ${fleet.yard_cranes?.working || 0}/${fleet.yard_cranes?.total || 0}`, `AGV充电 ${fleet.agv?.charging || 0}`],
+      ["堆场与闸口", `场地 ${yardOccupancy.toFixed(1)}%`, `排队 ${gates.reduce((sum,item)=>sum+Number(item.queue_vehicles||0),0)} 辆`, `开放 ${gates.reduce((sum,item)=>sum+Number(item.lanes_open||0),0)} 车道`],
+      ["能源与储能", `岸电 ${(Number(energy.shore_power_kw||0)/1000).toFixed(2)} MW`, `BESS ${formatNumber(energy.bess_soc_percent)}%`, `电价 ${formatNumber(energy.tariff_cny_per_kwh)} 元/kWh`],
+      ["气象与潮汐", `风速 ${formatNumber(weather.wind_speed_ms)} m/s`, `能见度 ${formatNumber(weather.visibility_m)} m`, `水位 ${formatNumber(weather.water_level_m_mllw)} m MLLW`],
+      ["告警闭环", `高 ${alerts.filter((item)=>item.level==="critical").length}`, `中 ${alerts.filter((item)=>item.level==="warning").length}`, `提示 ${alerts.filter((item)=>item.level==="info").length}`],
+      ["数据质量", `完整 ${((snapshot.quality?.completeness_rate||0)*100).toFixed(1)}%`, `重复 ${((snapshot.quality?.duplicate_rate||0)*100).toFixed(2)}%`, `物理违规 ${snapshot.quality?.physical_constraint_violations ?? "—"}`],
+      ["权限边界", `沙箱执行 ${snapshot.governance?.sandbox_dispatch_allowed ? "允许" : "关闭"}`, `物理下发 ${snapshot.governance?.physical_dispatch_allowed ? "允许" : "关闭"}`, `生产权限 ${snapshot.governance?.production_authority ? "允许" : "关闭"}`]
+    ];
+    $("#simulatorDomainGrid").innerHTML = domainCards.map(([title, first, second, third]) => `<article class="sim-domain-card"><header><strong>${escapeHtml(title)}</strong><span>${escapeHtml(simulation.scenario_id || "SIM")}</span></header><dl><dt>指标1</dt><dd>${escapeHtml(first)}</dd><dt>指标2</dt><dd>${escapeHtml(second)}</dd><dt>指标3</dt><dd>${escapeHtml(third)}</dd></dl></article>`).join("");
+    $("#simulatorDecisions").innerHTML = (snapshot.decisions || []).map((item) => {
+      const status = item.executed_in_sandbox ? "已在沙箱执行" : item.approval_count >= 2 ? "双人审批完成" : `待审批 ${item.approval_count}/2`;
+      const nextRole = item.approval_count === 0 ? "dispatcher" : "duty_manager";
+      const nextLabel = item.approval_count === 0 ? "调度员审批" : "值班长复核";
+      const actions = item.executed_in_sandbox
+        ? `<button type="button" class="rollback" data-sim-rollback="${escapeHtml(item.decision_id)}">回滚模拟动作</button>`
+        : item.approval_count < 2
+          ? `<button type="button" class="warning" data-sim-approve="${escapeHtml(item.decision_id)}" data-sim-role="${nextRole}">${nextLabel}</button>`
+          : `<button type="button" data-sim-execute="${escapeHtml(item.decision_id)}">执行到模拟状态</button>`;
+      return `<article class="sim-decision ${item.executed_in_sandbox ? "executed" : ""}"><header><strong>${escapeHtml(item.title)}</strong><span>${escapeHtml(status)}</span></header><p>${escapeHtml(item.trigger)} ${escapeHtml(item.action)}</p><dl><span>${escapeHtml(item.policy)}</span><span>输入 ${escapeHtml(String(item.input_payload_sha256 || "").slice(0,12))}</span><span>${escapeHtml(item.impact?.semantics || "engineering_scenario_estimate")}</span></dl><footer>${actions}</footer></article>`;
+    }).join("");
+    renderSimulatorEvents();
+  }
+
+  function renderSimulatorEvents() {
+    if (!$("#simulatorEvents")) return;
+    const items = state.simulatorEvents || [];
+    $("#simulatorEvents").innerHTML = items.length ? items.slice(0,12).map((item) => `<div class="sim-event"><i></i><div><strong>${escapeHtml(item.event)}</strong><span>${escapeHtml(item.detail)}</span><time>${escapeHtml(formatDateTime(item.occurred_at))}</time></div></div>`).join("") : `<div class="task-empty">等待模拟器审计事件</div>`;
+  }
+
+  async function loadSimulatorEvents() {
+    try {
+      const payload = await api("/api/port-simulator/events");
+      state.simulatorEvents = payload.items || [];
+      renderSimulatorEvents();
+    } catch { /* event panel keeps the last valid audit trail */ }
+  }
+
+  async function loadSimulatorSnapshot() {
+    try {
+      const [snapshot, events] = await Promise.all([api("/api/port-simulator/snapshot"), api("/api/port-simulator/events")]);
+      state.simulatorEvents = events.items || [];
+      renderSimulator(snapshot);
+      return snapshot;
+    } catch (error) {
+      if ($("#simulatorStatus")) $("#simulatorStatus").textContent = `模拟流不可用 · ${error.message}`;
+      return null;
+    }
+  }
+
+  function connectSimulatorStream() {
+    if (!globalThis.EventSource || state.simulatorEventSource) return;
+    const stream = new EventSource("/api/port-simulator/stream");
+    state.simulatorEventSource = stream;
+    stream.addEventListener("telemetry", (event) => {
+      try { renderSimulator(JSON.parse(event.data)); } catch { /* wait for next complete event */ }
+    });
+    stream.addEventListener("error", () => {
+      if ($("#simulatorStatus")) $("#simulatorStatus").textContent = "事件流正在重连 · 最近有效快照仍保留";
+    });
+  }
+
+  async function changeSimulatorScenario(scenarioId) {
+    try {
+      await api("/api/port-simulator/scenario", simulatorMutationOptions({scenario_id:scenarioId, reason:"用户在数据分析页启动本地闭环演练"}));
+      await loadSimulatorSnapshot();
+      toast("模拟场景已切换", "所有数据沿同一port-realtime.v1链路重新计算；不是现场数据。", "success");
+    } catch (error) { toast("场景切换失败", error.message, "warning"); }
+  }
+
+  async function approveSimulatorDecision(decisionId, role) {
+    const roleMap = {
+      dispatcher:["local-dispatcher","调度员基于本次模拟输入确认候选"],
+      duty_manager:["local-duty-manager","值班长复核约束、影响和回滚边界"]
+    };
+    const [approverId, reason] = roleMap[role] || roleMap.dispatcher;
+    try {
+      await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/approve`, simulatorMutationOptions({approver_id:approverId, approver_role:role, reason}));
+      await loadSimulatorSnapshot();
+      toast("沙箱审批已记录", "审批仅对当前模拟动作有效，不构成生产授权。", "success");
+    } catch (error) { toast("审批未记录", error.message, "warning"); }
+  }
+
+  async function executeSimulatorDecision(decisionId) {
+    try {
+      const result = await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/execute`, simulatorMutationOptions({reason:"双人审批后执行本地模拟闭环"}));
+      await loadSimulatorSnapshot();
+      toast("模拟闭环已执行", `sandbox_state_updated=${result.sandbox_state_updated}；physical_dispatch_performed=${result.physical_dispatch_performed}`, "success", 5200);
+    } catch (error) { toast("模拟动作被阻断", error.message, "warning"); }
+  }
+
+  async function rollbackSimulatorDecision(decisionId) {
+    try {
+      const result = await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/rollback`, simulatorMutationOptions({reason:"本地验收回滚演练"}));
+      await loadSimulatorSnapshot();
+      toast("模拟动作已回滚", `模拟状态已恢复；physical_dispatch_performed=${result.physical_dispatch_performed}`, "success");
+    } catch (error) { toast("回滚未完成", error.message, "warning"); }
+  }
+
+  async function openSimulatorLineage() {
+    try {
+      state.simulatorContract = state.simulatorContract || await api("/api/port-simulator/contract");
+      const contract = state.simulatorContract;
+      const snapshot = state.simulator || await api("/api/port-simulator/snapshot");
+      const sources = contract.calibration_sources || [];
+      const sourceCards = sources.map((item) => `<div><span>${escapeHtml(item.semantic_class)}</span><strong>${escapeHtml(item.id)}</strong><code title="${escapeHtml(item.source_url)}">${escapeHtml(item.source_url)}</code></div>`).join("");
+      const domains = (contract.domains || []).map((item) => `<div><strong>${escapeHtml(item.id)} · ${item.required_fields.length}字段</strong><span>${escapeHtml(item.source_system)}<br>${escapeHtml(item.required_fields.slice(0,8).join(" · "))}${item.required_fields.length > 8 ? " …" : ""}</span></div>`).join("");
+      openModal("港口实时数据契约与血缘", `${contract.contract_id} · ${contract.domain_count}域 · ${contract.canonical_field_count}个规范字段`, `<div class="drawer-note"><strong>换源规则：</strong>${escapeHtml(contract.replacement_rule)}</div><div class="sim-lineage-grid">${sourceCards}</div><div class="settings-grid"><div class="setting-row"><div><strong>契约SHA-256</strong><span>${escapeHtml(contract.artifact)}</span></div><code>${escapeHtml(contract.artifact_sha256)}</code></div><div class="setting-row"><div><strong>公开AIS文件</strong><span>${escapeHtml(snapshot.lineage?.public_ais_path)}</span></div><code>${escapeHtml(snapshot.lineage?.public_ais_sha256)}</code></div><div class="setting-row"><div><strong>公开能源文件</strong><span>${escapeHtml(snapshot.lineage?.public_energy_path)}</span></div><code>${escapeHtml(snapshot.lineage?.public_energy_sha256)}</code></div></div><div class="sim-contract-domains">${domains}</div><div class="drawer-note"><strong>真实性边界：</strong>${escapeHtml(snapshot.metadata?.data_notice)} production_authority=false。</div>`, `<button type="button" class="drawer-button" data-action="close-modal">已核对</button>`, "simulator-lineage");
+    } catch (error) { toast("数据契约读取失败", error.message, "warning"); }
+  }
+
   function renderDecisions() {
     const quick = state.dashboard.quick_actions || [];
     const alerts = state.dashboard.alerts?.items || [];
@@ -708,13 +872,23 @@
       impact: impactLabels[index] || "执行后返回可审计结果"
     }));
     const waitingForPort = state.dashboard.public_open_source_waiting === true;
+    const decisionGenerateButton = $("#decisionGenerateButton");
+    if (decisionGenerateButton) {
+      decisionGenerateButton.disabled = waitingForPort;
+      decisionGenerateButton.title = waitingForPort ? "尚未接入经验证的港口数据源" : "生成只读泊位调度候选";
+      decisionGenerateButton.innerHTML = `${icon("spark")}${waitingForPort ? "等待数据接入" : "生成智能方案"}`;
+    }
     $("#decisionCards").innerHTML = cards.map((item, index) => `<article class="decision-item"><span class="decision-rank">0${index+1}</span><header><strong>${escapeHtml(item.title)}</strong><span class="priority-${item.priority}">${item.priority === "high" ? "高优先级" : item.priority === "medium" ? "中优先级" : "建议"}</span></header><p>${waitingForPort ? "等待接入港口后基于现场状态生成候选，不使用沙箱数值替代。" : escapeHtml(item.description)}</p><footer><span>${waitingForPort ? "等待接入港口" : escapeHtml(item.impact)}</span><button type="button" data-task-template="${escapeHtml(item.task_template_id)}" ${waitingForPort ? "disabled title=\"尚未接入经验证的港口数据源\"" : ""}>${waitingForPort ? "等待数据接入" : "让小懿执行 →"}</button></footer></article>`).join("");
     const risk = { critical: state.dashboard.alerts?.critical || 0, warning: state.dashboard.alerts?.warning || 0, info: state.dashboard.alerts?.info || 0 };
     const totalAlerts = risk.critical + risk.warning + risk.info;
     const riskScore = Math.max(0, 100 - risk.critical * 18 - risk.warning * 8 - risk.info * 2);
-    if ($("#riskHealthScore")) $("#riskHealthScore").textContent = String(riskScore);
-    if ($("#riskAlertSummary")) $("#riskAlertSummary").textContent = `当前 ${totalAlerts} 项运营提醒 · 按级别扣分`;
-    $("#riskLegend").innerHTML = `<span><i style="background:#ff6268"></i>高 ${risk.critical}</span><span><i style="background:#f5a733"></i>中 ${risk.warning}</span><span><i style="background:#4ee58c"></i>提示 ${risk.info}</span>`;
+    if ($("#riskHealthScore")) $("#riskHealthScore").textContent = waitingForPort ? "—" : String(riskScore);
+    if ($("#riskAlertSummary")) $("#riskAlertSummary").textContent = waitingForPort
+      ? "现场告警未接入 · 不计算健康分"
+      : `当前 ${totalAlerts} 项运营提醒 · 按级别扣分`;
+    $("#riskLegend").innerHTML = waitingForPort
+      ? `<span><i style="background:#f5a733"></i>待接入 TOS / EAM / VTS 告警</span>`
+      : `<span><i style="background:#ff6268"></i>高 ${risk.critical}</span><span><i style="background:#f5a733"></i>中 ${risk.warning}</span><span><i style="background:#4ee58c"></i>提示 ${risk.info}</span>`;
     const summary = state.energy?.summary || {};
     if ($("#energyEvidenceMetrics")) $("#energyEvidenceMetrics").innerHTML = waitingForPort
       ? `<span>综合能耗<b>等待接入港口</b></span><span>碳排放<b>等待接入港口</b></span><span>碳强度<b>等待接入港口</b></span><span>岸电利用率<b>等待接入港口</b></span>`
@@ -812,7 +986,7 @@
     const status = $("#heroStatus");
     bubble.classList.toggle("thinking", stage !== "idle" && stage !== "complete");
     const values = {
-      idle:["您好！我是小懿AI","您的港航智能助手","智能感知在线"],
+      idle:["您好！我是小懿AI","您的港航智能助手","本机应用可用"],
       understand:["正在理解您的意图","识别目标、约束与风险边界","任务理解中"],
       retrieve:["正在检索港航知识库","正在比对证据与专业规则","知识检索中"],
       compose:["正在融合索引与生成模型","将锁定事实、专业分析和岗位建议组织为完整回答","混合生成中"],
@@ -857,7 +1031,7 @@
 
   function sourceQualityLabel(value) {
     return {
-      official_verified:"官方发布来源", internal_curated:"内部整理未独立核验", sandbox_runtime:"运营沙箱事件流",
+      official_verified:"官方发布来源", internal_curated:"内部整理未独立核验", sandbox_runtime:"历史运营沙箱事件流", public_data_calibrated_simulation:"公开数据校准实时模拟",
       mixed:"混合来源", unverified:"未验证", not_applicable:"不适用"
     }[value] || value || "未验证";
   }
@@ -1114,7 +1288,7 @@
     }
     const evidence = Array.isArray(data.evidence) ? data.evidence : [];
     const officialCount = evidence.filter((item) => item.official && item.source_quality === "official_verified").length;
-    const sandboxRuntime = data.source_quality === "sandbox_runtime";
+    const sandboxRuntime = ["sandbox_runtime", "public_data_calibrated_simulation"].includes(data.source_quality);
     const readiness = data.decision_readiness?.status || "";
     if (readiness === "evidence_conflict") {
       badge.textContent = "证据冲突·待裁决";
@@ -1244,7 +1418,7 @@
       $("#responseKpis").hidden = !["energy_analysis", "energy_carbon"].includes(data.intent);
       $("#analysisTitle").textContent = intentTitle(data.intent);
       const generationLabel = data.generation_fallback ? `${data.generation_provider} 已回退` : data.generation_provider || "local_rules";
-      $("#analysisDate").textContent = data.source_quality === "sandbox_runtime" ? `${new Date().toLocaleDateString("zh-CN")} · 运营沙箱态势 · ${generationLabel}` : `${new Date().toLocaleDateString("zh-CN")} · 本地生成式 RAG · ${generationLabel}`;
+      $("#analysisDate").textContent = ["sandbox_runtime", "public_data_calibrated_simulation"].includes(data.source_quality) ? `${new Date().toLocaleDateString("zh-CN")} · 公开数据校准模拟态势 · ${generationLabel}` : `${new Date().toLocaleDateString("zh-CN")} · 本地生成式 RAG · ${generationLabel}`;
       $("#responseStatus").textContent = "融合分析与证据校验已完成，正在统一输出完整答案";
       if (!await typeAnswer(answer, runId, 24)) return;
       state.activeController = null;
@@ -1259,7 +1433,7 @@
         ? data.generation_fallback
           ? "部分子问题有据，未覆盖部分保持证据边界"
           : "有据结论已锁定，未覆盖部分已由本机模型补充并等待人工复核"
-        : data.source_quality === "sandbox_runtime"
+        : ["sandbox_runtime", "public_data_calibrated_simulation"].includes(data.source_quality)
         ? "已读取动态沙箱事件并保留生产数据边界"
         : liveBoundary ? "已说明实时数据边界与目标接入系统，未使用沙箱数值"
         : data.refusal_reason === "business_object_required" ? "业务对象不明确，等待补充后继续"
@@ -1398,12 +1572,13 @@
     const summary = energy.summary;
     const metadata = state.dashboard.source_metadata || null;
     const live = metadata?.data_mode === "live" && metadata?.live_data_verified === true;
-    const modeName = live ? "生产实绩" : "等待接入港口";
+    const simulation = metadata?.source_type === "public_data_calibrated_simulation" || metadata?.data_mode === "public_data_calibrated_simulation";
+    const modeName = live ? "生产实绩" : simulation ? "公开数据校准实时模拟" : "等待接入港口";
     state.currentQuestion = "帮我分析一下今日港口的能耗情况";
-    state.currentAnswer = live
+    state.currentAnswer = live || simulation
       ? `当前能耗态势：\n• 综合能耗 ${formatNumber(summary.total_energy_mwh)} MWh，较对比基线 ${Number(summary.energy_change_percent) <= 0 ? "下降" : "上升"} ${Math.abs(Number(summary.energy_change_percent)).toFixed(1)}%。\n• 碳排放 ${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e，岸电利用率 ${formatNumber(summary.shore_power_utilization_percent)}%。\n• ${energy.insights?.[0] || "请结合当前作业计划复核能耗变化。"}\n• ${energy.insights?.[1] || "高负荷窗口需要现场值班人员确认。"}\n\n数据边界：${modeName}，来源 ${metadata.source_system}，观测时间 ${formatDateTime(metadata.observed_at)}，质量码 ${metadata.quality_code}。${metadata.live_data_verified ? "" : "当前不是现场生产实绩，不能作为控制依据。"}`
       : "等待接入港口：当前未读取 TOS、AIS、EMS、EAM 或 VTS 的现场数据，因此不展示或推断今日能耗、吞吐量、设备状态和告警数值。港航知识问答与固定 RAG 评测仍可独立使用。";
-    state.currentEvidence = live ? [{ id:"runtime:LIVE-PORT", source:metadata.source_system, title:"已验证港口运营数据", score:1, snippet:metadata.data_notice, institution:metadata.source_system, version:metadata.schema_version, official:false, source_quality:"live_verified", verification_status:"live_verified" }] : [];
+    state.currentEvidence = live || simulation ? [{ id:live ? "runtime:LIVE-PORT" : "runtime:PUBLIC-CALIBRATED-SIM", source:metadata.source_system, title:live ? "已验证港口运营数据" : "公开数据校准实时模拟", score:1, snippet:metadata.data_notice, institution:metadata.source_system, version:metadata.schema_version, official:false, source_quality:live ? "live_verified" : "public_data_calibrated_simulation", verification_status:live ? "live_verified" : "simulation_only" }] : [];
     state.currentVerification = null;
     state.currentMode = "ops";
     state.currentIntent = "energy_analysis";
@@ -1416,13 +1591,13 @@
     );
     $("#responseKpis").hidden = false;
     $("#analysisTitle").textContent = "今日能耗概况";
-    $("#responseStatus").textContent = live ? "已读取并验证港口现场数据" : "等待接入港口";
+    $("#responseStatus").textContent = live ? "已读取并验证港口现场数据" : simulation ? "公开数据校准实时模拟 · 非现场实绩" : "等待接入港口";
     $("#modeMetric").textContent = "运营 / Ops";
     $("#intentTag").textContent = "energy_analysis";
-    $("#confMetric").textContent = live ? "中" : "不适用";
+    $("#confMetric").textContent = live ? "中" : simulation ? "模拟" : "不适用";
     $("#evMetric").textContent = String(state.currentEvidence.length);
     $("#next").innerHTML = `<button type="button" data-action="generate-report">${icon("report")}生成详细报告</button><button type="button" data-task-template="analyze-energy">${icon("spark")}帮我逐步分析</button><button type="button" data-q="请预测未来 7 日港口能耗趋势。" data-mode="expert">${icon("chart")}能耗趋势预测</button>`;
-    updateGroundingState(live ? { grounded:true, coverage:1, source_quality:"live_verified", evidence:state.currentEvidence } : { grounded:false, coverage:0, source_quality:"unverified", refusal_reason:"live_data_connection_required", evidence:[] });
+    updateGroundingState(live || simulation ? { grounded:true, coverage:1, source_quality:live ? "live_verified" : "public_data_calibrated_simulation", evidence:state.currentEvidence } : { grounded:false, coverage:0, source_quality:"unverified", refusal_reason:"live_data_connection_required", evidence:[] });
     setView("chat", { silent:true });
     applyEnergySummary(state.dashboard.energy || fallbackDashboard.energy);
     renderConversationTranscript();
@@ -1674,14 +1849,23 @@
     const systemItems = systemsPayload.items || [];
     const benchmark = evaluationPayload.latest_benchmark || {};
     const knowledge = evaluationPayload.knowledge || {};
+    const implementedCount = priorities.filter((item) => item.status === "ready").length;
+    const connectedSystemCount = systemItems.filter((item) => item.mode === "live").length;
+    const benchmarkAvailable = benchmark.status !== "not_run_in_this_process";
+    const benchmarkLabel = benchmark.status === "pinned_release_evidence"
+      ? "固定发布报告（非本进程重跑）"
+      : benchmarkAvailable ? "本进程评测结果" : "本进程尚未评测";
+    const metricPercent = (value) => benchmarkAvailable
+      ? `${Math.round(Number(value || 0) * 100)}%`
+      : "待运行";
     const command = "分析 CNYTN 泊位 3 未来3小时岸电风险，并告诉我去哪个系统看详情";
-    $("#modalSubtitle").textContent = `${priorities.filter((item) => item.status === "ready").length}/7 项就绪 · ${systemItems.length} 个系统 · ${capabilitiesPayload.total || 0} 项只读能力`;
+    $("#modalSubtitle").textContent = `${implementedCount}/7 个模块已实现 · ${connectedSystemCount}/${systemItems.length} 个外部系统联机 · ${capabilitiesPayload.total || 0} 项只读契约`;
     $("#modalBody").innerHTML = `<div class="intelligence-hub">
       <div class="hub-boundary">${icon("alert")}<div><strong>隔离边界</strong><span>小懿只做知识检索、能力选择、只读预览、结果解释和原系统交接；默认不会访问或改变其他系统。</span></div></div>
-      <section class="hub-section"><div class="hub-section-heading"><div><strong>七项能力完成度</strong><span>KNOWLEDGE · CONTEXT · EVIDENCE · RAG · ORCHESTRATION · GOVERNANCE · EVALUATION</span></div><span class="status-pill"><i></i>7 / 7 READY</span></div><div class="hub-priority-grid">${priorities.map((item) => `<article><b>0${item.id}</b><div><strong>${escapeHtml(item.name)}</strong><span>${item.status === "ready" ? "已接入小懿" : escapeHtml(item.status)}</span></div><em>${item.status === "ready" ? "READY" : "CHECK"}</em></article>`).join("")}</div></section>
+      <section class="hub-section"><div class="hub-section-heading"><div><strong>七项能力模块</strong><span>模块实现状态不等于外部系统在线或生产授权</span></div><span class="status-pill"><i></i>${implementedCount} / 7 IMPLEMENTED</span></div><div class="hub-priority-grid">${priorities.map((item) => `<article><b>0${item.id}</b><div><strong>${escapeHtml(item.name)}</strong><span>${item.status === "ready" ? "代码与接口已实现" : escapeHtml(item.status)}</span></div><em>${item.status === "ready" ? "IMPLEMENTED" : "CHECK"}</em></article>`).join("")}</div></section>
       <section class="hub-section"><div class="hub-section-heading"><div><strong>跨系统能力注册表</strong><span>仅登记能力契约，不复制其他系统业务逻辑</span></div><span>${capabilitiesPayload.total || 0} CAPABILITIES</span></div><div class="hub-system-grid">${systemItems.map((system) => `<article><header><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.english_name)}</small></div><span class="hub-mode ${escapeHtml(system.mode)}">${escapeHtml(system.mode === "demo" ? "ISOLATED" : system.mode.toUpperCase())}</span></header><p>${escapeHtml(system.role)}</p><footer><span>${system.capabilities.length} 项能力</span><span>${system.mode === "live" ? "只读联机" : "隔离预览"}</span></footer></article>`).join("")}</div></section>
       <section class="hub-section hub-demo-section"><div class="hub-section-heading"><div><strong>跨系统编排验证</strong><span>输入自然语言，查看上下文识别、能力路由、证据融合和原系统交接</span></div></div><div class="hub-command-row"><textarea id="hubCommand" rows="2">${escapeHtml(command)}</textarea><button type="button" class="primary-button" data-action="hub-run-demo">开始编排</button></div><div id="hubOrchestrationResult" class="hub-result"><div class="task-empty"><div>${icon("spark")}<strong>等待运行验证</strong><span>默认 dry-run，不会访问或改变其他系统</span></div></div></div></section>
-      <section class="hub-section" data-hub-section="evaluation"><div class="hub-section-heading"><div><strong>RAG 评测与反馈闭环</strong><span>${knowledge.documents || 0} 份文档 · ${knowledge.chunks || 0} 个片段 · ${knowledge.official_documents || 0} 份官方来源</span></div><button type="button" class="outline-button" data-action="hub-run-evaluation">重新评测</button></div><div class="hub-metrics"><div><span>检索方法</span><strong>${escapeHtml(benchmark.retrieval_method || "hybrid_sparse_v2")}</strong></div><div><span>Hybrid Hit@5</span><strong id="hubHitMetric">${Math.round(Number(benchmark.resume_safe_metrics?.hybrid_hit_at_5 ?? benchmark.hit_at_k ?? 0) * 100)}%</strong></div><div><span>BM25 Hit@5</span><strong id="hubBaselineMetric">${Math.round(Number(benchmark.resume_safe_metrics?.bm25_hit_at_5 || 0) * 100)}%</strong></div><div><span>官方要求通过率</span><strong id="hubOfficialMetric">${Math.round(Number(benchmark.official_requirement_pass_rate || 0) * 100)}%</strong></div><div><span>证据策略通过率</span><strong id="hubPolicyMetric">${Math.round(Number(benchmark.policy_safety_pass_rate || 0) * 100)}%</strong></div><div><span>持久审计</span><strong>${Number(governancePayload.audit_events || 0)} 条</strong></div></div><div class="hub-feedback-row"><select id="hubFeedbackRating"><option value="5">5 · 很准确</option><option value="4">4 · 基本准确</option><option value="3">3 · 需要补充</option><option value="2">2 · 有明显问题</option><option value="1">1 · 不可用</option></select><input id="hubFeedbackCorrection" value="建议补充适用港口、时间范围和证据来源后再形成结论。" aria-label="反馈修订建议"><button type="button" class="outline-button" data-action="hub-submit-feedback">提交待审核</button></div><div id="hubFeedbackStatus" class="hub-inline-status">反馈只进入人工审核队列，不会直接污染正式知识索引。</div></section>
+      <section class="hub-section" data-hub-section="evaluation"><div class="hub-section-heading"><div><strong>RAG 评测与反馈闭环</strong><span>${knowledge.documents || 0} 份文档 · ${knowledge.chunks || 0} 个片段 · ${knowledge.official_documents || 0} 份官方来源 · ${escapeHtml(benchmarkLabel)}</span></div><button type="button" class="outline-button" data-action="hub-run-evaluation">本机重新评测</button></div><div class="hub-metrics"><div><span>检索方法</span><strong>${escapeHtml(benchmark.retrieval_method || "hybrid_sparse_v2")}</strong></div><div><span>Hybrid Hit@5</span><strong id="hubHitMetric">${metricPercent(benchmark.resume_safe_metrics?.hybrid_hit_at_5 ?? benchmark.hit_at_k)}</strong></div><div><span>BM25 Hit@5</span><strong id="hubBaselineMetric">${metricPercent(benchmark.resume_safe_metrics?.bm25_hit_at_5)}</strong></div><div><span>官方要求通过率</span><strong id="hubOfficialMetric">${metricPercent(benchmark.official_requirement_pass_rate)}</strong></div><div><span>证据策略通过率</span><strong id="hubPolicyMetric">${metricPercent(benchmark.policy_safety_pass_rate)}</strong></div><div><span>持久审计</span><strong>${Number(governancePayload.audit_events || 0)} 条</strong></div></div><div class="hub-feedback-row"><select id="hubFeedbackRating"><option value="5">5 · 很准确</option><option value="4">4 · 基本准确</option><option value="3">3 · 需要补充</option><option value="2">2 · 有明显问题</option><option value="1">1 · 不可用</option></select><input id="hubFeedbackCorrection" value="建议补充适用港口、时间范围和证据来源后再形成结论。" aria-label="反馈修订建议"><button type="button" class="outline-button" data-action="hub-submit-feedback">提交待审核</button></div><div id="hubFeedbackStatus" class="hub-inline-status">固定报告不是本次页面启动后的重跑；点击“本机重新评测”才会生成本进程结果。反馈只进入人工审核队列。</div></section>
     </div>`;
   }
 
@@ -1755,7 +1939,7 @@
 
   const SYSTEM_LINKAGE_CATALOG = [
     { target:"port-dt-multi", name:"港口数字孪生", english:"PORT DIGITAL TWIN", icon:"agv", action:"自然语言动作映射", detail:"读取孪生态势并将小懿指令映射为可审计 dry-run 动作包" },
-    { target:"energy-cockpit", name:"能碳驾驶舱", english:"ENERGY & CARBON", icon:"chart", action:"离线策略重算", detail:"调用真实能碳后端，重算成本、碳排、岸电与调度指标" },
+    { target:"energy-cockpit", name:"能碳驾驶舱", english:"ENERGY & CARBON", icon:"chart", action:"离线策略重算", detail:"目标系统在线时调用能碳适配器，重算成本、碳排、岸电与调度指标" },
     { target:"malacca-sandbox", name:"马六甲推演", english:"PORT SANDBOX", icon:"spark", action:"沙盘与RL读取", detail:"读取公开数据快照、场景态势和训练引擎能力" },
     { target:"sailing-simulator", name:"航行模拟器", english:"GODOT SAILING SIM", icon:"ship", action:"航行场景验证", detail:"注入航线、船舶与风险事件，回传安全间距、碰撞和碳排结果" }
   ];
@@ -1797,7 +1981,7 @@
       facts.push(["碰撞/搁浅", `${summary.collisionCount ?? "—"} / ${summary.groundingCount ?? "—"}`]);
       facts.push(["碳排变化", summary.carbonDeltaTons == null ? "—" : `${summary.carbonDeltaTons} t`]);
     }
-    return `<div class="system-linkage-result"><header><strong>${escapeHtml(result.action || "联动任务完成")}</strong><span>${escapeHtml(result.trace_id || "")}</span></header><div>${facts.map(([label,value]) => `<span><small>${escapeHtml(label)}</small><b>${escapeHtml(value)}</b></span>`).join("")}</div><footer><span>${Number(result.duration_ms || 0).toLocaleString("zh-CN")} ms</span><span>SHA-256 ${escapeHtml(String(result.payload_sha256 || "").slice(0,12))}…</span></footer></div>`;
+    return `<div class="system-linkage-result"><header><strong>最近一次本机回执 · ${escapeHtml(result.action || "联动任务完成")}</strong><span>${escapeHtml(result.trace_id || "")}</span></header><div>${facts.map(([label,value]) => `<span><small>${escapeHtml(label)}</small><b>${escapeHtml(value)}</b></span>`).join("")}</div><footer><span>${Number(result.duration_ms || 0).toLocaleString("zh-CN")} ms</span><span>SHA-256 ${escapeHtml(String(result.payload_sha256 || "").slice(0,12))}…</span></footer></div>`;
   }
 
   function renderSystemLinkage(payload) {
@@ -1808,7 +1992,7 @@
     $("#modalSubtitle").textContent = `${payload.online_count || 0}/${payload.total || 4} 个系统在线 · 本机API / Godot文件桥 · 全链路审计`;
     $("#modalBody").innerHTML = `<div class="system-linkage-hub">
       <section class="system-linkage-hero">
-        <div><span>LOCAL MULTI-SYSTEM ORCHESTRATION</span><strong>小懿四系统联动控制台</strong><p>统一启动、上下文传递、真实接口调用、模拟器场景注入、结果回写与证据哈希。</p></div>
+        <div><span>LOCAL MULTI-SYSTEM ORCHESTRATION</span><strong>小懿四系统联动控制台</strong><p>统一启动、上下文传递、本机适配器调用、模拟器场景注入、结果回写与证据哈希。</p></div>
         <span class="system-linkage-total">${payload.online_count || 0}<small>/ 4 ONLINE</small></span>
       </section>
       <section class="system-linkage-command">
@@ -1827,7 +2011,7 @@
         return `<article class="system-linkage-card ${online ? "online" : ""}" data-system-linkage-card="${item.target}">
           <header><span class="system-linkage-icon">${icon(item.icon)}</span><div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.english)}</small></div><em class="linkage-state ${escapeHtml(String(runtime.state || "offline"))}"><i></i>${escapeHtml(stateLabel)}</em></header>
           <p>${escapeHtml(item.detail)}</p>
-          <div class="system-linkage-action"><span>真实联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
+          <div class="system-linkage-action"><span>适配器联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
           ${busy ? `<div class="system-linkage-running"><i></i><span>正在启动并执行，等待目标系统回写…</span></div>` : linkageResultMarkup(node.last_result)}
           <footer>
             <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${busy ? "disabled" : ""}>${icon("spark")}${online ? "执行联动" : "启动并联动"}</button>
@@ -1836,7 +2020,7 @@
           <small class="system-linkage-message">${escapeHtml(runtime.message || "等待读取运行状态")}</small>
         </article>`;
       }).join("")}</section>
-      <footer class="system-linkage-audit"><span>桥接请求：${payload.bridge?.request_exists ? "已生成" : "待生成"}</span><span>桥接结果：${payload.bridge?.result_exists ? "已回写" : "待回写"}</span><span>生产写入：关闭</span></footer>
+      <footer class="system-linkage-audit"><span>桥接请求文件：${payload.bridge?.request_exists ? "历史文件存在" : "待生成"}</span><span>历史结果文件：${payload.bridge?.result_exists ? "存在（非本次执行）" : "无"}</span><span>生产写入：关闭</span></footer>
     </div>`;
   }
 
@@ -2096,12 +2280,17 @@
 
   function openNotifications() {
     const items = state.dashboard.alerts?.items || [];
-    openModal("预警与提醒", `${items.length} 条活动提醒 · ${state.dashboard.data_mode === "live" ? "生产实绩" : "运营沙箱"}`, `<div class="notification-list">${items.map((item) => `<article class="notification-detail"><div class="response-header"><strong>${escapeHtml(item.title)}</strong><span class="alert-level ${escapeHtml(item.level)}">${item.level === "critical" ? "高" : item.level === "warning" ? "中" : "提示"}</span></div><p>${escapeHtml(item.message)}</p><p>来源：${escapeHtml(item.source)} · ${formatDateTime(item.occurred_at)}</p><button type="button" class="outline-button" data-task-template="handle-alert">让小懿生成处置步骤</button></article>`).join("")}</div>`, "", "notifications");
+    const waitingForPort = state.dashboard.public_open_source_waiting === true;
+    const sourceLabel = state.dashboard.data_mode === "live" && !waitingForPort ? "已验证生产实绩" : state.dashboard.source_metadata?.source_type === "public_data_calibrated_simulation" ? "公开数据校准模拟告警" : "现场告警待接入";
+    const emptyState = waitingForPort
+      ? `<div class="task-empty"><div>${icon("alert")}<strong>现场告警尚未接入</strong><span>待接字段：告警ID、对象、级别、发生时间、来源系统和确认状态；未用零告警冒充安全。</span></div></div>`
+      : `<div class="task-empty"><div>${icon("check")}<strong>当前没有活动提醒</strong><span>结论仅适用于已验证连接器返回的当前窗口。</span></div></div>`;
+    openModal("预警与提醒", `${items.length} 条活动提醒 · ${sourceLabel}`, `<div class="notification-list">${items.length ? items.map((item) => `<article class="notification-detail"><div class="response-header"><strong>${escapeHtml(item.title)}</strong><span class="alert-level ${escapeHtml(item.level)}">${item.level === "critical" ? "高" : item.level === "warning" ? "中" : "提示"}</span></div><p>${escapeHtml(item.message)}</p><p>来源：${escapeHtml(item.source)} · ${formatDateTime(item.occurred_at)}</p><button type="button" class="outline-button" data-task-template="handle-alert">让小懿生成处置步骤</button></article>`).join("") : emptyState}</div>`, "", "notifications");
   }
 
   function openSettings() {
     const theme = document.body.dataset.theme;
-    openModal("系统设置", "界面偏好会保存在当前浏览器", `<div class="settings-grid"><div class="setting-row"><div><strong>视觉主题</strong><span>深海蓝或更高对比度的极夜模式</span></div><select id="settingsTheme"><option value="deep-sea" ${theme === "deep-sea" ? "selected" : ""}>深海模式</option><option value="midnight" ${theme === "midnight" ? "selected" : ""}>极夜模式</option></select></div><div class="setting-row"><div><strong>默认回答模式</strong><span>提问时仍可在输入框内单独调整</span></div><select id="settingsMode"><option value="expert">专业问答</option><option value="ops">运营问答</option><option value="sop">SOP 生成</option><option value="brief">简报摘要</option></select></div><div class="setting-row"><div><strong>检索证据数</strong><span>范围 1–10 条</span></div><select id="settingsTopK">${[3,5,8,10].map((n) => `<option value="${n}" ${Number($("#topK").value) === n ? "selected" : ""}>${n} 条</option>`).join("")}</select></div><div class="drawer-note"><strong>系统边界：</strong>当前运营看板为生产形态动态沙箱，所有数值均带来源、时间戳和质量码，但不是现场实绩。真实 TOS / EMS / PCS 写操作需完成接口集成、权限校验和人工确认。</div></div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button" data-modal-action="save-settings">保存设置</button>`, "settings");
+    openModal("系统设置", "界面偏好会保存在当前浏览器", `<div class="settings-grid"><div class="setting-row"><div><strong>视觉主题</strong><span>深海蓝或更高对比度的极夜模式</span></div><select id="settingsTheme"><option value="deep-sea" ${theme === "deep-sea" ? "selected" : ""}>深海模式</option><option value="midnight" ${theme === "midnight" ? "selected" : ""}>极夜模式</option></select></div><div class="setting-row"><div><strong>默认回答模式</strong><span>提问时仍可在输入框内单独调整</span></div><select id="settingsMode"><option value="expert">专业问答</option><option value="ops">运营问答</option><option value="sop">SOP 生成</option><option value="brief">简报摘要</option></select></div><div class="setting-row"><div><strong>检索证据数</strong><span>范围 1–10 条</span></div><select id="settingsTopK">${[3,5,8,10].map((n) => `<option value="${n}" ${Number($("#topK").value) === n ? "selected" : ""}>${n} 条</option>`).join("")}</select></div><div class="drawer-note"><strong>系统边界：</strong>无现场数据时显示“公开数据校准实时模拟”，每个值保留场景、seed、事件序号、数据哈希和 SIM 真值标签；真实 TOS / EMS / PCS 接入后沿用同一契约，生产写权限仍须独立准入。</div></div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button" data-modal-action="save-settings">保存设置</button>`, "settings");
     const tokenConfigured = Boolean(sessionStorage.getItem("xiaoyi_access_token"));
     $("#modalSubtitle").textContent = "界面偏好保存在浏览器；访问令牌只保存在当前标签会话";
     $("#modalBody .settings-grid").insertAdjacentHTML("beforeend", `<label class="intake-field"><span>生产访问令牌</span><input id="settingsAccessToken" type="password" autocomplete="off" placeholder="${tokenConfigured ? "当前标签已配置；留空保持不变" : "粘贴管理员签发的Bearer JWT"}"></label><label class="strict-evidence-option"><span><strong>清除当前访问令牌</strong><small>令牌不会写入localStorage或服务器</small></span><span class="evidence-switch"><input id="settingsClearToken" type="checkbox"><i></i></span></label>`);
@@ -2109,10 +2298,11 @@
   }
 
   async function openSystemStatus() {
-    openModal("系统状态", "正在检查运行时、身份边界、持久化、知识索引、模型和真实连接器", `<div class="task-empty"><div>${icon("spark")}<strong>正在执行深度就绪检查</strong><span>单一接口成功不会被当成整套系统就绪</span></div></div>`, "", "status");
-    const [readinessResult, knowledgeResult, connectorResult, modelResult, identityResult, infoResult] = await Promise.allSettled([
+    openModal("系统状态", "正在分层检查应用、模型、现场数据与生产授权", `<div class="task-empty"><div>${icon("spark")}<strong>正在执行分层就绪检查</strong><span>单一接口成功不会被当成模型、现场或生产就绪</span></div></div>`, "", "status");
+    const [readinessResult, knowledgeResult, connectorResult, modelResult, identityResult, infoResult, siteAdmissionResult] = await Promise.allSettled([
       api("/api/system/readiness"), api("/api/knowledge/status"), api("/api/connectors"),
-      api("/api/models"), api("/api/governance/identity"), api("/api/system/info")
+      api("/api/models"), api("/api/governance/identity"), api("/api/system/info"),
+      api("/api/system/site-admission")
     ]);
     if (state.modalKind !== "status") return;
     const readiness = readinessResult.status === "fulfilled" ? readinessResult.value : readinessResult.reason?.payload || null;
@@ -2121,18 +2311,61 @@
     const model = modelResult.status === "fulfilled" ? modelResult.value : null;
     const identity = identityResult.status === "fulfilled" ? identityResult.value : null;
     const info = infoResult.status === "fulfilled" ? infoResult.value : null;
+    const siteAdmission = siteAdmissionResult.status === "fulfilled" ? siteAdmissionResult.value : null;
     if (knowledge) { state.knowledgeStatus = knowledge; }
     if (connectors) { state.connectors = connectors; }
     const ready = readiness?.status === "ready";
     const deployment = readiness?.checks?.deployment_configuration;
     const runtimeStore = readiness?.checks?.runtime_store;
+    const posture = readiness?.runtime_posture || {};
     const authVerified = Boolean(identity?.authenticated);
+    const localModelActive = Boolean(model?.configured && model?.local_generation_enabled && !model?.circuit_open);
     const blockerText = deployment?.blockers?.length ? deployment.blockers.join("；") : "无启动阻断项";
-    $("#modalBody").innerHTML = `<div class="settings-grid"><div class="setting-row"><div><strong>平台深度就绪</strong><span>${readiness ? `${escapeHtml(readiness.app)} · v${escapeHtml(readiness.version)} · ${escapeHtml(readiness.checked_at || "")}` : "深度健康接口不可达"}</span></div><span class="${ready ? "status-pill" : "demo-badge"}">${ready ? "READY" : "NOT READY"}</span></div><div class="setting-row"><div><strong>身份与权限</strong><span>${identity ? `${escapeHtml(identity.actor_id)} · ${escapeHtml(identity.role)} · ${escapeHtml(identity.authentication_status)}` : "身份接口不可读"}</span></div><span class="${authVerified ? "status-pill" : "demo-badge"}">${authVerified ? "已验证" : "本地未验证"}</span></div><div class="setting-row"><div><strong>持久化与恢复</strong><span>${runtimeStore?.ok ? `SQLite 完整性 ${escapeHtml(runtimeStore.integrity)} · 会话保留 ${escapeHtml(info?.chat_retention_days || "--")} 天` : "运行时存储需检查"}</span></div><span class="${runtimeStore?.ok ? "status-pill" : "demo-badge"}">${runtimeStore?.ok ? "可读写" : "异常"}</span></div><div class="setting-row"><div><strong>模型网关</strong><span>${model ? `${escapeHtml(model.provider)} · ${escapeHtml(model.model)} · ${escapeHtml(model.notice)}` : "模型状态不可读"}</span></div><span class="${model?.configured && !model?.circuit_open ? "status-pill" : "demo-badge"}">${model?.circuit_open ? "熔断" : model?.configured ? "已配置" : "待配置"}</span></div><div class="setting-row"><div><strong>港航知识索引</strong><span>${knowledge ? `${knowledge.document_count} 份文档 · ${knowledge.chunk_count} 个片段 · ${knowledge.official_verified_documents} 份官方发布来源资料（非全为正文）` : "索引状态不可读"}</span></div><span class="${knowledge?.status === "ready" ? "status-pill" : "demo-badge"}">${knowledge?.status === "ready" ? "可检索" : "需检查"}</span></div><div class="setting-row"><div><strong>真实港口连接器</strong><span>${connectors ? `${connectors.total} 类已装配 · ${connectors.online} 个真实在线 · ${connectors.offline} 个待配置` : "连接器目录不可读"}</span></div><button type="button" class="text-button" data-action="connectors">查看接口</button></div><div class="setting-row"><div><strong>运营看板数据</strong><span>${escapeHtml(state.dashboard.data_notice || "数据模式未声明")}</span></div><span class="demo-badge">${escapeHtml(String(state.dashboard.data_mode || "unknown").toUpperCase())}</span></div><div class="drawer-note"><strong>部署配置：</strong>${escapeHtml(blockerText)}。连接器离线不会被冒充为港口生产就绪。</div></div>`;
+    $("#modalBody").innerHTML = `<div class="settings-grid">
+      <div class="setting-row"><div><strong>本机应用运行</strong><span>${readiness ? `${escapeHtml(readiness.app)} · v${escapeHtml(readiness.version)} · ${escapeHtml(readiness.checked_at || "")}` : "深度健康接口不可达"}</span></div><span class="${ready ? "status-pill" : "demo-badge"}">${ready ? "APP READY" : "NOT READY"}</span></div>
+      <div class="setting-row"><div><strong>本地生成模型</strong><span>${model ? `${escapeHtml(model.provider)} · ${escapeHtml(model.model)} · ${escapeHtml(model.notice)}` : "模型状态不可读"}</span></div><span class="${localModelActive ? "status-pill" : "demo-badge"}">${model?.circuit_open ? "熔断" : localModelActive ? "LOCAL MODEL" : "规则回退"}</span></div>
+      <div class="setting-row"><div><strong>LoRA准入证据</strong><span>${model?.lora_admission ? `${escapeHtml(model.lora_admission.source_run_id || "—")} · ${escapeHtml(model.lora_admission.training_type || "—")} · ${escapeHtml(model.lora_admission.report || "")}` : "LoRA准入报告不可读"}</span></div><span class="demo-badge">${model?.lora_admission?.quality_admission_passed ? "QUALITY ADMITTED" : "ENGINEERING ONLY"}</span></div>
+      <div class="setting-row"><div><strong>提示词注入固定回归</strong><span>${model?.prompt_security_benchmark ? `${escapeHtml(model.prompt_security_benchmark.run_id || "—")} · ${model.prompt_security_benchmark.case_count || 0}个中英固定样例 · 外部红队=${String(model.prompt_security_benchmark.external_red_team_completed)}` : "安全回归报告不可读"}</span></div><span class="${model?.prompt_security_benchmark?.passed ? "status-pill" : "demo-badge"}">${model?.prompt_security_benchmark?.passed ? "FIXED PASS" : "CHECK"}</span></div>
+      <div class="setting-row"><div><strong>现场数据连接</strong><span>${connectors ? `${connectors.total} 类已装配 · ${connectors.online} 个验证在线 · ${connectors.offline} 个待配置` : "连接器目录不可读"}</span></div><button type="button" class="text-button" data-action="connectors">查看接口</button></div>
+      <div class="setting-row"><div><strong>现场准入与漂移门禁</strong><span>${siteAdmission ? `${escapeHtml(siteAdmission.contract_id)} · ${escapeHtml(siteAdmission.current_evidence?.overall_status || "blocked")}` : "准入契约不可读"}</span></div><button type="button" class="text-button" data-action="site-admission">查看7道门禁</button></div>
+      <div class="setting-row"><div><strong>生产调度授权</strong><span>recommendation_only=${String(posture.recommendation_only ?? info?.recommendation_only ?? true)} · dispatch_allowed=${String(posture.dispatch_allowed ?? info?.dispatch_allowed ?? false)}</span></div><span class="demo-badge">NOT AUTHORIZED</span></div>
+      <div class="setting-row"><div><strong>身份与权限</strong><span>${identity ? `${escapeHtml(identity.actor_id)} · ${escapeHtml(identity.role)} · ${escapeHtml(identity.authentication_status)}` : "身份接口不可读"}</span></div><span class="${authVerified ? "status-pill" : "demo-badge"}">${authVerified ? "已验证" : "本地未验证"}</span></div>
+      <div class="setting-row"><div><strong>持久化与恢复</strong><span>${runtimeStore?.ok ? `SQLite 完整性 ${escapeHtml(runtimeStore.integrity)} · 会话保留 ${escapeHtml(info?.chat_retention_days || "--")} 天` : "运行时存储需检查"}</span></div><span class="${runtimeStore?.ok ? "status-pill" : "demo-badge"}">${runtimeStore?.ok ? "可读写" : "异常"}</span></div>
+      <div class="setting-row"><div><strong>港航知识索引</strong><span>${knowledge ? `${knowledge.document_count} 份文档 · ${knowledge.chunk_count} 个片段 · ${knowledge.official_verified_documents} 份官方发布来源资料（非全为正文）` : "索引状态不可读"}</span></div><span class="${knowledge?.status === "ready" ? "status-pill" : "demo-badge"}">${knowledge?.status === "ready" ? "可检索" : "需检查"}</span></div>
+      <div class="setting-row"><div><strong>运营看板数据</strong><span>${escapeHtml(state.dashboard.data_notice || "数据模式未声明")}</span></div><span class="demo-badge">${escapeHtml(String(state.dashboard.data_mode || "unknown").toUpperCase())}</span></div>
+      <div class="setting-row"><div><strong>行业公开能力对照</strong><span>仅比较可引用公开材料；没有共同独立基准时不宣称全面超越</span></div><button type="button" class="text-button" data-action="competitive-benchmark">查看差距</button></div>
+      <div class="drawer-note"><strong>边界：</strong>${escapeHtml(blockerText)}。APP READY 只表示本机依赖可用；现场映射、标定、影子运行、双人审批和回滚演练未完成前，production_authority=false。</div>
+    </div>`;
   }
 
   function openProfile() {
-    openModal("管理员工作台", "港航运营 AI · 生产形态沙箱", `<div class="settings-grid"><div class="setting-row"><div><strong>当前角色</strong><span>港航智能助手管理员</span></div><span class="status-pill"><i></i>在线</span></div><div class="setting-row"><div><strong>生产安全边界</strong><span>真实写操作必须由连接器门禁和当前步骤人工确认共同授权</span></div><span class="demo-badge">FAIL CLOSED</span></div><div class="setting-row"><div><strong>当前知识索引</strong><span>${state.knowledgeStatus ? `${state.knowledgeStatus.chunk_count} 个可追溯片段，其中 ${state.knowledgeStatus.official_verified_documents} 份官方发布来源资料（非全为正文）` : "尚未读取索引状态"}</span></div><span>${state.knowledgeStatus ? `${state.knowledgeStatus.document_count} 份` : "--"}</span></div></div>`, "", "profile");
+    openModal("管理员工作台", "本地验收身份 · 无生产调度授权", `<div class="settings-grid"><div class="setting-row"><div><strong>当前角色</strong><span>港航智能助手本地管理员</span></div><span class="demo-badge">本机会话</span></div><div class="setting-row"><div><strong>生产安全边界</strong><span>推荐模式开启；现场写操作与调度下发默认禁止</span></div><span class="demo-badge">production_authority=false</span></div><div class="setting-row"><div><strong>当前知识索引</strong><span>${state.knowledgeStatus ? `${state.knowledgeStatus.chunk_count} 个可追溯片段，其中 ${state.knowledgeStatus.official_verified_documents} 份官方发布来源资料（非全为正文）` : "尚未读取索引状态"}</span></div><span>${state.knowledgeStatus ? `${state.knowledgeStatus.document_count} 份` : "--"}</span></div></div>`, "", "profile");
+  }
+
+  async function openCompetitiveBenchmark() {
+    openModal("小懿与行业公开能力对照", "正在读取可复验差距矩阵", `<div class="task-empty"><div>${icon("spark")}<strong>正在核对官方公开材料</strong><span>不会根据未公开信息推断模型质量</span></div></div>`, "", "competitive-benchmark");
+    try {
+      const payload = await api("/api/system/competitive-benchmark");
+      if (state.modalKind !== "competitive-benchmark") return;
+      const counts = payload.reference_public_scale || {};
+      $("#modalSubtitle").textContent = `${escapeHtml(payload.reference_product)} · 核对日期 ${escapeHtml(payload.accessed_at)} · ${escapeHtml(payload.comparison_status)}`;
+      $("#modalBody").innerHTML = `<div class="drawer-note"><strong>当前结论：</strong>${escapeHtml(payload.superiority_claim_gate?.safe_claim || payload.scope_notice)}</div><div class="source-audit-summary"><span><strong>${escapeHtml(counts.registered_users || "—")}</strong>对方公开注册用户</span><span><strong>${escapeHtml(counts.agents || "—")}</strong>对方公开智能体</span><span><strong>${escapeHtml(counts.evaluation_questions || "—")}</strong>对方公开评测题</span></div><div class="source-record-list">${(payload.dimensions || []).map((item) => `<article class="source-record ${item.status.startsWith("xiaoyi_") ? "official" : "unverified"}"><div class="source-record-header"><div class="source-record-title"><strong>${escapeHtml(item.id)}</strong><span>${escapeHtml(item.status)}</span></div><span class="source-status ${item.status.startsWith("xiaoyi_") ? "official" : "unverified"}">${item.status.startsWith("xiaoyi_") ? "可核验优势" : "待追赶"}</span></div><div class="drawer-note"><strong>参考公开能力</strong><br>${escapeHtml(item.reference_public_capability)}</div><div class="drawer-note"><strong>小懿当前证据</strong><br>${escapeHtml(item.xiaoyi_evidence)}</div><div class="drawer-note"><strong>下一验收门禁</strong><br>${escapeHtml(item.next_acceptance_gate)}</div></article>`).join("")}</div><div class="source-hash"><span>矩阵 SHA-256</span><code>${escapeHtml(payload.artifact_sha256)}</code></div>`;
+    } catch (error) {
+      if (state.modalKind === "competitive-benchmark") $("#modalBody").innerHTML = `<div class="drawer-note"><strong>差距矩阵读取失败：</strong>${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  async function openSiteAdmission() {
+    openModal("现场数据与生产权限准入", "正在读取字段、质量、漂移、影子与回滚门禁", `<div class="task-empty"><div>${icon("spark")}<strong>正在核对失败关闭契约</strong><span>只读数据通过不等于获得生产调度权限</span></div></div>`, "", "site-admission");
+    try {
+      const payload = await api("/api/system/site-admission");
+      if (state.modalKind !== "site-admission") return;
+      const thresholds = payload.read_only_quality_thresholds || {};
+      $("#modalSubtitle").textContent = `${payload.contract_id} · ${payload.current_evidence?.overall_status || "blocked"} · production_authority=false`;
+      $("#modalBody").innerHTML = `<div class="drawer-note"><strong>当前边界：</strong>${escapeHtml(payload.scope_notice)} 当前模式 ${escapeHtml(payload.runtime?.configured_data_mode || "unknown")}；只读端点不会由状态页自动探测。</div><div class="source-audit-summary"><span><strong>${Number(thresholds.minimum_completeness_rate || 0) * 100}%</strong>最低完整率</span><span><strong>${thresholds.maximum_freshness_seconds || "—"}s</strong>最大新鲜度</span><span><strong>PSI ≤ ${thresholds.maximum_population_stability_index ?? "—"}</strong>漂移阈值</span></div><div class="source-record-list">${(payload.production_admission_gates || []).map((gate, index) => `<article class="source-record unverified"><div class="source-record-header"><div class="source-record-title"><strong>${index + 1}. ${escapeHtml(gate.label)}</strong><span>${escapeHtml(gate.id)}</span></div><span class="source-status unverified">待现场</span></div><div class="drawer-note"><strong>所需证据</strong><br>${escapeHtml((gate.required_evidence || []).join(" · "))}</div></article>`).join("")}</div><div class="drawer-note"><strong>固定关闭项：</strong>recommendation_only=true · dispatch_allowed=false · dual_approval_verified=false · production_authority=false。</div><div class="source-hash"><span>准入契约 SHA-256</span><code>${escapeHtml(payload.artifact_sha256)}</code></div>`;
+    } catch (error) {
+      if (state.modalKind === "site-admission") $("#modalBody").innerHTML = `<div class="drawer-note"><strong>现场准入契约读取失败：</strong>${escapeHtml(error.message)}</div>`;
+    }
   }
 
   function openAvatarPicker() {
@@ -2458,7 +2691,7 @@
     const systems = mission.health?.systems || {};
     const nodes = [
       ["xiaoyi", "小懿AI", "ORCHESTRATOR"], ["dataset", "真实公开数据", "MEASURED DATA"],
-      ["trainer", "本地RL训练器", "4 RL + PID"], ["guardrail", "测试隔离门禁", "NO TRAIN RENDER"]
+      ["trainer", "本地RL训练器", "4 RL + PID + SOP"], ["guardrail", "测试隔离门禁", "NO TRAIN RENDER"]
     ];
     const topology = nodes.map(([id,label,en]) => {
       const item = systems[id];
@@ -3165,13 +3398,13 @@
     const answer = `可复现RL能源调度实验已完成。\n\n`+
       `数据：${dataset.label || "—"}，${dataset.row_count || 0}条真实观测，SHA-256 ${String(dataset.sha256 || "—")}。\n`+
       `数据划分：按时间顺序70%训练、15%验证、15%保留测试；默认公开数据不是港口实绩。\n`+
-      `训练：Q-learning、SARSA、Expected SARSA、Double Q-learning共完成 ${training.completed_training_episodes || 0} 个episode；PID作为控制理论基线不训练。训练阶段rendering_performed=${Boolean(training.training?.rendering_performed)}。\n`+
+      `训练：Q-learning、SARSA、Expected SARSA、Double Q-learning共完成 ${training.completed_training_episodes || 0} 个episode；PID与现场SOP规则作为非学习强基线不训练。训练阶段rendering_performed=${Boolean(training.training?.rendering_performed)}。\n`+
       `测试：训练全部完成后才读取保留测试段并生成轨迹，领先算法 ${simulation.best_algorithm_id || "—"}。\n\n`+
-      `五算法结果：\n${raceLines || "• 测试结果未返回。"}\n\n`+
+      `六种候选与基线结果：\n${raceLines || "• 测试结果未返回。"}\n\n`+
       `复现门禁：${verification.passed || 0}/${verification.total || 0}项通过；归档状态 ${dispatch.status || "未归档"}，production_executed=${Boolean(dispatch.production_executed)}。\n\n`+
       `接港口方式：提供同一timestamp/load_kw CSV契约并设置XIAOYI_RL_DATASET_PATH；算法、时间划分、模型哈希、测试隔离和前端进度无需改代码。`;
-    commitAutomationChat({ question:plan.command, answer, intent:"rl_energy_training_lab", mode:"ops", confidence:"高", sourceQuality:"public_dataset", grounded:true, nextQuestions:["解释五种基线的更新规则", "查看数据和模型哈希", "如何替换为港口EMS与AGV数据"] });
-    return "真实训练、保留测试集评测、五基线结果、模型哈希与数据边界已回写智能对话。";
+    commitAutomationChat({ question:plan.command, answer, intent:"rl_energy_training_lab", mode:"ops", confidence:"高", sourceQuality:"public_dataset", grounded:true, nextQuestions:["解释六种候选与基线的更新规则", "查看数据和模型哈希", "如何替换为港口EMS与AGV数据"] });
+    return "真实训练、保留测试集评测、六种候选与基线结果、模型哈希与数据边界已回写智能对话。";
   }
 
   function deliverWeatherMissionResult() {
@@ -3182,7 +3415,7 @@
     const answer = `极端天气下船舶—泊位联合调度已完成。\n\n`+
       `压力场：风速 ${weather.wind_speed_ms ?? "—"} m/s、浪高 ${weather.wave_height_m ?? "—"} m、能见度 ${weather.visibility_km ?? "—"} km。\n`+
       `MAPPO动作：${selected.label || "—"}，概率 ${selected.probability ?? "—"}%，到港窗口调整 ${selected.arrivalShiftMinutes ?? 0} 分钟。\n`+
-      `公平基准：${benchmark.episodes || 0} episodes，五种算法使用相同状态空间、动作空间与随机种子族，领先算法 ${benchmark.best_algorithm_id || "—"}。\n\n`+
+      `公平基准：${benchmark.episodes || 0} episodes，六种候选与基线使用相同状态空间、动作空间与随机种子族，领先算法 ${benchmark.best_algorithm_id || "—"}。\n\n`+
       `策略相对基线：拥堵改善 ${comparison.improvement?.congestionPoints ?? "—"} 点，延误改善 ${comparison.improvement?.delayMinutes ?? "—"} 分钟，韧性提升 ${comparison.improvement?.resiliencePoints ?? "—"} 点。\n`+
       `安全门禁：${verification.passed || 0}/${verification.total || 0} 通过；Dry-run回执 ${dispatch.systems_completed || 0}/${dispatch.systems_total || 3}，production_executed=${Boolean(dispatch.production_executed)}。\n\n`+
       `数据边界：船舶泊位来自小懿动态运营沙箱，MAPPO推理和五算法曲线来自马六甲本地RL接口，调度轨迹来自港口数字孪生回放。极端天气是动态压力场景而非现场实况，本次未修改真实泊位计划。`;
@@ -3264,7 +3497,7 @@
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ operation, payload:{ command:action.parameters.command }, confirmation:{ confirmed:true, operator_id:"管理员", reason:"用户确认当前小懿操作计划", reference:action.id } })
       });
-      return `${result.message} 授权号 ${result.authorization_id}；dispatch_performed=${result.dispatch_performed}。`;
+      return `${result.message} 预检回执 ${result.authorization_id}；authorized=${result.authorized}；dual_approval_verified=${result.dual_approval_verified}；dispatch_performed=${result.dispatch_performed}。`;
     } catch (error) {
       if ([400,403,409].includes(error.status)) return `安全门禁已生效：${error.message}；未下发任何生产指令。`;
       throw error;
@@ -3392,6 +3625,7 @@
     const runs = payload.runs?.items || [];
     const recent = latestCompletedRun(runs);
     const evidenceReport = payload.evidence || {};
+    const formalReport = evidenceReport.report || {};
     const available = datasets.filter((item) => item.available);
     const largest = [...available].sort((left, right) => Number(right.row_count || 0) - Number(left.row_count || 0))[0];
     const portDatasets = available.filter((item) => item.port_data);
@@ -3399,13 +3633,21 @@
     const reportReady = evidenceReport.status === "available";
 
     const gate = $("#rlCenterGate");
-    gate.textContent = health.status === "ready" ? "EVIDENCE READY" : "DATA REQUIRED";
-    gate.classList.toggle("warning", health.status !== "ready");
+    const policyAdmitted = formalReport.policy_admission_passed === true;
+    gate.textContent = health.status !== "ready"
+      ? "DATA REQUIRED"
+      : reportReady
+        ? policyAdmitted ? "OFFLINE CANDIDATE ADMITTED" : "EVIDENCE PASS · POLICY BLOCKED"
+        : "REPORT REQUIRED";
+    gate.classList.toggle("warning", health.status !== "ready" || !policyAdmitted);
+    const formalConfig = formalReport.configuration || {};
+    const recentIsFormal = Number(recent?.config?.episodes || 0) >= 320
+      && Number(recent?.config?.horizon_steps || 0) >= 72;
     $("#rlCenterEvidenceStrip").innerHTML = [
       ["最大公开基准", largest ? `${formatNumber(largest.row_count, 0)} 行` : "—", largest?.id || "未安装"],
-      ["港口实测场景", `${portDatasets.length} 套`, portDatasets[0] ? "AIS交通 · 运营代理" : "待安装"],
-      ["最近训练", recent ? `${recent.completed_training_episodes || 0}/${recent.total_training_episodes || 0}` : "尚无", recent ? `${recent.status} · seed ${recent.config?.seed}` : "可配置复现实验"],
-      ["证据报告", reportReady ? "已固化" : "待生成", evaluated ? `TEST · ${evaluated.best_algorithm_id || "—"}` : "训练后独立测试"],
+      ["正式证据批次", reportReady ? `${formalConfig.seed_count || 0}种子 × ${formalConfig.algorithms?.length || 0}算法` : "待生成", reportReady ? "320回合 · 训练无渲染" : "运行固定基准"],
+      ["最近本机运行", recent ? `${recent.completed_training_episodes || 0}/${recent.total_training_episodes || 0}` : "尚无", recent ? `${recentIsFormal ? "FORMAL" : "SMOKE/WIRING"} · seed ${recent.config?.seed}` : "可配置复现实验"],
+      ["RL候选准入", reportReady ? policyAdmitted ? "离线影子候选" : "全部未晋级" : "待评测", reportReady ? "强基线保留 · 生产权限关闭" : "训练后独立盲测"],
     ].map(([label, value, detail]) => `<div><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong><em>${escapeHtml(detail)}</em></div>`).join("");
 
     $("#rlCenterDatasets").innerHTML = available.map((item) => `
@@ -3418,8 +3660,9 @@
     const validationResults = new Map((recent?.validation?.results || []).map((item) => [item.algorithm_id, item]));
     $("#rlCenterAlgorithmMatrix").innerHTML = algorithms.map((item, index) => {
       const score = validationResults.get(item.id)?.selection_score;
-      return `<article class="rl-matrix-card ${item.family === "control_theory" ? "pid" : ""}">
-        <span>0${index + 1} · ${item.family === "control_theory" ? "CONTROL" : "RL"}<b>${item.trainable ? "TRAINABLE" : "BASELINE"}</b></span>
+      const familyLabel = item.family === "control_theory" ? "CONTROL" : item.family === "operations_rule" ? "SOP RULE" : "RL";
+      return `<article class="rl-matrix-card ${item.trainable ? "" : "pid"}">
+        <span>0${index + 1} · ${familyLabel}<b>${item.trainable ? "TRAINABLE" : "STRONG BASELINE"}</b></span>
         <strong>${escapeHtml(item.label)}</strong>
         <p>${escapeHtml(item.description)}</p>
         <code>${escapeHtml(item.update_equation)}</code>
@@ -3438,9 +3681,9 @@
 
     const systemNodes = [
       ["公开数据", available.length ? `${available.length} 套可用` : "缺失", available.length > 0],
-      ["五算法训练", algorithms.length === 5 ? "4 RL + PID" : `${algorithms.length} 个`, algorithms.length === 5],
+      ["六算法对比", algorithms.length === 6 ? "4 RL + PID + SOP" : `${algorithms.length} 个`, algorithms.length === 6],
       ["保留测试", evaluated ? "已生成轨迹" : "训练后执行", Boolean(evaluated)],
-      ["证据账本", reportReady ? "报告已固化" : "待跑基准", reportReady],
+      ["证据账本", reportReady ? policyAdmitted ? "候选已准入" : "失败候选已固化" : "待跑基准", reportReady],
       ["真实港口适配", portDatasets.length ? "契约已就绪" : "待接入", false],
     ];
     $("#rlSystemLinkage").innerHTML = systemNodes.map(([label, detail, ready]) => `
@@ -3521,6 +3764,29 @@
     );
   }
 
+  function showRLEvidence() {
+    const envelope = state.rlCenter?.evidence || {};
+    const report = envelope.report || {};
+    const experiments = report.experiments || {};
+    if (envelope.status !== "available") {
+      toast("正式证据尚未生成", "请先运行固定多数据集、多种子基准。", "warning");
+      return;
+    }
+    const rows = Object.entries(experiments).map(([datasetId, experiment]) => {
+      const admission = experiment.admission || {};
+      const runIds = (experiment.runs || []).map((run) => `${escapeHtml(run.run_id)} / seed ${run.seed}`).join("<br>");
+      const failures = (admission.failed_candidates || []).map((item) => `${escapeHtml(item.algorithm_id)}：${escapeHtml((item.reasons || []).join("、") || item.status)}`).join("<br>");
+      return `<article class="source-record unverified"><div class="source-record-header"><div class="source-record-title"><strong>${escapeHtml(experiment.dataset?.label || datasetId)}</strong><span>${escapeHtml(datasetId)}</span></div><span class="source-status unverified">${admission.rl_candidate_admitted ? "OFFLINE ADMITTED" : "RL REJECTED"}</span></div><div class="source-provenance"><span>验证集候选<b>${escapeHtml(admission.validation_candidate_id || "—")} · ${admission.validation_votes || 0}/3</b></span><span>保留强基线<b>${escapeHtml(admission.strong_baseline_id || "—")}</b></span><span>数据SHA-256<b>${compactHash(experiment.dataset?.sha256)}</b></span><span>生产权限<b>FALSE</b></span></div><div class="drawer-note"><strong>失败候选</strong><br>${failures}</div><div class="drawer-note"><strong>正式run_id</strong><br>${runIds}</div></article>`;
+    }).join("");
+    openModal(
+      "RL正式证据、95%区间与失败候选",
+      `${escapeHtml(envelope.report_path || "reports/rl_dataset_benchmark_v2.json")} · ${escapeHtml(report.generated_at || "")}`,
+      `<div class="drawer-note"><strong>准入结论：</strong>evidence_integrity_passed=${String(report.evidence_integrity_passed)}；policy_admission_passed=${String(report.policy_admission_passed)}；production_authority=${String(report.production_authority)}。测试均值只做盲测诊断，候选只按验证集多数票选择。</div><div class="source-record-list">${rows}</div>`,
+      `<button type="button" class="drawer-button" data-action="close-modal">已核对证据</button>`,
+      "rl-evidence"
+    );
+  }
+
   async function handleRLCenterAction(action) {
     if (action === "refresh") {
       state.rlCenter = null;
@@ -3529,6 +3795,7 @@
     }
     if (action === "start-training") await openRLLabConfig();
     if (action === "show-contract") showRLContract();
+    if (action === "show-evidence") showRLEvidence();
     if (action === "ask-advisor") {
       $("#rlAdvisorInput")?.focus();
       await askRLAdvisor("结合当前证据，告诉我下一步应该跑哪套数据，以及为什么。");
@@ -3543,12 +3810,12 @@
       if (!datasets.length) throw new Error("没有可用数据集，请先运行 scripts/fetch_public_rl_dataset.py");
       openModal(
         "真实RL训练实验室",
-        "选择数据、算法与训练规模；完整基准默认包含4种RL和1种PID控制器",
+        "选择数据、算法与训练规模；完整基准包含4种RL、PID与现场SOP固定规则",
         `<div class="settings-grid rl-lab-config">
           <label class="intake-field"><span>训练数据集</span><select id="rlDataset">${datasets.map((item) => `<option value="${escapeHtml(item.id)}">${escapeHtml(item.label)} · ${formatNumber(item.row_count,0)}行${item.port_data ? " · 港口数据" : " · 公开非港口基准"}</option>`).join("")}</select></label>
-          <div class="rl-algorithm-selector"><span>算法选择</span>${algorithms.map((item) => `<label><input type="checkbox" data-rl-algorithm value="${escapeHtml(item.id)}" checked><strong>${escapeHtml(item.label)}</strong><small>${item.family === "control_theory" ? "控制理论基线，不执行训练episode" : escapeHtml(item.type)}</small></label>`).join("")}</div>
+          <div class="rl-algorithm-selector"><span>算法选择</span>${algorithms.map((item) => `<label><input type="checkbox" data-rl-algorithm value="${escapeHtml(item.id)}" checked><strong>${escapeHtml(item.label)}</strong><small>${item.trainable ? escapeHtml(item.type) : "不学习强基线，不执行训练episode"}</small></label>`).join("")}</div>
           <div class="rl-config-row"><label class="intake-field"><span>每种RL训练回合</span><select id="rlEpisodes"><option value="80">80 · 快速</option><option value="160" selected>160 · 标准</option><option value="320">320 · 深度</option></select></label><label class="intake-field"><span>单回合时域步数</span><select id="rlHorizon"><option value="36">36</option><option value="72" selected>72</option><option value="144">144</option></select></label><label class="intake-field"><span>随机种子</span><input id="rlSeed" type="number" min="0" max="2147483647" value="240520"></label></div>
-          <div class="drawer-note"><strong>强制边界：</strong>训练只读取时间前段训练集且render_mode=None；全部训练完成后，点击测试步骤才读取保留测试段并返回渲染轨迹。取消任一算法可以做单项实验，但完整“五基线”审计要求全部勾选。</div>
+          <div class="drawer-note"><strong>强制边界：</strong>训练只读取时间前段训练集且render_mode=None；全部训练完成后，点击测试步骤才读取保留测试段并返回渲染轨迹。取消任一算法可以做单项实验，但完整“六算法与强基线”审计要求全部勾选。</div>
         </div>`,
         `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button" data-modal-action="start-rl-lab">启动真实训练</button>`,
         "rl-lab-config"
@@ -3560,8 +3827,8 @@
 
   function startConfiguredRLLab() {
     const algorithms = $$('[data-rl-algorithm]:checked').map((item) => item.value);
-    if (!algorithms.some((item) => item !== "pid")) {
-      toast("至少选择一种RL算法", "PID是控制基线，不能单独作为强化学习训练任务。", "warning");
+    if (!algorithms.some((item) => !["pid", "sop_rule"].includes(item))) {
+      toast("至少选择一种RL算法", "PID和SOP规则都是非学习强基线，不能单独作为强化学习训练任务。", "warning");
       return;
     }
     state.pendingRLLabConfig = {
@@ -3616,6 +3883,14 @@
     document.addEventListener("click", async (event) => {
       const viewButton = event.target.closest("[data-view-target]");
       if (viewButton) { setView(viewButton.dataset.viewTarget); return; }
+      const simulatorScenario = event.target.closest("[data-simulator-scenario]");
+      if (simulatorScenario) { await changeSimulatorScenario(simulatorScenario.dataset.simulatorScenario); return; }
+      const simulatorApproval = event.target.closest("[data-sim-approve]");
+      if (simulatorApproval) { await approveSimulatorDecision(simulatorApproval.dataset.simApprove, simulatorApproval.dataset.simRole); return; }
+      const simulatorExecution = event.target.closest("[data-sim-execute]");
+      if (simulatorExecution) { await executeSimulatorDecision(simulatorExecution.dataset.simExecute); return; }
+      const simulatorRollback = event.target.closest("[data-sim-rollback]");
+      if (simulatorRollback) { await rollbackSimulatorDecision(simulatorRollback.dataset.simRollback); return; }
       const rlCenterAction = event.target.closest("[data-rl-center-action]");
       if (rlCenterAction) { await handleRLCenterAction(rlCenterAction.dataset.rlCenterAction); return; }
       const rlAdvisorPrompt = event.target.closest("[data-rl-advisor-prompt]");
@@ -3707,6 +3982,9 @@
       settings:openSettings,
       profile:openProfile,
       "system-status":openSystemStatus,
+      "competitive-benchmark":openCompetitiveBenchmark,
+      "site-admission":openSiteAdmission,
+      "simulator-lineage":openSimulatorLineage,
       "runtime-status":openRuntimeStatus,
       "capability-chat":() => { $("#mode").value = "expert"; $("#modeShortLabel").textContent = "专业"; $("#question").focus(); },
       "generate-report":() => generateReport(state.currentIntent?.includes("energy") ? "energy" : "management_brief"),
@@ -3771,7 +4049,8 @@
 
   async function init() {
     initBilingualLayer(); restorePreferences(); updateGreeting(); bindEvents(); updateCounts();
-    await Promise.allSettled([loadDashboard(), loadKnowledge(), loadTasksAndTemplates(), loadConnectorSummary(), loadServerConversation()]);
+    await Promise.allSettled([loadDashboard(), loadSimulatorSnapshot(), loadKnowledge(), loadTasksAndTemplates(), loadConnectorSummary(), loadServerConversation()]);
+    connectSimulatorStream();
     void loadSystemLinkage({ render:false }).catch(() => {});
     showWelcome();
     if (state.conversationTurns.length) {

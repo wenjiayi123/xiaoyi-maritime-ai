@@ -1,21 +1,31 @@
 from __future__ import annotations
 
 import json
+import hashlib
 from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, PlainTextResponse
 
-from app.config import APP_NAME, APP_VERSION, INDEX_PATH
+from app.config import APP_NAME, APP_VERSION, BASE_DIR, INDEX_PATH
 from app.model_gateway import model_gateway
 from app.observability import telemetry
 from app.rl_lab.datasets import dataset_catalog
 from app.runtime_store import runtime_store
 from app.settings import settings
+from app.site_admission import site_admission_payload
 
 
 router = APIRouter(tags=["系统健康与可观测性"])
+
+
+def _competitive_benchmark_payload() -> dict[str, Any]:
+    path = BASE_DIR / "data" / "competitive" / "hi_dolphin_public_gap_v1.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload["artifact"] = str(path.relative_to(BASE_DIR))
+    payload["artifact_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return payload
 
 
 def _index_check() -> dict[str, Any]:
@@ -59,12 +69,31 @@ def readiness_payload() -> dict[str, Any]:
         },
     }
     ready = all(bool(item.get("ok")) for item in checks.values())
+    model_status = checks["model_gateway"]
+    local_model_active = bool(
+        model_status.get("configured")
+        and model_status.get("local_generation_enabled")
+        and not model_status.get("circuit_open")
+    )
     return {
         "app": APP_NAME,
         "version": APP_VERSION,
         "status": "ready" if ready else "not_ready",
         "checked_at": datetime.now(timezone.utc).isoformat(),
         "checks": checks,
+        "runtime_posture": {
+            "application_ready": ready,
+            "generation_mode": "local_model" if local_model_active else "deterministic_fallback",
+            "recommendation_only": True,
+            "dispatch_allowed": False,
+            "production_authority": False,
+            "production_data_verified": False,
+            "authority_notice": (
+                "Application readiness only. Production authority remains disabled until "
+                "site mapping, calibration, shadow operation, dual approval, and rollback "
+                "drills are verified."
+            ),
+        },
         "telemetry": telemetry.snapshot(),
     }
 
@@ -100,7 +129,27 @@ def system_info() -> dict[str, Any]:
         "idempotency_enabled": True,
         "observability": ["structured_json_logs", "request_id", "prometheus_metrics", "deep_readiness"],
         "production_write_default": False,
+        "recommendation_only": True,
+        "dispatch_allowed": False,
+        "production_authority": False,
+        "authority_admission_requirements": [
+            "site_field_mapping",
+            "calibration",
+            "shadow_operation",
+            "dual_approval",
+            "rollback_drill",
+        ],
     }
+
+
+@router.get("/api/system/competitive-benchmark")
+def competitive_benchmark() -> dict[str, Any]:
+    return _competitive_benchmark_payload()
+
+
+@router.get("/api/system/site-admission")
+def site_admission() -> dict[str, Any]:
+    return site_admission_payload()
 
 
 @router.get("/metrics", response_class=PlainTextResponse)

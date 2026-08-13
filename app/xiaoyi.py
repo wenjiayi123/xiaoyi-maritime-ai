@@ -191,21 +191,21 @@ class XiaoyiAI:
                 answer=answer,
                 evidence=[
                     Evidence(
-                        id="runtime:XIAOYI-PORT-SANDBOX",
-                        source="XIAOYI-PORT-SANDBOX",
-                        title="港口运营沙箱动态事件流",
+                        id="runtime:XIAOYI-PORT-REALTIME-SIMULATOR",
+                        source="XIAOYI-PORT-REALTIME-SIMULATOR",
+                        title="港口公开数据校准实时模拟事件流",
                         score=1.0,
                         snippet=(
-                            "本条证据是本次问答时读取的运营沙箱快照，供生成模型"
-                            "解释当前合成事件，不代表港口生产实绩：\n"
+                            "本条证据是本次问答时读取的公开数据校准模拟快照，供生成模型"
+                            "解释当前工程模拟事件；公开AIS只校准交通包络，不代表港口生产实绩：\n"
                             f"{answer[:1800]}"
                         ),
-                        institution="小懿AI本地运营沙箱",
-                        version="port-ops.v1",
-                        provenance_type="synthetic_runtime",
+                        institution="小懿AI本地实时模拟器",
+                        version="port-realtime.v1 / port-ops.v1",
+                        provenance_type="public_data_calibrated_simulation",
                         official=False,
-                        verification_status="synthetic_validated",
-                        source_quality="sandbox_runtime",
+                        verification_status="simulation_constraints_validated",
+                        source_quality="public_data_calibrated_simulation",
                     )
                 ],
                 confidence="medium",
@@ -213,7 +213,7 @@ class XiaoyiAI:
                 strict_evidence=strict_evidence,
                 grounded=True,
                 coverage=1.0,
-                source_quality="sandbox_runtime",
+                source_quality="public_data_calibrated_simulation",
                 refusal_reason="sandbox_not_production",
             )
         policy = build_query_policy(
@@ -229,16 +229,33 @@ class XiaoyiAI:
                 if item and item.strip()
             )
         )[:5]
+        expanded_by_base = [
+            (
+                item,
+                list(
+                    dict.fromkeys(
+                        [item, *expand_port_queries(item)]
+                    )
+                )[:5],
+            )
+            for item in base_queries
+        ]
         queries = list(
             dict.fromkeys(
-                expanded
-                for item in base_queries
-                for expanded in expand_port_queries(item)
+                [
+                    *base_queries,
+                    *(
+                        expanded
+                        for _, expanded_queries in expanded_by_base
+                        for expanded in expanded_queries
+                        if expanded not in base_queries
+                    ),
+                ]
             )
-        )[:5]
+        )[:15]
         if not queries:
             queries = [question]
-        per_query_hit_ids: list[tuple[str, list[str]]] = []
+        search_hit_ids: dict[str, list[str]] = {}
         raw_by_id: dict[str, SearchHit] = {}
         for retrieval_query in queries:
             query_hits = self.kb.search(
@@ -246,13 +263,28 @@ class XiaoyiAI:
                 top_k=max(top_k * 4, 20),
                 jurisdictions=policy.jurisdictions or None,
             )
-            per_query_hit_ids.append(
-                (retrieval_query, [hit.chunk.id for hit in query_hits])
-            )
+            search_hit_ids[retrieval_query] = [
+                hit.chunk.id for hit in query_hits
+            ]
             for hit in query_hits:
                 existing = raw_by_id.get(hit.chunk.id)
                 if existing is None or hit.score > existing.score:
                     raw_by_id[hit.chunk.id] = hit
+        # Domain/form expansions are recall aids, not user-authored subquestions.
+        # Keep one coverage row per actual user subquestion and associate it with
+        # the union of its expanded searches. Otherwise a short question can be
+        # reported as three fully covered questions and generic catalog hits can
+        # consume most of top_k merely because they satisfy generated expansions.
+        per_query_hit_ids: list[tuple[str, list[str]]] = []
+        for base_query, expanded_queries in expanded_by_base:
+            combined_ids = list(
+                dict.fromkeys(
+                    hit_id
+                    for expanded_query in expanded_queries
+                    for hit_id in search_hit_ids.get(expanded_query, [])
+                )
+            )
+            per_query_hit_ids.append((base_query, combined_ids))
         raw_hits = sorted(
             raw_by_id.values(),
             key=lambda item: (item.score, item.coverage, item.chunk.id),
@@ -290,10 +322,19 @@ class XiaoyiAI:
                 for hit in qualified_hits
                 if source_is_applicable(hit.chunk.provenance, policy)
             ]
-            eligible_grounding_hits.sort(
-                key=lambda hit: self._policy_applicability_rank(hit, policy),
-                reverse=True,
-            )
+            if re.search(
+                r"(?:截至|当时|现在|现行|生效|废止|过去|未来|"
+                r"20\d{2}(?:年|[-/.]))",
+                question,
+            ):
+                eligible_grounding_hits.sort(
+                    # Apply temporal precedence only when the user actually
+                    # asks a time/version question. For an official directory
+                    # or procedure locator, a newer circular is not a better
+                    # answer merely because it carries an effective date.
+                    key=lambda hit: self._policy_applicability_rank(hit, policy)[:2],
+                    reverse=True,
+                )
             requested_local = set(policy.jurisdictions) - {"GLOBAL"}
             grounding_hits = self._balance_query_coverage(
                 eligible_grounding_hits,
@@ -778,9 +819,42 @@ class XiaoyiAI:
 
     def _rank_evidence_hits(self, question: str, hits: list[SearchHit]) -> list[SearchHit]:
         compact_question = re.sub(r"[\s，。！？、,.!?]", "", question).lower()
+        daily_categories = set(daily_query_categories(question))
+        preferred_daily_sources = {
+            "gate_pressure": "121_yard_gate_equipment_flow_daily_qa.md",
+            "carbon_reduction": "123_port_carbon_reduction_daily_qa.md",
+            "special_cargo": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+            "intermodal_plan": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+            "intermodal_delay": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
+            "system_data": "126_port_management_kpi_system_daily_qa.md",
+        }
+        preferred_sources = {
+            preferred_daily_sources[category]
+            for category in daily_categories
+            if category in preferred_daily_sources
+        }
+        cjk_title_anchors = {
+            "闸口": ("闸口",),
+            "滚装": ("滚装",),
+            "海铁": ("海铁", "班列"),
+            "火车": ("火车", "班列"),
+            "班列": ("火车", "班列"),
+            "储能": ("储能",),
+            "接口": ("接口", "消息"),
+            "消息": ("接口", "消息"),
+        }
         acronym_terms = {
             term.lower()
             for term in re.findall(r"[A-Za-z][A-Za-z0-9_/-]{1,}", question)
+        }
+        precise_technical_question = bool(acronym_terms) and any(
+            marker in compact_question
+            for marker in ("是什么", "负责什么", "怎么", "如何", "区别", "步骤", "处置")
+        )
+        vessel_schedule_definition = compact_question in {
+            "eta是什么",
+            "etb是什么",
+            "etd是什么",
         }
         generic_handover = (
             "交班" in compact_question
@@ -812,7 +886,40 @@ class XiaoyiAI:
             acronym_bonus = 200.0 * sum(
                 1 for term in acronym_terms if term in compact_title
             )
+            daily_source_bonus = 320.0 if hit.chunk.source in preferred_sources else 0.0
+            vessel_schedule_bonus = (
+                520.0
+                if vessel_schedule_definition
+                and hit.chunk.source == "55_vessel_schedule_port_call_qa.md"
+                else 0.0
+            )
+            # A named operational object (for example 储能 or 滚装) must beat
+            # a broader same-document overview returned by expansion queries.
+            cjk_anchor_bonus = 700.0 * sum(
+                1
+                for question_anchor, title_anchors in cjk_title_anchors.items()
+                if question_anchor in compact_question
+                and any(title_anchor in compact_title for title_anchor in title_anchors)
+            )
             handover_bonus = 0.0
+            generic_penalty = 0.0
+            if (
+                hit.chunk.source in GENERIC_SOURCES
+                and not any(
+                    marker in compact_question
+                    for marker in (
+                        "知识目录",
+                        "知识体系",
+                        "知识库范围",
+                        "问答形式",
+                        "问题类型",
+                    )
+                )
+            ):
+                # Catalogs and question-form taxonomies are useful routing aids,
+                # but their headings are not operational answers. A specific
+                # alarm/SOP query must rank an auditable procedure above them.
+                generic_penalty = -1200.0 if precise_technical_question else -360.0
             if generic_handover:
                 if (
                     hit.chunk.source == "54_daily_port_operations_shift_qa.md"
@@ -838,7 +945,11 @@ class XiaoyiAI:
             return (
                 exact_bonus
                 + acronym_bonus
+                + daily_source_bonus
+                + vessel_schedule_bonus
+                + cjk_anchor_bonus
                 + handover_bonus
+                + generic_penalty
                 + hit.coverage * 100.0
                 + hit.score,
                 hit.coverage,
@@ -922,9 +1033,13 @@ class XiaoyiAI:
             if len(selected) >= top_k:
                 return selected[:top_k]
         for _, hit_ids in per_query_hit_ids:
-            for hit_id in hit_ids:
-                hit = by_id.get(hit_id)
-                if hit is None or hit_id in selected_ids:
+            eligible_ids = set(hit_ids)
+            # `hits` already contains the domain-aware reranking. Preserve that
+            # order instead of reverting to the raw first result of each sparse
+            # or expanded search.
+            for hit in hits:
+                hit_id = hit.chunk.id
+                if hit_id not in eligible_ids or hit_id in selected_ids:
                     continue
                 selected.append(hit)
                 selected_ids.add(hit_id)
@@ -1329,7 +1444,7 @@ class XiaoyiAI:
             "每条专业证据均保留来源、版本、机构和内容校验哈希。\n\n"
             "我聚焦港口调度、船舶运营、航运SOP规范、能碳优化、海事合规五大场景，可提供严格证据知识问答、标准流程生成、设备告警处置建议、航运数据辅助决策、结构化报告，以及学术研究中的术语梳理、资料检索线索和论文框架辅助。\n\n"
             "除回答问题外，我还能把一句自然语言指令拆解为可视化、可暂停、可审计的工作台操作链，自动完成页面跳转、数据读取、知识检索、来源核验、任务推进、报告生成和结果回写。项目已经预留 TOS、PCS、EMS、EAM、VTS、AIS、气象海洋与国际贸易单一窗口等真实港口接口契约，也为港航数字孪生和强化学习训练实验室保留协同入口。\n\n"
-            "我的原则是专业结论有索引依据，实时状态有可追溯数据源依据，生产写操作有当前授权依据。未接入真实系统时，我会明确标注运营沙箱动态合成数据；涉及安全、调度、设备控制和对外申报时，我只完成辅助分析与写操作预检，不绕过人工确认和生产系统权限。"
+            "我的原则是专业结论有索引依据，实时状态有可追溯数据源依据，生产写操作有当前授权依据。未接入真实系统时，我会明确标注公开数据校准实时模拟，并展示来源、哈希、物理约束和换源契约；涉及安全、调度、设备控制和对外申报时，我只完成辅助分析或沙箱闭环，不绕过人工确认和生产系统权限。"
         )
         if intent == "identity":
             return identity_profile
@@ -1359,6 +1474,30 @@ class XiaoyiAI:
         filtered: list[SearchHit] = []
         question_terms = set(re.findall(r"[A-Za-z0-9]+|[\u4e00-\u9fff]{2,}", question))
         incident_groups = self._incident_groups(question)
+
+        # In a Chinese domain question, mixed-case/uppercase technical tokens
+        # such as THDi, VGM, TOS or AGV are high-information anchors. Generated
+        # domain expansions must not replace them with broad catalog material.
+        technical_anchors = {
+            token.casefold()
+            for token in re.findall(r"[A-Za-z][A-Za-z0-9_/-]{1,}", question)
+            if (
+                any(character.isupper() for character in token)
+                or any(character.isdigit() for character in token)
+            )
+        }
+        if technical_anchors and re.search(r"[\u4e00-\u9fff]", question):
+            anchored_hits = [
+                hit
+                for hit in hits
+                if any(
+                    anchor
+                    in f"{hit.chunk.title}\n{hit.chunk.text}".casefold()
+                    for anchor in technical_anchors
+                )
+            ]
+            if anchored_hits:
+                hits = anchored_hits
 
         if intent in {"sop", "alert_explain"} and incident_groups:
             incident_hits = self._filter_incident_hits(question, hits, incident_groups)

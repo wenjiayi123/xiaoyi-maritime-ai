@@ -8,7 +8,7 @@ from app.main import app
 
 client = TestClient(app)
 
-COMMAND = "启动RL训练实验，四种强化学习算法加PID控制基线，训练时不渲染，训练后才在测试集渲染。"
+COMMAND = "启动RL训练实验，四种强化学习算法加PID和现场SOP规则基线，训练时不渲染，训练后才在测试集渲染。"
 
 
 def _wait(run_id: str) -> dict:
@@ -35,7 +35,7 @@ def test_rl_command_builds_real_training_and_holdout_workflow() -> None:
 def test_rl_mission_runs_locally_and_seals_test_data_until_training_finishes() -> None:
     health = client.get("/api/rl-mission/health").json()
     assert health["online_count"] == health["total"] == 4
-    assert len(health["algorithms"]) == 5
+    assert len(health["algorithms"]) == 6
     assert health["production_write_enabled"] is False
 
     payload = {
@@ -61,7 +61,7 @@ def test_rl_mission_runs_locally_and_seals_test_data_until_training_finishes() -
     assert run["training"]["rendering_performed"] is False
     assert run["reproducibility"]["test_rows_touched_during_training"] is False
     assert set(run["training"]["algorithms"]) == {
-        "q_learning", "sarsa", "expected_sarsa", "double_q_learning", "pid",
+        "q_learning", "sarsa", "expected_sarsa", "double_q_learning", "pid", "sop_rule",
     }
 
     if early_test.status_code == 200:
@@ -70,7 +70,7 @@ def test_rl_mission_runs_locally_and_seals_test_data_until_training_finishes() -
         evaluation = client.post("/api/rl-mission/simulate", json={**payload, "run_id": run_id}).json()
     assert evaluation["rendering_performed"] is True
     assert evaluation["render_split"] == "test"
-    assert len(evaluation["results"]) == 5
+    assert len(evaluation["results"]) == 6
     assert all(result["frames"] for result in evaluation["results"])
     assert {frame["split"] for result in evaluation["results"] for frame in result["frames"]} == {"test"}
 

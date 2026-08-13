@@ -21,9 +21,9 @@ from app.rl_lab.datasets import dataset_catalog, file_sha256  # noqa: E402
 from app.rl_lab.service import RLLabService  # noqa: E402
 
 
-REPORT_JSON = BASE_DIR / "reports" / "rl_dataset_benchmark_v1.json"
-REPORT_MARKDOWN = BASE_DIR / "reports" / "rl_dataset_benchmark_v1.md"
-EVIDENCE_DIR = BASE_DIR / "reports" / "rl_evidence"
+REPORT_JSON = BASE_DIR / "reports" / "rl_dataset_benchmark_v2.json"
+REPORT_MARKDOWN = BASE_DIR / "reports" / "rl_dataset_benchmark_v2.md"
+EVIDENCE_DIR = BASE_DIR / "reports" / "rl_evidence_v2"
 LEGACY_RUN_ID = "rl-20260724T120838-ecbd3029"
 DATASET_IDS = (
     "uci_appliances_energy",
@@ -31,6 +31,9 @@ DATASET_IDS = (
     "noaa_la_lb_ais_2024_12_25_1min",
 )
 DEFAULT_SEEDS = (260726, 260727, 260728)
+STUDENT_T_95 = {2: 4.3026527297}
+RL_IDS = {"q_learning", "sarsa", "expected_sarsa", "double_q_learning"}
+STRONG_BASELINE_IDS = {"pid", "sop_rule"}
 
 
 def _now() -> str:
@@ -138,16 +141,20 @@ def _aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
                 ]
             )
         )
-        summaries[algorithm_id] = {
-            field: {
-                "mean": round(statistics.fmean(float(item[field]) for item in metrics), 6),
-                "stddev": round(
-                    statistics.pstdev(float(item[field]) for item in metrics),
-                    6,
-                ),
+        summaries[algorithm_id] = {}
+        for field in numeric_fields:
+            values = [float(item[field]) for item in metrics]
+            mean = statistics.fmean(values)
+            sample_stddev = statistics.stdev(values) if len(values) > 1 else 0.0
+            critical = STUDENT_T_95.get(len(values) - 1, 1.96)
+            margin = critical * sample_stddev / (len(values) ** 0.5)
+            summaries[algorithm_id][field] = {
+                "mean": round(mean, 6),
+                "sample_stddev": round(sample_stddev, 6),
+                "ci95_lower": round(mean - margin, 6),
+                "ci95_upper": round(mean + margin, 6),
+                "ci95_method": f"two-sided Student t, df={len(values) - 1}",
             }
-            for field in numeric_fields
-        }
     winner_counts = {
         algorithm_id: sum(run["test_best_algorithm_id"] == algorithm_id for run in runs)
         for algorithm_id in algorithms
@@ -161,6 +168,104 @@ def _aggregate(runs: list[dict[str, Any]]) -> dict[str, Any]:
         "algorithm_metrics": summaries,
         "test_winner_counts": winner_counts,
         "best_algorithm_by_mean_test_score": best_by_mean_score,
+        "validation_winner_counts": {
+            algorithm_id: sum(
+                run["validation_best_algorithm_id"] == algorithm_id for run in runs
+            )
+            for algorithm_id in algorithms
+        },
+    }
+
+
+def _admission(experiment: dict[str, Any]) -> dict[str, Any]:
+    runs = experiment["runs"]
+    aggregate = experiment["aggregate"]
+    metrics = aggregate["algorithm_metrics"]
+    validation_counts = aggregate["validation_winner_counts"]
+    validation_order = sorted(
+        validation_counts,
+        key=lambda algorithm_id: (-validation_counts[algorithm_id], algorithm_id),
+    )
+    validation_candidate = validation_order[0]
+    validation_votes = validation_counts[validation_candidate]
+    strongest_baseline = max(
+        STRONG_BASELINE_IDS,
+        key=lambda algorithm_id: metrics[algorithm_id]["score"]["mean"],
+    )
+    baseline_score = metrics[strongest_baseline]["score"]
+    failures: list[dict[str, Any]] = []
+    selected_reasons: list[str] = []
+    if validation_votes < 2:
+        selected_reasons.append("validation_selection_unstable_no_majority")
+    if validation_candidate not in RL_IDS:
+        selected_reasons.append("strong_baseline_won_validation")
+
+    if validation_candidate in RL_IDS:
+        candidate_score = metrics[validation_candidate]["score"]
+        if candidate_score["ci95_lower"] <= baseline_score["ci95_upper"]:
+            selected_reasons.append("candidate_ci95_does_not_dominate_strong_baseline")
+        candidate_runs = [
+            next(
+                result for result in run["results"]
+                if result["algorithm_id"] == validation_candidate
+            )
+            for run in runs
+        ]
+        if any(result["metrics"].get("constraint_violations", 0) != 0 for result in candidate_runs):
+            selected_reasons.append("constraint_violation_detected")
+        if experiment["dataset"]["environment_type"] == "energy_storage":
+            if any(result["metrics"].get("terminal_soc_recovery_rate", 0) < 1 for result in candidate_runs):
+                selected_reasons.append("terminal_soc_recovery_gate_failed")
+            if metrics[validation_candidate]["peak_reduction_percent"]["ci95_lower"] < 0:
+                selected_reasons.append("peak_demand_non_degradation_gate_failed")
+
+    for algorithm_id in sorted(RL_IDS):
+        reasons: list[str] = []
+        if algorithm_id != validation_candidate:
+            reasons.append("not_selected_by_validation_majority")
+        else:
+            reasons.extend(selected_reasons)
+        if not reasons:
+            status = "admitted_for_offline_shadow_candidate"
+        else:
+            status = "rejected"
+        failures.append({
+            "algorithm_id": algorithm_id,
+            "status": status,
+            "reasons": reasons,
+            "test_score": metrics[algorithm_id]["score"],
+        })
+
+    selected_admitted = (
+        validation_candidate in RL_IDS
+        and validation_votes >= 2
+        and not selected_reasons
+    )
+    return {
+        "selection_basis": "validation-majority only; blind-test metrics do not select the candidate",
+        "validation_candidate_id": validation_candidate,
+        "validation_votes": validation_votes,
+        "required_validation_votes": 2,
+        "strong_baseline_id": strongest_baseline,
+        "strong_baseline_score": baseline_score,
+        "candidate_status": (
+            "admitted_for_offline_shadow_candidate"
+            if selected_admitted
+            else "baseline_retained_or_candidate_rejected"
+        ),
+        "candidate_reasons": selected_reasons,
+        "rl_candidate_admitted": selected_admitted,
+        "failed_candidates": failures,
+        "production_authority": False,
+        "dispatch_allowed": False,
+        "site_admission_required": [
+            "site_field_mapping",
+            "calibration",
+            "drift_acceptance",
+            "shadow_operation",
+            "dual_approval",
+            "rollback_drill",
+        ],
     }
 
 
@@ -203,15 +308,7 @@ def _export_evidence(
     selected_runs["legacy_uci_smoke"] = LEGACY_RUN_ID
 
     for dataset_id, experiment in experiments.items():
-        aggregate_winner = experiment["aggregate"]["best_algorithm_by_mean_test_score"]
-        selected = max(
-            experiment["runs"],
-            key=lambda run: next(
-                result["metrics"]["score"]
-                for result in run["results"]
-                if result["algorithm_id"] == aggregate_winner
-            ),
-        )
+        selected = sorted(experiment["runs"], key=lambda run: run["seed"])[0]
         selected_runs[dataset_id] = selected["run_id"]
         copied_files.extend(
             _copy_run_bundle(
@@ -241,7 +338,8 @@ def _markdown(report: dict[str, Any]) -> str:
         metrics = aggregate["algorithm_metrics"][winner]
         if dataset["environment_type"] == "energy_storage":
             headline = (
-                f"平均测试节费代理 {metrics['cost_saving_percent']['mean']:.2f}%；"
+                f"平均测试净成本变化代理 {metrics['cost_saving_percent']['mean']:.2f}%"
+                f"（95%CI {metrics['cost_saving_percent']['ci95_lower']:.2f}%~{metrics['cost_saving_percent']['ci95_upper']:.2f}%）；"
                 f"峰值变化 {metrics['peak_reduction_percent']['mean']:.2f}%；"
                 f"终端SOC {metrics['terminal_soc']['mean']:.3f}；"
                 f"平均约束违例 {metrics['constraint_violations']['mean']:.2f}"
@@ -253,35 +351,38 @@ def _markdown(report: dict[str, Any]) -> str:
             )
         rows.append(
             f"| `{dataset_id}` | {dataset['row_count']:,} | {dataset['environment_type']} | "
-            f"{winner} | {headline} |"
+            f"{winner} | {experiment['admission']['candidate_status']} | {headline} |"
         )
     scale = report["dataset_comparison"]["large_to_original_row_ratio"]
-    return f"""# 小懿 RL 公开数据对比证据 v1
+    return f"""# 小懿 RL 公开数据对比与候选准入证据 v2
 
 生成时间：{report['generated_at']}
 
-本报告使用固定时间顺序 70%/15%/15% 训练、验证、测试隔离，训练阶段不渲染；全部训练结束后才读取保留测试段并生成轨迹。每套数据使用 {report['configuration']['seed_count']} 个随机种子、4 种 RL 与 1 个 PID 控制基线。
+本报告追加于v1之后，不覆盖旧训练。它使用固定时间顺序 70%/15%/15% 训练、验证、测试隔离，训练阶段不渲染；全部训练结束后才读取保留测试段并生成轨迹。每套数据使用 {report['configuration']['seed_count']} 个随机种子、4 种 RL、PID与现场SOP固定规则两类强基线。95%置信区间使用三种子Student t区间（df=2），小样本区间较宽。
 
-| 数据集 | 行数 | 环境 | 多种子平均测试优选 | 保留测试摘要 |
-|---|---:|---|---|---|
+| 数据集 | 行数 | 环境 | 测试均值诊断优选（不用于选模） | 准入状态 | 保留测试摘要 |
+|---|---:|---|---|---|---|
 {chr(10).join(rows)}
 
 ## 可信度结论
 
 - 新的大规模公开能源基准为 {report['dataset_comparison']['large_rows']:,} 行，是原 {report['dataset_comparison']['original_rows']:,} 行基准的 {scale:.2f} 倍。它提高的是算法规模、重复性与分布跨度证据，不是港口现场真实性。
 - NOAA 港口场景来自 AIS 实测交通消息。船舶数量、航速、航行状态和船型来自公开观测；服务量、积压、等待和得分是校准仿真输出，不是洛杉矶或长滩码头生产 KPI。
-- 多种子结果允许 PID 胜出。发布证据保留真实比较结果，不为了展示 RL 而隐藏控制基线。
+- 候选只能由验证集多数票选出；测试均值只做盲测诊断，不反向选模。PID或SOP规则胜出时保留基线，失败RL候选及原因全部保留。
+- 能源环境v2把终端SOC恢复设为硬门禁，净成本纳入电池吞吐衰减成本，不再允许“放空电池换节费”通过准入。
 - 接真实港口仍需提供 DCSA/TOS/VTS/EMS、泊位、堆场、设备、工班、潮汐、天气、闸口与授权字段，并在现场数据上重新标定和测试。
 
 ## 可复现与门禁
 
-- 算法：Q-learning、SARSA、Expected SARSA、Double Q-learning、PID。
+- 算法：Q-learning、SARSA、Expected SARSA、Double Q-learning、PID、现场SOP固定规则。
 - 每种 RL：{report['configuration']['episodes']} 回合；单回合 {report['configuration']['horizon_steps']} 步。
 - 固定种子：{', '.join(str(seed) for seed in report['configuration']['seeds'])}。
 - 数据、端口配置、模型和测试结果均进入 SHA-256 证据清单。
 - 旧的 2026-07-24 UCI 10 回合训练包原样保存在 `reports/rl_evidence/legacy_uci_smoke_20260724/`，并明确标注为烟雾级运行。
 
-PASS 定义：{report['pass_definition']}
+证据完整性PASS定义：{report['pass_definition']}
+
+生产权限：`production_authority=false`，`dispatch_allowed=false`。离线候选即使通过，也只允许进入现场映射、标定和影子运行阶段。
 
 范围声明：{report['scope_notice']}
 """
@@ -312,17 +413,27 @@ def run_benchmark(episodes: int, horizon_steps: int, seeds: tuple[int, ...]) -> 
             "runs": runs,
             "aggregate": _aggregate(runs),
         }
+        experiments[dataset_id]["admission"] = _admission(experiments[dataset_id])
 
     selected_runs, evidence_hashes = _export_evidence(experiments)
     original_rows = experiments["uci_appliances_energy"]["dataset"]["row_count"]
     large_rows = experiments["uci_household_power_5min"]["dataset"]["row_count"]
     report = {
-        "schema_version": "xiaoyi-rl-dataset-benchmark.v1",
+        "schema_version": "xiaoyi-rl-dataset-benchmark.v2",
         "generated_at": _now(),
-        "passed": True,
+        "evidence_integrity_passed": True,
+        "policy_admission_passed": any(
+            experiment["admission"]["rl_candidate_admitted"]
+            for experiment in experiments.values()
+        ),
+        "production_admission_passed": False,
+        "production_authority": False,
+        "dispatch_allowed": False,
+        "report_status": "completed_with_explicit_admission_results",
         "pass_definition": (
             "All scheduled runs completed, temporal and rendering boundaries held, and evidence "
-            "hashes were generated. PASS does not mean RL beat PID or production targets were met."
+            "hashes were generated. Evidence PASS does not mean an RL candidate beat strong baselines "
+            "or that production targets were met."
         ),
         "configuration": {
             "algorithms": list(ALL_ALGORITHM_IDS),
@@ -367,10 +478,10 @@ def verify() -> list[str]:
         report = json.loads(REPORT_JSON.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         return [f"benchmark report is unreadable: {exc}"]
-    if report.get("schema_version") != "xiaoyi-rl-dataset-benchmark.v1":
+    if report.get("schema_version") != "xiaoyi-rl-dataset-benchmark.v2":
         errors.append("unexpected benchmark schema")
-    if len(report.get("configuration", {}).get("algorithms", [])) != 5:
-        errors.append("benchmark does not contain five algorithms")
+    if len(report.get("configuration", {}).get("algorithms", [])) != 6:
+        errors.append("benchmark does not contain six algorithms")
     if report.get("configuration", {}).get("seed_count", 0) < 3:
         errors.append("benchmark requires at least three seeds")
     for relative, expected in report.get("evidence_sha256", {}).items():
@@ -387,6 +498,11 @@ def verify() -> list[str]:
                 errors.append(f"test trace missing in {run.get('run_id')}")
             if run.get("split", {}).get("strategy") != "chronological_no_shuffle":
                 errors.append(f"split boundary changed in {run.get('run_id')}")
+        admission = experiment.get("admission", {})
+        if admission.get("production_authority") is not False:
+            errors.append("production authority must remain false")
+        if len(admission.get("failed_candidates", [])) != 4:
+            errors.append("all four RL candidates require an admission record")
     return errors
 
 
@@ -401,7 +517,12 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "run":
         report = run_benchmark(args.episodes, args.horizon_steps, tuple(args.seeds))
-        print(json.dumps({"passed": report["passed"], "report": _relative(REPORT_JSON)}, ensure_ascii=False))
+        print(json.dumps({
+            "evidence_integrity_passed": report["evidence_integrity_passed"],
+            "policy_admission_passed": report["policy_admission_passed"],
+            "production_admission_passed": report["production_admission_passed"],
+            "report": _relative(REPORT_JSON),
+        }, ensure_ascii=False))
         return 0
     errors = verify()
     for error in errors:

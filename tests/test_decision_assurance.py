@@ -120,6 +120,43 @@ def test_failed_citation_integrity_blocks_decision_chain() -> None:
     assert "citation_integrity_failed" in readiness.blockers
 
 
+def test_internal_sop_control_action_requires_site_confirmation() -> None:
+    response = ChatResponse(
+        app="小懿",
+        mode="sop",
+        intent="sop",
+        question="岸电 THDi 超标怎么办？",
+        answer="必要时限功率、分步切负载或暂停岸电连接。[E1]",
+        evidence=[
+            Evidence(
+                id="internal-sop-1",
+                source="internal.md",
+                title="岸电 THDi 超标处置",
+                score=100.0,
+                snippet="必要时限功率、分步切负载或暂停岸电连接。",
+                provenance_type="internal_curated",
+                verification_status="not_independently_verified",
+                source_quality="internal_curated",
+            )
+        ],
+        confidence="medium",
+        next_questions=[],
+        grounded=True,
+        source_quality="internal_curated",
+    )
+    response = response.model_copy(
+        update={"answer_verification": verify_response(response)}
+    )
+
+    evidence_health, readiness = assess_response(response)
+
+    assert evidence_health.status in {"healthy", "degraded"}
+    assert readiness.status == "ready_with_review"
+    assert readiness.risk_level == "high"
+    assert readiness.requires_human_confirmation is True
+    assert "internal_sop_requires_site_validation" in readiness.blockers
+
+
 def test_live_question_api_returns_explicit_decision_blocker() -> None:
     response = client.post(
         "/api/chat",

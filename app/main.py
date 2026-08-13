@@ -34,6 +34,7 @@ from app.operations import router as operations_router
 from app.operator_assistant import operator_scenarios
 from app.orchestrator import router as orchestrator_router
 from app.query_intelligence import build_query_analysis
+from app.realtime_port_simulator import router as realtime_port_simulator_router
 from app.rl_mission import router as rl_mission_router
 from app.rl_lab import router as rl_lab_router
 from app.runtime_store import runtime_store
@@ -83,6 +84,7 @@ app.include_router(connectors_router)
 app.include_router(knowledge_router)
 app.include_router(knowledge_intake_router)
 app.include_router(operations_router)
+app.include_router(realtime_port_simulator_router)
 app.include_router(capability_hub_router)
 app.include_router(domain_context_router)
 app.include_router(evidence_fusion_router)

@@ -1,0 +1,176 @@
+{
+  "contract_id": "xiaoyi-port-realtime-telemetry.v1",
+  "version": "1.0.0",
+  "updated_at": "2026-08-13",
+  "canonical_schema": "port-ops.v1",
+  "telemetry_schema": "port-realtime.v1",
+  "default_mode": "public_data_calibrated_simulation",
+  "truth_label": "公开数据校准实时模拟",
+  "replacement_rule": "TOS/PCS/EMS/EAM/VTS/AIS/METOC站点适配器必须输出相同规范字段；业务层、策略层和前端不因换源而改写。",
+  "production_authority": false,
+  "domains": [
+    {
+      "id": "port_call",
+      "source_system": "TOS/PCS/DCSA Port Call",
+      "required_fields": [
+        "port_call_id", "imo", "mmsi", "vessel_name", "vessel_type", "loa_m", "beam_m", "draft_m",
+        "voyage_id", "berth_id", "status", "eta", "etb", "atb", "etc", "etd", "moves_planned",
+        "moves_completed", "remaining_moves", "pilot_status", "tug_status", "event_time", "quality_code"
+      ]
+    },
+    {
+      "id": "ais_vts",
+      "source_system": "AIS/VTS",
+      "required_fields": [
+        "mmsi", "imo", "latitude", "longitude", "sog_knots", "cog_degrees", "heading_degrees",
+        "navigation_status", "position_accuracy", "ais_class", "last_reported_at", "route_segment", "cpa_nm", "tcpa_minutes"
+      ]
+    },
+    {
+      "id": "berth_marine_services",
+      "source_system": "TOS/PCS/VTS",
+      "required_fields": [
+        "berth_id", "length_m", "design_depth_m", "occupied", "port_call_id", "cranes_assigned",
+        "mooring_status", "pilot_required", "tugs_required", "under_keel_clearance_m", "window_risk_minutes"
+      ]
+    },
+    {
+      "id": "equipment",
+      "source_system": "TOS/ECS/EAM/PLC gateway",
+      "required_fields": [
+        "asset_id", "asset_type", "status", "availability", "task_id", "power_kw", "energy_kwh",
+        "moves_per_hour", "soc_percent", "battery_temperature_c", "fault_code", "maintenance_due_hours",
+        "location", "event_time", "quality_code"
+      ]
+    },
+    {
+      "id": "yard_inventory",
+      "source_system": "TOS/YMS",
+      "required_fields": [
+        "block_id", "capacity_teu", "occupied_teu", "occupancy_percent", "reefer_slots_total",
+        "reefer_slots_used", "dangerous_goods_teu", "export_teu", "import_teu", "transshipment_teu",
+        "rehandle_ratio", "dwell_hours_p50", "dwell_hours_p95"
+      ]
+    },
+    {
+      "id": "gate_intermodal",
+      "source_system": "Gate/OCR/Appointment/Rail",
+      "required_fields": [
+        "gate_id", "lanes_total", "lanes_open", "queue_vehicles", "truck_arrivals_per_hour",
+        "truck_departures_per_hour", "turn_time_minutes", "appointment_adherence_percent", "ocr_match_percent",
+        "rail_slots_planned", "rail_slots_active"
+      ]
+    },
+    {
+      "id": "energy_carbon",
+      "source_system": "EMS/SCADA/metering",
+      "required_fields": [
+        "grid_demand_kw", "peak_limit_kw", "energy_interval_kwh", "tariff_cny_per_kwh",
+        "marginal_carbon_kg_per_kwh", "shore_power_kw", "shore_power_connections", "reefer_kw",
+        "quay_crane_kw", "yard_crane_kw", "agv_charging_kw", "hvac_kw", "lighting_kw", "other_kw",
+        "bess_soc_percent", "bess_capacity_kwh", "bess_power_kw", "bess_roundtrip_efficiency",
+        "bess_degradation_cost_cny_per_kwh", "power_balance_error_kw", "meter_quality_code"
+      ]
+    },
+    {
+      "id": "weather_tide",
+      "source_system": "METOC/NOAA CO-OPS compatible adapter",
+      "required_fields": [
+        "station_id", "air_temperature_c", "relative_humidity_percent", "pressure_hpa", "wind_speed_ms",
+        "wind_gust_ms", "wind_direction_degrees", "visibility_m", "precipitation_mm_h", "wave_height_m",
+        "water_level_m_mllw", "current_speed_ms", "current_direction_degrees", "observation_time", "forecast_valid_until"
+      ]
+    },
+    {
+      "id": "safety_maintenance",
+      "source_system": "EAM/HSE/Alarm management",
+      "required_fields": [
+        "event_id", "severity", "category", "asset_id", "title", "message", "occurred_at", "acknowledged_at",
+        "resolved_at", "recommended_actions", "work_order_id", "permit_required", "isolation_required"
+      ]
+    },
+    {
+      "id": "governance",
+      "source_system": "Xiaoyi audit plane",
+      "required_fields": [
+        "stream_id", "sequence", "scenario_id", "simulation_seed", "observed_at", "generated_at",
+        "source_manifest_sha256", "contract_sha256", "payload_sha256", "completeness_rate", "duplicate_rate",
+        "out_of_order_rate", "physical_constraint_violations", "decision_mode", "sandbox_dispatch_allowed",
+        "physical_dispatch_allowed", "production_authority"
+      ]
+    }
+  ],
+  "physical_constraints": [
+    "0 <= occupied_teu <= capacity_teu",
+    "0 <= lanes_open <= lanes_total",
+    "equipment state counts do not exceed fleet totals",
+    "20 <= bess_soc_percent <= 90",
+    "abs(power_balance_error_kw) <= 1",
+    "draft_m + under_keel_clearance_m <= water_level_adjusted_depth_m",
+    "quay crane work is inhibited above configured wind safety threshold",
+    "AIS speed, heading, latitude and longitude remain within configured navigation envelope",
+    "moves_completed + remaining_moves = moves_planned",
+    "event timestamps are timezone-aware and monotonically sequenced"
+  ],
+  "quality_gates": {
+    "minimum_completeness_rate": 0.995,
+    "maximum_duplicate_rate": 0.001,
+    "maximum_out_of_order_rate": 0.001,
+    "maximum_physical_constraint_violations": 0,
+    "maximum_stream_staleness_seconds": 10
+  },
+  "calibration_sources": [
+    {
+      "id": "noaa_la_lb_ais_2024_12_25_1min",
+      "semantic_class": "independent_public_observation",
+      "local_path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+      "source_url": "https://marinecadastre.gov/ais/",
+      "license": "U.S. Government material; NOAA MarineCadastre AIS terms",
+      "accessed_at": "2026-07-24",
+      "used_for": ["traffic volume envelope", "vessel mix", "anchored/slow traffic ratios"],
+      "not_used_for": ["terminal berth occupancy", "yard inventory", "equipment state", "financial benefit"]
+    },
+    {
+      "id": "uci_appliances_energy",
+      "semantic_class": "independent_public_benchmark_observation",
+      "local_path": "data/public/uci_appliances_energy.csv",
+      "source_url": "https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction",
+      "license": "CC BY 4.0",
+      "accessed_at": "2026-08-13",
+      "used_for": ["time-series ingestion", "load/weather feature coupling", "energy quality regression tests"],
+      "not_used_for": ["port energy magnitude", "shore-power settlement", "terminal financial benefit"]
+    },
+    {
+      "id": "noaa_coops_api_contract",
+      "semantic_class": "official_api_contract_only",
+      "local_path": null,
+      "source_url": "https://api.tidesandcurrents.noaa.gov/api/prod/",
+      "license": "U.S. Government public information; verify station-specific terms",
+      "accessed_at": "2026-08-13",
+      "used_for": ["weather/tide field names", "units", "timestamps", "future adapter shape"],
+      "not_used_for": ["current simulated weather values", "site forecast", "navigation authorization"]
+    },
+    {
+      "id": "dcsa_port_call_2_0",
+      "semantic_class": "official_standard_contract",
+      "local_path": null,
+      "source_url": "https://dcsa.org/standards/port-call/documentation-port-call",
+      "license": "Apache License 2.0 for published standard materials",
+      "accessed_at": "2026-08-13",
+      "used_for": ["port call event vocabulary", "estimated/planned/actual timestamps", "adapter interoperability"],
+      "not_used_for": ["claim of DCSA conformance", "site implementation approval"]
+    }
+  ],
+  "simulation_only_domains": [
+    "berth_marine_services", "equipment", "yard_inventory", "gate_intermodal", "port energy magnitude",
+    "weather/tide values", "safety events", "all predicted business impacts"
+  ],
+  "site_replacement_checklist": [
+    "configure authorized read-only endpoints and credentials",
+    "approve field mapping with units, timezone, enums and stable keys",
+    "reconcile sample records against source-system screens and exports",
+    "run quality, drift and physical-constraint gates",
+    "complete read-only shadow operation and incident logging",
+    "keep recommendation_only until dual approval, rollback and OT/IT acceptance pass"
+  ]
+}

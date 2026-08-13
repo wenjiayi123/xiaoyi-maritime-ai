@@ -220,9 +220,9 @@ def verify_policy(payload: MissionPayload) -> dict[str, Any]:
             "detail": "chronological holdout",
         },
         {
-            "name": "五种基线完整",
+            "name": "六种候选与基线完整",
             "passed": set(run["config"]["algorithms"]) == set(ALL_ALGORITHM_IDS),
-            "detail": "4 RL + PID",
+            "detail": "4 RL + PID + SOP规则",
         },
         {
             "name": "模型与数据哈希",

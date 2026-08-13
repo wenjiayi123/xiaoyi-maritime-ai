@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Added a deterministic, public-data-calibrated port realtime simulator with a
+  two-second SSE stream, ten operational domains, 153 canonical fields, five
+  causal scenarios, and 168 equipment objects. All simulator values are marked
+  as non-site engineering simulation.
+- Added a replacement-ready `port-realtime.v1` telemetry contract, provenance
+  hashes, physical/data-quality gates, scenario evidence, and compatibility with
+  the existing `port-ops.v1` application interfaces.
+- Added two-distinct-person approval, simulator-state execution, immutable audit
+  events, and rollback. Physical dispatch and production authority remain
+  disabled until site admission is independently completed.
 - Expanded the same-architecture local LoRA profile to Rank 96 with
   104,595,456 trainable adapter parameters, source-isolated v3 supervision,
   held-out-question exclusion, PEFT and GGUF artifacts, and before/after

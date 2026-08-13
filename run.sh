@@ -6,11 +6,15 @@ cd "$(dirname "$0")"
 XIAOYI_PROJECT_ROOT="$PWD"
 XIAOYI_DESKTOP_ROOT="$(dirname "$XIAOYI_PROJECT_ROOT")"
 PORT_CONTRACT_FILE="$XIAOYI_PROJECT_ROOT/config/local_ports.env"
+REQUESTED_XIAOYI_PORT="${XIAOYI_PORT:-}"
 if [[ -f "$PORT_CONTRACT_FILE" ]]; then
   set -a
   # shellcheck disable=SC1090
   source "$PORT_CONTRACT_FILE"
   set +a
+fi
+if [[ -n "$REQUESTED_XIAOYI_PORT" ]]; then
+  XIAOYI_PORT="$REQUESTED_XIAOYI_PORT"
 fi
 export XIAOYI_PORT="${XIAOYI_PORT:-8010}"
 export XIAOYI_SIMULATOR_URL="${XIAOYI_SIMULATOR_URL:-http://127.0.0.1:${PORT_DT_SERVER_PORT:-8000}/}"
@@ -56,13 +60,39 @@ fi
 PYTHON_BIN="${XIAOYI_PYTHON:-}"
 if [[ -z "$PYTHON_BIN" ]]; then
   if [[ ! -x .venv/bin/python ]]; then
-    python3 -m venv .venv
+    BOOTSTRAP_PYTHON="${XIAOYI_BOOTSTRAP_PYTHON:-}"
+    if [[ -z "$BOOTSTRAP_PYTHON" ]]; then
+      BOOTSTRAP_PYTHON="$(command -v python3.12 || command -v python3 || true)"
+    fi
+    if [[ -z "$BOOTSTRAP_PYTHON" ]]; then
+      echo "未找到 Python 3.12；请先安装 Python 3.12。" >&2
+      exit 2
+    fi
+    if ! "$BOOTSTRAP_PYTHON" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] >= (3, 12) else 1)'; then
+      echo "检测到的 Python 低于 3.12；请设置 XIAOYI_BOOTSTRAP_PYTHON=/path/to/python3.12。" >&2
+      exit 2
+    fi
+    "$BOOTSTRAP_PYTHON" -m venv .venv
   fi
   PYTHON_BIN=".venv/bin/python"
 fi
 
-if ! "$PYTHON_BIN" -c 'import fastapi, pydantic, uvicorn' >/dev/null 2>&1; then
+if ! "$PYTHON_BIN" -c 'import sys; raise SystemExit(0 if sys.version_info[:2] >= (3, 12) else 1)'; then
+  echo "当前虚拟环境低于 Python 3.12，无法安装已修复安全漏洞的锁定依赖。" >&2
+  echo "请移动旧 .venv 后，使用 python3.12 -m venv .venv 重建。" >&2
+  exit 2
+fi
+
+LOCK_DIGEST="$("$PYTHON_BIN" -c 'import hashlib; print(hashlib.sha256(open("requirements.lock", "rb").read()).hexdigest())')"
+LOCK_MARKER="$(dirname "$PYTHON_BIN")/.xiaoyi-requirements-lock.sha256"
+INSTALLED_LOCK_DIGEST=""
+if [[ -f "$LOCK_MARKER" ]]; then
+  INSTALLED_LOCK_DIGEST="$(<"$LOCK_MARKER")"
+fi
+if [[ "$LOCK_DIGEST" != "$INSTALLED_LOCK_DIGEST" ]] \
+  || ! "$PYTHON_BIN" -c 'import fastapi, pydantic, uvicorn' >/dev/null 2>&1; then
   "$PYTHON_BIN" -m pip install -r requirements.lock
+  printf '%s\n' "$LOCK_DIGEST" >"$LOCK_MARKER"
 fi
 
 if [[ ! -f data/public/uci_appliances_energy.csv ]]; then
@@ -145,8 +175,8 @@ if [[ "$MODEL_ENABLED" != "false" && -f "$MODEL_FILE" && -n "$LLAMA_SERVER_BIN" 
         --port "$MODEL_PORT"
         --ctx-size "${XIAOYI_LOCAL_MODEL_CONTEXT:-$MODEL_CONTEXT}"
         --threads "${XIAOYI_LOCAL_MODEL_THREADS:-8}"
-        --batch-size 256
-        --ubatch-size 64
+        --batch-size "${XIAOYI_LOCAL_MODEL_BATCH_SIZE:-512}"
+        --ubatch-size "${XIAOYI_LOCAL_MODEL_UBATCH_SIZE:-256}"
         --parallel 1
         --cache-reuse 128
         --n-gpu-layers 0
@@ -174,9 +204,9 @@ if [[ "$MODEL_ENABLED" != "false" && -f "$MODEL_FILE" && -n "$LLAMA_SERVER_BIN" 
       export XIAOYI_MODEL_PROVIDER=openai_compatible
       export XIAOYI_MODEL_BASE_URL="http://127.0.0.1:${MODEL_PORT}/v1"
       export XIAOYI_MODEL_NAME="$MODEL_ALIAS"
-      export XIAOYI_MODEL_TIMEOUT_SECONDS="${XIAOYI_MODEL_TIMEOUT_SECONDS:-180}"
+      export XIAOYI_MODEL_TIMEOUT_SECONDS="${XIAOYI_MODEL_TIMEOUT_SECONDS:-60}"
       export XIAOYI_MODEL_MAX_RETRIES="${XIAOYI_MODEL_MAX_RETRIES:-0}"
-      export XIAOYI_MODEL_MAX_TOKENS="${XIAOYI_MODEL_MAX_TOKENS:-360}"
+      export XIAOYI_MODEL_MAX_TOKENS="${XIAOYI_MODEL_MAX_TOKENS:-200}"
       export XIAOYI_MINIMUM_ANSWER_REVIEW_SECONDS="${XIAOYI_MINIMUM_ANSWER_REVIEW_SECONDS:-0}"
       export XIAOYI_MODEL_EXTERNAL_DATA_ALLOWED=false
       if [[ "$USE_LORA" == true ]]; then

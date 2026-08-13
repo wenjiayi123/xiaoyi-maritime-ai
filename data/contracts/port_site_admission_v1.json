@@ -1,0 +1,95 @@
+{
+  "contract_id": "xiaoyi-port-site-admission.v1",
+  "version": "1.0.0",
+  "updated_at": "2026-08-13",
+  "decision_mode": "recommendation_only",
+  "dispatch_allowed": false,
+  "production_authority": false,
+  "scope_notice": "This contract admits read-only site data for recommendation workflows. It never grants production dispatch authority.",
+  "required_live_metadata": [
+    "data_mode",
+    "live_data_verified",
+    "schema_version",
+    "source_system",
+    "source_dataset_id",
+    "source_manifest_sha256",
+    "field_mapping_version",
+    "field_mapping_sha256",
+    "quality_report_sha256",
+    "drift_report_sha256",
+    "calibration_report_sha256",
+    "observed_at",
+    "generated_at",
+    "timezone",
+    "quality_report",
+    "drift_report"
+  ],
+  "read_only_quality_thresholds": {
+    "maximum_freshness_seconds": 300,
+    "minimum_completeness_rate": 0.995,
+    "maximum_duplicate_rate": 0.001,
+    "maximum_out_of_order_rate": 0.001,
+    "maximum_physical_constraint_violations": 0,
+    "minimum_feature_coverage_rate": 0.95,
+    "maximum_population_stability_index": 0.2,
+    "schema_validation_required": true,
+    "timezone_normalization_required": true,
+    "drift_status_required": "passed"
+  },
+  "production_admission_gates": [
+    {
+      "id": "field_mapping",
+      "label": "现场字段映射与责任人签字",
+      "required_evidence": ["mapping manifest", "units", "timezone", "quality codes", "data owner approval"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "calibration",
+      "label": "物理与业务标定",
+      "required_evidence": ["calibration window", "meter reconciliation", "constraint verification", "site KPI definition"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "drift_monitoring",
+      "label": "漂移与缺失监控",
+      "required_evidence": ["reference window", "PSI report", "feature coverage", "alert and fail-closed test"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "shadow_operation",
+      "label": "只读影子运行",
+      "required_evidence": ["site-approved duration", "baseline reconciliation", "operator review", "incident log"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "dual_approval",
+      "label": "双人审批与职责分离",
+      "required_evidence": ["distinct approvers", "short-lived signed approvals", "action scope", "expiry and revocation"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "rollback_drill",
+      "label": "回滚与人工接管演练",
+      "required_evidence": ["site runbook", "drill receipt", "recovery time", "post-drill review"],
+      "status": "blocked_pending_site"
+    },
+    {
+      "id": "security_acceptance",
+      "label": "OT/IT安全与设备白名单",
+      "required_evidence": ["network allowlist", "least privilege", "key rotation", "audit export", "security sign-off"],
+      "status": "blocked_pending_site"
+    }
+  ],
+  "current_evidence": {
+    "site_id": null,
+    "authorized_live_adapter": false,
+    "site_mapping_verified": false,
+    "calibration_verified": false,
+    "drift_report_available": false,
+    "shadow_operation_verified": false,
+    "dual_approval_verified": false,
+    "rollback_drill_verified": false,
+    "security_acceptance_verified": false,
+    "overall_status": "blocked_pending_site"
+  }
+}

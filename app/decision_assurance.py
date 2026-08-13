@@ -221,6 +221,31 @@ def assess_decision_readiness(
                 "回答后的引用、词面对齐或数字完整性校验未通过，当前文本不可进入决策链。"
             ),
         )
+    internal_control_instruction = bool(
+        response.grounded
+        and response.source_quality != "official_verified"
+        and re.search(
+            r"(?:停机|停运|停产|停电|断电|隔离|合闸|送电|复工|"
+            r"恢复(?:设备|系统|作业|运行|供电)|切负载|限功率|"
+            r"暂停岸电|启动消防|疏散|切断相关能源)",
+            response.answer,
+        )
+    )
+    if internal_control_instruction:
+        return DecisionReadiness(
+            status="ready_with_review",
+            risk_level="high",
+            blockers=["internal_sop_requires_site_validation"],
+            next_action=(
+                "仅作为 recommendation_only 建议；由现场授权岗位核对有效SOP、"
+                "设备联锁、告警等级和当前工况后决定是否执行，并保留审批与回滚记录。"
+            ),
+            requires_human_confirmation=True,
+            rationale=(
+                "引用完整性已通过，但控制动作来自项目内部整理资料，未完成现场制度映射、"
+                "设备标定和影子运行，不能直接转成生产指令。"
+            ),
+        )
     refusal_actions = {
         "live_data_connection_required": (
             "needs_live_data",
@@ -249,7 +274,7 @@ def assess_decision_readiness(
             in {"needs_live_data", "needs_full_text"},
             rationale="当前回答已按证据或数据边界失败关闭。",
         )
-    if response.source_quality == "sandbox_runtime":
+    if response.source_quality in {"sandbox_runtime", "public_data_calibrated_simulation"}:
         return DecisionReadiness(
             status="sandbox_only",
             risk_level="medium",

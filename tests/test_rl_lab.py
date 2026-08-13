@@ -103,6 +103,39 @@ def test_energy_action_mask_blocks_projected_soc_violation() -> None:
     assert environment.valid_action_mask()[-2:] == (False, False)
 
 
+def test_energy_environment_accounts_for_degradation_and_terminal_recovery() -> None:
+    records = load_records(get_dataset("uci_appliances_energy"))[:1000]
+    parameters = derive_parameters(records)
+    environment = EnergySchedulingEnvironment(
+        records,
+        parameters,
+        horizon_steps=24,
+        seed=17,
+        split_name="test",
+        render_mode="trace",
+    )
+    environment.reset(start_index=0)
+    while environment.steps < environment.horizon_steps:
+        mask = environment.valid_action_mask()
+        action = 0 if mask[0] else 4 if mask[4] else next(
+            index for index, valid in enumerate(mask) if valid
+        )
+        _, _, done, frame = environment.step(action)
+        if done:
+            break
+    metrics = environment.episode_metrics(0.0)
+
+    assert parameters.public_dict()["environment_version"] == "xiaoyi-energy-env.v2"
+    assert metrics["total_degradation_cost"] > 0
+    assert metrics["total_cost"] == pytest.approx(
+        metrics["total_grid_energy_cost"] + metrics["total_degradation_cost"],
+        abs=1e-7,
+    )
+    assert metrics["terminal_soc_recovered"] is True
+    assert metrics["terminal_soc"] >= parameters.initial_soc - parameters.terminal_soc_tolerance
+    assert frame["terminal_recovery_violation"] is False
+
+
 def test_port_environment_refuses_training_render_and_masks_unsafe_actions() -> None:
     records = load_records(get_dataset("noaa_la_lb_ais_2024_12_25_1min"))
     parameters = derive_port_parameters(records[:497])
@@ -121,9 +154,10 @@ def test_algorithm_and_dataset_api_expose_real_contract() -> None:
     algorithms = client.get("/api/rl-lab/algorithms").json()
     datasets = client.get("/api/rl-lab/datasets").json()
 
-    assert algorithms["count"] == 5
+    assert algorithms["count"] == 6
     assert sum(item["family"] == "reinforcement_learning" for item in algorithms["items"]) == 4
     assert sum(item["family"] == "control_theory" for item in algorithms["items"]) == 1
+    assert sum(item["family"] == "operations_rule" for item in algorithms["items"]) == 1
     assert datasets["items"][0]["source_type"] == "public_benchmark"
     assert datasets["items"][0]["port_data"] is False
     assert datasets["contract"]["required"] == ["timestamp", "load_kw"]
@@ -150,6 +184,24 @@ def test_port_contract_and_grounded_training_advisor_are_exposed() -> None:
     assert advisor.json()["grounded"] is True
     assert advisor.json()["generation_provider"] == "local_evidence_advisor"
     assert "Double Q-learning" in advisor.json()["answer"]
+
+
+def test_fixed_rl_evidence_exposes_v2_admission_failures_and_authority_boundary() -> None:
+    payload = client.get("/api/rl-lab/evidence").json()
+    report = payload["report"]
+
+    assert payload["report_path"] == "reports/rl_dataset_benchmark_v2.json"
+    assert report["schema_version"] == "xiaoyi-rl-dataset-benchmark.v2"
+    assert report["evidence_integrity_passed"] is True
+    assert report["policy_admission_passed"] is False
+    assert report["production_authority"] is False
+    assert len(report["configuration"]["algorithms"]) == 6
+    for experiment in report["experiments"].values():
+        assert len(experiment["runs"]) == 3
+        assert len(experiment["admission"]["failed_candidates"]) == 4
+        assert experiment["admission"]["production_authority"] is False
+        for metrics in experiment["aggregate"]["algorithm_metrics"].values():
+            assert metrics["score"]["ci95_method"] == "two-sided Student t, df=2"
 
 
 def test_custom_algorithm_selection_still_uses_real_progress_and_holdout() -> None:

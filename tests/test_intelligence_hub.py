@@ -225,3 +225,16 @@ def test_priority_7_benchmark_and_feedback_review_loop(tmp_path: Path) -> None:
     assert reviewed.json()["status"] == "submitted_to_knowledge_intake"
     assert reviewed.json()["intake_id"]
     assert list((tmp_path / "kb_pending").glob("*.json"))
+
+
+def test_evaluation_summary_labels_committed_report_as_pinned_not_live() -> None:
+    evaluation._LATEST_BENCHMARK = None
+    payload = client.get("/api/evaluation/summary").json()
+    benchmark = payload["latest_benchmark"]
+
+    assert benchmark["status"] == "pinned_release_evidence"
+    assert benchmark["evidence_source"] == "reports/maritime_rag_benchmark_v1_20260813_r5.json"
+    assert benchmark["live_rerun"] is False
+    assert benchmark["report_sha256"]
+    assert benchmark["resume_safe_metrics"]["fixed_test_case_count"] == 35
+    assert "not untouched held-out data" in benchmark["required_qualifier"]

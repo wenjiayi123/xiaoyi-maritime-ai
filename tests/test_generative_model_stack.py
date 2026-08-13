@@ -18,6 +18,25 @@ from scripts.build_lora_dataset import (
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_lora_admission_is_engineering_proof_not_quality_or_foundation_training() -> None:
+    status = ModelGateway(Settings.from_env()).status()["lora_admission"]
+
+    assert status["status"] == "engineering_only_quality_blocked"
+    assert status["engineering_integrity_passed"] is True
+    assert status["quality_admission_passed"] is False
+    assert status["foundation_model_trained_from_scratch"] is False
+    assert status["production_authority"] is False
+
+
+def test_prompt_security_benchmark_keeps_external_red_team_boundary() -> None:
+    status = ModelGateway(Settings.from_env()).status()["prompt_security_benchmark"]
+    assert status["passed"] is True
+    assert status["case_count"] == 26
+    assert status["external_red_team_completed"] is False
+    assert status["production_security_certification"] is False
+    assert len(status["report_sha256"]) == 64
+
+
 def test_model_registry_pins_open_model_artifact_and_adapter_base() -> None:
     registry = json.loads(
         (ROOT / "data" / "model_registry.json").read_text(encoding="utf-8")

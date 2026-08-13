@@ -1,4 +1,6 @@
-.PHONY: install install-dev run test lint check release-check benchmark benchmark-verify benchmark-verify-deep docker-build
+.PHONY: install install-dev run test lint check release-check benchmark benchmark-verify benchmark-verify-deep sbom sbom-verify dependency-audit-verify docker-build
+
+BENCHMARK_TAG ?=
 
 install:
 	python -m pip install -r requirements.lock
@@ -25,13 +27,23 @@ check:
 release-check: check test
 
 benchmark:
-	python scripts/run_rag_benchmark.py run
+	@test -n "$(BENCHMARK_TAG)" || (echo "BENCHMARK_TAG is required, e.g. make benchmark BENCHMARK_TAG=20260814_r1" && exit 2)
+	python scripts/run_rag_benchmark.py run --output-tag "$(BENCHMARK_TAG)"
 
 benchmark-verify:
-	python scripts/run_rag_benchmark.py verify
+	python scripts/run_rag_benchmark.py verify --output-tag 20260813_r7
 
 benchmark-verify-deep:
-	python scripts/run_rag_benchmark.py verify --deep
+	python scripts/run_rag_benchmark.py verify --output-tag 20260813_r7 --deep
+
+sbom:
+	python scripts/build_sbom.py build
+
+sbom-verify:
+	python scripts/build_sbom.py verify
+
+dependency-audit-verify:
+	python scripts/build_dependency_audit_admission.py verify
 
 docker-build:
-	docker build --tag xiaoyi-ai:0.3.0 .
+	docker build --tag xiaoyi-ai:0.4.0 .

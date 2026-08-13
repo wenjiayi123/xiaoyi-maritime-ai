@@ -103,6 +103,9 @@ class AnswerVerification(BaseModel):
     citation_validity: float = Field(0.0, ge=0.0, le=1.0)
     evidence_alignment: float = Field(0.0, ge=0.0, le=1.0)
     numeric_integrity: float = Field(0.0, ge=0.0, le=1.0)
+    advisory_checked: bool = False
+    advisory_safe: bool = True
+    advisory_issues: list[str] = Field(default_factory=list)
     claims: list[ClaimSupport] = Field(default_factory=list)
     issues: list[str] = Field(default_factory=list)
     scope_notice: str = (

@@ -127,6 +127,7 @@ def test_frontend_calls_required_backend_surfaces() -> None:
         "/api/runtime/status",
         "/api/system/readiness",
         "/api/system/info",
+        "/api/system/competitive-benchmark",
         "/api/system-linkage/overview",
         "/api/system-linkage/command",
         "/api/models",
@@ -152,7 +153,7 @@ def test_training_center_connects_matrix_advisor_and_system_actions() -> None:
 
     assert 'data-view="rl"' in html
     assert "训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动" in html
-    for action in ("refresh", "start-training", "show-contract", "ask-advisor"):
+    for action in ("refresh", "start-training", "show-contract", "show-evidence", "ask-advisor"):
         assert f'data-rl-center-action="{action}"' in html
     assert "loadRLCenter" in javascript
     assert "renderRLCenter" in javascript
@@ -177,6 +178,36 @@ def test_intelligence_hub_has_visible_entry_and_seven_priority_runtime() -> None
     assert "seven_priorities" in javascript
     assert "BM25 Hit@5" in javascript
     assert "Hybrid Hit@5" in javascript
+    assert "IMPLEMENTED" in javascript
+    assert "固定发布报告（非本进程重跑）" in javascript
+
+
+def test_frontend_does_not_present_missing_site_data_as_live_or_safe() -> None:
+    html, javascript = _read_frontend()
+
+    assert "实时运营概况" not in html
+    assert "能耗实时指标" not in html
+    assert "现场告警未接入 · 不计算健康分" in javascript
+    assert 'waitingForPort ? "—"' in javascript
+    assert "未用零告警冒充安全" in javascript
+    assert "production_authority=false" in javascript
+    assert "规则回退" in javascript
+    assert "openCompetitiveBenchmark" in javascript
+
+
+def test_frontend_exposes_calibrated_realtime_simulator_without_calling_it_live() -> None:
+    html, javascript = _read_frontend()
+
+    assert 'id="realtimeSimulatorPanel"' in html
+    assert "公开数据校准实时模拟" in html
+    assert "不是现场实测" in html
+    assert "/api/port-simulator/snapshot" in javascript
+    assert "/api/port-simulator/stream" in javascript
+    assert "/api/port-simulator/contract" in javascript
+    assert "physical_dispatch_performed" in javascript
+    assert "production_authority" in javascript
+    assert "connectSimulatorStream" in javascript
+
 
 
 def test_four_system_linkage_has_visible_entry_and_execution_controls() -> None:
@@ -439,6 +470,14 @@ def test_completed_automation_reveals_result_but_risky_action_keeps_confirmation
     assert 'state.automationPlan.status === "awaiting_confirmation"' in javascript
     assert "await requestAutomationConfirmation()" in javascript
     assert 'openModal("审核生产操作建议"' in javascript
+
+
+def test_system_status_exposes_site_admission_and_industry_gap_evidence() -> None:
+    javascript = (ROOT / "web/app.js").read_text(encoding="utf-8")
+    assert "/api/system/site-admission" in javascript
+    assert "现场准入与漂移门禁" in javascript
+    assert "dual_approval_verified=false" in javascript
+    assert "/api/system/competitive-benchmark" in javascript
 
 
 def test_simulator_and_linked_system_launchers_use_distinct_frontend_routes() -> None:

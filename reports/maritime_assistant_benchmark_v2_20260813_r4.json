@@ -1,0 +1,1396 @@
+{
+  "schema_version": "2.0",
+  "generated_at": "2026-08-13T14:36:26+00:00",
+  "knowledge_snapshot": {
+    "documents": 129,
+    "chunks": 882,
+    "official_documents": 68,
+    "official_full_text_documents": 0,
+    "completeness_claim": "partial_auditable_coverage"
+  },
+  "evidence_sha256": {
+    "data/evaluation/maritime_assistant_benchmark_v2.json": "8ce1cc805786fd6221d1e6ba8183422bb9ade6579384543de2d7f226da5a13bd",
+    "data/evaluation/maritime_qa_benchmark_v1.json": "5126cb7734fb923034fba25c7cc30f52180116260812d065387335498e8aae15",
+    "data/xiaoyi_index.json": "8139112712f6574bb20d80174f3286f2bbe2f6af479e181b38b01649eb67a63c",
+    "data/source_registry.json": "3865b08a51756b70e97130ea39a75c86007535404b2f7ff7e6ef0d47f0469d32",
+    "data/authority_coverage.json": "306cb844b84ea91a9d1fc78a17d26b26fed201f95e4314a81c767a0e6890c12f",
+    "app/query_intelligence.py": "5e9e8a476fb518bc08d3cd555177f9917f3b79f9a9d04c270368d252544a7006",
+    "app/answer_verification.py": "14313f3adb484c624141a33912189273f6b9c699b90a4a3692a2ff91bcb3dcb2",
+    "app/xiaoyi.py": "f0fc0ba470dfee0acda24a21251b688c52fbac799b35328448d6a7ed6159385d"
+  },
+  "benchmark": {
+    "benchmark_id": "xiaoyi-maritime-assistant-hard-v2",
+    "benchmark_sha256": "8ce1cc805786fd6221d1e6ba8183422bb9ade6579384543de2d7f226da5a13bd",
+    "case_count": 60,
+    "combined_with_v1_case_count": 120,
+    "dialogue": {
+      "summary": {
+        "case_count": 20,
+        "passed_count": 20,
+        "pass_rate": 1.0,
+        "failed_ids": []
+      },
+      "rows": [
+        {
+          "id": "dlg-001",
+          "standalone_question": "船舶到港报告的官方入口在哪里；追问：那在新加坡呢？",
+          "detected_jurisdictions": [
+            "SG"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "101_sg_vessel_arrival_departure_procedures.md",
+            "45_imo_maritime_single_window.md",
+            "74_unctad_review_maritime_transport.md",
+            "89_imo_amendments_version_monitoring.md",
+            "98_sg_maritime_legislation_directory.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-002",
+          "standalone_question": "船舶到港官方入口在哪里；追问：那马来西亚呢？",
+          "detected_jurisdictions": [
+            "MY"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "102_my_marine_legislation_directory.md",
+            "103_my_active_shipping_notices_2026.md",
+            "104_my_notices_to_mariners.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-003",
+          "standalone_question": "MARPOL 防污染框架主要覆盖什么；追问：具体排放限值呢？",
+          "detected_jurisdictions": [
+            "GLOBAL"
+          ],
+          "refusal_reason": "official_full_text_required",
+          "sources": [
+            "70_imo_conventions_directory.md",
+            "79_imo_imdg_code.md",
+            "82_imo_marpol_public_summary.md",
+            "87_imo_2023_ghg_strategy_summary.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-004",
+          "standalone_question": "中国生态环境法典在是否生效；追问：那2026年8月15日呢？",
+          "detected_jurisdictions": [
+            "CN"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "106_china_ecology_environment_code_transition.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-005",
+          "standalone_question": "集装箱码头 TOS 负责什么；追问：它和闸口系统怎么协同？",
+          "detected_jurisdictions": [],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-006",
+          "standalone_question": "那这个要求呢？",
+          "detected_jurisdictions": [],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-007",
+          "standalone_question": "港口安全规则入口在哪里；追问：那澳大利亚呢？",
+          "detected_jurisdictions": [
+            "AU"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "79_imo_imdg_code.md",
+            "84_imo_isps_code_public_summary.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-008",
+          "standalone_question": "港口国监督从哪里核验；追问：英国对应入口呢？",
+          "detected_jurisdictions": [
+            "GB"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "113_uk_mca_active_m_notices_directory.md",
+            "118_uk_mca_port_state_control_2026.md",
+            "85_imo_ballast_water_management_summary.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-009",
+          "standalone_question": "海事主管机关公开入口在哪里；追问：鹿特丹港地方规则呢？",
+          "detected_jurisdictions": [
+            "NL"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "116_rotterdam_port_rules_directory.md",
+            "45_imo_maritime_single_window.md",
+            "78_imo_container_vgm.md",
+            "79_imo_imdg_code.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-010",
+          "standalone_question": "Paris MoU 提供哪些 PSC 查询入口；追问：那 Tokyo MOU 呢？",
+          "detected_jurisdictions": [
+            "REGIONAL"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "117_paris_tokyo_mou_psc_directories.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-011",
+          "standalone_question": "海盛轮当前是否在港；追问：这艘船的 ETA 呢？",
+          "detected_jurisdictions": [],
+          "refusal_reason": "live_data_connection_required",
+          "sources": [
+            "55_vessel_schedule_port_call_qa.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-012",
+          "standalone_question": "岸桥的主要作用是什么；追问：它异常时怎么处置？",
+          "detected_jurisdictions": [],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-013",
+          "standalone_question": "VGM 是什么；追问：那提单呢？",
+          "detected_jurisdictions": [],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-014",
+          "standalone_question": "新加坡港口条例从哪里核验；追问：该规定的具体罚则呢？",
+          "detected_jurisdictions": [
+            "SG"
+          ],
+          "refusal_reason": "official_full_text_required",
+          "sources": [
+            "100_sg_active_port_marine_circulars_2026.md",
+            "101_sg_vessel_arrival_departure_procedures.md",
+            "98_sg_maritime_legislation_directory.md",
+            "99_sg_port_regulations_current.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-015",
+          "standalone_question": "鹿特丹港许可入口在哪里；追问：该港危险品靠泊怎么办理？",
+          "detected_jurisdictions": [
+            "NL"
+          ],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-016",
+          "standalone_question": "上面那个港口呢？",
+          "detected_jurisdictions": [],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-017",
+          "standalone_question": "Where can I verify port safety regulations；追问：What about Australia?",
+          "detected_jurisdictions": [
+            "AU"
+          ],
+          "refusal_reason": null,
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "122_shift_customer_system_coordination_daily_qa.md",
+            "54_daily_port_operations_shift_qa.md",
+            "55_vessel_schedule_port_call_qa.md",
+            "56_container_yard_gate_handling_qa.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "source": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-018",
+          "standalone_question": "Where is the vessel-arrival portal；追问：How about Malaysia?",
+          "detected_jurisdictions": [
+            "MY"
+          ],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-019",
+          "standalone_question": "澳大利亚 AMSA Marine Orders 从哪里查；追问：那具体豁免条件呢？",
+          "detected_jurisdictions": [
+            "AU"
+          ],
+          "refusal_reason": "official_full_text_required",
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "73_iala_s1040_vts.md"
+          ],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "dlg-020",
+          "standalone_question": "英国 MCA 海事通告分哪些类型；追问：它和 MSN 的关系呢？",
+          "detected_jurisdictions": [
+            "GB"
+          ],
+          "refusal_reason": null,
+          "sources": [],
+          "checks": {
+            "resolution": true,
+            "required_terms": true,
+            "forbidden_terms": true,
+            "jurisdiction": true
+          },
+          "passed": true
+        }
+      ]
+    },
+    "complex": {
+      "summary": {
+        "case_count": 20,
+        "passed_count": 20,
+        "pass_rate": 1.0,
+        "failed_ids": []
+      },
+      "rows": [
+        {
+          "id": "cx-001",
+          "subquestions": [
+            "TOS 是什么",
+            "AGV 在码头负责什么？"
+          ],
+          "dimensions": [
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "06_tos_and_digital.md",
+            "119_port_energy_peak_management_daily_qa.md",
+            "121_yard_gate_equipment_flow_daily_qa.md",
+            "123_port_carbon_reduction_daily_qa.md",
+            "18_smart_port_ai_data.md",
+            "34_terminal_operations_incident_playbooks.md",
+            "38_definition_process_role_qa.md",
+            "41_data_system_interface_qa.md",
+            "43_report_template_training_qa.md",
+            "56_container_yard_gate_handling_qa.md",
+            "58_equipment_team_handover_alert_qa.md",
+            "59_bilingual_port_spoken_abbreviations_qa.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_any": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-002",
+          "subquestions": [
+            "ETA、ETB、ETD 分别是什么意思",
+            "船舶靠泊一般经过哪些流程？"
+          ],
+          "dimensions": [
+            "comparison",
+            "workflow",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "12_vessel_port_call.md",
+            "33_vessel_navigation_incident_playbooks.md",
+            "55_vessel_schedule_port_call_qa.md",
+            "59_bilingual_port_spoken_abbreviations_qa.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-003",
+          "subquestions": [
+            "比较欧盟和英国的港口国监督官方入口",
+            "比较欧盟和英国的港口国监督官方入口；说明2026年应核对哪个版本"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "temporal",
+            "comparison",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "112_eu_emsa_port_state_control_directory.md",
+            "118_uk_mca_port_state_control_2026.md",
+            "85_imo_ballast_water_management_summary.md",
+            "91_ilo_mlc_normlex_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-004",
+          "subquestions": [
+            "美国港航法规官方入口在哪里",
+            "澳大利亚 Marine Orders 从哪里核验？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "109_unclos_official_directory.md",
+            "111_us_ecfr_navigation_ports_directory.md",
+            "114_au_amsa_marine_orders_directory.md",
+            "47_unece_unedifact_maritime.md",
+            "73_iala_s1040_vts.md",
+            "74_unctad_review_maritime_transport.md",
+            "81_imo_solas_public_summary.md",
+            "89_imo_amendments_version_monitoring.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-005",
+          "subquestions": [
+            "日本海事主管机关入口在哪里",
+            "鹿特丹港地方规则从哪里核验？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "115_jp_mlit_maritime_and_psc_directory.md",
+            "116_rotterdam_port_rules_directory.md",
+            "45_imo_maritime_single_window.md",
+            "78_imo_container_vgm.md",
+            "79_imo_imdg_code.md",
+            "93_wto_trade_facilitation_agreement_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-006",
+          "subquestions": [
+            "Paris MoU 的官方查询入口有哪些",
+            "Tokyo MOU 的官方查询入口有哪些？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "117_paris_tokyo_mou_psc_directories.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_any": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-007",
+          "subquestions": [
+            "新加坡船舶到港程序入口在哪里",
+            "新加坡船舶到港程序入口在哪里；有效 Port Marine Circular 从哪里核验？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "workflow",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "100_sg_active_port_marine_circulars_2026.md",
+            "101_sg_vessel_arrival_departure_procedures.md",
+            "45_imo_maritime_single_window.md",
+            "48_dcsa_port_call_standard.md",
+            "98_sg_maritime_legislation_directory.md",
+            "99_sg_port_regulations_current.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-008",
+          "subquestions": [
+            "马来西亚海事法律目录在哪里",
+            "马来西亚海事法律目录在哪里；2026年有效航运通告从哪里查？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "temporal",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "102_my_marine_legislation_directory.md",
+            "103_my_active_shipping_notices_2026.md",
+            "104_my_notices_to_mariners.md",
+            "81_imo_solas_public_summary.md",
+            "91_ilo_mlc_normlex_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-009",
+          "subquestions": [
+            "DCSA Port Call Standard 解决什么问题",
+            "IMO 海事单一窗口从哪一年起强制实施？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "110_imo_colreg_public_summary.md",
+            "45_imo_maritime_single_window.md",
+            "46_imo_fal_guidance.md",
+            "48_dcsa_port_call_standard.md",
+            "77_imo_maritime_cyber_risk.md",
+            "81_imo_solas_public_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-010",
+          "subquestions": [
+            "VGM 的制度目的是什么",
+            "SOLAS VI/2 的条款原文是什么？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "13_customs_trade_documents.md",
+            "57_booking_document_release_qa.md",
+            "70_imo_conventions_directory.md",
+            "78_imo_container_vgm.md",
+            "79_imo_imdg_code.md",
+            "80_imo_ism_code.md",
+            "81_imo_solas_public_summary.md",
+            "84_imo_isps_code_public_summary.md",
+            "86_imo_imsbc_code_public_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-011",
+          "subquestions": [
+            "鹿特丹港规则入口在哪里",
+            "鹿特丹港规则入口在哪里；危险品船靠泊豁免的具体条件是什么？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "116_rotterdam_port_rules_directory.md",
+            "79_imo_imdg_code.md",
+            "80_imo_ism_code.md",
+            "89_imo_amendments_version_monitoring.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-012",
+          "subquestions": [
+            "澳大利亚 Marine Orders 与海事法律是什么关系",
+            "澳大利亚 Marine Orders 与海事法律是什么关系；Marine Order 28 的法定休息时数是多少？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "73_iala_s1040_vts.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-013",
+          "subquestions": [
+            "英国 MCA 通告分哪些类型",
+            "英国 MCA 通告分哪些类型；某个 MSN 的强制条款原文是什么？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "113_uk_mca_active_m_notices_directory.md",
+            "118_uk_mca_port_state_control_2026.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-014",
+          "subquestions": [
+            "美国 eCFR Title 33 的目录范围是什么",
+            "美国 eCFR Title 33 的目录范围是什么；洛杉矶港当前有多少船在港？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "live_data",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "111_us_ecfr_navigation_ports_directory.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-015",
+          "subquestions": [
+            "Tokyo MOU 数据库可以查什么",
+            "IMO 9387421 当前是否被滞留？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "live_data",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "117_paris_tokyo_mou_psc_directories.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-016",
+          "subquestions": [
+            "TOS 负责什么",
+            "箱号 MSKU1234567 现在到哪了？"
+          ],
+          "dimensions": [
+            "temporal",
+            "live_data",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "06_tos_and_digital.md",
+            "18_smart_port_ai_data.md",
+            "41_data_system_interface_qa.md",
+            "43_report_template_training_qa.md",
+            "56_container_yard_gate_handling_qa.md",
+            "59_bilingual_port_spoken_abbreviations_qa.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-017",
+          "subquestions": [
+            "中国岸电安全流程有哪些",
+            "中国岸电安全流程有哪些；违反岸电规定的具体罚款金额是多少？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "regulatory",
+            "workflow",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.5,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "07_energy_carbon_shore_power.md",
+            "110_imo_colreg_public_summary.md",
+            "123_port_carbon_reduction_daily_qa.md",
+            "16_green_port_environment.md",
+            "32_people_hse_operations_management.md",
+            "60_cn_port_law.md",
+            "62_cn_work_safety_law.md",
+            "64_cn_port_ship_shore_power_rules.md",
+            "68_cn_ship_safety_supervision_rules.md",
+            "79_imo_imdg_code.md",
+            "84_imo_isps_code_public_summary.md",
+            "85_imo_ballast_water_management_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-018",
+          "subquestions": [
+            "新加坡船舶到港入口在哪里",
+            "马来西亚到港入口在哪里",
+            "新加坡、马来西亚；这两地今天各有多少船靠泊？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "live_data",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.6667,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "100_sg_active_port_marine_circulars_2026.md",
+            "101_sg_vessel_arrival_departure_procedures.md",
+            "102_my_marine_legislation_directory.md",
+            "103_my_active_shipping_notices_2026.md",
+            "104_my_notices_to_mariners.md",
+            "45_imo_maritime_single_window.md",
+            "54_daily_port_operations_shift_qa.md",
+            "55_vessel_schedule_port_call_qa.md",
+            "99_sg_port_regulations_current.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-019",
+          "subquestions": [
+            "中国生态环境法典在2026年7月15日是否生效",
+            "中国生态环境法典在是否生效；在2026年8月15日是否生效？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "temporal",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "complete",
+          "evidence_coverage": 1.0,
+          "refusal_reason": null,
+          "citation_status": "passed",
+          "sources": [
+            "106_china_ecology_environment_code_transition.md",
+            "107_china_marine_environment_law_current.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "source_all": true
+          },
+          "passed": true
+        },
+        {
+          "id": "cx-020",
+          "subquestions": [
+            "MARPOL 防污染框架是什么",
+            "MARPOL 防污染框架是什么；具体油类排放限值是多少",
+            "MARPOL 防污染框架是什么；本港当前是否发生溢油？"
+          ],
+          "dimensions": [
+            "jurisdiction",
+            "live_data",
+            "regulatory",
+            "multi_part"
+          ],
+          "completion_status": "partial",
+          "evidence_coverage": 0.6667,
+          "refusal_reason": "partial_evidence",
+          "citation_status": "passed",
+          "sources": [
+            "70_imo_conventions_directory.md",
+            "79_imo_imdg_code.md",
+            "82_imo_marpol_public_summary.md",
+            "87_imo_2023_ghg_strategy_summary.md"
+          ],
+          "checks": {
+            "decomposition": true,
+            "dimensions": true,
+            "completion": true,
+            "evidence_coverage": true,
+            "citation_gate": true,
+            "refusal": true
+          },
+          "passed": true
+        }
+      ]
+    },
+    "adversarial": {
+      "summary": {
+        "case_count": 20,
+        "passed_count": 20,
+        "pass_rate": 1.0,
+        "failed_ids": []
+      },
+      "rows": [
+        {
+          "id": "adv-001",
+          "grounded": false,
+          "refusal_reason": "insufficient_index_evidence",
+          "requires_human_review": false,
+          "citation_status": "not_applicable",
+          "sources": [],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-002",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "70_imo_conventions_directory.md",
+            "79_imo_imdg_code.md",
+            "82_imo_marpol_public_summary.md",
+            "87_imo_2023_ghg_strategy_summary.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true,
+            "citation_role": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-003",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "78_imo_container_vgm.md",
+            "81_imo_solas_public_summary.md",
+            "84_imo_isps_code_public_summary.md",
+            "86_imo_imsbc_code_public_summary.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true,
+            "citation_role": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-004",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "79_imo_imdg_code.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-005",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "111_us_ecfr_navigation_ports_directory.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-006",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "112_eu_emsa_port_state_control_directory.md",
+            "85_imo_ballast_water_management_summary.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-007",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "113_uk_mca_active_m_notices_directory.md",
+            "118_uk_mca_port_state_control_2026.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-008",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "73_iala_s1040_vts.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-009",
+          "grounded": false,
+          "refusal_reason": "live_data_connection_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-010",
+          "grounded": false,
+          "refusal_reason": "live_data_connection_required",
+          "requires_human_review": false,
+          "citation_status": "not_applicable",
+          "sources": [
+            "56_container_yard_gate_handling_qa.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-011",
+          "grounded": false,
+          "refusal_reason": "live_data_connection_required",
+          "requires_human_review": false,
+          "citation_status": "not_applicable",
+          "sources": [
+            "54_daily_port_operations_shift_qa.md",
+            "55_vessel_schedule_port_call_qa.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-012",
+          "grounded": false,
+          "refusal_reason": "live_data_connection_required",
+          "requires_human_review": false,
+          "citation_status": "not_applicable",
+          "sources": [
+            "54_daily_port_operations_shift_qa.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true,
+            "forbidden_terms": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-013",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "116_rotterdam_port_rules_directory.md",
+            "79_imo_imdg_code.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-014",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "111_us_ecfr_navigation_ports_directory.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-015",
+          "grounded": false,
+          "refusal_reason": "official_full_text_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "114_au_amsa_marine_orders_directory.md",
+            "93_wto_trade_facilitation_agreement_summary.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-016",
+          "grounded": true,
+          "refusal_reason": null,
+          "requires_human_review": true,
+          "citation_status": "passed",
+          "sources": [
+            "79_imo_imdg_code.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "human_review": true,
+            "citation_gate": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-017",
+          "grounded": false,
+          "refusal_reason": "insufficient_index_evidence",
+          "requires_human_review": false,
+          "citation_status": "not_applicable",
+          "sources": [],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-018",
+          "grounded": true,
+          "refusal_reason": null,
+          "requires_human_review": true,
+          "citation_status": "passed",
+          "sources": [
+            "115_jp_mlit_maritime_and_psc_directory.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "source": true,
+            "required_terms": true,
+            "citation_gate": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-019",
+          "grounded": false,
+          "refusal_reason": "jurisdiction_source_required",
+          "requires_human_review": true,
+          "citation_status": "not_applicable",
+          "sources": [
+            "113_uk_mca_active_m_notices_directory.md",
+            "118_uk_mca_port_state_control_2026.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "refusal": true
+          },
+          "passed": true
+        },
+        {
+          "id": "adv-020",
+          "grounded": true,
+          "refusal_reason": null,
+          "requires_human_review": true,
+          "citation_status": "passed",
+          "sources": [
+            "117_paris_tokyo_mou_psc_directories.md"
+          ],
+          "checks": {
+            "grounded": true,
+            "source": true,
+            "required_terms": true,
+            "citation_gate": true
+          },
+          "passed": true
+        }
+      ]
+    },
+    "overall": {
+      "case_count": 60,
+      "passed_count": 60,
+      "pass_rate": 1.0,
+      "failed_ids": []
+    },
+    "passed": true,
+    "scope": "仓库维护的确定性困难集，验证跨轮改写、复杂问题分治、证据引用和安全拒答；不是第三方盲测、用户研究、线上SLA或法律正确率。"
+  }
+}

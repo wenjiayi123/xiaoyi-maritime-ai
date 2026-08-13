@@ -34,6 +34,27 @@ _NON_FACTUAL_FOLLOWUP = re.compile(
     r"(?:细化|确认|分析|查询|协助|说明)?"
     r"[，,:：]?(?:请|可|需)?(?:补充|提供)"
 )
+_MODEL_ADVISORY_HEADING = "模型综合建议（需人工复核）："
+_UNSUPPORTED_ADVISORY_ACTION = re.compile(
+    r"(?:(?:立即|马上|直接|应当|应该|需要|必须|须|需).{0,12})?"
+    r"(?:停机|停运|停产|停电|断电|隔离.{0,6}(?:设备|回路|系统)|合闸|送电|"
+    r"复工|恢复.{0,6}(?:设备|系统|作业|运行|供电)|"
+    r"(?:设备|系统|作业|运行|供电).{0,4}恢复|切负载|限功率|暂停岸电|"
+    r"下发(?:指令|策略)|执行(?:调度|控制|写操作))"
+)
+_UNSUPPORTED_ADVISORY_ROLE = re.compile(
+    r"(?:由.{0,12}(?:团队|部门|岗位|维护岗|运维)"
+    r".{0,4}(?:负责|批准|签批|下令|完成)|"
+    r"由.{0,24}(?:批准|签批|下令|完成|核实|复核|确认)|"
+    r"(?:责任|负责)(?:岗位|人员|人)?(?:为|是|由).{0,18}|"
+    r"(?:需|须|应|建议)?协同.{0,18}(?:部门|岗位|人员|工程师|负责人|主管)|"
+    r"(?:岗位|责任人|负责人|主管|工程师|运维员).{0,8}"
+    r"(?:负责|确认|复核|批准|签批|协同|协调|评估)|"
+    r"(?:通知|联系|上报).{0,18}(?:部门|岗位|人员|工程师|负责人|主管))"
+)
+_UNSUPPORTED_ADVISORY_STANDARD = re.compile(
+    r"(?:符合|达到|超过|超出|满足).{0,8}(?:标准|规范|限值|阈值)"
+)
 _TERM_NOISE = {
     "the",
     "and",
@@ -193,6 +214,28 @@ def _claims(answer: str) -> list[str]:
     return claims
 
 
+def _advisory_safety(answer: str) -> tuple[bool, bool, list[str]]:
+    if _MODEL_ADVISORY_HEADING not in answer:
+        return False, True, []
+    advisory = answer.split(_MODEL_ADVISORY_HEADING, 1)[1]
+    issues: list[str] = []
+    for raw_line in advisory.splitlines():
+        line = raw_line.strip()
+        if not line or _CITATION.search(line):
+            continue
+        if (
+            _UNSUPPORTED_ADVISORY_ACTION.search(line)
+            and not re.search(r"(?:禁止|不得|不要|避免).{0,12}", line)
+        ):
+            issues.append("生成式建议包含未由逐项引用锁定的设备或生产控制动作")
+        if _UNSUPPORTED_ADVISORY_ROLE.search(line):
+            issues.append("生成式建议分配了未由逐项引用锁定的责任岗位或通知对象")
+        if _UNSUPPORTED_ADVISORY_STANDARD.search(line):
+            issues.append("生成式建议引用了未由逐项证据锁定的标准、限值或阈值")
+    unique_issues = list(dict.fromkeys(issues))
+    return True, not unique_issues, unique_issues
+
+
 def verify_answer(
     answer: str,
     evidence: list[Evidence],
@@ -264,6 +307,7 @@ def verify_answer(
         if numeric_token_count
         else 1.0
     )
+    advisory_checked, advisory_safe, advisory_issues = _advisory_safety(answer)
     issues: list[str] = []
     if claim_count and coverage < 1.0:
         issues.append("存在未同时通过引用、词面对齐和数字完整性门禁的事实性陈述")
@@ -279,6 +323,7 @@ def verify_answer(
         issues.append("引用存在，但事实性陈述与所引证据的词面主题对齐不足")
     if any(item.unsupported_numeric_tokens for item in rows):
         issues.append("回答新增的数字、日期或量值未在所引证据中出现")
+    issues.extend(advisory_issues)
     return AnswerVerification(
         status=(
             "passed"
@@ -287,6 +332,7 @@ def verify_answer(
                 and validity == 1.0
                 and alignment >= _ALIGNMENT_THRESHOLD
                 and numeric_integrity == 1.0
+                and advisory_safe
             )
             else "needs_review"
         ),
@@ -296,6 +342,9 @@ def verify_answer(
         citation_validity=round(validity, 4),
         evidence_alignment=round(alignment, 4),
         numeric_integrity=round(numeric_integrity, 4),
+        advisory_checked=advisory_checked,
+        advisory_safe=advisory_safe,
+        advisory_issues=advisory_issues,
         claims=rows,
         issues=issues,
         scope_notice=(
@@ -303,7 +352,9 @@ def verify_answer(
             "是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
             + (
                 " 标注为“模型综合建议（需人工复核）”且未附证据编号的内容不计入"
-                "证据支持率，不得作为已核验事实或直接生产指令。"
+                "证据支持率，不得作为已核验事实或直接生产指令；但其中的生产控制动作"
+                "和责任岗位分配仍接受独立安全门禁，"
+                "命中时回答整体转为 needs_review。"
                 if "模型综合建议（需人工复核）：" in answer
                 else ""
             )
@@ -312,7 +363,11 @@ def verify_answer(
 
 
 def verify_response(response: ChatResponse) -> AnswerVerification:
-    if response.source_quality in {"not_applicable", "sandbox_runtime"}:
+    if response.source_quality in {
+        "not_applicable",
+        "sandbox_runtime",
+        "public_data_calibrated_simulation",
+    }:
         return AnswerVerification(status="not_applicable")
     return verify_answer(
         response.answer,

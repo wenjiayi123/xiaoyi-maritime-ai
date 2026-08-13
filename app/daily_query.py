@@ -43,6 +43,7 @@ _RULES = (
             r"碳清单",
             r"排放因子",
             r"碳强度",
+            r"储能.*(?:减碳|碳排)",
         ),
         canonical_query=(
             "港口如何减少碳排放 碳盘查 基线 岸电 设备电动化 能效 "
@@ -91,12 +92,37 @@ _RULES = (
         category="gate_pressure",
         patterns=(
             r"闸口.*堵",
+            r"闸口.*排队",
             r"集卡.*排队",
             r"车辆.*积压",
             r"预约.*扎堆",
             r"进港.*高峰",
         ),
         canonical_query="闸口车辆排队 预约到车波峰 车道增开 错峰分流",
+    ),
+    DailyQueryRule(
+        category="special_cargo",
+        patterns=(
+            r"滚装.*(?:车辆|汽车|怎么排)",
+            r"Ro-?Ro.*(?:车辆|堆场|坡道)",
+        ),
+        canonical_query="滚装船车辆怎么排 预排区 单向流 坡道能力 系固检查",
+    ),
+    DailyQueryRule(
+        category="intermodal_plan",
+        patterns=(
+            r"海铁联运.*(?:组织|流程|怎么)",
+            r"箱.*转铁路",
+        ),
+        canonical_query="海铁联运怎么组织 船期 班列 业务主键 堆场箱位",
+    ),
+    DailyQueryRule(
+        category="intermodal_delay",
+        patterns=(
+            r"火车.*(?:没按时|延误|晚到)",
+            r"班列.*(?:没按时|延误|晚到)",
+        ),
+        canonical_query="班列延误怎么处理 替代运力 冷链 堆场容量 改班列",
     ),
     DailyQueryRule(
         category="equipment_queue",
@@ -118,6 +144,8 @@ _RULES = (
             r"口径.*不一致",
             r"EDI.*失败",
             r"报文.*失败",
+            r"接口.*(?:晚到|延迟|积压|乱序)",
+            r"消息.*(?:晚到|延迟|积压|乱序)",
         ),
         canonical_query="TOS卡顿 数据不一致 EDI报文失败 降级运行 对账",
     ),

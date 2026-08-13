@@ -58,11 +58,11 @@ def test_workbench_question_uses_traceable_sandbox_state() -> None:
 
     assert result.intent == "operator_runtime_assist"
     assert result.grounded is True
-    assert result.source_quality == "sandbox_runtime"
+    assert result.source_quality == "public_data_calibrated_simulation"
     assert result.refusal_reason == "sandbox_not_production"
-    assert "SYNTHETIC_VALIDATED" in result.answer
+    assert "PUBLIC_CALIBRATED_SIMULATION_VALIDATED" in result.answer
     assert "不是现场生产实绩" in result.answer
-    assert result.evidence[0].source == "XIAOYI-PORT-SANDBOX"
+    assert result.evidence[0].source == "XIAOYI-PORT-REALTIME-SIMULATOR"
 
 
 @pytest.mark.parametrize(
@@ -86,7 +86,10 @@ def test_generic_handover_question_uses_knowledge_rag_not_sandbox(
     )
 
     assert result.intent != "operator_runtime_assist"
-    assert result.source_quality != "sandbox_runtime"
+    assert result.source_quality not in {
+        "sandbox_runtime",
+        "public_data_calibrated_simulation",
+    }
     assert result.grounded is True
     assert result.evidence
     assert "未闭环" in result.answer
@@ -101,7 +104,7 @@ def test_explicit_handover_summary_request_still_uses_runtime_snapshot() -> None
     result = XiaoyiAI().ask(question, mode="ops", strict_evidence=True)
 
     assert result.intent == "operator_runtime_assist"
-    assert result.source_quality == "sandbox_runtime"
+    assert result.source_quality == "public_data_calibrated_simulation"
     assert "船舶" in result.answer
     assert "设备" in result.answer
     assert "堆场" in result.answer
@@ -145,7 +148,7 @@ def test_showcase_operator_questions_answer_directly_without_rag_refusal(
     result = XiaoyiAI().ask(question, mode="ops", strict_evidence=True)
 
     assert result.intent == "operator_runtime_assist"
-    assert result.source_quality == "sandbox_runtime"
+    assert result.source_quality == "public_data_calibrated_simulation"
     assert result.grounded is True
     assert result.refusal_reason == "sandbox_not_production"
     assert expected in result.answer

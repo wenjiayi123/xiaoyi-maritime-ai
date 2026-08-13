@@ -60,3 +60,13 @@ The MIT license for this repository does not grant rights to third-party
 standards, laws, webpages, trademarks or external documents. Users must follow
 the applicable publisher terms before fetching, storing or redistributing any
 external full text.
+
+## Project visual assets
+
+The repository-local provenance and redistribution status of raster visual
+assets is recorded in `data/assets/asset_registry_v1.json`. On 2026-08-14 the
+authenticated repository owner explicitly approved GitHub publication of the
+pre-existing Xiaoyi Q-style hero artwork and screenshots containing it. That
+approval is limited to redistribution as part of this repository. Copyright is
+not transferred, and the repository MIT license must not be interpreted as a
+standalone license to extract, reuse, or redistribute the character artwork.

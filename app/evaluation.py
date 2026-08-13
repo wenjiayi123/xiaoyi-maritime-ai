@@ -11,7 +11,7 @@ from typing import Any, Literal, Optional
 from fastapi import APIRouter, HTTPException, Query, Request
 from pydantic import BaseModel, Field
 
-from app.config import EVALUATION_BENCHMARK_PATH
+from app.config import EVALUATION_BENCHMARK_PATH, RAG_RELEASE_REPORT_PATH
 from app.knowledge_api import get_knowledge_status
 from app.knowledge_intake import KnowledgeIntakeRequest, submit_knowledge_intake
 from app.knowledge_policy import detect_jurisdictions
@@ -64,6 +64,39 @@ def _load_benchmark(path: Path = EVALUATION_BENCHMARK_PATH) -> dict[str, Any]:
     if any(item.get("split") not in {"validation", "test"} for item in [*retrieval_cases, *policy_cases]):
         raise ValueError("Benchmark split must be validation or test")
     return payload
+
+
+def _load_pinned_release_summary(
+    path: Path = RAG_RELEASE_REPORT_PATH,
+) -> Optional[dict[str, Any]]:
+    """Load committed fixed-benchmark evidence without presenting it as a live rerun."""
+    if not path.is_file():
+        return None
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+        benchmark = payload["benchmark"]
+        metrics = benchmark["resume_safe_metrics"]
+    except (OSError, json.JSONDecodeError, KeyError, TypeError):
+        return None
+    return {
+        "retrieval_method": benchmark.get("retrieval_method", "hybrid_sparse_v2"),
+        "benchmark_count": benchmark.get("benchmark_count", 0),
+        "retrieval_benchmark_count": benchmark.get("retrieval_benchmark_count", 0),
+        "policy_benchmark_count": benchmark.get("policy_benchmark_count", 0),
+        "hit_at_k": metrics.get("hybrid_hit_at_5", 0.0),
+        "official_requirement_pass_rate": metrics.get(
+            "official_requirement_pass_rate", 0.0
+        ),
+        "policy_safety_pass_rate": metrics.get("policy_safety_pass_rate", 0.0),
+        "resume_safe_metrics": metrics,
+        "passed": bool(benchmark.get("passed")),
+        "status": "pinned_release_evidence",
+        "evidence_source": str(path.relative_to(path.parents[1])),
+        "report_generated_at": payload.get("generated_at"),
+        "report_sha256": _sha256_file(path),
+        "live_rerun": False,
+        "required_qualifier": metrics.get("required_qualifier"),
+    }
 
 
 def _source_rank(hits: list[SearchHit], expected_sources: set[str]) -> int | None:
@@ -564,6 +597,7 @@ def evaluation_summary() -> dict[str, Any]:
         },
         "runtime": runtime_store.metrics(),
         "latest_benchmark": _LATEST_BENCHMARK
+        or _load_pinned_release_summary()
         or {
             "retrieval_method": "hybrid_sparse_v2",
             "benchmark_count": benchmark_count,
@@ -573,6 +607,7 @@ def evaluation_summary() -> dict[str, Any]:
             "policy_safety_pass_rate": 0.0,
             "passed": False,
             "status": "not_run_in_this_process",
+            "live_rerun": False,
         },
     }
 

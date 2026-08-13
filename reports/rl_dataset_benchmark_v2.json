@@ -1,0 +1,3403 @@
+{
+  "configuration": {
+    "algorithms": [
+      "q_learning",
+      "sarsa",
+      "expected_sarsa",
+      "double_q_learning",
+      "pid",
+      "sop_rule"
+    ],
+    "episodes": 320,
+    "horizon_steps": 72,
+    "seed_count": 3,
+    "seeds": [
+      260813,
+      260814,
+      260815
+    ],
+    "split": "chronological_no_shuffle_70_15_15",
+    "test_render_mode": "trace_after_training",
+    "training_render_mode": null
+  },
+  "dataset_comparison": {
+    "large_rows": 409887,
+    "large_to_original_row_ratio": 20.769546,
+    "original_rows": 19735,
+    "recommendation": "Use the large UCI dataset for algorithm-scale evidence and retain the original dataset for regression comparison. Use NOAA AIS for port-traffic relevance. None of them replaces site validation."
+  },
+  "dispatch_allowed": false,
+  "evidence_integrity_passed": true,
+  "evidence_sha256": {
+    "data/port_profiles/us_la_lb_public_ais_v1.json": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+    "data/public/noaa_la_lb_ais_2024_12_25_1min.csv": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+    "data/public/noaa_la_lb_ais_2024_12_25_1min.provenance.json": "cbf1f1705acb351dd60702d7514bc2ab7856f61fe96c325012dfe103318ba00f",
+    "data/public/uci_appliances_energy.csv": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+    "data/public/uci_appliances_energy.provenance.json": "0ed6d6cc1f526c8b4209ea79363bc225794be1a487323e1b1db558bf8d6ec710",
+    "data/public/uci_household_power_5min.csv": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+    "data/public/uci_household_power_5min.provenance.json": "0fc6cc6a04b2605b9bea2af496ea2528b4576d0e75f996bf5e781e44d616c054",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/evaluations/eval-172e7dfc84.json": "278aed50099092f02ac1055a52aecb2f5384c1ca0ce1e145b9933f82cda466b2",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/models/double_q_learning.json": "ba553bfbb368cf402bd7c5c6f898e8b9a8425c94b52c65757f8e71722160e116",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/models/expected_sarsa.json": "fdbe5ebb9b32d3c5b2fdd9fc077e8ea9ce3fe90f7586439b258b009be8d8ff79",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/models/q_learning.json": "3cddff34a264658932ea0103aa025a5a0db960094bbf3b37232cfabbef5ec311",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/models/sarsa.json": "d4db91ee41057ba88f2711f29f3b7bc67967cdcd08218996996b473fcb14da4f",
+    "reports/rl_evidence_v2/legacy_uci_smoke_20260724/run.json": "69cbe9e176a0f97aebf839e12400937843b7906ec45d7149f11d4b9d4e7e5979",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/evaluations/eval-9a3db9d97e.json": "b9834bf0598a3dda07d0a0c565bcb2557d330ebdfb3f964c7d4f21a52ddf8f3e",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/double_q_learning.json": "0adc2c5caa49938a88984a980c3930fbe31cced906368a7714b69bc1a780b917",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/expected_sarsa.json": "2e4fc642515f089eaa36e333841bd3f312b6ad06e28724e8ad0a0b9e48e8b8da",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/q_learning.json": "f0e921be710031cce1860994804070c1c566e18b4ceb9595746aec02154c01a3",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/sarsa.json": "d1a338923c4afbc4652741c9238403802813b57871bba85c5d645c90b6312c98",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/models/sop_rule.json": "384ac12faeca100e0e0ef83d6e55cafc689aefa76e8b1e7ddf152d172e6e9536",
+    "reports/rl_evidence_v2/noaa_la_lb_ais_2024_12_25_1min/selected_run/run.json": "d794bedf926a2bf278f6b6982bda55c19a129a7701e66e0d6eb3ef367c366bb9",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/evaluations/eval-e7ffbb777e.json": "e15dee0cdfb387e8372f3db706904b82f493d801f8777d361b443f3e4c82f0d4",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/double_q_learning.json": "036575c6be11878eb3f7f09ed30cc378add6b6a20ba9b33f8d4366fc794a3e60",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/expected_sarsa.json": "4afbe26295206aabf6c7b8fa7f645be87fc983f44b7a691cd08f229f1f3186a9",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/q_learning.json": "bc1e2842da488d749e18901a9fdfd5c47dfc93a935315fb031d0a8943790f4d5",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/sarsa.json": "c3c1609bac8cb03efecaba932b330889ffcb32121b0eb8ff4c397091ae78a3cd",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/models/sop_rule.json": "384ac12faeca100e0e0ef83d6e55cafc689aefa76e8b1e7ddf152d172e6e9536",
+    "reports/rl_evidence_v2/uci_appliances_energy/selected_run/run.json": "aa9b19f442741ce2c8b52332215fbbd7810ee52f798cac06447a8b33e6d096a1",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/evaluations/eval-72bdbe949f.json": "6cc327bf24d5043a37bdefdbc4b9f3bef16173194cb3c7e3ef799e01eeb885f2",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/double_q_learning.json": "a467ef5997ba10e0e8f097a722f1177df5b0b12fcf94bc009a4a0e30c121abdd",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/expected_sarsa.json": "b3d12927375c0ea7109426060cdfa173ca1ed85f56f580b15ba00bc48dd5012f",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/pid.json": "42ec931a0198093456ebc90fe6ab9cd8530a20c873077a5ac641badfe7f517c4",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/q_learning.json": "3e69b47405547abf10033df66e25c85de07255c8b6e91fbe05014d68136babcd",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/sarsa.json": "2574c99ab8b019227b8f1991023d8e2dd8e2f9ef185c426169a86f116db484bb",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/models/sop_rule.json": "384ac12faeca100e0e0ef83d6e55cafc689aefa76e8b1e7ddf152d172e6e9536",
+    "reports/rl_evidence_v2/uci_household_power_5min/selected_run/run.json": "235157ae259e177dc03d7227c8815415be50949d078911f6df652bb6c45b540c"
+  },
+  "experiments": {
+    "noaa_la_lb_ais_2024_12_25_1min": {
+      "admission": {
+        "candidate_reasons": [
+          "strong_baseline_won_validation"
+        ],
+        "candidate_status": "baseline_retained_or_candidate_rejected",
+        "dispatch_allowed": false,
+        "failed_candidates": [
+          {
+            "algorithm_id": "double_q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -11035.047855,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8860.729084,
+              "mean": -9947.888469,
+              "sample_stddev": 437.640546
+            }
+          },
+          {
+            "algorithm_id": "expected_sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -11040.724193,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8857.244732,
+              "mean": -9948.984463,
+              "sample_stddev": 439.484383
+            }
+          },
+          {
+            "algorithm_id": "q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -11040.19497,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8863.566609,
+              "mean": -9951.880789,
+              "sample_stddev": 438.105414
+            }
+          },
+          {
+            "algorithm_id": "sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -11046.534,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8847.92744,
+              "mean": -9947.23072,
+              "sample_stddev": 442.529122
+            }
+          }
+        ],
+        "production_authority": false,
+        "required_validation_votes": 2,
+        "rl_candidate_admitted": false,
+        "selection_basis": "validation-majority only; blind-test metrics do not select the candidate",
+        "site_admission_required": [
+          "site_field_mapping",
+          "calibration",
+          "drift_acceptance",
+          "shadow_operation",
+          "dual_approval",
+          "rollback_drill"
+        ],
+        "strong_baseline_id": "pid",
+        "strong_baseline_score": {
+          "ci95_lower": -6574.06588,
+          "ci95_method": "two-sided Student t, df=2",
+          "ci95_upper": -6574.06588,
+          "mean": -6574.06588,
+          "sample_stddev": 0.0
+        },
+        "validation_candidate_id": "pid",
+        "validation_votes": 3
+      },
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "average_backlog_units": {
+              "ci95_lower": 132.744373,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 162.276561,
+              "mean": 147.510467,
+              "sample_stddev": 5.944153
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -11035.047855,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8860.729084,
+              "mean": -9947.888469,
+              "sample_stddev": 437.640546
+            },
+            "served_units": {
+              "ci95_lower": 368.517925,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 394.677035,
+              "mean": 381.59748,
+              "sample_stddev": 5.26523
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 209.709632,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 235.868742,
+              "mean": 222.789187,
+              "sample_stddev": 5.26523
+            },
+            "total_reward": {
+              "ci95_lower": -11035.047855,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8860.729084,
+              "mean": -9947.888469,
+              "sample_stddev": 437.640546
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 159.293246,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 194.731874,
+              "mean": 177.01256,
+              "sample_stddev": 7.132984
+            }
+          },
+          "expected_sarsa": {
+            "average_backlog_units": {
+              "ci95_lower": 132.709009,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 162.334199,
+              "mean": 147.521604,
+              "sample_stddev": 5.962872
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -11040.724193,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8857.244732,
+              "mean": -9948.984463,
+              "sample_stddev": 439.484383
+            },
+            "served_units": {
+              "ci95_lower": 367.573367,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 395.265193,
+              "mean": 381.41928,
+              "sample_stddev": 5.57373
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 209.121474,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 236.8133,
+              "mean": 222.967387,
+              "sample_stddev": 5.57373
+            },
+            "total_reward": {
+              "ci95_lower": -11040.724193,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8857.244732,
+              "mean": -9948.984463,
+              "sample_stddev": 439.484383
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 159.250809,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 194.801041,
+              "mean": 177.025925,
+              "sample_stddev": 7.155447
+            }
+          },
+          "pid": {
+            "average_backlog_units": {
+              "ci95_lower": 103.191467,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 103.191467,
+              "mean": 103.191467,
+              "sample_stddev": 0.0
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -6574.06588,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -6574.06588,
+              "mean": -6574.06588,
+              "sample_stddev": 0.0
+            },
+            "served_units": {
+              "ci95_lower": 480.6054,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 480.6054,
+              "mean": 480.6054,
+              "sample_stddev": 0.0
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 123.781267,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 123.781267,
+              "mean": 123.781267,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -6574.06588,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -6574.06588,
+              "mean": -6574.06588,
+              "sample_stddev": 0.0
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 123.82976,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 123.82976,
+              "mean": 123.82976,
+              "sample_stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "average_backlog_units": {
+              "ci95_lower": 132.791607,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 162.327831,
+              "mean": 147.559719,
+              "sample_stddev": 5.944965
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -11040.19497,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8863.566609,
+              "mean": -9951.880789,
+              "sample_stddev": 438.105414
+            },
+            "served_units": {
+              "ci95_lower": 367.661606,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 394.998754,
+              "mean": 381.33018,
+              "sample_stddev": 5.502342
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 209.387913,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 236.725061,
+              "mean": 223.056487,
+              "sample_stddev": 5.502342
+            },
+            "total_reward": {
+              "ci95_lower": -11040.19497,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8863.566609,
+              "mean": -9951.880789,
+              "sample_stddev": 438.105414
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 159.349928,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 194.793398,
+              "mean": 177.071663,
+              "sample_stddev": 7.133959
+            }
+          },
+          "sarsa": {
+            "average_backlog_units": {
+              "ci95_lower": 132.633247,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 162.348581,
+              "mean": 147.490914,
+              "sample_stddev": 5.981016
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -11046.534,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8847.92744,
+              "mean": -9947.23072,
+              "sample_stddev": 442.529122
+            },
+            "served_units": {
+              "ci95_lower": 364.679163,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 397.719837,
+              "mean": 381.1995,
+              "sample_stddev": 6.650331
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 206.66683,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 239.707504,
+              "mean": 223.187167,
+              "sample_stddev": 6.650331
+            },
+            "total_reward": {
+              "ci95_lower": -11046.534,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8847.92744,
+              "mean": -9947.23072,
+              "sample_stddev": 442.529122
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 159.159896,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 194.818298,
+              "mean": 176.989097,
+              "sample_stddev": 7.177219
+            }
+          },
+          "sop_rule": {
+            "average_backlog_units": {
+              "ci95_lower": 128.254554,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 128.254554,
+              "mean": 128.254554,
+              "sample_stddev": 0.0
+            },
+            "capacity_utilization_percent": {
+              "ci95_lower": 100.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 100.0,
+              "mean": 100.0,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -8464.2425,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8464.2425,
+              "mean": -8464.2425,
+              "sample_stddev": 0.0
+            },
+            "served_units": {
+              "ci95_lower": 430.353,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 430.353,
+              "mean": 430.353,
+              "sample_stddev": 0.0
+            },
+            "terminal_backlog_units": {
+              "ci95_lower": 174.033667,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 174.033667,
+              "mean": 174.033667,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -8464.2425,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -8464.2425,
+              "mean": -8464.2425,
+              "sample_stddev": 0.0
+            },
+            "wait_proxy_hours": {
+              "ci95_lower": 153.905465,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 153.905465,
+              "mean": 153.905465,
+              "sample_stddev": 0.0
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "pid",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 3,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 0
+        },
+        "validation_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 3,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 0
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "U.S. Coast Guard NAIS; NOAA Office for Coastal Management; Bureau of Ocean Energy Management. MarineCadastre historical AIS point data.",
+        "description": "洛杉矶—长滩港区公开AIS实测交通的一分钟聚合场景；服务量、队列与等待改善属于校准仿真输出，不是码头生产KPI。",
+        "environment_type": "port_operations",
+        "evidence_level": "measured_ais_plus_calibrated_operations_proxy",
+        "factor_coverage": {
+          "berth": "site_required",
+          "energy_carbon": "site_required",
+          "equipment": "site_required",
+          "gate_rail": "site_required",
+          "queue": "derived_proxy",
+          "traffic": "measured_ais",
+          "vessel_mix": "measured_ais",
+          "weather_tide": "site_required",
+          "yard": "site_required"
+        },
+        "id": "noaa_la_lb_ais_2024_12_25_1min",
+        "label": "NOAA LA–Long Beach AIS · 2024-12-25",
+        "license": "U.S. Government material; NOAA MarineCadastre AIS terms",
+        "mapping": {
+          "anchored_vessels": "anchored_vessels",
+          "avg_sog_knots": "avg_sog_knots",
+          "cargo_vessels": "cargo_vessels",
+          "passenger_vessels": "passenger_vessels",
+          "slow_vessels": "slow_vessels",
+          "tanker_vessels": "tanker_vessels",
+          "timestamp": "timestamp",
+          "tug_vessels": "tug_vessels",
+          "vessel_count": "vessel_count"
+        },
+        "optional_fields": [
+          "load_kw",
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "slow_vessels",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+        "port_data": true,
+        "profile_path": "data/port_profiles/us_la_lb_public_ais_v1.json",
+        "queue_proxy_max": 125.0,
+        "queue_proxy_median": 92.0,
+        "required_fields": [
+          "timestamp",
+          "vessel_count",
+          "anchored_vessels",
+          "avg_sog_knots"
+        ],
+        "row_count": 710,
+        "sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+        "source_type": "public_port_traffic",
+        "source_url": "https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2024/",
+        "step_minutes": 1.0,
+        "time_end": "2024-12-25T12:01:00+00:00",
+        "time_start": "2024-12-25T00:00:00+00:00",
+        "timezone": "UTC",
+        "vessel_count_max": 106.0,
+        "vessel_count_median": 82.0,
+        "vessel_count_min": 1.0
+      },
+      "runs": [
+        {
+          "config_sha256": "6f4e5862076a7e9c108f30ad659a3634e32924a3fd0f3d0824a44be0ddd18e21",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 13.207,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.733004,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9815.50074,
+                "served_units": 384.1992,
+                "terminal_backlog_units": 220.187467,
+                "total_reward": -9815.50074,
+                "wait_proxy_hours": 174.879605
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.522134,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9798.55354,
+                "served_units": 385.2684,
+                "terminal_backlog_units": 219.118267,
+                "total_reward": -9798.55354,
+                "wait_proxy_hours": 174.626561
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.618659,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9806.81176,
+                "served_units": 384.4665,
+                "terminal_backlog_units": 219.920167,
+                "total_reward": -9806.81176,
+                "wait_proxy_hours": 174.742391
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 145.618659,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9806.81176,
+                "served_units": 384.4665,
+                "terminal_backlog_units": 219.920167,
+                "total_reward": -9806.81176,
+                "wait_proxy_hours": 174.742391
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 128.254554,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -8464.2425,
+                "served_units": 430.353,
+                "terminal_backlog_units": 174.033667,
+                "total_reward": -8464.2425,
+                "wait_proxy_hours": 153.905465
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124648-cc838599",
+          "seed": 260813,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124648-cc838599/evaluations/eval-9a3db9d97e.json",
+          "test_artifact_sha256": "b9834bf0598a3dda07d0a0c565bcb2557d330ebdfb3f964c7d4f21a52ddf8f3e",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "b77500b1198ec2dfd5aaf898e0a1b264fe921d8ba4cf93b7e5f0883421751de5",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 12.492,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 154.203691,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10441.955532,
+                "served_units": 374.98626,
+                "terminal_backlog_units": 229.400407,
+                "total_reward": -10441.955532,
+                "wait_proxy_hours": 185.04443
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 154.208146,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10444.952524,
+                "served_units": 373.52502,
+                "terminal_backlog_units": 230.861647,
+                "total_reward": -10444.952524,
+                "wait_proxy_hours": 185.049776
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 154.203691,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10441.955532,
+                "served_units": 374.98626,
+                "terminal_backlog_units": 229.400407,
+                "total_reward": -10441.955532,
+                "wait_proxy_hours": 185.04443
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 154.170279,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -10438.667552,
+                "served_units": 375.52086,
+                "terminal_backlog_units": 228.865807,
+                "total_reward": -10438.667552,
+                "wait_proxy_hours": 185.004335
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 128.254554,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -8464.2425,
+                "served_units": 430.353,
+                "terminal_backlog_units": 174.033667,
+                "total_reward": -8464.2425,
+                "wait_proxy_hours": 153.905465
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124702-134bd4c2",
+          "seed": 260814,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124702-134bd4c2/evaluations/eval-65ab0e91a0.json",
+          "test_artifact_sha256": "8043030cd5c9e1ef71f0ddfa37246080a61727784a23c4ee1933db8bf5394529",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "8d829ead3b2f7b68d6c710d2786377e591856084f3286675b783eb71569a31df",
+          "dataset_sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6",
+          "duration_seconds": 12.586,
+          "profile_sha256": "95b7f9125ce0da6a46c805ef14a12ddc793392d052f9dc4a541c62e008efdcbc",
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 142.742462,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9598.186096,
+                "served_units": 384.80508,
+                "terminal_backlog_units": 219.581587,
+                "total_reward": -9598.186096,
+                "wait_proxy_hours": 171.290954
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 142.742462,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9598.186096,
+                "served_units": 384.80508,
+                "terminal_backlog_units": 219.581587,
+                "total_reward": -9598.186096,
+                "wait_proxy_hours": 171.290954
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 142.742462,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9598.186096,
+                "served_units": 384.80508,
+                "terminal_backlog_units": 219.581587,
+                "total_reward": -9598.186096,
+                "wait_proxy_hours": 171.290954
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 142.742462,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -9598.186096,
+                "served_units": 384.80508,
+                "terminal_backlog_units": 219.581587,
+                "total_reward": -9598.186096,
+                "wait_proxy_hours": 171.290954
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 103.191467,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -6574.06588,
+                "served_units": 480.6054,
+                "terminal_backlog_units": 123.781267,
+                "total_reward": -6574.06588,
+                "wait_proxy_hours": 123.82976
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "average_backlog_units": 128.254554,
+                "capacity_utilization_percent": 100.0,
+                "constraint_violations": 0.0,
+                "metric_boundary": "AIS fields are measured observations; served, backlog, wait and score are calibrated scenario outputs and are not terminal production KPIs.",
+                "score": -8464.2425,
+                "served_units": 430.353,
+                "terminal_backlog_units": 174.033667,
+                "total_reward": -8464.2425,
+                "wait_proxy_hours": 153.905465
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124715-63e19adc",
+          "seed": 260815,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 108,
+            "test_time_start": "2024-12-25T10:14:00+00:00",
+            "train_rows": 496,
+            "train_time_end": "2024-12-25T08:15:00+00:00",
+            "validation_rows": 106,
+            "validation_time_end": "2024-12-25T10:13:00+00:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124715-63e19adc/evaluations/eval-999ff2246c.json",
+          "test_artifact_sha256": "42d4fce48ab8f642225bbff11db3844264389df698dee8080274739afb81a734",
+          "test_best_algorithm_id": "pid",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        }
+      ]
+    },
+    "uci_appliances_energy": {
+      "admission": {
+        "candidate_reasons": [
+          "strong_baseline_won_validation"
+        ],
+        "candidate_status": "baseline_retained_or_candidate_rejected",
+        "dispatch_allowed": false,
+        "failed_candidates": [
+          {
+            "algorithm_id": "double_q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -237.658637,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -227.548022,
+              "mean": -232.60333,
+              "sample_stddev": 2.035035
+            }
+          },
+          {
+            "algorithm_id": "expected_sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -263.910859,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -195.562207,
+              "mean": -229.736533,
+              "sample_stddev": 13.757017
+            }
+          },
+          {
+            "algorithm_id": "q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -236.815628,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -205.131894,
+              "mean": -220.973761,
+              "sample_stddev": 6.37721
+            }
+          },
+          {
+            "algorithm_id": "sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -240.522648,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -210.80443,
+              "mean": -225.663539,
+              "sample_stddev": 5.981596
+            }
+          }
+        ],
+        "production_authority": false,
+        "required_validation_votes": 2,
+        "rl_candidate_admitted": false,
+        "selection_basis": "validation-majority only; blind-test metrics do not select the candidate",
+        "site_admission_required": [
+          "site_field_mapping",
+          "calibration",
+          "drift_acceptance",
+          "shadow_operation",
+          "dual_approval",
+          "rollback_drill"
+        ],
+        "strong_baseline_id": "sop_rule",
+        "strong_baseline_score": {
+          "ci95_lower": -151.500365,
+          "ci95_method": "two-sided Student t, df=2",
+          "ci95_upper": -151.500365,
+          "mean": -151.500365,
+          "sample_stddev": 0.0
+        },
+        "validation_candidate_id": "pid",
+        "validation_votes": 3
+      },
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 4.356541,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 4.502509,
+              "mean": 4.429525,
+              "sample_stddev": 0.02938
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -59.333825,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -45.931797,
+              "mean": -52.632811,
+              "sample_stddev": 2.697521
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.164773,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.295227,
+              "mean": 2.73,
+              "sample_stddev": 0.227535
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -71.993654,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -33.477746,
+              "mean": -52.7357,
+              "sample_stddev": 7.75237
+            },
+            "score": {
+              "ci95_lower": -237.658637,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -227.548022,
+              "mean": -232.60333,
+              "sample_stddev": 2.035035
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.532684,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.540833,
+              "mean": 0.536759,
+              "sample_stddev": 0.00164
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.982945,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.08734,
+              "mean": 2.035142,
+              "sample_stddev": 0.021012
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.12791,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.178355,
+              "mean": 0.153132,
+              "sample_stddev": 0.010153
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.853286,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.910734,
+              "mean": 1.88201,
+              "sample_stddev": 0.011563
+            },
+            "total_reward": {
+              "ci95_lower": -196.052472,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -184.859379,
+              "mean": -190.455925,
+              "sample_stddev": 2.252913
+            }
+          },
+          "expected_sarsa": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 4.005648,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 4.790652,
+              "mean": 4.39815,
+              "sample_stddev": 0.158003
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -65.798185,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -34.961193,
+              "mean": -50.379689,
+              "sample_stddev": 6.20678
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.350081,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.887919,
+              "mean": 2.619,
+              "sample_stddev": 0.108254
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -53.838178,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -42.099,
+              "mean": -47.968589,
+              "sample_stddev": 2.362827
+            },
+            "score": {
+              "ci95_lower": -263.910859,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -195.562207,
+              "mean": -229.736533,
+              "sample_stddev": 13.757017
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.536309,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.54186,
+              "mean": 0.539085,
+              "sample_stddev": 0.001117
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.816759,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.226573,
+              "mean": 2.021666,
+              "sample_stddev": 0.082486
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.110119,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.193236,
+              "mean": 0.151678,
+              "sample_stddev": 0.01673
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.704872,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.035105,
+              "mean": 1.869989,
+              "sample_stddev": 0.066468
+            },
+            "total_reward": {
+              "ci95_lower": -216.100914,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -164.693529,
+              "mean": -190.397222,
+              "sample_stddev": 10.347129
+            }
+          },
+          "pid": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 4.060275,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 4.060275,
+              "mean": 4.060275,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -26.1894,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -26.1894,
+              "mean": -26.1894,
+              "sample_stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.115,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.115,
+              "mean": 2.115,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -6.7761,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -6.7761,
+              "mean": -6.7761,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -151.630938,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -151.630938,
+              "mean": -151.630938,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.672392,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.672392,
+              "mean": 0.672392,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.717853,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.717853,
+              "mean": 1.717853,
+              "sample_stddev": 0.0
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.082903,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.082903,
+              "mean": 0.082903,
+              "sample_stddev": 0.0
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.63495,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.63495,
+              "mean": 1.63495,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -138.444738,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -138.444738,
+              "mean": -138.444738,
+              "sample_stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 4.182569,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 4.408181,
+              "mean": 4.295375,
+              "sample_stddev": 0.045411
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -51.521582,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -43.571662,
+              "mean": -47.546622,
+              "sample_stddev": 1.600137
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.185121,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.906212,
+              "mean": 2.545667,
+              "sample_stddev": 0.145139
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -63.923036,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -30.835697,
+              "mean": -47.379367,
+              "sample_stddev": 6.659723
+            },
+            "score": {
+              "ci95_lower": -236.815628,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -205.131894,
+              "mean": -220.973761,
+              "sample_stddev": 6.37721
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.527606,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.548774,
+              "mean": 0.53819,
+              "sample_stddev": 0.004261
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.931129,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.03008,
+              "mean": 1.980604,
+              "sample_stddev": 0.019917
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.131037,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.152787,
+              "mean": 0.141912,
+              "sample_stddev": 0.004378
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.798742,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.878643,
+              "mean": 1.838692,
+              "sample_stddev": 0.016082
+            },
+            "total_reward": {
+              "ci95_lower": -190.869175,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -175.137556,
+              "mean": -183.003366,
+              "sample_stddev": 3.166414
+            }
+          },
+          "sarsa": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 4.302386,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 4.472064,
+              "mean": 4.387225,
+              "sample_stddev": 0.034152
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -58.383955,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -39.129757,
+              "mean": -48.756856,
+              "sample_stddev": 3.875429
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.303351,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.849982,
+              "mean": 2.576667,
+              "sample_stddev": 0.110024
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -54.779993,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -40.604429,
+              "mean": -47.692211,
+              "sample_stddev": 2.853216
+            },
+            "score": {
+              "ci95_lower": -240.522648,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -210.80443,
+              "mean": -225.663539,
+              "sample_stddev": 5.981596
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.528954,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.546711,
+              "mean": 0.537832,
+              "sample_stddev": 0.003574
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.936425,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.076043,
+              "mean": 2.006234,
+              "sample_stddev": 0.028102
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.106006,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.187376,
+              "mean": 0.146691,
+              "sample_stddev": 0.016378
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.814869,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.904218,
+              "mean": 1.859543,
+              "sample_stddev": 0.017984
+            },
+            "total_reward": {
+              "ci95_lower": -196.356344,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -177.811479,
+              "mean": -187.083912,
+              "sample_stddev": 3.732656
+            }
+          },
+          "sop_rule": {
+            "baseline_cost": {
+              "ci95_lower": 1.463533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.463533,
+              "mean": 1.463533,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 2.26,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.26,
+              "mean": 2.26,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.972675,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.972675,
+              "mean": 3.972675,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -7.712467,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -7.712467,
+              "mean": -7.712467,
+              "sample_stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.534,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.534,
+              "mean": 2.534,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -41.515167,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -41.515167,
+              "mean": -41.515167,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -151.500365,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -151.500365,
+              "mean": -151.500365,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.657361,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.657361,
+              "mean": 0.657361,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.527777,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.527777,
+              "mean": 1.527777,
+              "sample_stddev": 0.0
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.023063,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.023063,
+              "mean": 0.023063,
+              "sample_stddev": 0.0
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.504713,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.504713,
+              "mean": 1.504713,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -131.809311,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -131.809311,
+              "mean": -131.809311,
+              "sample_stddev": 0.0
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "sop_rule",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 0,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 3
+        },
+        "validation_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 3,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 0
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "Candanedo, L. (2017). Appliances Energy Prediction. UCI Machine Learning Repository. DOI: 10.24432/C5VC8G.",
+        "description": "19735条10分钟级真实建筑用电与气象观测。仅作为能源调度算法公开基准，不宣称为港口或AGV实绩。",
+        "environment_type": "energy_storage",
+        "evidence_level": "measured_public_benchmark",
+        "factor_coverage": {},
+        "id": "uci_appliances_energy",
+        "label": "UCI Appliances Energy Prediction",
+        "license": "CC BY 4.0",
+        "load_kw_max": 6.48,
+        "load_kw_median": 0.36,
+        "load_kw_min": 0.06,
+        "mapping": {
+          "humidity_percent": "humidity_percent",
+          "load_kw": "load_kw",
+          "pressure_hpa": "pressure_hpa",
+          "temperature_c": "temperature_c",
+          "timestamp": "timestamp",
+          "visibility_km": "visibility_km",
+          "wind_speed_mps": "wind_speed_mps"
+        },
+        "optional_fields": [
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "vessel_count",
+          "anchored_vessels",
+          "slow_vessels",
+          "avg_sog_knots",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/uci_appliances_energy.csv",
+        "port_data": false,
+        "required_fields": [
+          "timestamp",
+          "load_kw"
+        ],
+        "row_count": 19735,
+        "sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+        "source_type": "public_benchmark",
+        "source_url": "https://archive.ics.uci.edu/dataset/374/appliances+energy+prediction",
+        "step_minutes": 10.0,
+        "time_end": "2016-05-27T18:00:00",
+        "time_start": "2016-01-11T17:00:00",
+        "timezone": "Europe/Brussels"
+      },
+      "runs": [
+        {
+          "config_sha256": "3fb120a7160a1b27f4709f8fc4af9a0f702e11160f13aaf14befba5a897b0806",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 9.911,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.243575,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -45.875933,
+                "peak_grid_kw": 2.381,
+                "peak_reduction_percent": -40.3241,
+                "score": -213.837671,
+                "terminal_soc": 0.53658,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.957893,
+                "total_degradation_cost": 0.137757,
+                "total_grid_energy_cost": 1.820137,
+                "total_reward": -179.357658
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.426575,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -52.271,
+                "peak_grid_kw": 2.688,
+                "peak_reduction_percent": -50.601867,
+                "score": -232.540413,
+                "terminal_soc": 0.538727,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.036353,
+                "total_degradation_cost": 0.156457,
+                "total_grid_energy_cost": 1.879897,
+                "total_reward": -191.391266
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.410975,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -51.8088,
+                "peak_grid_kw": 2.682,
+                "peak_reduction_percent": -48.0724,
+                "score": -231.217589,
+                "terminal_soc": 0.53819,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.026933,
+                "total_degradation_cost": 0.157703,
+                "total_grid_energy_cost": 1.86923,
+                "total_reward": -191.265109
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.42455,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -53.524533,
+                "peak_grid_kw": 2.494,
+                "peak_reduction_percent": -45.555567,
+                "score": -230.834858,
+                "terminal_soc": 0.53819,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.03823,
+                "total_degradation_cost": 0.157703,
+                "total_grid_energy_cost": 1.880527,
+                "total_reward": -191.202818
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.060275,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -26.1894,
+                "peak_grid_kw": 2.115,
+                "peak_reduction_percent": -6.7761,
+                "score": -151.630938,
+                "terminal_soc": 0.672392,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.717853,
+                "total_degradation_cost": 0.082903,
+                "total_grid_energy_cost": 1.63495,
+                "total_reward": -138.444738
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.972675,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -7.712467,
+                "peak_grid_kw": 2.534,
+                "peak_reduction_percent": -41.515167,
+                "score": -151.500365,
+                "terminal_soc": 0.657361,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.527777,
+                "total_degradation_cost": 0.023063,
+                "total_grid_energy_cost": 1.504713,
+                "total_reward": -131.809311
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124358-7ebcab47",
+          "seed": 260813,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124358-7ebcab47/evaluations/eval-e7ffbb777e.json",
+          "test_artifact_sha256": "e15dee0cdfb387e8372f3db706904b82f493d801f8777d361b443f3e4c82f0d4",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "ef41b9d50d15be424b5f5633c41e0ef9608c83b6ee61bafe94671e4e30b9897e",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 10.189,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.328325,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -49.065367,
+                "peak_grid_kw": 2.655,
+                "peak_reduction_percent": -53.5564,
+                "score": -226.115326,
+                "terminal_soc": 0.543021,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.995093,
+                "total_degradation_cost": 0.146483,
+                "total_grid_energy_cost": 1.84861,
+                "total_reward": -185.066619
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.3698,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -44.6004,
+                "peak_grid_kw": 2.574,
+                "peak_reduction_percent": -47.575767,
+                "score": -221.667478,
+                "terminal_soc": 0.540874,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.980717,
+                "total_degradation_cost": 0.127783,
+                "total_grid_energy_cost": 1.852933,
+                "total_reward": -184.797011
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.54935,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -55.747267,
+                "peak_grid_kw": 2.681,
+                "peak_reduction_percent": -50.2778,
+                "score": -242.693099,
+                "terminal_soc": 0.540337,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.101393,
+                "total_degradation_cost": 0.16456,
+                "total_grid_energy_cost": 1.936833,
+                "total_reward": -200.283072
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.40295,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -49.602333,
+                "peak_grid_kw": 2.948,
+                "peak_reduction_percent": -60.9554,
+                "score": -232.14751,
+                "terminal_soc": 0.534969,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.012757,
+                "total_degradation_cost": 0.141497,
+                "total_grid_energy_cost": 1.87126,
+                "total_reward": -187.924417
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.060275,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -26.1894,
+                "peak_grid_kw": 2.115,
+                "peak_reduction_percent": -6.7761,
+                "score": -151.630938,
+                "terminal_soc": 0.672392,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.717853,
+                "total_degradation_cost": 0.082903,
+                "total_grid_energy_cost": 1.63495,
+                "total_reward": -138.444738
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.972675,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -7.712467,
+                "peak_grid_kw": 2.534,
+                "peak_reduction_percent": -41.515167,
+                "score": -151.500365,
+                "terminal_soc": 0.657361,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.527777,
+                "total_degradation_cost": 0.023063,
+                "total_grid_energy_cost": 1.504713,
+                "total_reward": -131.809311
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124410-969047e1",
+          "seed": 260814,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124410-969047e1/evaluations/eval-5b1c01c454.json",
+          "test_artifact_sha256": "440440f82725a1988f2c8d7b318de2395e17f9af04a5fbea8cb1cf50c4298cc3",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        },
+        {
+          "config_sha256": "07cf5f342d83d4c70a8bdf15df248a77039161adc090e0246c75e0bdd2cf496e",
+          "dataset_sha256": "e9ccfc34fed52b1b64b0c6040eef7e7d916d90a46427f455de7f7f1439bb6c1b",
+          "duration_seconds": 10.084,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.314225,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -47.698567,
+                "peak_grid_kw": 2.601,
+                "peak_reduction_percent": -48.2576,
+                "score": -222.968287,
+                "terminal_soc": 0.534969,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.988827,
+                "total_degradation_cost": 0.141497,
+                "total_grid_energy_cost": 1.84733,
+                "total_reward": -184.58582
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.3653,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -49.399167,
+                "peak_grid_kw": 2.468,
+                "peak_reduction_percent": -44.899,
+                "score": -222.782725,
+                "terminal_soc": 0.533896,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.001633,
+                "total_degradation_cost": 0.155833,
+                "total_grid_energy_cost": 1.8458,
+                "total_reward": -185.063458
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.234125,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -43.583,
+                "peak_grid_kw": 2.494,
+                "peak_reduction_percent": -45.555567,
+                "score": -215.298911,
+                "terminal_soc": 0.538727,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.936673,
+                "total_degradation_cost": 0.13277,
+                "total_grid_energy_cost": 1.803903,
+                "total_reward": -179.643484
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.461075,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -54.771567,
+                "peak_grid_kw": 2.748,
+                "peak_reduction_percent": -51.696133,
+                "score": -234.827621,
+                "terminal_soc": 0.537117,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.05444,
+                "total_degradation_cost": 0.160197,
+                "total_grid_energy_cost": 1.894243,
+                "total_reward": -192.240541
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 4.060275,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -26.1894,
+                "peak_grid_kw": 2.115,
+                "peak_reduction_percent": -6.7761,
+                "score": -151.630938,
+                "terminal_soc": 0.672392,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.717853,
+                "total_degradation_cost": 0.082903,
+                "total_grid_energy_cost": 1.63495,
+                "total_reward": -138.444738
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.463533,
+                "baseline_peak_kw": 2.26,
+                "carbon_kg": 3.972675,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -7.712467,
+                "peak_grid_kw": 2.534,
+                "peak_reduction_percent": -41.515167,
+                "score": -151.500365,
+                "terminal_soc": 0.657361,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.527777,
+                "total_degradation_cost": 0.023063,
+                "total_grid_energy_cost": 1.504713,
+                "total_reward": -131.809311
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124421-5b0d86bb",
+          "seed": 260815,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 2961,
+            "test_time_start": "2016-05-07T04:40:00",
+            "train_rows": 13814,
+            "train_time_end": "2016-04-16T15:10:00",
+            "validation_rows": 2960,
+            "validation_time_end": "2016-05-07T04:30:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124421-5b0d86bb/evaluations/eval-31ecf3bdac.json",
+          "test_artifact_sha256": "13949292251f6651ef3fd912c73a084bb1abb39b4cdc9c031401ccd201fab4dc",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "pid"
+        }
+      ]
+    },
+    "uci_household_power_5min": {
+      "admission": {
+        "candidate_reasons": [
+          "strong_baseline_won_validation"
+        ],
+        "candidate_status": "baseline_retained_or_candidate_rejected",
+        "dispatch_allowed": false,
+        "failed_candidates": [
+          {
+            "algorithm_id": "double_q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -230.128953,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -216.491441,
+              "mean": -223.310197,
+              "sample_stddev": 2.744919
+            }
+          },
+          {
+            "algorithm_id": "expected_sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -252.254591,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -204.027134,
+              "mean": -228.140862,
+              "sample_stddev": 9.707082
+            }
+          },
+          {
+            "algorithm_id": "q_learning",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -241.199873,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -227.145279,
+              "mean": -234.172576,
+              "sample_stddev": 2.828868
+            }
+          },
+          {
+            "algorithm_id": "sarsa",
+            "reasons": [
+              "not_selected_by_validation_majority"
+            ],
+            "status": "rejected",
+            "test_score": {
+              "ci95_lower": -265.453406,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -189.982471,
+              "mean": -227.717939,
+              "sample_stddev": 15.19057
+            }
+          }
+        ],
+        "production_authority": false,
+        "required_validation_votes": 2,
+        "rl_candidate_admitted": false,
+        "selection_basis": "validation-majority only; blind-test metrics do not select the candidate",
+        "site_admission_required": [
+          "site_field_mapping",
+          "calibration",
+          "drift_acceptance",
+          "shadow_operation",
+          "dual_approval",
+          "rollback_drill"
+        ],
+        "strong_baseline_id": "sop_rule",
+        "strong_baseline_score": {
+          "ci95_lower": -122.140023,
+          "ci95_method": "two-sided Student t, df=2",
+          "ci95_upper": -122.140023,
+          "mean": -122.140023,
+          "sample_stddev": 0.0
+        },
+        "validation_candidate_id": "sop_rule",
+        "validation_votes": 3
+      },
+      "aggregate": {
+        "algorithm_metrics": {
+          "double_q_learning": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.34406,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.626772,
+              "mean": 3.485416,
+              "sample_stddev": 0.056904
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -61.91499,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -40.367677,
+              "mean": -51.141333,
+              "sample_stddev": 4.33698
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 3.388956,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.625267,
+              "mean": 3.507111,
+              "sample_stddev": 0.047564
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -117.403372,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -108.269405,
+              "mean": -112.836389,
+              "sample_stddev": 1.838458
+            },
+            "score": {
+              "ci95_lower": -230.128953,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -216.491441,
+              "mean": -223.310197,
+              "sample_stddev": 2.744919
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.528444,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.538453,
+              "mean": 0.533448,
+              "sample_stddev": 0.002014
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.988386,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.116576,
+              "mean": 2.052481,
+              "sample_stddev": 0.025802
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.141836,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.160233,
+              "mean": 0.151035,
+              "sample_stddev": 0.003703
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.838016,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.964876,
+              "mean": 1.901446,
+              "sample_stddev": 0.025534
+            },
+            "total_reward": {
+              "ci95_lower": -161.121291,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -154.316925,
+              "mean": -157.719108,
+              "sample_stddev": 1.369563
+            }
+          },
+          "expected_sarsa": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.232338,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.828435,
+              "mean": 3.530387,
+              "sample_stddev": 0.119981
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -84.488777,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -30.356957,
+              "mean": -57.422867,
+              "sample_stddev": 10.895495
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 3.537067,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.537067,
+              "mean": 3.537067,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -113.994233,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -113.994233,
+              "mean": -113.994233,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -252.254591,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -204.027134,
+              "mean": -228.140862,
+              "sample_stddev": 9.707082
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.530924,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.535973,
+              "mean": 0.533448,
+              "sample_stddev": 0.001016
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.839167,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.256481,
+              "mean": 2.047824,
+              "sample_stddev": 0.083996
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.144388,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.183134,
+              "mean": 0.163761,
+              "sample_stddev": 0.007799
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.68729,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.080836,
+              "mean": 1.884063,
+              "sample_stddev": 0.079212
+            },
+            "total_reward": {
+              "ci95_lower": -173.620188,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -145.527856,
+              "mean": -159.574022,
+              "sample_stddev": 5.654343
+            }
+          },
+          "pid": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.766557,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.766557,
+              "mean": 3.766557,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -71.821133,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -71.821133,
+              "mean": -71.821133,
+              "sample_stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.189533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.189533,
+              "mean": 2.189533,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -45.4247,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -45.4247,
+              "mean": -45.4247,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -183.178272,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -183.178272,
+              "mean": -183.178272,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.739224,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.739224,
+              "mean": 0.739224,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 2.083643,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.083643,
+              "mean": 2.083643,
+              "sample_stddev": 0.0
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.064801,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.064801,
+              "mean": 0.064801,
+              "sample_stddev": 0.0
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 2.018842,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.018842,
+              "mean": 2.018842,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -136.279939,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -136.279939,
+              "mean": -136.279939,
+              "sample_stddev": 0.0
+            }
+          },
+          "q_learning": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.541449,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.648674,
+              "mean": 3.595062,
+              "sample_stddev": 0.021582
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -66.592533,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -51.995245,
+              "mean": -59.293889,
+              "sample_stddev": 2.938099
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 3.537067,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.537067,
+              "mean": 3.537067,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -113.994233,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -113.994233,
+              "mean": -113.994233,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -241.199873,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -227.145279,
+              "mean": -234.172576,
+              "sample_stddev": 2.828868
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.530453,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.536265,
+              "mean": 0.533359,
+              "sample_stddev": 0.00117
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 2.061195,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.144647,
+              "mean": 2.102921,
+              "sample_stddev": 0.016797
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.159136,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.18178,
+              "mean": 0.170458,
+              "sample_stddev": 0.004558
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.900644,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.96428,
+              "mean": 1.932462,
+              "sample_stddev": 0.012809
+            },
+            "total_reward": {
+              "ci95_lower": -170.048211,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -159.666443,
+              "mean": -164.857327,
+              "sample_stddev": 2.089612
+            }
+          },
+          "sarsa": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 3.114057,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.983028,
+              "mean": 3.548542,
+              "sample_stddev": 0.174904
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": -96.93931,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -18.447445,
+              "mean": -57.693378,
+              "sample_stddev": 15.798614
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 3.537067,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 3.537067,
+              "mean": 3.537067,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -113.994233,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -113.994233,
+              "mean": -113.994233,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -265.453406,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -189.982471,
+              "mean": -227.717939,
+              "sample_stddev": 15.19057
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.530426,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.534502,
+              "mean": 0.532464,
+              "sample_stddev": 0.00082
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.756278,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.312704,
+              "mean": 2.034491,
+              "sample_stddev": 0.111996
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.133672,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.194854,
+              "mean": 0.164263,
+              "sample_stddev": 0.012315
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.622365,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.118092,
+              "mean": 1.870228,
+              "sample_stddev": 0.099779
+            },
+            "total_reward": {
+              "ci95_lower": -181.110556,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -136.975233,
+              "mean": -159.042895,
+              "sample_stddev": 8.883429
+            }
+          },
+          "sop_rule": {
+            "baseline_cost": {
+              "ci95_lower": 1.649124,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.649124,
+              "mean": 1.649124,
+              "sample_stddev": 0.0
+            },
+            "baseline_peak_kw": {
+              "ci95_lower": 1.8564,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.8564,
+              "mean": 1.8564,
+              "sample_stddev": 0.0
+            },
+            "carbon_kg": {
+              "ci95_lower": 2.862357,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.862357,
+              "mean": 2.862357,
+              "sample_stddev": 0.0
+            },
+            "constraint_violations": {
+              "ci95_lower": 0.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.0,
+              "mean": 0.0,
+              "sample_stddev": 0.0
+            },
+            "cost_saving_percent": {
+              "ci95_lower": 0.722233,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.722233,
+              "mean": 0.722233,
+              "sample_stddev": 0.0
+            },
+            "peak_grid_kw": {
+              "ci95_lower": 2.395267,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 2.395267,
+              "mean": 2.395267,
+              "sample_stddev": 0.0
+            },
+            "peak_reduction_percent": {
+              "ci95_lower": -22.916833,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -22.916833,
+              "mean": -22.916833,
+              "sample_stddev": 0.0
+            },
+            "score": {
+              "ci95_lower": -122.140023,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -122.140023,
+              "mean": -122.140023,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc": {
+              "ci95_lower": 0.539801,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.539801,
+              "mean": 0.539801,
+              "sample_stddev": 0.0
+            },
+            "terminal_soc_recovery_rate": {
+              "ci95_lower": 1.0,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.0,
+              "mean": 1.0,
+              "sample_stddev": 0.0
+            },
+            "total_cost": {
+              "ci95_lower": 1.634557,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.634557,
+              "mean": 1.634557,
+              "sample_stddev": 0.0
+            },
+            "total_degradation_cost": {
+              "ci95_lower": 0.047722,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 0.047722,
+              "mean": 0.047722,
+              "sample_stddev": 0.0
+            },
+            "total_grid_energy_cost": {
+              "ci95_lower": 1.586835,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": 1.586835,
+              "mean": 1.586835,
+              "sample_stddev": 0.0
+            },
+            "total_reward": {
+              "ci95_lower": -113.262183,
+              "ci95_method": "two-sided Student t, df=2",
+              "ci95_upper": -113.262183,
+              "mean": -113.262183,
+              "sample_stddev": 0.0
+            }
+          }
+        },
+        "best_algorithm_by_mean_test_score": "sop_rule",
+        "seed_count": 3,
+        "test_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 0,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 3
+        },
+        "validation_winner_counts": {
+          "double_q_learning": 0,
+          "expected_sarsa": 0,
+          "pid": 0,
+          "q_learning": 0,
+          "sarsa": 0,
+          "sop_rule": 3
+        }
+      },
+      "dataset": {
+        "available": true,
+        "citation": "Hebrail, G. & Berard, A. (2006). Individual Household Electric Power Consumption. UCI Machine Learning Repository. DOI: 10.24432/C58K54.",
+        "description": "约四年一分钟真实用电记录聚合为五分钟时间序列；用于大规模能源调度算法基准，不宣称为港口实绩。",
+        "environment_type": "energy_storage",
+        "evidence_level": "measured_public_benchmark",
+        "factor_coverage": {
+          "carbon": "documented_experimental_default",
+          "energy_load": "measured",
+          "port_operations": "not_applicable",
+          "tariff": "documented_experimental_default",
+          "weather": "missing"
+        },
+        "id": "uci_household_power_5min",
+        "label": "UCI Household Power · 5-minute large benchmark",
+        "license": "CC BY 4.0",
+        "load_kw_max": 9.7212,
+        "load_kw_median": 0.6336,
+        "load_kw_min": 0.0764,
+        "mapping": {
+          "load_kw": "load_kw",
+          "timestamp": "timestamp"
+        },
+        "optional_fields": [
+          "temperature_c",
+          "humidity_percent",
+          "wind_speed_mps",
+          "visibility_km",
+          "pressure_hpa",
+          "price_per_kwh",
+          "carbon_kg_per_kwh",
+          "vessel_count",
+          "anchored_vessels",
+          "slow_vessels",
+          "avg_sog_knots",
+          "cargo_vessels",
+          "tanker_vessels",
+          "passenger_vessels",
+          "tug_vessels",
+          "berth_occupancy_ratio",
+          "yard_occupancy_ratio",
+          "equipment_availability_ratio",
+          "gate_queue_trucks",
+          "moves_demand",
+          "tide_window_open"
+        ],
+        "path": "data/public/uci_household_power_5min.csv",
+        "port_data": false,
+        "required_fields": [
+          "timestamp",
+          "load_kw"
+        ],
+        "row_count": 409887,
+        "sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+        "source_type": "public_benchmark",
+        "source_url": "https://archive.ics.uci.edu/dataset/235/individual+household+electric+power+consumption",
+        "step_minutes": 5.0,
+        "time_end": "2010-11-26T21:00:00",
+        "time_start": "2006-12-16T17:20:00",
+        "timezone": "Europe/Paris"
+      },
+      "runs": [
+        {
+          "config_sha256": "784752e85a5ac3bf632bdcb7388c36e53b01863bef0fd545b2fe05c68c44d706",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 19.643,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.584992,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -58.272067,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -235.474263,
+                "terminal_soc": 0.534164,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.107808,
+                "total_degradation_cost": 0.173807,
+                "total_grid_energy_cost": 1.934001,
+                "total_reward": -166.567743
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.509367,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -55.828333,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -225.09457,
+                "terminal_soc": 0.531748,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.014626,
+                "total_degradation_cost": 0.163761,
+                "total_grid_energy_cost": 1.850866,
+                "total_reward": -157.165544
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.619107,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -66.308167,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -233.528167,
+                "terminal_soc": 0.532285,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.059265,
+                "total_degradation_cost": 0.171296,
+                "total_grid_energy_cost": 1.887969,
+                "total_reward": -161.407207
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.420055,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -46.2737,
+                "peak_grid_kw": 3.532,
+                "peak_reduction_percent": -113.7984,
+                "score": -220.197464,
+                "terminal_soc": 0.533359,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.027629,
+                "total_degradation_cost": 0.148188,
+                "total_grid_energy_cost": 1.87944,
+                "total_reward": -156.168624
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -71.821133,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -183.178272,
+                "terminal_soc": 0.739224,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.083643,
+                "total_degradation_cost": 0.064801,
+                "total_grid_energy_cost": 2.018842,
+                "total_reward": -136.279939
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 2.862357,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 0.722233,
+                "peak_grid_kw": 2.395267,
+                "peak_reduction_percent": -22.916833,
+                "score": -122.140023,
+                "terminal_soc": 0.539801,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.634557,
+                "total_degradation_cost": 0.047722,
+                "total_grid_energy_cost": 1.586835,
+                "total_reward": -113.262183
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124443-9192bcca",
+          "seed": 260813,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124443-9192bcca/evaluations/eval-72bdbe949f.json",
+          "test_artifact_sha256": "6cc327bf24d5043a37bdefdbc4b9f3bef16173194cb3c7e3ef799e01eeb885f2",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sop_rule"
+        },
+        {
+          "config_sha256": "4276f0124c7f95338dd89fded82fa022f9583a107f46114456cdc6e40a0a553a",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 19.944,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.580355,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -57.003133,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -230.92718,
+                "terminal_soc": 0.533896,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.084222,
+                "total_degradation_cost": 0.165268,
+                "total_grid_energy_cost": 1.918954,
+                "total_reward": -162.528234
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.739712,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -74.341733,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -244.049339,
+                "terminal_soc": 0.533359,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.15509,
+                "total_degradation_cost": 0.176821,
+                "total_grid_energy_cost": 1.978269,
+                "total_reward": -168.714953
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.578178,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -60.693867,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -233.959563,
+                "terminal_soc": 0.534164,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.125513,
+                "total_degradation_cost": 0.164263,
+                "total_grid_energy_cost": 1.96125,
+                "total_reward": -164.084323
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.512268,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -52.555833,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -225.384009,
+                "terminal_soc": 0.53148,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.050676,
+                "total_degradation_cost": 0.155221,
+                "total_grid_energy_cost": 1.895455,
+                "total_reward": -158.763983
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -71.821133,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -183.178272,
+                "terminal_soc": 0.739224,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.083643,
+                "total_degradation_cost": 0.064801,
+                "total_grid_energy_cost": 2.018842,
+                "total_reward": -136.279939
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 2.862357,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 0.722233,
+                "peak_grid_kw": 2.395267,
+                "peak_reduction_percent": -22.916833,
+                "score": -122.140023,
+                "terminal_soc": 0.539801,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.634557,
+                "total_degradation_cost": 0.047722,
+                "total_grid_energy_cost": 1.586835,
+                "total_reward": -113.262183
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124524-24b1cd53",
+          "seed": 260814,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124524-24b1cd53/evaluations/eval-f470f6a259.json",
+          "test_artifact_sha256": "22557a52ec067626bb66ec3d216ec9ed231a4b14668fa4be5d1d1c6508893f69",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sop_rule"
+        },
+        {
+          "config_sha256": "ac63eeb8587fd9669a22cade753da48fbd4b25be87dad7c906331cc24b531690",
+          "dataset_sha256": "c319218b8226d7a8c5c7a7ba01729d84624ee72274851df9f6fe052f3e23584b",
+          "duration_seconds": 20.845,
+          "profile_sha256": null,
+          "results": [
+            {
+              "algorithm_id": "q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.619838,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -62.606467,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -236.116284,
+                "terminal_soc": 0.532017,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.116732,
+                "total_degradation_cost": 0.1723,
+                "total_grid_energy_cost": 1.944432,
+                "total_reward": -165.476004
+              }
+            },
+            {
+              "algorithm_id": "sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.396548,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -42.910067,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -214.009907,
+                "terminal_soc": 0.532285,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.933757,
+                "total_degradation_cost": 0.152207,
+                "total_grid_energy_cost": 1.78155,
+                "total_reward": -151.248187
+              }
+            },
+            {
+              "algorithm_id": "expected_sarsa",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.393875,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -45.266567,
+                "peak_grid_kw": 3.537067,
+                "peak_reduction_percent": -113.994233,
+                "score": -216.934857,
+                "terminal_soc": 0.533896,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.958694,
+                "total_degradation_cost": 0.155723,
+                "total_grid_energy_cost": 1.802971,
+                "total_reward": -153.230537
+              }
+            },
+            {
+              "algorithm_id": "double_q_learning",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.523925,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -54.594467,
+                "peak_grid_kw": 3.452267,
+                "peak_reduction_percent": -110.716533,
+                "score": -224.349117,
+                "terminal_soc": 0.535506,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.079138,
+                "total_degradation_cost": 0.149695,
+                "total_grid_energy_cost": 1.929443,
+                "total_reward": -158.224717
+              }
+            },
+            {
+              "algorithm_id": "pid",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 3.766557,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": -71.821133,
+                "peak_grid_kw": 2.189533,
+                "peak_reduction_percent": -45.4247,
+                "score": -183.178272,
+                "terminal_soc": 0.739224,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 2.083643,
+                "total_degradation_cost": 0.064801,
+                "total_grid_energy_cost": 2.018842,
+                "total_reward": -136.279939
+              }
+            },
+            {
+              "algorithm_id": "sop_rule",
+              "frame_count": 216,
+              "metrics": {
+                "baseline_cost": 1.649124,
+                "baseline_peak_kw": 1.8564,
+                "carbon_kg": 2.862357,
+                "constraint_violations": 0.0,
+                "cost_saving_percent": 0.722233,
+                "peak_grid_kw": 2.395267,
+                "peak_reduction_percent": -22.916833,
+                "score": -122.140023,
+                "terminal_soc": 0.539801,
+                "terminal_soc_recovery_rate": 1.0,
+                "total_cost": 1.634557,
+                "total_degradation_cost": 0.047722,
+                "total_grid_energy_cost": 1.586835,
+                "total_reward": -113.262183
+              }
+            }
+          ],
+          "run_id": "rl-20260813T124605-f57791ac",
+          "seed": 260815,
+          "split": {
+            "strategy": "chronological_no_shuffle",
+            "test_rows": 61484,
+            "test_time_start": "2010-04-18T17:55:00",
+            "train_rows": 286920,
+            "train_time_end": "2009-09-13T16:30:00",
+            "validation_rows": 61483,
+            "validation_time_end": "2010-04-18T17:50:00"
+          },
+          "test_artifact": "data/rl_runs/rl-20260813T124605-f57791ac/evaluations/eval-1ab97dc335.json",
+          "test_artifact_sha256": "fadd6879fc762f950a75b7e55d8642249ea7f8eaf3c141b7c1ba4a7fd7f5d543",
+          "test_best_algorithm_id": "sop_rule",
+          "test_render_mode": "trace",
+          "test_rendering_performed": true,
+          "training_render_mode": null,
+          "training_rendering_performed": false,
+          "validation_best_algorithm_id": "sop_rule"
+        }
+      ]
+    }
+  },
+  "generated_at": "2026-08-13T12:47:28+00:00",
+  "pass_definition": "All scheduled runs completed, temporal and rendering boundaries held, and evidence hashes were generated. Evidence PASS does not mean an RL candidate beat strong baselines or that production targets were met.",
+  "policy_admission_passed": false,
+  "production_admission_passed": false,
+  "production_authority": false,
+  "report_status": "completed_with_explicit_admission_results",
+  "schema_version": "xiaoyi-rl-dataset-benchmark.v2",
+  "scope_notice": "Public offline benchmark and calibrated planning sandbox only. No field productivity, live-control, safety-certification or production-SLA claim is made.",
+  "selected_evidence_runs": {
+    "legacy_uci_smoke": "rl-20260724T120838-ecbd3029",
+    "noaa_la_lb_ais_2024_12_25_1min": "rl-20260813T124648-cc838599",
+    "uci_appliances_energy": "rl-20260813T124358-7ebcab47",
+    "uci_household_power_5min": "rl-20260813T124443-9192bcca"
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": "xiaoyi-lora-admission.v1",
+  "generated_at": "2026-08-13T12:53:46+00:00",
+  "source_run_id": "lora-20260727T033445Z",
+  "training_type": "PEFT_LoRA_SFT_adapter",
+  "foundation_model_trained_from_scratch": false,
+  "engineering_integrity_passed": true,
+  "quality_admission_passed": false,
+  "admission_status": "engineering_only_quality_blocked",
+  "production_authority": false,
+  "claim_boundary": "This is an adapter engineering and local inference proof. Loss reduction is not answer accuracy, expert preference, port KPI, legal correctness, or proof that the base model was trained from scratch.",
+  "training_snapshot": {
+    "seed_count": 1,
+    "seed": 20260727,
+    "optimizer_steps": 64,
+    "train_examples": 622,
+    "validation_examples": 94,
+    "test_examples": 125,
+    "validation_loss_cases": 8,
+    "test_loss_cases": 8,
+    "initial_validation_loss": 4.8808678686618805,
+    "final_validation_loss": 2.755390465259552,
+    "initial_test_loss": 5.356009423732758,
+    "final_test_loss": 3.187270939350128,
+    "adapter_sha256": "d277abd0cc6155f682e3fd2293a56da2bead7a047fbf8d3678dce2a30e3bd46a",
+    "gguf_sha256": "2160da946ab4adcada579d9db0fa1d812285c7fbd418f6c09679bd95e546edfb"
+  },
+  "checks": [
+    {
+      "id": "artifact_integrity",
+      "passed": true,
+      "observed": "manifest, training report, PEFT adapter and GGUF hashes recorded",
+      "required": "all training and inference artifacts are content-addressed"
+    },
+    {
+      "id": "real_local_generation_probe",
+      "passed": true,
+      "observed": "44 completion tokens plus one RAG-to-LoRA probe",
+      "required": "matching-base adapter loads and produces tokens through the local runtime"
+    },
+    {
+      "id": "multi_seed_training",
+      "passed": false,
+      "observed": "1 seed (20260727)",
+      "required": ">=3 independently trained seeds"
+    },
+    {
+      "id": "heldout_generation_quality",
+      "passed": false,
+      "observed": "validation/test loss use 8/8 sampled cases; no expert blind preference study",
+      "required": ">=100 source-isolated unseen generation cases plus expert blind review"
+    },
+    {
+      "id": "lora_attributable_benchmark",
+      "passed": false,
+      "observed": "model benchmark provider counts are {'local_grounded_rag': 30, 'local_policy_boundary': 5, 'local_workforce_guidance': 16}; they do not isolate adapter causal lift",
+      "required": "same-base baseline vs LoRA paired benchmark with 95% CI and no safety regression"
+    },
+    {
+      "id": "training_depth",
+      "passed": false,
+      "observed": "64 optimizer steps on one CPU run",
+      "required": "predeclared convergence budget with multi-seed stability and early-stop evidence"
+    }
+  ],
+  "evidence_sha256": {
+    "reports/local_lora_inference_v3.json": "c8991f942c3c77bdbd1226c6de82d7e721bbc77a54db9a86ac56c58cfda6abdb",
+    "reports/local_rag_lora_e2e_v3.json": "4ea4e85e4e17c26626db87e77c8b3bccfb784300d56971dd8754ae25aa30c301",
+    "reports/maritime_model_benchmark_v7_lora_r96.json": "844b1f128a9dee9e83ad38e96cd588152923e49aba14a7ca65924fdd7a4a566f",
+    "reports/maritime_model_benchmark_v7_baseline.json": "ab837666f2b4fdd3abba691fda0597b57990e77f732d8ce676bf14a9518c320d"
+  }
+}
