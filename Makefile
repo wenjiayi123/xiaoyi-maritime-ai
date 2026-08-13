@@ -7,6 +7,7 @@ install:
 
 install-dev:
 	python -m pip install --require-hashes -r requirements-dev.lock
+	pnpm install --frozen-lockfile --ignore-scripts
 
 run:
 	bash run.sh
@@ -23,6 +24,8 @@ check:
 	python scripts/release_check.py
 	python -m pip check
 	node --check web/app.js
+	node --check web/runtime_contract.js
+	pnpm test:fuzz
 
 release-check: check test
 

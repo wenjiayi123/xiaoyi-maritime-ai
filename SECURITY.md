@@ -44,5 +44,10 @@ tested backups, a durable distributed job queue for multi-instance operation,
 and a reviewed production data gateway. Never expose local launcher routes to
 non-administrator roles or an untrusted network.
 
+CI runs CodeQL, dependency admission, SBOM generation, secret scanning gates,
+and property-based fuzz tests for the browser SSE/telemetry boundary. These are
+engineering controls, not a substitute for an authorized external penetration
+test, OT network review, or site acceptance test.
+
 See `docs/DEPLOYMENT.md` for the complete production boundary and key rotation,
 retention, recovery and model-data egress requirements.

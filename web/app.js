@@ -1,6 +1,9 @@
 (() => {
   "use strict";
 
+  const runtimeContract = globalThis.XiaoyiRuntimeContract;
+  if (!runtimeContract) throw new Error("前端运行契约未加载");
+
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
   const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -200,11 +203,7 @@
   };
 
   function createSessionId() {
-    if (globalThis.crypto?.randomUUID) return `web-${globalThis.crypto.randomUUID()}`;
-    const bytes = new Uint8Array(16);
-    globalThis.crypto.getRandomValues(bytes);
-    const entropy = Array.from(bytes, (value) => value.toString(16).padStart(2, "0")).join("");
-    return `web-${Date.now()}-${entropy}`;
+    return runtimeContract.createSessionId(globalThis.crypto);
   }
 
   const persistentSessionId = localStorage.getItem(STORAGE.sessionId)
@@ -401,7 +400,7 @@
     const headers = new Headers(options.headers || {});
     const accessToken = sessionStorage.getItem("xiaoyi_access_token");
     if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
-    headers.set("X-Xiaoyi-Trace-Id", globalThis.crypto?.randomUUID?.() || `trace-${Date.now()}`);
+    headers.set("X-Xiaoyi-Trace-Id", createSessionId().replace(/^web-/, "trace-"));
     if (!["GET", "HEAD"].includes(method)) {
       headers.set("X-Idempotency-Key", globalThis.crypto?.randomUUID?.() || `idem-${Date.now()}-${Math.random()}`);
     }
@@ -447,14 +446,9 @@
     let buffer = "";
     let completed = null;
     const consume = (block) => {
-      let eventName = "message";
-      const dataLines = [];
-      block.split(/\r?\n/).forEach((line) => {
-        if (line.startsWith("event:")) eventName = line.slice(6).trim();
-        if (line.startsWith("data:")) dataLines.push(line.slice(5).trimStart());
-      });
-      if (!dataLines.length) return;
-      const eventData = JSON.parse(dataLines.join("\n"));
+      const parsedEvent = runtimeContract.parseSseBlock(block);
+      if (!parsedEvent) return;
+      const { event: eventName, data: eventData } = parsedEvent;
       if (eventName === "token" && typeof eventData.text === "string") onToken(eventData.text);
       if (eventName === "done") completed = eventData;
     };
@@ -703,6 +697,7 @@
   }
 
   async function loadEnergy(range, source = "rail") {
+    range = runtimeContract.normalizeEnergyRange(range);
     const controls = source === "analytics" ? "#analyticsRange [data-range]" : "#energyRange [data-range]";
     try {
       const data = await api(`/api/energy?range=${encodeURIComponent(range)}`);
@@ -810,7 +805,7 @@
     const stream = new EventSource("/api/port-simulator/stream");
     state.simulatorEventSource = stream;
     stream.addEventListener("telemetry", (event) => {
-      try { renderSimulator(JSON.parse(event.data)); } catch { /* wait for next complete event */ }
+      try { renderSimulator(runtimeContract.parseJsonObject(event.data)); } catch { /* wait for next complete event */ }
     });
     stream.addEventListener("error", () => {
       if ($("#simulatorStatus")) $("#simulatorStatus").textContent = "事件流正在重连 · 最近有效快照仍保留";
