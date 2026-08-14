@@ -11,7 +11,7 @@ REQUIRED = (
     "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "THIRD_PARTY_NOTICES.md",
     "CHANGELOG.md", "Dockerfile", "compose.yaml", "requirements.lock", "pyproject.toml",
     "package.json", "pnpm-lock.yaml", "web/runtime_contract.js",
-    "tests/frontend_security.fuzz.test.cjs",
+    "tests/frontend_security.fuzz.test.js",
     "CODE_OF_CONDUCT.md", "GOVERNANCE.md", "SUPPORT.md", "CITATION.cff",
     ".github/workflows/ci.yml", ".github/workflows/dependency-review.yml",
     ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml",
