@@ -67,9 +67,9 @@ def build_report() -> dict[str, Any]:
             "passed": False,
             "observed": (
                 f"validation/test loss use {training_config['validation_cases']}/"
-                f"{training_config['test_cases']} sampled cases; no expert blind preference study"
+                f"{training_config['test_cases']} sampled cases; no blinded preference study by operational participants excluded from training"
             ),
-            "required": ">=100 source-isolated unseen generation cases plus expert blind review",
+            "required": ">=100 source-isolated unseen generation cases plus blinded review by operational participants excluded from training",
         },
         {
             "id": "lora_attributable_benchmark",
@@ -103,7 +103,7 @@ def build_report() -> dict[str, Any]:
         "production_authority": False,
         "claim_boundary": (
             "This is an adapter engineering and local inference proof. Loss reduction is not answer "
-            "accuracy, expert preference, port KPI, legal correctness, or proof that the base model "
+            "accuracy, independent quality validation, port KPI, legal correctness, or proof that the base model "
             "was trained from scratch."
         ),
         "training_snapshot": {
@@ -149,7 +149,7 @@ def _markdown(report: dict[str, Any]) -> str:
 - 当前定位：`{report['admission_status']}`。这是PEFT LoRA/SFT适配器训练，不是从零训练基础模型。
 - 训练快照：1个种子、{snapshot['optimizer_steps']}步、{snapshot['train_examples']}/{snapshot['validation_examples']}/{snapshot['test_examples']}条来源隔离样本；loss仅抽取{snapshot['validation_loss_cases']}/{snapshot['test_loss_cases']}例计算。
 - 适配器SHA-256：`{snapshot['adapter_sha256']}`；GGUF SHA-256：`{snapshot['gguf_sha256']}`。
-- `production_authority=false`。loss下降不等于回答准确率、专家偏好、港口KPI或法律正确性。
+- `production_authority=false`。loss下降不等于回答准确率、独立业务人员偏好、港口KPI或法律正确性。
 """
 
 

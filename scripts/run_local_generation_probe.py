@@ -139,7 +139,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
         "training_summary": _training_summary(training_report_path),
         "claim_boundary": (
             "This probe proves that a pinned local model profile produced tokens through "
-            "the OpenAI-compatible runtime. It is not an accuracy, expert-quality, "
+            "the OpenAI-compatible runtime. It is not an accuracy, independently validated quality, "
             "production-port, or legal-correctness benchmark."
         ),
     }

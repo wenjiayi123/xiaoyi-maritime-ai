@@ -189,15 +189,15 @@ def test_priority_7_benchmark_and_feedback_review_loop(tmp_path: Path) -> None:
     assert payload["retrieval"]["baseline_method"] == "bm25_only_v1"
     assert payload["retrieval_benchmark_count"] == 40
     assert payload["policy_benchmark_count"] == 20
-    assert payload["resume_safe_metrics"]["fixed_test_case_count"] == 35
-    assert payload["resume_safe_metrics"]["hybrid_hit_at_5"] == 1.0
-    assert payload["resume_safe_metrics"]["bm25_hit_at_5"] == 0.9583
-    assert payload["resume_safe_metrics"]["hit_at_5_lift_percentage_points"] == 4.17
+    assert payload["verified_metrics"]["fixed_test_case_count"] == 35
+    assert payload["verified_metrics"]["hybrid_hit_at_5"] == 1.0
+    assert payload["verified_metrics"]["bm25_hit_at_5"] == 0.9583
+    assert payload["verified_metrics"]["hit_at_5_lift_percentage_points"] == 4.17
     assert payload["retrieval"]["test"]["hybrid"]["hit_at_1"] == 1.0
     assert payload["retrieval"]["test"]["baseline"]["hit_at_1"] == 0.9583
-    assert payload["resume_safe_metrics"]["hybrid_mrr"] == 1.0
-    assert payload["resume_safe_metrics"]["bm25_mrr"] == 0.9583
-    assert payload["resume_safe_metrics"]["unsupported_answer_block_rate"] == 1.0
+    assert payload["verified_metrics"]["hybrid_mrr"] == 1.0
+    assert payload["verified_metrics"]["bm25_mrr"] == 0.9583
+    assert payload["verified_metrics"]["unsupported_answer_block_rate"] == 1.0
     assert payload["policy"]["test"]["temporal_applicability_accuracy"] == 1.0
     assert payload["policy"]["test"]["live_data_boundary_pass_rate"] == 1.0
     assert payload["policy_safety_pass_rate"] == 1.0
@@ -233,8 +233,8 @@ def test_evaluation_summary_labels_committed_report_as_pinned_not_live() -> None
     benchmark = payload["latest_benchmark"]
 
     assert benchmark["status"] == "pinned_release_evidence"
-    assert benchmark["evidence_source"] == "reports/maritime_rag_benchmark_v1_20260813_r5.json"
+    assert benchmark["evidence_source"] == "reports/maritime_rag_benchmark_v1_20260814_r3.json"
     assert benchmark["live_rerun"] is False
     assert benchmark["report_sha256"]
-    assert benchmark["resume_safe_metrics"]["fixed_test_case_count"] == 35
+    assert benchmark["verified_metrics"]["fixed_test_case_count"] == 35
     assert "not untouched held-out data" in benchmark["required_qualifier"]

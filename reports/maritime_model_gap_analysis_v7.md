@@ -14,7 +14,7 @@
   <https://mlcommons.org/benchmarks/client/>。
 
 这些结果是仓库维护的单机、单流、固定工程基准，不是 BEIR、RAGAS 或
-MLPerf 官方提交，也不是港航专家盲评、生产 SLA 或职业健康验证。
+MLPerf 官方提交，也不是未参与训练的港航业务人员盲评、生产 SLA 或职业健康验证。
 
 ## 改进前基线
 

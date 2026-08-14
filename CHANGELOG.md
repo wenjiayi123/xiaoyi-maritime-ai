@@ -66,7 +66,7 @@ All notable changes are documented here. The project follows semantic versioning
 - A `port_operations` environment with 11 observations, five capacity actions, a safety-constrained objective, port profiles, factor coverage, and international-port integration fields.
 - A three-dataset, three-seed benchmark for four tabular RL algorithms and the PID control baseline, including tracked legacy and selected-run evidence bundles.
 - A one-screen training center connecting the evidence ledger, algorithm matrix, Xiaoyi training advisor, environment contract, system linkage, and configuration actions.
-- Port RL landing, data-contract, resume-claim, and public-data documentation.
+- Port RL landing, data-contract, capability-boundary, and public-data documentation.
 
 ### Changed
 

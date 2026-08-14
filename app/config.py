@@ -11,7 +11,7 @@ SOURCE_REGISTRY_PATH = DATA_DIR / "source_registry.json"
 KNOWLEDGE_CATALOG_PATH = DATA_DIR / "knowledge_catalog.json"
 AUTHORITY_COVERAGE_PATH = DATA_DIR / "authority_coverage.json"
 EVALUATION_BENCHMARK_PATH = DATA_DIR / "evaluation" / "maritime_qa_benchmark_v1.json"
-RAG_RELEASE_REPORT_PATH = BASE_DIR / "reports" / "maritime_rag_benchmark_v1_20260813_r5.json"
+RAG_RELEASE_REPORT_PATH = BASE_DIR / "reports" / "maritime_rag_benchmark_v1_20260814_r3.json"
 WEB_DIR = BASE_DIR / "web"
 RUNTIME_DB_PATH = DATA_DIR / "xiaoyi_runtime.db"
 

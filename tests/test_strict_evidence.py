@@ -111,8 +111,7 @@ def test_identity_recognizes_origin_wording() -> None:
     assert result.refusal_reason is None
     assert "我是小懿" in result.answer
     assert "我是小懿AI" not in result.answer
-    assert "由AI博士温家懿研发" in result.answer
-    assert "独立研发" not in result.answer
+    assert "由温家懿设计与研发" in result.answer
     assert "随时可交流的港航数字同事" in result.answer
 
 
@@ -122,8 +121,7 @@ def test_identity_recognizes_developer_wording_without_hallucination() -> None:
 
         assert result.intent == "identity"
         assert result.refusal_reason is None
-        assert "由AI博士温家懿研发" in result.answer
-        assert "独立研发" not in result.answer
+        assert "由温家懿设计与研发" in result.answer
         assert "海贼王" not in result.answer
         assert "One Piece" not in result.answer
 

@@ -62,7 +62,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
         "claim_boundary": (
             "This probe verifies local RAG retrieval, LoRA-backed generation and "
             "post-answer evidence reporting on one engineering case. It is not a "
-            "production-port or independent expert-quality benchmark."
+            "production-port or independently validated quality benchmark."
         ),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)

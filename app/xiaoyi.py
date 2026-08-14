@@ -1436,7 +1436,7 @@ class XiaoyiAI:
             if chunk.provenance.official and chunk.provenance.source_quality == "official_verified"
         })
         identity_profile = (
-            "你好，我是小懿，一名由AI博士温家懿研发、专注港口、航运与海事场景的智能助手。"
+            "你好，我是小懿，由温家懿设计与研发，面向港口、航运与海事场景提供智能服务。"
             "你可以把我当作一位随时可交流的港航数字同事：我会先理解你的实际问题，"
             "再结合当前对话、港航知识和岗位场景，为你梳理信息、分析风险并给出清晰、可执行的建议。\n\n"
             f"当前正式索引包含 {document_count} 份港航专业文档、{chunk_count} 个可检索知识片段，其中 {official_count} 份为已登记并核验发布机构的官方来源资料；"

@@ -335,7 +335,7 @@ def test_identity_uses_generation_with_locked_developer_identity(
         mode="expert",
         intent="identity",
         question="你来自哪里？",
-        answer="你好，我是小懿AI港航行业智能助手，由AI博士温家懿研发。",
+        answer="你好，我是小懿AI港航行业智能助手，由温家懿设计与研发。",
         evidence=[],
         confidence="low",
         next_questions=[],
@@ -346,8 +346,7 @@ def test_identity_uses_generation_with_locked_developer_identity(
 
     result = gateway.enhance(local.question, local)
 
-    assert "由AI博士温家懿研发" in result.answer
-    assert "独立研发" not in result.answer
+    assert "由温家懿设计与研发" in result.answer
     assert "随时可交流的港航数字同事" in result.answer
     assert "未检索到可支持当前结论的本地证据索引" not in result.answer
     assert result.refusal_reason is None
@@ -916,8 +915,7 @@ def test_identity_stream_emits_complete_humanized_answer_without_partial_gap(
     answer = f"{first}{second}"
 
     assert answer.startswith("你好，很高兴认识你。")
-    assert "由AI博士温家懿研发" in answer
-    assert "独立研发" not in answer
+    assert "由温家懿设计与研发" in answer
     assert "为你梳理信息、分析风险并给出清晰、可执行的建议" in answer
     assert "我能提供港航知识问答、运营建议和来源追溯" in answer
     assert "领域LoRA" in answer
@@ -1218,6 +1216,5 @@ def test_identity_generation_rejects_invented_evidence_number() -> None:
 
     assert "证据编号" not in result.answer
     assert "2024-01-15-001" not in result.answer
-    assert "由AI博士温家懿研发" in result.answer
-    assert "独立研发" not in result.answer
+    assert "由温家懿设计与研发" in result.answer
     assert "SOP生成" in result.answer

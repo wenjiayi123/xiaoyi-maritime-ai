@@ -679,7 +679,7 @@ class ModelGateway:
     def _locked_output_prefix(response: ChatResponse) -> str:
         if response.intent == "identity":
             core = (
-                "你好，很高兴认识你。我是小懿，一名由AI博士温家懿研发、"
+                "你好，很高兴认识你。我是小懿，由温家懿设计与研发，"
                 "专注港口、航运与海事场景的智能助手。你可以把我当作一位"
                 "随时可交流的港航数字同事：我会先理解你的实际问题，再结合"
                 "当前对话、港航知识和岗位场景，为你梳理信息、分析风险并给出"
@@ -719,7 +719,7 @@ class ModelGateway:
         if response.intent == "identity":
             suspicious = re.search(
                 r"(证据编号|档案编号|核验路径|海贼王|One\s*Piece|"
-                r"温家懿|独立研发|小懿\s*AI|你好.{0,4}我是|^我(?:是|叫)|\d{3,})",
+                r"温家懿|小懿\s*AI|你好.{0,4}我是|^我(?:是|叫)|\d{3,})",
                 value,
                 flags=re.IGNORECASE,
             )

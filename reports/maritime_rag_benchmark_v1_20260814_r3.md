@@ -1,6 +1,6 @@
 # 小懿AI 港航检索与证据安全固定基准 v1
 
-生成时间：2026-07-27T13:56:04+00:00
+生成时间：2026-08-14T00:54:44+00:00
 
 ## 可复现结论
 
@@ -30,14 +30,14 @@ Hybrid 与 BM25 使用同一知识快照、同一辖区/官方来源过滤、同
 
 ```json
 {
-  "data/evaluation/maritime_qa_benchmark_v1.json": "5126cb7734fb923034fba25c7cc30f52180116260812d065387335498e8aae15",
+  "data/evaluation/maritime_qa_benchmark_v1.json": "7e9fa11efafb17a98b57b4881a56f445da8d2dd68d2afff05e515606621cdef9",
   "data/xiaoyi_index.json": "8139112712f6574bb20d80174f3286f2bbe2f6af479e181b38b01649eb67a63c",
   "data/source_registry.json": "3865b08a51756b70e97130ea39a75c86007535404b2f7ff7e6ef0d47f0469d32",
-  "app/evaluation.py": "b8b5e15405b980c5e61b08cfd6f42545c81d5b017cde2065367f9d92f9c979bb",
+  "app/evaluation.py": "8312f6433d27eb4cadcdd1d8edeb1e1c89f66a94b04485c82c79151adc1c3e74",
   "app/retrieval.py": "982dee23ce784751dbf06271c0cdbc475e01cd35df65b64fd96f699619b2a962",
   "app/knowledge_policy.py": "e61caef14b250dcd8e094c58fed558e7f4f5f961fb0144dc2e01f7150d3ef1d0",
-  "app/operator_assistant.py": "e0fc02ccab83a86f5ae7379b62a379f244529dc273b9ca200a01d64fd0786880",
-  "app/xiaoyi.py": "f6c48984190b73c57d12fcaec4259ea1c294e5882b86ca0fac18ee0b2dc88bae"
+  "app/operator_assistant.py": "64baf6e2039a3a21a27417d4a4db51122880fd8e05dc0aeb44c4a22f76aaeebe",
+  "app/xiaoyi.py": "9fde6b7769bcb7cc5892a2b59d330ea58afcde11394466565c350f310fedfada"
 }
 ```
 

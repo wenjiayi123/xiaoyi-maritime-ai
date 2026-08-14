@@ -298,7 +298,7 @@ def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727) ->
         "source_registry_sha256": _sha256_file(REGISTRY_PATH),
         "artifact_sha256": artifact_hashes,
         "limitations": [
-            "Repository-authored supervision, not an independent expert blind set.",
+            "Repository-authored supervision, not an independent blinded set reviewed by operational participants excluded from development.",
             "No raw private material is exported by this builder.",
             "A training loss change is not evidence of field accuracy or production benefit.",
         ],

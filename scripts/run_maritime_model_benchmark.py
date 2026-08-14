@@ -574,7 +574,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             ),
             "latency": "MLPerf-style TTFT, TPOT, total latency and output tokens/s.",
             "limitations": [
-                "Repository-authored fixed cases, not an independent expert blind study.",
+                "Repository-authored fixed cases, not an independent blinded study by operational participants excluded from development.",
                 "RAGAS-aligned deterministic proxies are not RAGAS LLM-judge scores.",
                 "Single-user localhost measurements are not a concurrency SLA.",
             ],

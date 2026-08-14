@@ -75,7 +75,7 @@ def _load_pinned_release_summary(
     try:
         payload = json.loads(path.read_text(encoding="utf-8"))
         benchmark = payload["benchmark"]
-        metrics = benchmark["resume_safe_metrics"]
+        metrics = benchmark["verified_metrics"]
     except (OSError, json.JSONDecodeError, KeyError, TypeError):
         return None
     return {
@@ -88,7 +88,7 @@ def _load_pinned_release_summary(
             "official_requirement_pass_rate", 0.0
         ),
         "policy_safety_pass_rate": metrics.get("policy_safety_pass_rate", 0.0),
-        "resume_safe_metrics": metrics,
+        "verified_metrics": metrics,
         "passed": bool(benchmark.get("passed")),
         "status": "pinned_release_evidence",
         "evidence_source": str(path.relative_to(path.parents[1])),
@@ -506,7 +506,7 @@ def run_benchmark(top_k: int = 5) -> dict[str, Any]:
         },
         "retrieval": retrieval,
         "policy": policy,
-        "resume_safe_metrics": {
+        "verified_metrics": {
             "fixed_case_count": benchmark_count,
             "fixed_test_case_count": test_case_count,
             "test_retrieval_case_count": test_retrieval["case_count"],

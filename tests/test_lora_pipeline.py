@@ -39,7 +39,7 @@ def test_curated_multiturn_data_teaches_identity_and_followups(tmp_path: Path) -
     assert curated
     assert any("谁研发的" in item["question"] for item in curated)
     assert any(
-        "AI博士温家懿" in item["answer"]
+        "温家懿" in item["answer"]
         for item in curated
     )
     assert any(

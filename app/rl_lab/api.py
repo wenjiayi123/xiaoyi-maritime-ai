@@ -216,7 +216,7 @@ def rl_training_advisor(request: AdvisorRequest) -> dict[str, Any]:
             f"训练完成 {run.get('completed_training_episodes', 0)}/{run.get('total_training_episodes', 0)} 个回合；"
             f"验证集当前优选 {validation.get('best_algorithm_id') or '尚未产生'}，"
             f"保留测试集优选 {test.get('best_algorithm_id') or '尚未执行'}。"
-            "下一步应先核对数据、配置和模型哈希，再决定是否把结果用于简历或港口试点。"
+            "下一步应先核对数据、配置和模型哈希，再判断结果是否满足港口试点门禁。"
         )
         evidence = [
             run.get("reproducibility", {}).get("dataset_sha256", ""),

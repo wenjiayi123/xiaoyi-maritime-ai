@@ -45,7 +45,7 @@ class SandboxPortDataSource:
     """Deterministic, time-varying port sandbox with production-shaped payloads.
 
     Values change on a five-minute event-time bucket.  The generator is repeatable
-    for the same bucket, which makes tests and interview demonstrations stable while
+    for the same bucket, which makes tests and operator demonstrations stable while
     still behaving like a continuously updating operational feed.
     """
 
