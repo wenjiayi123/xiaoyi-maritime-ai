@@ -1843,13 +1843,16 @@
     }
   }
 
-  function renderHubOverview(systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload) {
+  function renderHubOverview(systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload, linkagePayload) {
     const priorities = evaluationPayload.seven_priorities || [];
     const systemItems = systemsPayload.items || [];
     const benchmark = evaluationPayload.latest_benchmark || {};
     const knowledge = evaluationPayload.knowledge || {};
     const implementedCount = priorities.filter((item) => item.status === "ready").length;
     const connectedSystemCount = systemItems.filter((item) => item.mode === "live").length;
+    const localLinkageCount = Number(linkagePayload?.online_count || 0);
+    const localLinkageTotal = Number(linkagePayload?.total || systemItems.length || 0);
+    const lastLinkage = linkagePayload?.last_command || null;
     const benchmarkAvailable = benchmark.status !== "not_run_in_this_process";
     const benchmarkLabel = benchmark.status === "pinned_release_evidence"
       ? "固定发布报告（非本进程重跑）"
@@ -1858,11 +1861,12 @@
       ? `${Math.round(Number(value || 0) * 100)}%`
       : "待运行";
     const command = "分析 CNYTN 泊位 3 未来3小时岸电风险，并告诉我去哪个系统看详情";
-    $("#modalSubtitle").textContent = `${implementedCount}/7 个模块已实现 · ${connectedSystemCount}/${systemItems.length} 个外部系统联机 · ${capabilitiesPayload.total || 0} 项只读契约`;
+    $("#modalSubtitle").textContent = `${implementedCount}/7 个模块已实现 · 本机联动 ${localLinkageCount}/${localLinkageTotal} · 生产接口 ${connectedSystemCount}/${systemItems.length} · ${capabilitiesPayload.total || 0} 项只读契约`;
     $("#modalBody").innerHTML = `<div class="intelligence-hub">
       <div class="hub-boundary">${icon("alert")}<div><strong>隔离边界</strong><span>小懿只做知识检索、能力选择、只读预览、结果解释和原系统交接；默认不会访问或改变其他系统。</span></div></div>
+      <section class="hub-runtime-strip"><div><span>LOCAL ADAPTER RUNTIME</span><strong>本机四系统联动 ${localLinkageCount}/${localLinkageTotal}</strong><small>${lastLinkage ? `${lastLinkage.all_succeeded ? "最近一轮全部完成" : "最近一轮部分完成"} · ${escapeHtml(lastLinkage.correlation_id || "—")}` : "尚无本轮跨系统回执"}</small></div><div><span>PRODUCTION CONNECTORS</span><strong>${connectedSystemCount}/${systemItems.length}</strong><small>production_authority=false</small></div><button type="button" class="outline-button" data-action="system-linkage">查看四系统回执</button></section>
       <section class="hub-section"><div class="hub-section-heading"><div><strong>七项能力模块</strong><span>模块实现状态不等于外部系统在线或生产授权</span></div><span class="status-pill"><i></i>${implementedCount} / 7 IMPLEMENTED</span></div><div class="hub-priority-grid">${priorities.map((item) => `<article><b>0${item.id}</b><div><strong>${escapeHtml(item.name)}</strong><span>${item.status === "ready" ? "代码与接口已实现" : escapeHtml(item.status)}</span></div><em>${item.status === "ready" ? "IMPLEMENTED" : "CHECK"}</em></article>`).join("")}</div></section>
-      <section class="hub-section"><div class="hub-section-heading"><div><strong>跨系统能力注册表</strong><span>仅登记能力契约，不复制其他系统业务逻辑</span></div><span>${capabilitiesPayload.total || 0} CAPABILITIES</span></div><div class="hub-system-grid">${systemItems.map((system) => `<article><header><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.english_name)}</small></div><span class="hub-mode ${escapeHtml(system.mode)}">${escapeHtml(system.mode === "demo" ? "ISOLATED" : system.mode.toUpperCase())}</span></header><p>${escapeHtml(system.role)}</p><footer><span>${system.capabilities.length} 项能力</span><span>${system.mode === "live" ? "只读联机" : "隔离预览"}</span></footer></article>`).join("")}</div></section>
+      <section class="hub-section"><div class="hub-section-heading"><div><strong>跨系统能力注册表</strong><span>本机运行态与生产接入状态分层展示</span></div><span>${capabilitiesPayload.total || 0} CAPABILITIES</span></div><div class="hub-system-grid">${systemItems.map((system) => { const localReady = Boolean(linkagePayload?.systems?.[system.id]?.runtime?.running); return `<article><header><div><strong>${escapeHtml(system.name)}</strong><small>${escapeHtml(system.english_name)}</small></div><span class="hub-mode ${localReady ? "live" : "offline"}">${localReady ? "LOCAL READY" : "LOCAL OFFLINE"}</span></header><p>${escapeHtml(system.role)}</p><footer><span>${system.capabilities.length} 项能力</span><span>生产契约 ${system.mode === "live" ? "LIVE" : "OFFLINE"}</span></footer></article>`; }).join("")}</div></section>
       <section class="hub-section hub-demo-section"><div class="hub-section-heading"><div><strong>跨系统编排验证</strong><span>输入自然语言，查看上下文识别、能力路由、证据融合和原系统交接</span></div></div><div class="hub-command-row"><textarea id="hubCommand" rows="2">${escapeHtml(command)}</textarea><button type="button" class="primary-button" data-action="hub-run-demo">开始编排</button></div><div id="hubOrchestrationResult" class="hub-result"><div class="task-empty"><div>${icon("spark")}<strong>等待运行验证</strong><span>默认 dry-run，不会访问或改变其他系统</span></div></div></div></section>
       <section class="hub-section" data-hub-section="evaluation"><div class="hub-section-heading"><div><strong>RAG 评测与反馈闭环</strong><span>${knowledge.documents || 0} 份文档 · ${knowledge.chunks || 0} 个片段 · ${knowledge.official_documents || 0} 份官方来源 · ${escapeHtml(benchmarkLabel)}</span></div><button type="button" class="outline-button" data-action="hub-run-evaluation">本机重新评测</button></div><div class="hub-metrics"><div><span>检索方法</span><strong>${escapeHtml(benchmark.retrieval_method || "hybrid_sparse_v2")}</strong></div><div><span>Hybrid Hit@5</span><strong id="hubHitMetric">${metricPercent(benchmark.verified_metrics?.hybrid_hit_at_5 ?? benchmark.hit_at_k)}</strong></div><div><span>BM25 Hit@5</span><strong id="hubBaselineMetric">${metricPercent(benchmark.verified_metrics?.bm25_hit_at_5)}</strong></div><div><span>官方要求通过率</span><strong id="hubOfficialMetric">${metricPercent(benchmark.official_requirement_pass_rate)}</strong></div><div><span>证据策略通过率</span><strong id="hubPolicyMetric">${metricPercent(benchmark.policy_safety_pass_rate)}</strong></div><div><span>持久审计</span><strong>${Number(governancePayload.audit_events || 0)} 条</strong></div></div><div class="hub-feedback-row"><select id="hubFeedbackRating"><option value="5">5 · 很准确</option><option value="4">4 · 基本准确</option><option value="3">3 · 需要补充</option><option value="2">2 · 有明显问题</option><option value="1">1 · 不可用</option></select><input id="hubFeedbackCorrection" value="建议补充适用港口、时间范围和证据来源后再形成结论。" aria-label="反馈修订建议"><button type="button" class="outline-button" data-action="hub-submit-feedback">提交待审核</button></div><div id="hubFeedbackStatus" class="hub-inline-status">固定报告不是本次页面启动后的重跑；点击“本机重新评测”才会生成本进程结果。反馈只进入人工审核队列。</div></section>
     </div>`;
@@ -1871,11 +1875,11 @@
   async function openIntelligenceHub(focusSection = "") {
     openModal("小懿智能联动中心", "正在读取七项能力、系统注册表与评测状态", `<div class="task-empty"><div>${icon("spark")}<strong>正在装载智能中枢</strong><span>不会访问或改变其他系统</span></div></div>`, "", "intelligence-hub");
     try {
-      const [systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload] = await Promise.all([
-        api("/api/hub/systems"), api("/api/hub/capabilities"), api("/api/evaluation/summary"), api("/api/governance/metrics")
+      const [systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload, linkagePayload] = await Promise.all([
+        api("/api/hub/systems"), api("/api/hub/capabilities"), api("/api/evaluation/summary"), api("/api/governance/metrics"), api("/api/system-linkage/overview")
       ]);
       if (state.modalKind !== "intelligence-hub") return;
-      renderHubOverview(systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload);
+      renderHubOverview(systemsPayload, capabilitiesPayload, evaluationPayload, governancePayload, linkagePayload);
       if (focusSection) {
         const section = $(`[data-hub-section="${focusSection}"]`);
         if (section) {
@@ -1954,7 +1958,7 @@
   function linkageResultMarkup(result) {
     if (!result) return `<div class="system-linkage-empty">尚未执行联动任务</div>`;
     if (result.status !== "completed") {
-      return `<div class="system-linkage-error">${icon("alert")}<span>${escapeHtml(result.error || "联动执行失败")}</span></div>`;
+      return `<div class="system-linkage-error">${icon("alert")}<div><strong>最近一次联动失败</strong><span>${escapeHtml(result.message || "联动执行失败，未产生业务回执。")}</span><small>${escapeHtml(result.trace_id || "无 trace ID")} · ${escapeHtml(result.error || "linked_target_execution_failed")}</small>${result.retryable ? `<button type="button" data-linkage-run="${escapeHtml(result.target)}">重试当前系统</button>` : ""}</div></div>`;
     }
     const summary = result.summary || {};
     const facts = [];
@@ -1983,6 +1987,18 @@
     return `<div class="system-linkage-result"><header><strong>最近一次本机回执 · ${escapeHtml(result.action || "联动任务完成")}</strong><span>${escapeHtml(result.trace_id || "")}</span></header><div>${facts.map(([label,value]) => `<span><small>${escapeHtml(label)}</small><b>${escapeHtml(value)}</b></span>`).join("")}</div><footer><span>${Number(result.duration_ms || 0).toLocaleString("zh-CN")} ms</span><span>SHA-256 ${escapeHtml(String(result.payload_sha256 || "").slice(0,12))}…</span></footer></div>`;
   }
 
+  function linkageBatchMarkup(batch) {
+    if (!batch) return "";
+    const failed = Array.isArray(batch.failed_targets) ? batch.failed_targets : [];
+    const passed = Number(batch.succeeded || 0);
+    const total = Number(batch.total || 0);
+    return `<section class="system-linkage-batch ${batch.all_succeeded ? "passed" : "partial"}">
+      <header><div><span>LAST ORCHESTRATION RECEIPT</span><strong>${batch.all_succeeded ? "本轮四系统联动全部完成" : "本轮联动存在未完成系统"}</strong></div><b>${passed}/${total}</b></header>
+      <p>${escapeHtml(batch.command || "跨系统联动")}</p>
+      <footer><span>关联 ID：${escapeHtml(batch.correlation_id || "—")}</span><span>完成时间：${formatDateTime(batch.completed_at)}</span><span>${failed.length ? `待重试：${failed.map((item) => escapeHtml(item)).join(" / ")}` : "全部系统已返回可审计回执"}</span><span>生产写入：关闭</span></footer>
+    </section>`;
+  }
+
   function renderSystemLinkage(payload) {
     state.systemLinkage = payload;
     const systems = payload.systems || {};
@@ -2001,6 +2017,7 @@
         <button type="button" class="outline-button" data-linkage-refresh>${icon("command")}刷新状态</button>
       </section>
       <div class="system-linkage-boundary">${icon("alert")}<span>${escapeHtml(payload.execution_boundary || "联动仅面向本机仿真与离线数据，不下发生产指令。")}</span></div>
+      ${linkageBatchMarkup(payload.last_command)}
       <section class="system-linkage-grid">${SYSTEM_LINKAGE_CATALOG.map((item) => {
         const node = systems[item.target] || {};
         const runtime = node.runtime || {};

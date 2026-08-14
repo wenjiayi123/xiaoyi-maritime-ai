@@ -180,6 +180,10 @@ def test_intelligence_hub_has_visible_entry_and_seven_priority_runtime() -> None
     assert "Hybrid Hit@5" in javascript
     assert "IMPLEMENTED" in javascript
     assert "固定发布报告（非本进程重跑）" in javascript
+    assert "LOCAL ADAPTER RUNTIME" in javascript
+    assert "PRODUCTION CONNECTORS" in javascript
+    assert "查看四系统回执" in javascript
+    assert "production_authority=false" in javascript
 
 
 def test_frontend_does_not_present_missing_site_data_as_live_or_safe() -> None:
@@ -221,6 +225,60 @@ def test_four_system_linkage_has_visible_entry_and_execution_controls() -> None:
     assert 'data-linkage-start="all"' in javascript
     assert "runSystemLinkage" in javascript
     assert "openLinkedSystem" in javascript
+    assert "linkageBatchMarkup" in javascript
+    assert "最近一次联动失败" in javascript
+    assert "重试当前系统" in javascript
+
+
+def test_literal_button_actions_are_all_registered() -> None:
+    html, javascript = _read_frontend()
+    frontend = f"{html}\n{javascript}"
+    declared_actions = {
+        action
+        for action in re.findall(r'data-action=["\']([^"\'$]+)["\']', frontend)
+        if "${" not in action
+    }
+    actions_block = javascript.split("const actions = {", 1)[1].split("\n    };", 1)[0]
+    missing_actions = sorted(
+        action
+        for action in declared_actions
+        if re.search(
+            rf"(?:^|\n)\s*(?:{re.escape(action)}|[\"']{re.escape(action)}[\"'])\s*:",
+            actions_block,
+        )
+        is None
+    )
+
+    declared_modal_actions = {
+        action
+        for action in re.findall(r'data-modal-action=["\']([^"\'$]+)["\']', frontend)
+        if "${" not in action
+    }
+    modal_handler = javascript.split("async function handleModalAction(action)", 1)[1].split(
+        "\n  function restorePreferences", 1
+    )[0]
+    missing_modal_actions = sorted(
+        action
+        for action in declared_modal_actions
+        if f'action === "{action}"' not in modal_handler
+        and f"action === '{action}'" not in modal_handler
+    )
+
+    assert not missing_actions, f"存在未注册的 data-action: {missing_actions}"
+    assert not missing_modal_actions, (
+        f"存在未注册的 data-modal-action: {missing_modal_actions}"
+    )
+
+
+def test_frontend_asset_revision_and_responsive_profile_label_are_current() -> None:
+    html, _ = _read_frontend()
+
+    assert "/web/styles.css?v=20260814-linkage-r3" in html
+    assert "/web/app.js?v=20260814-linkage-r3" in html
+    assert re.search(
+        r'<button class="profile-button"[^>]*aria-label="打开管理员工作台"',
+        html,
+    )
 
 
 def test_professional_catalog_has_visible_entry_and_interactive_filters() -> None:

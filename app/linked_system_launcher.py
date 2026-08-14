@@ -48,7 +48,7 @@ _TARGETS: dict[LinkedTarget, dict[str, object]] = {
         "url": os.getenv("XIAOYI_ENERGY_UI_URL", "http://127.0.0.1:5173/").strip(),
         "health_url": os.getenv(
             "XIAOYI_ENERGY_HEALTH_URL",
-            "http://127.0.0.1:8808/api/linkage/health",
+            "http://127.0.0.1:8808/api/health",
         ).strip(),
         "root": _ENERGY_ROOT,
         "command": ("/bin/bash", str(_ENERGY_ROOT / "scripts/start_demo.sh")),

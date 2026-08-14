@@ -93,7 +93,61 @@ def test_command_failure_does_not_expose_internal_exception(monkeypatch) -> None
     assert response.status_code == 200
     item = response.json()["results"][0]
     assert item["error"] == "linked_target_execution_failed"
+    assert item["retryable"] is True
     assert "secret-host" not in response.text
+
+    overview = client.get("/api/system-linkage/overview").json()
+    persisted = overview["systems"]["port-dt-multi"]["last_result"]
+    assert persisted["status"] == "failed"
+    assert persisted["trace_id"] == item["trace_id"]
+    assert overview["last_command"]["failed_targets"] == ["port-dt-multi"]
+    assert overview["last_command"]["all_succeeded"] is False
+
+
+def test_linkage_overview_restores_sanitized_receipt_from_runtime_store(
+    monkeypatch,
+) -> None:
+    receipt = {
+        "correlation_id": "link-persisted",
+        "command": "恢复联动回执",
+        "succeeded": 1,
+        "total": 1,
+        "all_succeeded": True,
+        "failed_targets": [],
+        "completed_at": "2026-08-14T10:00:00+00:00",
+        "production_write_enabled": False,
+    }
+    result = {
+        "trace_id": "link-persisted-1",
+        "target": "port-dt-multi",
+        "status": "completed",
+        "production_write_enabled": False,
+    }
+    system_linkage._last_results.clear()
+    system_linkage._last_command_summary.clear()
+    monkeypatch.setattr(
+        system_linkage.runtime_store,
+        "get_context",
+        lambda _key: {
+            "context": {
+                "last_results": {
+                    "port-dt-multi": result,
+                    "unknown-system": {"status": "completed"},
+                },
+                "last_command": receipt,
+            }
+        },
+    )
+
+    try:
+        overview = client.get("/api/system-linkage/overview").json()
+
+        assert overview["last_command"] == receipt
+        assert overview["systems"]["port-dt-multi"]["last_result"] == result
+        assert "unknown-system" not in overview["systems"]
+    finally:
+        system_linkage._last_results.clear()
+        system_linkage._last_command_summary.clear()
 
 
 def test_sailing_request_bridge_is_atomic_and_context_aware(

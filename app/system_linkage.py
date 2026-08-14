@@ -37,6 +37,12 @@ CommandTarget = Literal[
     "malacca-sandbox",
     "sailing-simulator",
 ]
+_SYSTEM_TARGETS: tuple[SystemTarget, ...] = (
+    "port-dt-multi",
+    "energy-cockpit",
+    "malacca-sandbox",
+    "sailing-simulator",
+)
 
 _XIAOYI_ROOT = Path(__file__).resolve().parents[1]
 _BRIDGE_DIR = Path(
@@ -50,6 +56,8 @@ _BRIDGE_RESULT = _BRIDGE_DIR / "malacca_validation_result.json"
 _ENERGY_API = os.getenv("XIAOYI_ENERGY_API_URL", "http://127.0.0.1:8808").rstrip("/")
 
 _last_results: dict[str, dict[str, Any]] = {}
+_last_command_summary: dict[str, Any] = {}
+_LINKAGE_STATE_KEY = "__xiaoyi_system_linkage_receipt_v1__"
 
 
 class LinkageCommandRequest(BaseModel):
@@ -77,6 +85,47 @@ def _utc_now() -> str:
 def _sha256(payload: Any) -> str:
     raw = json.dumps(payload, ensure_ascii=False, sort_keys=True, default=str).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
+
+
+def _restore_linkage_state() -> None:
+    if _last_results and _last_command_summary:
+        return
+    try:
+        record = runtime_store.get_context(_LINKAGE_STATE_KEY)
+    except Exception:
+        logger.exception("读取持久化联动回执失败")
+        return
+    state = record.get("context") if isinstance(record, dict) else None
+    if not isinstance(state, dict):
+        return
+    results = state.get("last_results")
+    if not _last_results and isinstance(results, dict):
+        _last_results.update(
+            {
+                target: result
+                for target, result in results.items()
+                if target in _SYSTEM_TARGETS and isinstance(result, dict)
+            }
+        )
+    summary = state.get("last_command")
+    if not _last_command_summary and isinstance(summary, dict):
+        _last_command_summary.update(summary)
+
+
+def _persist_linkage_state() -> None:
+    try:
+        runtime_store.save_context(
+            _LINKAGE_STATE_KEY,
+            {
+                "last_results": dict(_last_results),
+                "last_command": dict(_last_command_summary),
+                "production_write_enabled": False,
+            },
+        )
+    except Exception:
+        # Business receipts have already been returned. Persistence failure is
+        # recorded server-side without replacing the completed command result.
+        logger.exception("持久化联动回执失败")
 
 
 def _local_json(
@@ -411,7 +460,10 @@ def _execute_target(
                     request.parameters.get("carbon_price_cny_per_ton", 85.0)
                 ),
             },
-            timeout=12.0,
+            # The public-data-calibrated optimization may need to warm its
+            # dataset/cache on the first call. Keep it distinct from the fast
+            # readiness probe and allow a bounded cold-start window.
+            timeout=30.0,
         )
         summary = _compact_energy(payload)
         action = "能碳策略重算"
@@ -470,13 +522,9 @@ def _execute_target(
 
 @router.get("/overview")
 def linkage_overview() -> dict[str, Any]:
+    _restore_linkage_state()
     systems: dict[str, Any] = {}
-    for target in (
-        "port-dt-multi",
-        "energy-cockpit",
-        "malacca-sandbox",
-        "sailing-simulator",
-    ):
+    for target in _SYSTEM_TARGETS:
         try:
             runtime = _runtime(target)  # type: ignore[arg-type]
             error = None
@@ -507,6 +555,7 @@ def linkage_overview() -> dict[str, Any]:
             "result_exists": _BRIDGE_RESULT.is_file(),
         },
         "generated_at": _utc_now(),
+        "last_command": dict(_last_command_summary) or None,
         "execution_boundary": "本机联动只面向离线数据、仿真和策略预演；所有生产写入保持关闭。",
     }
 
@@ -540,12 +589,7 @@ def start_linked_targets(payload: LinkageStartRequest) -> dict[str, Any]:
 @router.post("/command")
 def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
     targets: list[SystemTarget] = (
-        [
-            "port-dt-multi",
-            "energy-cockpit",
-            "malacca-sandbox",
-            "sailing-simulator",
-        ]
+        list(_SYSTEM_TARGETS)
         if payload.target == "all"
         else [payload.target]
     )
@@ -563,17 +607,19 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
                 runtime_name = _runtime(target).get("name")
             except Exception:
                 runtime_name = target
-            results.append(
-                {
-                    "trace_id": trace_id,
-                    "target": target,
-                    "name": runtime_name,
-                    "status": "failed",
-                    "error": "linked_target_execution_failed",
-                    "message": "联动执行失败；详细原因已写入服务端日志。",
-                    "completed_at": _utc_now(),
-                }
-            )
+            failure_result = {
+                "trace_id": trace_id,
+                "target": target,
+                "name": runtime_name,
+                "status": "failed",
+                "error": "linked_target_execution_failed",
+                "message": "联动执行失败；未产生业务回执，可在目标系统恢复后重试。",
+                "retryable": True,
+                "production_write_enabled": False,
+                "completed_at": _utc_now(),
+            }
+            _last_results[target] = failure_result
+            results.append(failure_result)
     succeeded = sum(item["status"] == "completed" for item in results)
     response = {
         "correlation_id": correlation_id,
@@ -586,6 +632,22 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
         "execution_boundary": "联动结果来自本机系统API或Godot场景桥；不代表港口生产实时状态，也不下发真实设备或船舶指令。",
         "completed_at": _utc_now(),
     }
+    _last_command_summary.clear()
+    _last_command_summary.update(
+        {
+            "correlation_id": correlation_id,
+            "command": payload.command,
+            "succeeded": succeeded,
+            "total": len(results),
+            "all_succeeded": response["all_succeeded"],
+            "failed_targets": [
+                item["target"] for item in results if item["status"] != "completed"
+            ],
+            "completed_at": response["completed_at"],
+            "production_write_enabled": False,
+        }
+    )
+    _persist_linkage_state()
     runtime_store.add_audit(
         correlation_id=correlation_id,
         actor_id="local-admin",

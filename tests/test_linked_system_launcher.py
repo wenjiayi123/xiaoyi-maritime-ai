@@ -9,6 +9,13 @@ from app.main import app
 client = TestClient(app)
 
 
+def test_energy_readiness_uses_fast_service_health_not_deep_linkage_rollup() -> None:
+    health_url = str(linked_system_launcher._TARGETS["energy-cockpit"]["health_url"])
+
+    assert health_url.endswith("/api/health")
+    assert not health_url.endswith("/api/linkage/health")
+
+
 def test_launcher_reuses_online_whitelisted_systems(monkeypatch) -> None:
     monkeypatch.setattr(
         linked_system_launcher,
