@@ -1,9 +1,9 @@
 <table>
   <tr>
     <td width="64%" valign="middle">
-      <p><code>OPEN-WEIGHT LLM · RAG · LORA · EVIDENCE GOVERNANCE</code></p>
+      <p><code>OPEN-WEIGHT LLM · RAG · LORA · SOURCE-AWARE ANSWERS</code></p>
       <h1>小懿 AI · 港航垂直行业生成式大模型研发项目</h1>
-      <h3>Xiaoyi AI · Open-Weight Maritime LLM with RAG, LoRA &amp; Evidence Governance</h3>
+      <h3>Xiaoyi AI · Open-Weight Maritime LLM with RAG, LoRA &amp; Source-Aware Answers</h3>
       <p><strong>项目作者：</strong>温家懿 · <strong>Project Author:</strong> Wen Jiayi</p>
       <p><strong>把港航问答从“模型说了什么”，提升为“证据来自哪里、适用于哪个辖区和日期、何时必须拒答、谁允许推进任务”的可审计决策链。</strong></p>
       <p><em>A local generative maritime model stack where retrieval, adaptation, jurisdiction, temporal applicability, refusal, and audit evidence remain independently reviewable.</em></p>
@@ -22,28 +22,27 @@
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e.svg" /></a>
   <img alt="Version" src="https://img.shields.io/badge/release-v0.4.0-7057ff.svg" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" />
-  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-evidence%20gateway-009688?logo=fastapi&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-RAG%20gateway-009688?logo=fastapi&logoColor=white" />
   <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-1.0000-0ea5e9.svg" />
   <img alt="Production boundary" src="https://img.shields.io/badge/high--risk%20actions-human%20gated-e87945.svg" />
 </p>
 
 <p align="center">
-  <a href="#核心证明数据--headline-evidence">核心指标 / Evidence</a> ·
+  <a href="#核心指标--key-metrics">核心指标 / Metrics</a> ·
   <a href="#能力全景--capability-map">能力全景 / Capabilities</a> ·
   <a href="#系统架构--architecture">系统架构 / Architecture</a> ·
   <a href="#快速运行--quick-start">快速运行 / Quick start</a> ·
   <a href="reports/maritime_rag_benchmark_v1_20260814_r3.md">基准报告 / Benchmark</a> ·
   <a href="reports/maritime_decision_readiness_benchmark_v3_20260814_r3.md">决策保障 / Decision assurance</a> ·
-  <a href="reports/maritime_claim_alignment_benchmark_v4_20260814_r3.md">证据对齐 / Evidence alignment</a> ·
+  <a href="reports/maritime_claim_alignment_benchmark_v4_20260814_r3.md">回答对齐 / Answer alignment</a> ·
   <a href="reports/maritime_daily_operations_benchmark_v5_20260814_r3.md">日常问答 / Daily operations</a> ·
   <a href="reports/maritime_question_universe_benchmark_v6_20260814_r3.md">问题全集 / Question universe</a> ·
   <a href="docs/GENERATIVE_MODEL_STACK.md">生成式模型栈 / Generative stack</a> ·
-  <a href="reports/local_rag_lora_e2e_v3.json">本机LoRA证据 / Local LoRA evidence</a> ·
+  <a href="reports/local_rag_lora_e2e_v3.json">本机 LoRA 报告 / Local LoRA report</a> ·
   <a href="docs/TOP_TIER_MARITIME_ASSISTANT_ROADMAP.md">升级路线 / Roadmap</a> ·
-  <a href="reports/rl_dataset_benchmark_v2.md">RL证据 / RL evidence</a> ·
+  <a href="reports/rl_dataset_benchmark_v2.md">RL 基准 / RL benchmark</a> ·
   <a href="reports/dependency_audit_admission_v3.md">供应链安全 / Supply chain</a> ·
-  <a href="docs/COSCO_HIDOLPHIN_PUBLIC_GAP_MATRIX.md">行业差距 / Industry gap</a> ·
-  <a href="docs/OPEN_SOURCE_READINESS.md">开源审计 / Audit</a>
+  <a href="docs/COSCO_HIDOLPHIN_PUBLIC_GAP_MATRIX.md">行业差距 / Industry gap</a>
 </p>
 
 ---
@@ -54,10 +53,10 @@
 
 | 平面 | 可部署能力 | 核心业务价值 | 默认安全边界 |
 |---|---|---|---|
-| 应用与证据平面 | Web UI、FastAPI、Hybrid RAG、10域港口实时模拟、任务编排、6策略RL实验室、固定基准、审计与规则回退 | 把知识问答、现场换源前联调、SOP、运营研判和训练证据放进同一条可追溯链 | 无现场数据时明确显示“公开数据校准实时模拟”；`recommendation_only=true`、`production_authority=false` |
+| 应用服务平面 | Web UI、FastAPI、Hybrid RAG、10域港口实时模拟、任务编排、6策略RL实验室、固定基准、审计与规则回退 | 把知识问答、现场换源前联调、SOP、运营研判和训练结果放进同一条可追溯链 | 无现场数据时明确显示“公开数据校准实时模拟”；`recommendation_only=true`、`production_authority=false` |
 | 本地模型平面 | 可选4B GGUF生成、0.6B稠密检索、1.7B + LoRA工程档 | 本机完成生成、检索与领域适配，敏感资料无需外发 | 权重不随Git仓库分发；模型不可用自动回退，LoRA当前未通过质量准入 |
 
-基础运行不依赖生成模型权重；Python 3.12 下启用严格证据回退即可使用全部核心页面：
+基础运行不依赖生成模型权重；未配置权重时使用保守的本地规则回答，全部核心页面仍可运行：
 
 ```bash
 git clone https://github.com/wenjiayi123/xiaoyi-maritime-ai.git
@@ -69,15 +68,15 @@ XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 
 浏览器打开 `http://127.0.0.1:8010`。依次查看“数据分析 → 港口实时数据模拟与决策闭环 → 数据契约与血缘 → 训练中心 → 系统状态 → 现场准入与漂移门禁”。模拟器可切换 5 个因果场景，并可验证双人审批、模拟执行与回滚。本地模型权重、哈希校验和 LoRA 档的可选启动方式见下方[快速运行](#快速运行--quick-start)。
 
-## 核心证明数据 / Headline evidence
+## 核心指标 / Key metrics
 
-| 证据维度 / Evidence dimension | 固定结果 / Pinned result | 可复验入口 / Verification entry |
+| 指标 / Metric | 测试结果 / Test result | 复现入口 / Reproduction |
 |---|---:|---|
 | 知识快照 / Knowledge snapshot | <strong>129</strong>份文档、<strong>882</strong>个分块、<strong>68</strong>份官方核验来源<br><sub><strong>129</strong> documents, <strong>882</strong> chunks, <strong>68</strong> officially verified sources</sub> | `data/xiaoyi_index.json` + `data/source_registry.json` |
 | 稠密向量索引 / Dense vector index | `0.6B-Embedding` 为 <strong>882</strong> 个分块生成 <strong>1024</strong> 维本地向量；内容哈希失配即失效<br><sub><strong>882</strong> local embeddings × <strong>1024</strong> dimensions with content-hash invalidation</sub> | `reports/local_dense_retrieval_v1.json` |
 | 本机 LoRA 工程闭环 / Local LoRA loop | 面向17.29亿参数训练基座，Rank 96训练<strong>104,595,456</strong>个适配器参数；含适配器总参数18.25亿，占<strong>5.730723%</strong>。<strong>841</strong>条监督样本按来源隔离为<strong>622/94/125</strong>，64步后8例验证/测试loss分别下降<strong>43.55% / 40.49%</strong>，产出 PEFT + GGUF。当前仅通过工程完整性，因单种子、少量loss样例和缺少未参与训练的业务人员配对盲测，<strong>质量准入阻断</strong> | `reports/local_lora_inference_v3.json` + `reports/lora_admission_v1.json` |
 | 港航端到端模型评测 / Maritime model benchmark | BEIR对齐检索、RAGAS概念对齐确定性代理与MLPerf风格TTFT；核心港航/证据边界<strong>35/35</strong>，港航人员日常题<strong>16/16</strong>；所有问答统一保留<strong>至少3秒可见核验窗口</strong>，单机单流非官方提交 | `reports/maritime_model_benchmark_v7_lora_r96.json` |
-| 固定测试 / Fixed release acceptance | <strong>35</strong>题：24题检索 + 11题证据策略<br><sub><strong>35</strong> tests: 24 retrieval + 11 evidence-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
+| 问答基准 / Q&A benchmark | <strong>35</strong>题：24题检索 + 11题回答策略<br><sub><strong>35</strong> tests: 24 retrieval + 11 answer-policy cases</sub> | `data/evaluation/maritime_qa_benchmark_v1.json` |
 | Hybrid检索 / Hybrid retrieval | Hit@1/3/5 = <strong>100% / 100% / 100%</strong> | `reports/maritime_rag_benchmark_v1_20260814_r3.json` |
 | 同快照对照 / Same-snapshot baseline | MRR <strong>0.9583 → 1.0000</strong>（+4.17个百分点 / pp） | Hybrid Sparse vs BM25-only |
 | 证据治理 / Evidence governance | 官方来源、Top-5纯度、双哈希完整率均 <strong>100%</strong><br><sub>Official-source rate, Top-5 purity, and dual-hash integrity all <strong>100%</strong></sub> | SHA-256固定索引、来源与核心策略代码<br><sub>SHA-256-pinned index, source registry, and policy code</sub> |
@@ -97,16 +96,16 @@ XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 | 依赖漏洞准入 / Dependency admission | 初始运行依赖<strong>7</strong>条、开发依赖<strong>1</strong>条已知漏洞的失败报告均保留；当前 r3 运行/开发依赖以制品 SHA-256 锁定并均为<strong>0</strong>已知漏洞；本次完整回归<strong>365</strong>项通过 | `reports/dependency_audit_admission_v3.json` + CycloneDX SBOM + `pytest -q` |
 
 > [!NOTE]
-> 这些数字来自仓库固定发布验收集，不是第三方用户研究、生产SLA、法律意见或全球知识覆盖率。小懿默认将“独立公共观测”“公开数据校准实时模拟”“授权现场接口”和“生产动作权限”分开标识；153 个字段是契约覆盖，不是 153 项独立现场实测。
+> 这些数字来自仓库中的版本化基准报告，不是第三方用户研究、生产 SLA、法律意见或全球知识覆盖率。小懿分别标识“独立公共观测”“公开数据校准实时模拟”“授权现场接口”和“生产动作权限”；153 个字段是接口契约覆盖，不是 153 项独立现场实测。
 >
-> These figures come from the repository’s pinned release-acceptance set—not a third-party user study, production SLA, legal opinion, or global knowledge-coverage estimate. Xiaoyi explicitly separates curated public knowledge, the operations sandbox, authorized live interfaces, and production-action authority.
+> These figures come from versioned benchmark reports in the repository—not a third-party user study, production SLA, legal opinion, or global knowledge-coverage estimate. Xiaoyi separately labels curated public knowledge, the operations sandbox, authorized live interfaces, and production-action authority.
 
 > [!IMPORTANT]
 > `web/assets/xiaoyi-ai-port-hero.png` 保留项目原始小懿形象。仓库所有者已于 2026-08-14 明确授权随本仓库发布，授权记录与哈希见 `data/assets/asset_registry_v1.json`；该授权不转移著作权，也不表示角色形象按 MIT 独立授权提取或再利用。
 
 <p align="center">
   <img src="docs/screenshots/rl-evidence-center.png" alt="训练中心、算法矩阵、小懿训练顾问和全系统助手同屏联动" width="96%" />
-  <br><sub><strong>固定证据总览：</strong>同屏核对三套数据血缘、六种候选与基线、观测/动作/目标、小懿训练顾问和后端按钮联动。</sub>
+  <br><sub><strong>训练与评测总览：</strong>同屏查看三套数据来源、六种候选与基线、观测/动作/目标、小懿训练顾问和后端按钮联动。</sub>
 </p>
 
 ## 能力全景 / Capability map
@@ -131,7 +130,7 @@ flowchart LR
     REG["Authority registry\n官方来源与辖区"]
     OPS["Calibrated simulator or verified live adapter\n公开数据校准模拟或验证实时适配器"]
   end
-  subgraph Intelligence["Evidence Intelligence / 证据智能"]
+  subgraph Intelligence["Knowledge & Decision / 知识与决策"]
     HYB["Hybrid Sparse + BM25"]
     ROUTE["Jurisdiction + effective date"]
     POLICY["Citation · refusal · privacy gates"]
@@ -170,7 +169,7 @@ flowchart LR
     config.py            # 路径与配置 / paths and configuration
   data/
     kb/                  # 港航知识库 / maritime knowledge base
-    evaluation/          # 固定检索与证据评测 / pinned retrieval and policy set
+    evaluation/          # 固定检索与回答策略评测 / pinned retrieval and answer-policy set
     public/              # 公开RL数据与血缘 / public RL data and provenance
     port_profiles/       # 可替换港口参数与边界 / swappable port profiles
     rl_datasets.json     # 数据集目录 / dataset registry
@@ -179,12 +178,12 @@ flowchart LR
     build_index.py       # 构建知识索引 / build knowledge index
     build_vector_index.py # 可恢复的1024维稠密索引 / resumable dense index
     build_lora_dataset.py # 来源隔离的LoRA数据 / source-isolated LoRA data
-    train_lora.py        # PEFT LoRA训练与审计报告 / PEFT LoRA training
+    train_lora.py        # PEFT LoRA训练报告 / PEFT LoRA training
     export_lora_gguf.py  # 导出llama.cpp LoRA / export GGUF adapter
     fetch_public_rl_dataset.py # 下载并校验公开RL数据 / fetch and verify
     fetch_large_public_rl_dataset.py # 409,887行大规模基准 / large benchmark
     fetch_noaa_port_ais_dataset.py # NOAA港区AIS场景 / public port AIS
-    run_rl_dataset_benchmark.py # 三数据集多种子RL证据 / multi-seed RL evidence
+    run_rl_dataset_benchmark.py # 三数据集多种子RL基准 / multi-seed RL benchmark
     run_rag_benchmark.py # 固定RAG基准与哈希报告 / benchmark and hash report
   web/
     index.html           # Web交互页面 / Web interface
@@ -195,8 +194,8 @@ flowchart LR
 
 ## 快速运行 / Quick start
 
-推荐直接使用项目启动脚本；首次运行会要求 Python 3.12、创建 `.venv`、按锁文件安装运行依赖、重建索引并启动服务。没有模型权重时会安全进入严格证据规则回退，Web、RAG、RL、治理与证据页仍可验收：<br>
-Use the launcher with Python 3.12. It creates `.venv`, installs the exact lock snapshot, rebuilds the index, and starts the service. Without model weights it safely uses the strict-evidence fallback while keeping the Web, RAG, RL, governance, and evidence surfaces available:
+推荐直接使用项目启动脚本；首次运行会要求 Python 3.12、创建 `.venv`、按锁文件安装运行依赖、重建索引并启动服务。没有模型权重时会使用保守的本地规则回答，Web、RAG、RL 与治理页面仍可运行：<br>
+Use the launcher with Python 3.12. It creates `.venv`, installs the exact lock snapshot, rebuilds the index, and starts the service. Without model weights it uses a conservative local rule-based fallback while keeping the Web, RAG, RL, and governance pages available:
 
 ```bash
 cd <xiaoyi-ai-repository>
@@ -257,11 +256,11 @@ python -m app.cli "小懿的核心能力是什么？" --mode expert
 
 ## 系统说明 / System behavior
 
-小懿是面向港航场景的本地生成式 AI 助手。它采用开源 4B 量化生成档、本地港航知识库和 RAG 检索，结合专业问答、SOP 生成、告警解释和运营建议；同时以可在本机完成反向传播的 1.7B 训练/推理档执行 LoRA，学习港航表达与回答逻辑。1.7B 适配器不会跨参数规模套到 4B。当前事实、私有资料和法规版本仍由 RAG 提供，生成结果继续通过引用、主张和数字完整性门禁。模型不可用或门禁不通过时自动回退到 `local_rules` 严格证据答案；只有远程模型才需要显式资料外发授权。
+小懿是面向港航场景的本地生成式 AI 助手。它采用开源 4B 量化生成档、本地港航知识库和 RAG 检索，结合专业问答、SOP 生成、告警解释和运营建议；同时以可在本机完成反向传播的 1.7B 训练/推理档执行 LoRA，学习港航表达与回答逻辑。1.7B 适配器不会跨参数规模套到 4B。当前事实、私有资料和法规版本仍由 RAG 提供，生成结果继续检查引用、主张和数字完整性。模型不可用或检查不通过时自动回退到 `local_rules` 本地规则回答；只有远程模型才需要显式资料外发授权。
 
-Xiaoyi is now an open-weight generative maritime model stack: 4B provides the default local dialogue layer, 0.6B-Embedding adds dense retrieval alongside Sparse/BM25, and an exact-base 1.7B profile supports reproducible LoRA engineering on this Intel Mac. RAG remains authoritative for current, private, and jurisdiction-sensitive facts; citation, claim-alignment, and numeric-integrity gates can reject a generated rewrite and retain the deterministic strict-evidence answer. The 1.7B adapter is never attached to the 4B model, and remote data egress still requires explicit authorization.
+Xiaoyi is an open-weight generative maritime model stack: 4B provides the default local dialogue layer, 0.6B-Embedding adds dense retrieval alongside Sparse/BM25, and an exact-base 1.7B profile supports reproducible LoRA engineering on this Intel Mac. RAG remains authoritative for current, private, and jurisdiction-sensitive facts; citation, claim-alignment, and numeric-integrity checks can reject a generated rewrite and retain the deterministic local answer. The 1.7B adapter is never attached to the 4B model, and remote data egress requires explicit authorization.
 
-后端默认提供可复现的 `port-realtime.v1` 事件流，每 2 秒生成一次完整快照，覆盖港口挂靠、AIS/VTS、泊位与拖轮、设备、堆场、闸口/集疏运、能源碳排、气象潮汐、安全维护和治理审计 10 个业务域。页面会展示这些值以便闭环验收，但每个入口都固定标注“公开数据校准实时模拟 / SIM”：公共 AIS 只校准交通包络，公共能源基准只验证时序接入和特征耦合，其余业务量级、天气潮汐和收益影响均为物理约束下的工程模拟，不是上海港或任何港口的现场实测。五种场景会因果改变设备、作业、能耗和安全状态；建议必须经两个不同身份审批，执行只改变模拟器状态并可回滚，`physical_dispatch_performed=false`、`production_authority=false`。
+后端默认提供可复现的 `port-realtime.v1` 事件流，每 2 秒生成一次完整快照，覆盖港口挂靠、AIS/VTS、泊位与拖轮、设备、堆场、闸口/集疏运、能源碳排、气象潮汐、安全维护和治理审计 10 个业务域。页面中的模拟数据固定标注“公开数据校准实时模拟 / SIM”：公共 AIS 只校准交通包络，公共能源基准只验证时序接入和特征耦合，其余业务量级、天气潮汐和收益影响均为物理约束下的工程模拟，不是上海港或任何港口的现场实测。五种场景会因果改变设备、作业、能耗和安全状态；建议必须经两个不同身份审批，执行只改变模拟器状态并可回滚，`physical_dispatch_performed=false`、`production_authority=false`。
 
 现场接入时，TOS、PCS、EMS、EAM、VTS/AIS、METOC 和闸口网关只需映射到同一个 `port-realtime.v1` / `port-ops.v1` 契约，前端、分析和审批链无需重写。换源不会自动获得生产权限：字段映射、计量标定、漂移、影子运行、双人审批、回滚演练与 OT/IT 安全仍须逐项通过。
 
@@ -324,9 +323,9 @@ GET  /api/conversations/{id}    持久对话 / identity-scoped conversation hist
 POST /api/chat/stream           SSE流式回答 / server-sent-event answer stream
 ```
 
-部署、TLS/SSO、密钥、备份、模型数据外发和多实例边界见 [部署指南](docs/DEPLOYMENT.md)；信任边界见 [系统架构](docs/ARCHITECTURE.md)；开源审计结论见 [真实性与工程化评估](docs/OPEN_SOURCE_READINESS.md)。
+部署、TLS/SSO、密钥、备份、模型数据外发和多实例说明见[部署指南](docs/DEPLOYMENT.md)，系统信任边界见[架构说明](docs/ARCHITECTURE.md)。
 
-See the [deployment guide](docs/DEPLOYMENT.md) for TLS/SSO, secrets, backups, model-data egress, and multi-instance boundaries; [architecture](docs/ARCHITECTURE.md) for trust boundaries; and [open-source readiness](docs/OPEN_SOURCE_READINESS.md) for the engineering audit.
+See the [deployment guide](docs/DEPLOYMENT.md) for TLS/SSO, secrets, backups, model-data egress, and multi-instance operation, and [architecture](docs/ARCHITECTURE.md) for trust boundaries.
 
 ## 当前适合问的问题 / Suitable questions
 

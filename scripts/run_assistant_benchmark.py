@@ -73,7 +73,7 @@ def _markdown(report: dict[str, Any]) -> str:
 - 多轮指代与上下文改写：{result["dialogue"]["summary"]["passed_count"]}/{result["dialogue"]["summary"]["case_count"]}，通过率 {_percent(result["dialogue"]["summary"]["pass_rate"])}。
 - 复杂问题分解、部分回答与逐项引用：{result["complex"]["summary"]["passed_count"]}/{result["complex"]["summary"]["case_count"]}，通过率 {_percent(result["complex"]["summary"]["pass_rate"])}。
 - 对抗性证据、安全与实时边界：{result["adversarial"]["summary"]["passed_count"]}/{result["adversarial"]["summary"]["case_count"]}，通过率 {_percent(result["adversarial"]["summary"]["pass_rate"])}。
-- v2 发布门禁：{"PASS" if result["passed"] else "FAIL"}。
+- v2 完整性检查：{"PASS" if result["passed"] else "FAIL"}。
 
 ## 新增门禁
 

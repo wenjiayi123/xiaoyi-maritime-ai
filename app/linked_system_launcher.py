@@ -227,27 +227,15 @@ def _start_registered_process(target: LinkedTarget) -> None:
         env["VITE_API_TARGET"] = f"{health_parts.scheme}://{health_parts.netloc}"
     elif target == "malacca-sandbox":
         env["PORT"] = str(urlparse(str(spec["url"])).port or 5174)
-        node_bin = Path(
-            os.getenv(
-                "XIAOYI_NODE_BIN_DIR",
-                str(
-                    Path.home()
-                    / ".cache/codex-runtimes/codex-primary-runtime/dependencies/node/bin"
-                ),
-            )
-        ).expanduser()
-        pnpm_bin = Path(
-            os.getenv(
-                "XIAOYI_PNPM_BIN_DIR",
-                str(
-                    Path.home()
-                    / ".cache/codex-runtimes/codex-primary-runtime/dependencies/bin/fallback"
-                ),
-            )
-        ).expanduser()
+        configured_bins = (
+            os.getenv("XIAOYI_NODE_BIN_DIR"),
+            os.getenv("XIAOYI_PNPM_BIN_DIR"),
+        )
         path_parts = [
             str(path)
-            for path in (node_bin, pnpm_bin)
+            for value in configured_bins
+            if value
+            for path in (Path(value).expanduser(),)
             if path.is_dir()
         ]
         if path_parts:

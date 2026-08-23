@@ -95,7 +95,7 @@ def _render_markdown(report: dict[str, Any]) -> str:
 - 显式本地辖区路由：{metrics["retrieval_jurisdiction_routing_case_count"]} 题，准确率 {_percent(metrics["retrieval_jurisdiction_routing_accuracy"])}；国际通用问题保持无本地辖区误路由的比例为 {_percent(metrics["global_scope_neutrality_accuracy"])}。
 - 证据策略安全通过率：{_percent(metrics["policy_safety_pass_rate"])}；无依据回答阻断率：{_percent(metrics["unsupported_answer_block_rate"])}。
 - 辖区路由、日期适用性和实时数据边界通过率分别为 {_percent(metrics["jurisdiction_routing_accuracy"])}、{_percent(metrics["temporal_applicability_accuracy"])}、{_percent(metrics["live_data_boundary_pass_rate"])}。
-- 发布门禁：{"PASS" if benchmark["passed"] else "FAIL"}。
+- 完整性检查：{"PASS" if benchmark["passed"] else "FAIL"}。
 
 ## 对照与口径
 

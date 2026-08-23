@@ -72,7 +72,7 @@ def _markdown(report: dict[str, Any]) -> str:
 - v3：{result["case_count"]} 题；与 v1、v2 合计 {result["combined_case_count"]} 题。
 - 真实问答链路的决策就绪与升级动作：{result["query"]["summary"]["passed_count"]}/{result["query"]["summary"]["case_count"]}，通过率 {_percent(result["query"]["summary"]["pass_rate"])}。
 - 合成冲突、新鲜度和失败关闭保障：{result["assurance"]["summary"]["passed_count"]}/{result["assurance"]["summary"]["case_count"]}，通过率 {_percent(result["assurance"]["summary"]["pass_rate"])}。
-- v3 发布门禁：{"PASS" if result["passed"] else "FAIL"}。
+- v3 完整性检查：{"PASS" if result["passed"] else "FAIL"}。
 
 ## 验证范围
 

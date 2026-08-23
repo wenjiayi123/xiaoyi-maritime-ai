@@ -76,7 +76,7 @@ def _markdown(report: dict[str, Any]) -> str:
 - 当前知识快照：{knowledge["documents"]} 份文档、{knowledge["chunks"]} 个分块、{knowledge["official_documents"]} 份官方核验来源。
 - 日常运营问答：{result["operational"]["summary"]["passed_count"]}/{result["operational_case_count"]}。
 - 模糊问题与实时数据边界：{result["boundary"]["summary"]["passed_count"]}/{result["boundary_case_count"]}。
-- 与 v1-v4 合计固定题：{result["combined_fixed_case_count"]} 题；v5 发布门禁：{"PASS" if result["passed"] else "FAIL"}。
+- 与 v1-v4 合计固定题：{result["combined_fixed_case_count"]} 题；v5 完整性检查：{"PASS" if result["passed"] else "FAIL"}。
 
 ## 六类覆盖
 

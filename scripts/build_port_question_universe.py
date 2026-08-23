@@ -246,7 +246,7 @@ def _markdown(payload: dict[str, Any]) -> str:
             "",
             "完整主题、表达、来源及检索候选见",
             "`data/evaluation/port_question_universe_v1.json`。清单由脚本生成，",
-            "知识库变更后必须重新构建并进入发布检查。",
+            "知识库变更后必须重新构建并复测。",
             "",
         ]
     )

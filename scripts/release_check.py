@@ -367,7 +367,7 @@ def main() -> int:
             if metrics.get(field) != 1.0:
                 errors.append(f"RAG证据治理门禁未通过：{field}")
         if not benchmark.get("passed"):
-            errors.append("RAG固定评测发布门禁未通过")
+            errors.append("RAG 固定评测未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"RAG基准报告不可验证：{exc}")
 
@@ -395,7 +395,7 @@ def main() -> int:
             if summary.get("case_count") != 20 or summary.get("pass_rate") != 1.0:
                 errors.append(f"助手困难基准分类门禁未通过：{category}")
         if not assistant_benchmark.get("passed"):
-            errors.append("助手困难基准发布门禁未通过")
+            errors.append("助手困难基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"助手困难基准报告不可验证：{exc}")
 
@@ -426,7 +426,7 @@ def main() -> int:
             ):
                 errors.append(f"决策保障基准分类门禁未通过：{category}")
         if not decision_benchmark.get("passed"):
-            errors.append("决策保障固定基准发布门禁未通过")
+            errors.append("决策保障固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"决策保障基准报告不可验证：{exc}")
 
@@ -465,7 +465,7 @@ def main() -> int:
             ):
                 errors.append(f"主张证据对齐分类门禁未通过：{category}")
         if not alignment_benchmark.get("passed"):
-            errors.append("主张证据对齐固定基准发布门禁未通过")
+            errors.append("回答与来源对齐固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"主张证据对齐基准报告不可验证：{exc}")
 
@@ -502,7 +502,7 @@ def main() -> int:
             if summary.get("case_count") != 10 or summary.get("pass_rate") != 1.0:
                 errors.append(f"日常问答分类门禁未通过：{category}")
         if not daily_benchmark.get("passed"):
-            errors.append("日常问答固定基准发布门禁未通过")
+            errors.append("日常问答固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"日常问答基准报告不可验证：{exc}")
 
@@ -538,7 +538,7 @@ def main() -> int:
             if summary.get("case_count") != 2 or summary.get("pass_rate") != 1.0:
                 errors.append(f"港口问题全集分域门禁未通过：{domain}")
         if not universe_benchmark.get("passed"):
-            errors.append("港口问题全集固定基准发布门禁未通过")
+            errors.append("港口问题全集固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"港口问题全集基准报告不可验证：{exc}")
 
@@ -662,7 +662,7 @@ def main() -> int:
             "production_authority",
         ):
             if marker not in f"{web_html}\n{web_js}":
-                errors.append(f"开源界面的港口接入边界缺失：{marker}")
+                errors.append(f"公开界面的港口接入说明缺失：{marker}")
         for marker in (
             'data-view="rl"',
             "rlCenterAlgorithmMatrix",
@@ -680,9 +680,9 @@ def main() -> int:
             if marker not in web_js:
                 errors.append(f"回答后证据门禁未在前端展示：{marker}")
         if "现场实测" in web_html and "不是现场实测" not in web_html:
-            errors.append("开源首页缺少实时模拟的非现场实测边界")
+            errors.append("公开首页缺少实时模拟与现场实测的区分说明")
     except OSError as exc:
-        errors.append(f"开源界面真实性门禁不可验证：{exc}")
+        errors.append(f"公开界面数据状态无法验证：{exc}")
 
     try:
         sbom = json.loads(

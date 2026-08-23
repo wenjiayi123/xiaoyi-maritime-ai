@@ -34,10 +34,10 @@ benchmark:
 	python scripts/run_rag_benchmark.py run --output-tag "$(BENCHMARK_TAG)"
 
 benchmark-verify:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r3
 
 benchmark-verify-deep:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r2 --deep
+	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r3 --deep
 
 sbom:
 	python scripts/build_sbom.py build

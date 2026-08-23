@@ -74,7 +74,7 @@ def _markdown(report: dict[str, Any]) -> str:
 - 引用编号与支持角色：{categories["citation"]["summary"]["passed_count"]}/{categories["citation"]["summary"]["case_count"]}。
 - 主张—证据词面对齐：{categories["alignment"]["summary"]["passed_count"]}/{categories["alignment"]["summary"]["case_count"]}。
 - 数字、日期与量值完整性：{categories["numeric"]["summary"]["passed_count"]}/{categories["numeric"]["summary"]["case_count"]}。
-- v4 总通过率：{_percent(result["overall"]["pass_rate"])}；发布门禁：{"PASS" if result["passed"] else "FAIL"}。
+- v4 总通过率：{_percent(result["overall"]["pass_rate"])}；完整性检查：{"PASS" if result["passed"] else "FAIL"}。
 
 ## 验证范围
 

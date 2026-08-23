@@ -94,7 +94,7 @@ All notable changes are documented here. The project follows semantic versioning
 - Durable conversation, task, report, automation, audit, and feedback state in SQLite with fail-safe restart behavior.
 - Deep liveness/readiness endpoints, Prometheus metrics, structured JSON request logs, request IDs, and model-gateway status.
 - Optional OpenAI-compatible model gateway with evidence gates, privacy opt-in, retries, circuit breaker, and local fallback.
-- Container build, hardened local Compose profile, locked dependencies, CI, dependency review, Dependabot, release checks, and deployment guidance.
+- Container build, hardened local Compose profile, locked dependencies, CI, dependency review, Dependabot, project checks, and deployment guidance.
 - Persistent server-side chat history and standard server-sent-event chat streaming API.
 
 ### Changed
