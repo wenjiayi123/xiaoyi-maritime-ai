@@ -83,6 +83,43 @@ def test_rl_mission_runs_locally_and_seals_test_data_until_training_finishes() -
     assert dispatched["production_executed"] is False
 
 
+def test_port_traffic_mission_uses_port_scenario_and_port_metrics() -> None:
+    payload = {
+        "mission_id": "rlm-port-test",
+        "command": COMMAND,
+        "dataset_id": "noaa_la_lb_ais_2024_12_25_1min",
+        "episodes": 10,
+        "horizon_steps": 24,
+        "seed": 713,
+    }
+    scenario = client.post("/api/rl-mission/scenario", json=payload).json()
+    assert scenario["dataset"]["environment_type"] == "port_operations"
+    assert scenario["dataset"]["source_type"] == "public_port_traffic"
+    assert scenario["scenario"]["id"] == "measured-port-operations-coordination"
+    assert "作业协同" in scenario["scenario"]["label"]
+    assert "公开港区船舶自动识别系统交通观测" in scenario["data_notice"]
+    assert "不是码头生产实绩" in scenario["data_notice"]
+
+    started = client.post("/api/rl-mission/train", json=payload)
+    assert started.status_code == 202
+    run_id = started.json()["run_id"]
+    run = _wait(run_id)
+    assert run["status"] == "trained"
+
+    evaluation = client.post(
+        "/api/rl-mission/simulate", json={**payload, "run_id": run_id}
+    )
+    assert evaluation.status_code == 200
+    body = evaluation.json()
+    assert body["environment_type"] == "port_operations"
+    assert len(body["race"]) == 6
+    assert all("served_units" in item for item in body["race"])
+    assert all("average_backlog_units" in item for item in body["race"])
+    assert all("wait_proxy_hours" in item for item in body["race"])
+    assert all("cost_saving_percent" not in item for item in body["race"])
+    assert all("peak_reduction_percent" not in item for item in body["race"])
+
+
 def test_frontend_contains_real_rl_lab_contract() -> None:
     root = Path(__file__).resolve().parents[1]
     javascript = (root / "web" / "app.js").read_text(encoding="utf-8")
@@ -95,5 +132,8 @@ def test_frontend_contains_real_rl_lab_contract() -> None:
     assert "REAL TRAINING · NO RENDER" in javascript
     assert "HOLDOUT TEST RENDER" in javascript
     assert "确认归档本地测试 Dry-run" in javascript
+    assert '"政策法规":"法规 合规 监管 交通运输部 海事管理机构"' in javascript
+    assert "item.average_backlog_units" in javascript
+    assert "item.wait_proxy_hours" in javascript
     assert ".rl-training-progress" in css
     assert "真实RL训练实验室" in html

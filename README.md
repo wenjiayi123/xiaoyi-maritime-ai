@@ -93,7 +93,7 @@ XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 | 前端属性模糊测试 / Frontend property fuzzing | `fast-check` 对 SSE/遥测 JSON、能源范围和安全会话 ID 共<strong>4</strong>项性质各运行<strong>1,000</strong>次；CI 使用同一生产运行契约 | `pnpm test:fuzz`；不是外部渗透测试或现场安全认证 |
 | 真实本地模型安全回归 / Live local-model safety probe | THDi 单题保留初始检索/生成失败、中间失败及<strong>1次随机角色指派失败</strong>；v2 修复后命中3条专门证据、5条锁定步骤，整段门禁通过且不再杜撰现场岗位，仍为只读、需人工复核 | `reports/live_model_safety_probe_v2_20260813_role_variation_failure.json` + `...post_fix.json`；单题不是全量安全率 |
 | 现场准入 / Site admission | 字段映射、标定、漂移、影子运行、双人审批、回滚演练、OT/IT安全共<strong>7道门禁</strong>；当前<strong>0/7</strong>完成，`dispatch_allowed=false`、`production_authority=false` | `data/contracts/port_site_admission_v1.json` |
-| 依赖漏洞准入 / Dependency admission | 初始运行依赖<strong>7</strong>条、开发依赖<strong>1</strong>条已知漏洞的失败报告均保留；当前 r3 运行/开发依赖以制品 SHA-256 锁定并均为<strong>0</strong>已知漏洞；本次完整回归<strong>365</strong>项通过 | `reports/dependency_audit_admission_v3.json` + CycloneDX SBOM + `pytest -q` |
+| 依赖漏洞准入 / Dependency admission | 初始运行依赖<strong>7</strong>条、开发依赖<strong>1</strong>条已知漏洞的失败报告均保留；当前 r3 运行/开发依赖以制品 SHA-256 锁定并均为<strong>0</strong>已知漏洞；本次完整回归<strong>375</strong>项通过 | `reports/dependency_audit_admission_v3.json` + CycloneDX SBOM + `pytest -q` |
 
 > [!NOTE]
 > 这些数字来自仓库中的版本化基准报告，不是第三方用户研究、生产 SLA、法律意见或全球知识覆盖率。小懿分别标识“独立公共观测”“公开数据校准实时模拟”“授权现场接口”和“生产动作权限”；153 个字段是接口契约覆盖，不是 153 项独立现场实测。

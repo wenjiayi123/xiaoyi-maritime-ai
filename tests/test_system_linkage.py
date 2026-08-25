@@ -174,6 +174,55 @@ def test_sailing_request_bridge_is_atomic_and_context_aware(
     assert payload["requestId"] == "trace-bridge"
     assert payload["vesselId"] == "413123456"
     assert payload["speedProfile"]["targetKnots"] == 9.5
+    assert payload["origin"]["geo"] == {"lat": 1.26, "lon": 103.62}
+    assert payload["destination"]["geo"] == {"lat": 1.38, "lon": 103.88}
     assert request_file.is_file()
     assert not result_file.exists()
     assert "trace-bridge" in request_file.read_text(encoding="utf-8")
+
+
+def test_sailing_linkage_is_read_only_and_does_not_touch_simulator(
+    monkeypatch,
+) -> None:
+    monkeypatch.setattr(
+        system_linkage,
+        "_runtime",
+        lambda target: {
+            "target": target,
+            "name": "航行模拟器",
+            "state": "offline",
+            "running": False,
+            "launchable": True,
+        },
+    )
+    monkeypatch.setattr(
+        system_linkage,
+        "_ensure_running",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("隔离核验不得启动模拟器")
+        ),
+    )
+    monkeypatch.setattr(
+        system_linkage,
+        "_write_sailing_request",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("隔离核验不得写入桥接请求")
+        ),
+    )
+
+    request = system_linkage.LinkageCommandRequest(
+        target="sailing-simulator",
+        command="核验航行模拟器状态",
+    )
+    result = system_linkage._execute_target(
+        "sailing-simulator",
+        request,
+        "trace-isolated",
+    )
+
+    assert result["status"] == "completed"
+    assert result["action"] == "航行模拟器隔离状态核验"
+    assert result["summary"]["protectionStatus"] == "isolated"
+    assert result["summary"]["simulatorCodeModified"] is False
+    assert result["summary"]["routeInjected"] is False
+    assert result["summary"]["controlCommandSent"] is False

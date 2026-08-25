@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import shutil
 import subprocess
 from http.client import RemoteDisconnected
 from pathlib import Path
@@ -90,6 +91,38 @@ class LinkedSystemsRuntime(BaseModel):
     all_ready: bool
     production_write_enabled: bool = False
     safety_boundary: str = "只启动登记的本机仿真服务；不开启生产写入，不下发真实设备或船舶指令。"
+
+
+def _runtime_bin_dirs() -> list[Path]:
+    candidates: list[Path] = []
+    for variable in ("XIAOYI_NODE_BIN_DIR", "XIAOYI_PNPM_BIN_DIR"):
+        value = os.getenv(variable, "").strip()
+        if value:
+            candidates.append(Path(value).expanduser())
+    for executable in ("node", "pnpm", "corepack", "npx"):
+        resolved = shutil.which(executable)
+        if resolved:
+            candidates.append(Path(resolved).resolve().parent)
+
+    bundled_dependencies = (
+        Path.home()
+        / ".cache"
+        / "codex-runtimes"
+        / "codex-primary-runtime"
+        / "dependencies"
+    )
+    candidates.extend(
+        (
+            bundled_dependencies / "node" / "bin",
+            bundled_dependencies / "bin" / "override",
+            bundled_dependencies / "bin" / "fallback",
+        )
+    )
+    unique: list[Path] = []
+    for candidate in candidates:
+        if candidate.is_dir() and candidate not in unique:
+            unique.append(candidate)
+    return unique
 
 
 def _probe_json_health(health_url: str) -> tuple[LinkedState, str]:
@@ -227,17 +260,7 @@ def _start_registered_process(target: LinkedTarget) -> None:
         env["VITE_API_TARGET"] = f"{health_parts.scheme}://{health_parts.netloc}"
     elif target == "malacca-sandbox":
         env["PORT"] = str(urlparse(str(spec["url"])).port or 5174)
-        configured_bins = (
-            os.getenv("XIAOYI_NODE_BIN_DIR"),
-            os.getenv("XIAOYI_PNPM_BIN_DIR"),
-        )
-        path_parts = [
-            str(path)
-            for value in configured_bins
-            if value
-            for path in (Path(value).expanduser(),)
-            if path.is_dir()
-        ]
+        path_parts = [str(path) for path in _runtime_bin_dirs()]
         if path_parts:
             env["PATH"] = os.pathsep.join([*path_parts, env.get("PATH", "")])
     try:

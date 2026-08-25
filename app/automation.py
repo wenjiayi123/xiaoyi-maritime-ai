@@ -361,6 +361,19 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
     if _looks_like_question(command, text):
         return intent, summary, 0.92, actions
 
+    runtime_handover_request = (
+        "交班" in text
+        and any(word in text for word in ["生成", "整理", "汇总"])
+        and any(word in text for word in ["当前", "本班", "工作台"])
+    )
+    if runtime_handover_request:
+        return (
+            "general_question",
+            "这是读取当前工作台的交班摘要请求，将继续使用运行态证据问答。",
+            0.98,
+            actions,
+        )
+
     has_launch_verb = any(word in text for word in ["启动", "打开", "运行", "进入"])
     linked_launch_specs = (
         (

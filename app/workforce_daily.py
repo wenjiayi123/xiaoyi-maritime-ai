@@ -122,15 +122,15 @@ _RULES = (
 )
 
 _MARITIME_OR_PROFESSIONAL = re.compile(
-    r"(港口|港航|航运|海运|海事|船舶|船员|船|在港|引航|码头|泊位|靠泊|离泊|锚地|"
+    r"(港口|港航|航运|海运|海事|船舶|船员|船|在港|引航|码头|泊位|靠泊|待靠|还没靠|离泊|锚地|"
     r"岸桥|场桥|龙门吊|起重|装卸|堆场|闸口|集装箱|系解缆|拖轮|航道|潮汐|"
     r"船期|班轮|舱单|提单|通关|报关|危险品|冷藏箱|岸电|能耗|碳排|削峰|"
     r"运营|生产|作业|现场|值班|班组|交接|交班|排班|调度|设备|维修|检修|告警|"
     r"工单|SOP|法规|标准|合规|证据|索引|电力|用电|电费|峰值|负荷|需量|"
     r"储能|功率|排放|燃料|罚款|豁免|法定|通告|公约|条款|细则|限值|"
-    r"模型|算法|接口|系统|数据|报表|KPI|吞吐量|费率|合同|货损|客诉|"
+    r"模型|算法|接口|系统|工作台|数据|报表|KPI|吞吐量|费率|合同|货损|客诉|"
     r"MARPOL|SOLAS|IMO|MCA|Marine\s*Order|eCFR|"
-    r"TOS|PCS|EMS|EAM|VTS|AIS|ETA|ETD|ETB|AGV|QC|RTG)",
+    r"TOS|PCS|EMS|EAM|VTS|AIS|ETA|ETD|ETB|AGV|QC|RTG|EASTERN\s*HORIZON)",
     re.IGNORECASE,
 )
 _SMALLTALK_OR_IDENTITY = re.compile(

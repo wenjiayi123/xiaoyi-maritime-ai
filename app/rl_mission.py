@@ -99,12 +99,34 @@ def build_scenario(payload: MissionPayload) -> dict[str, Any]:
         dataset = definition.public_dict()
     except DatasetError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+    port_operations = dataset.get("environment_type") == "port_operations"
+    site_data = dataset.get("source_type") == "site_csv"
+    if site_data:
+        data_notice = "当前使用部署方登记的站点数据；训练仍保持只读、分段与数据哈希审计。"
+    elif port_operations:
+        data_notice = (
+            "当前使用公开港区船舶自动识别系统交通观测；船舶数量、类型和航速为实测，"
+            "服务量、积压、等待和容量利用率为校准仿真输出，不是码头生产实绩。"
+        )
+    else:
+        data_notice = (
+            "默认数据是知识共享署名许可的真实建筑能源公开基准，不是港口实绩；"
+            "站点部署只需用统一时序数据契约替换配置路径。"
+        )
     return {
         "mission_id": payload.mission_id,
         "updated_at": _now(),
         "scenario": {
-            "id": "measured-energy-storage-scheduling",
-            "label": "真实时序数据驱动的能源调度",
+            "id": (
+                "measured-port-operations-coordination"
+                if port_operations
+                else "measured-energy-storage-scheduling"
+            ),
+            "label": (
+                "公开港区交通观测驱动的作业协同"
+                if port_operations
+                else "真实时序数据驱动的能源调度"
+            ),
             "horizon_steps": payload.horizon_steps,
             "dataset_id": payload.dataset_id,
             "algorithm_count": len(payload.algorithms),
@@ -119,12 +141,7 @@ def build_scenario(payload: MissionPayload) -> dict[str, Any]:
             "seed": payload.seed,
             "split": "70% train / 15% validation / 15% untouched test",
         },
-        "data_notice": (
-            "默认数据是CC BY 4.0授权的真实建筑能源公开基准，不是港口实绩；"
-            "站点部署只需用统一CSV契约替换XIAOYI_RL_DATASET_PATH。"
-            if not dataset["port_data"]
-            else "当前使用部署方登记的站点港口数据；训练仍保持只读、分段与数据哈希审计。"
-        ),
+        "data_notice": data_notice,
     }
 
 
@@ -180,24 +197,48 @@ def evaluate_strategies(payload: MissionPayload) -> dict[str, Any]:
     except RunConflict as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     results = evaluation["results"]
+    environment_type = str(evaluation.get("environment_type") or "energy_storage")
+    labels = {item["id"]: item["label"] for item in algorithm_catalog()}
+    race: list[dict[str, Any]] = []
+    for result in results:
+        metrics = result["metrics"]
+        item = {
+            "id": result["algorithm_id"],
+            "label": labels.get(result["algorithm_id"], result["algorithm_id"]),
+            "score": metrics["score"],
+            "constraint_violations": metrics["constraint_violations"],
+            "environment_type": environment_type,
+            "metric_boundary": metrics.get("metric_boundary"),
+        }
+        if environment_type == "port_operations":
+            item.update(
+                {
+                    "served_units": metrics["served_units"],
+                    "average_backlog_units": metrics["average_backlog_units"],
+                    "wait_proxy_hours": metrics["wait_proxy_hours"],
+                    "capacity_utilization_percent": metrics[
+                        "capacity_utilization_percent"
+                    ],
+                    "terminal_backlog_units": metrics["terminal_backlog_units"],
+                }
+            )
+        else:
+            item.update(
+                {
+                    "cost_saving_percent": metrics["cost_saving_percent"],
+                    "peak_reduction_percent": metrics["peak_reduction_percent"],
+                }
+            )
+        race.append(item)
     return {
         "mission_id": payload.mission_id,
         "updated_at": _now(),
         "run_id": payload.run_id,
         "evaluation_id": evaluation["evaluation_id"],
         "best_algorithm_id": evaluation["best_algorithm_id"],
+        "environment_type": environment_type,
         "results": results,
-        "race": [
-            {
-                "id": result["algorithm_id"],
-                "label": result["algorithm_id"].replace("_", " ").title(),
-                "score": result["metrics"]["score"],
-                "cost_saving_percent": result["metrics"]["cost_saving_percent"],
-                "peak_reduction_percent": result["metrics"]["peak_reduction_percent"],
-                "constraint_violations": result["metrics"]["constraint_violations"],
-            }
-            for result in results
-        ],
+        "race": race,
         "rendering_performed": True,
         "render_split": "test",
         "notice": evaluation["notice"],

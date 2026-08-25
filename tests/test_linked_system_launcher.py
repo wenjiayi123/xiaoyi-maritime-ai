@@ -16,6 +16,33 @@ def test_energy_readiness_uses_fast_service_health_not_deep_linkage_rollup() -> 
     assert not health_url.endswith("/api/linkage/health")
 
 
+def test_launcher_discovers_bundled_node_and_package_manager_paths(
+    monkeypatch, tmp_path: Path
+) -> None:
+    dependency_root = (
+        tmp_path
+        / ".cache"
+        / "codex-runtimes"
+        / "codex-primary-runtime"
+        / "dependencies"
+    )
+    node_bin = dependency_root / "node" / "bin"
+    override_bin = dependency_root / "bin" / "override"
+    fallback_bin = dependency_root / "bin" / "fallback"
+    for path in (node_bin, override_bin, fallback_bin):
+        path.mkdir(parents=True)
+
+    monkeypatch.delenv("XIAOYI_NODE_BIN_DIR", raising=False)
+    monkeypatch.delenv("XIAOYI_PNPM_BIN_DIR", raising=False)
+    monkeypatch.setattr(linked_system_launcher.Path, "home", lambda: tmp_path)
+
+    paths = linked_system_launcher._runtime_bin_dirs()
+
+    assert node_bin in paths
+    assert override_bin in paths
+    assert fallback_bin in paths
+
+
 def test_launcher_reuses_online_whitelisted_systems(monkeypatch) -> None:
     monkeypatch.setattr(
         linked_system_launcher,

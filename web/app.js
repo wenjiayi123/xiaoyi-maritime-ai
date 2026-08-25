@@ -947,10 +947,15 @@
 
   async function searchKnowledge(query) {
     const run = ++state.knowledgeSearchRun;
+    const categoryRetrievalQueries = {
+      "政策法规":"法规 合规 监管 交通运输部 海事管理机构",
+      "行业标准":"行业标准 技术规范 国际海事组织 港口安全"
+    };
+    const retrievalQuery = categoryRetrievalQueries[String(query).trim()] || String(query).trim();
     try {
       const result = await api("/api/knowledge/search", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ query:String(query).trim(), top_k:10, min_coverage:.30 })
+        body:JSON.stringify({ query:retrievalQuery, top_k:10, min_coverage:.30 })
       });
       if (run !== state.knowledgeSearchRun || String($("#knowledgeSearch")?.value || "").trim() !== String(query).trim()) return;
       const qualifiedHits = (result.hits || []).filter((hit) => hit.qualified).sort((a,b) => Number(b.official) - Number(a.official) || Number(b.coverage) - Number(a.coverage) || Number(b.score) - Number(a.score));
@@ -1944,7 +1949,7 @@
     { target:"port-dt-multi", name:"港口数字孪生", english:"PORT DIGITAL TWIN", icon:"agv", action:"自然语言动作映射", detail:"读取孪生态势并将小懿指令映射为可审计 dry-run 动作包" },
     { target:"energy-cockpit", name:"能碳驾驶舱", english:"ENERGY & CARBON", icon:"chart", action:"离线策略重算", detail:"目标系统在线时调用能碳适配器，重算成本、碳排、岸电与调度指标" },
     { target:"malacca-sandbox", name:"马六甲推演", english:"PORT SANDBOX", icon:"spark", action:"沙盘与RL读取", detail:"读取公开数据快照、场景态势和训练引擎能力" },
-    { target:"sailing-simulator", name:"航行模拟器", english:"GODOT SAILING SIM", icon:"ship", action:"航行场景验证", detail:"注入航线、船舶与风险事件，回传安全间距、碰撞和碳排结果" }
+    { target:"sailing-simulator", name:"航行模拟器", english:"GODOT SAILING SIM", icon:"ship", action:"隔离状态核验", detail:"只读取登记状态并允许手动切换窗口；不修改模拟器代码，不自动注入航线或控制指令" }
   ];
 
   function linkageStateLabel(runtime = {}) {
@@ -1976,6 +1981,12 @@
       facts.push(["算法", (summary.algorithms || []).join(" / ") || "—"]);
       facts.push(["场景", summary.scenario?.id || "—"]);
       facts.push(["生产写入", summary.production_write_enabled ? "开启" : "关闭"]);
+    } else if (summary.protectionStatus === "isolated") {
+      facts.push(["保护状态", "已隔离"]);
+      facts.push(["运行状态", summary.running ? "在线" : "未运行"]);
+      facts.push(["代码改动", summary.simulatorCodeModified ? "有" : "无"]);
+      facts.push(["航线注入", summary.routeInjected ? "已执行" : "未执行"]);
+      facts.push(["控制指令", summary.controlCommandSent ? "已发送" : "未发送"]);
     } else {
       facts.push(["安全通过", summary.safePass === true ? "是" : summary.safePass === false ? "否" : "—"]);
       facts.push(["风险", summary.riskLevel || "—"]);
@@ -2004,16 +2015,16 @@
     const systems = payload.systems || {};
     if ($("#systemLaunchBadge")) $("#systemLaunchBadge").textContent = `${payload.online_count || 0}/${payload.total || 4}`;
     if (state.modalKind !== "system-linkage") return;
-    $("#modalSubtitle").textContent = `${payload.online_count || 0}/${payload.total || 4} 个系统在线 · 本机API / Godot文件桥 · 全链路审计`;
+    $("#modalSubtitle").textContent = `${payload.online_count || 0}/${payload.total || 4} 个系统在线 · 三个业务适配器 / 模拟器隔离核验 · 全链路审计`;
     $("#modalBody").innerHTML = `<div class="system-linkage-hub">
       <section class="system-linkage-hero">
-        <div><span>LOCAL MULTI-SYSTEM ORCHESTRATION</span><strong>小懿四系统联动控制台</strong><p>统一启动、上下文传递、本机适配器调用、模拟器场景注入、结果回写与证据哈希。</p></div>
+        <div><span>LOCAL MULTI-SYSTEM ORCHESTRATION</span><strong>小懿四系统联动控制台</strong><p>统一读取状态、调用三个业务适配器并生成证据哈希；航行模拟器默认隔离，不自动注入或控制。</p></div>
         <span class="system-linkage-total">${payload.online_count || 0}<small>/ 4 ONLINE</small></span>
       </section>
       <section class="system-linkage-command">
-        <div><label for="systemLinkageCommand">跨系统演示指令</label><textarea id="systemLinkageCommand" rows="2">针对当前港航作业进行态势读取、能碳策略重算和航行风险验证，并回传各系统结果</textarea></div>
+        <div><label for="systemLinkageCommand">跨系统演示指令</label><textarea id="systemLinkageCommand" rows="2">针对当前港航作业读取态势、重算能碳策略、读取沙盘能力，并核验航行模拟器隔离状态</textarea></div>
         <button type="button" class="primary-button" data-linkage-run="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}一键联动演示</button>
-        <button type="button" class="outline-button" data-linkage-start="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("play")}启动全部</button>
+        <button type="button" class="outline-button" data-linkage-start="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("play")}启动三个业务系统</button>
         <button type="button" class="outline-button" data-linkage-refresh>${icon("command")}刷新状态</button>
       </section>
       <div class="system-linkage-boundary">${icon("alert")}<span>${escapeHtml(payload.execution_boundary || "联动仅面向本机仿真与离线数据，不下发生产指令。")}</span></div>
@@ -2030,13 +2041,13 @@
           <div class="system-linkage-action"><span>适配器联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
           ${busy ? `<div class="system-linkage-running"><i></i><span>正在启动并执行，等待目标系统回写…</span></div>` : linkageResultMarkup(node.last_result)}
           <footer>
-            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${busy ? "disabled" : ""}>${icon("spark")}${online ? "执行联动" : "启动并联动"}</button>
+            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${busy ? "disabled" : ""}>${icon("spark")}${item.target === "sailing-simulator" ? "只读核验" : online ? "执行联动" : "启动并联动"}</button>
             <button type="button" class="drawer-button secondary" data-linkage-open="${item.target}" ${online ? "" : "disabled"}>${icon(item.target === "sailing-simulator" ? "ship" : "play")}${item.target === "sailing-simulator" ? "切换窗口" : "打开系统"}</button>
           </footer>
           <small class="system-linkage-message">${escapeHtml(runtime.message || "等待读取运行状态")}</small>
         </article>`;
       }).join("")}</section>
-      <footer class="system-linkage-audit"><span>桥接请求文件：${payload.bridge?.request_exists ? "历史文件存在" : "待生成"}</span><span>历史结果文件：${payload.bridge?.result_exists ? "存在（非本次执行）" : "无"}</span><span>生产写入：关闭</span></footer>
+      <footer class="system-linkage-audit"><span>业务适配器：本机调用</span><span>模拟器自动桥接：关闭</span><span>生产写入：关闭</span></footer>
     </div>`;
   }
 
@@ -2063,7 +2074,7 @@
   }
 
   async function startSystemLinkage(target) {
-    const targets = target === "all" ? SYSTEM_LINKAGE_CATALOG.map((item) => item.target) : [target];
+    const targets = target === "all" ? SYSTEM_LINKAGE_CATALOG.filter((item) => item.target !== "sailing-simulator").map((item) => item.target) : [target];
     state.systemLinkageBusy = target;
     if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
     try {
@@ -2071,7 +2082,7 @@
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ targets }), timeoutMs:180000
       });
-      toast(result.all_ready ? "四系统已就绪" : "部分系统未就绪", `${Object.values(result.systems || {}).filter((item) => item.running).length}/${targets.length} 个目标在线`, result.all_ready ? "success" : "warning", 5200);
+      toast(result.all_ready ? "业务系统已就绪" : "部分业务系统未就绪", `${Object.values(result.systems || {}).filter((item) => item.running).length}/${targets.length} 个目标在线；模拟器保持隔离`, result.all_ready ? "success" : "warning", 5200);
     } catch (error) {
       toast("系统启动失败", error.message, "warning", 6000);
     } finally {
@@ -2722,17 +2733,21 @@
     const curveAlgorithm = training.current_algorithm_id || curveTail.at(-1)?.algorithm_id;
     const curve = curveTail.filter((item) => !curveAlgorithm || item.algorithm_id === curveAlgorithm);
     const race = mission.simulation?.race || [];
+    const portMission = dataset.environment_type === "port_operations" || mission.simulation?.environment_type === "port_operations";
     const raceCards = race.length ? race.map((item) => {
       const winner = item.id === mission.simulation?.best_algorithm_id;
       const safe = Number(item.constraint_violations || 0) === 0;
-      return `<div class="rl-race-card ${winner ? "win" : safe ? "" : "watch"}"><span>${escapeHtml(item.label)}</span><strong>${formatNumber(item.score)} <small>SCORE</small></strong><em>成本 ${Number(item.cost_saving_percent) >= 0 ? "+" : ""}${formatNumber(item.cost_saving_percent)}% · 峰值 ${Number(item.peak_reduction_percent) >= 0 ? "+" : ""}${formatNumber(item.peak_reduction_percent)}% · 约束 ${formatNumber(item.constraint_violations)}</em></div>`;
+      const metrics = portMission
+        ? `服务量 ${formatNumber(item.served_units)} · 平均积压 ${formatNumber(item.average_backlog_units)} · 等待代理 ${formatNumber(item.wait_proxy_hours)}小时 · 约束 ${formatNumber(item.constraint_violations)}`
+        : `成本 ${Number(item.cost_saving_percent) >= 0 ? "+" : ""}${formatNumber(item.cost_saving_percent)}% · 峰值 ${Number(item.peak_reduction_percent) >= 0 ? "+" : ""}${formatNumber(item.peak_reduction_percent)}% · 约束 ${formatNumber(item.constraint_violations)}`;
+      return `<div class="rl-race-card ${winner ? "win" : safe ? "" : "watch"}"><span>${escapeHtml(item.label)}</span><strong>${formatNumber(item.score)} <small>SCORE</small></strong><em>${metrics}</em></div>`;
     }).join("") : `<div class="rl-stage-placeholder">训练完成后才会读取测试集并渲染 / Test holdout remains sealed</div>`;
     const verification = mission.verification || {};
     const checks = verification.checks || [];
     const checkHtml = checks.length ? checks.map((item) => `<span class="${item.passed ? "passed" : "blocked"}">${icon(item.passed ? "check" : "alert")}${escapeHtml(item.name)}</span>`).join("") : `<span class="pending">等待守护栏验证</span>`;
     const dispatch = mission.dispatch || {};
     return `<section class="rl-mission-hud" data-agent-target="rl-mission-core">
-      <header class="rl-mission-header"><div><span>REPRODUCIBLE RL LAB</span><strong>真实数据驱动的能源调度训练</strong><small>4 RL Algorithms · PID Baseline · Chronological Holdout · No Train Rendering</small></div><b>${dispatch.status === "dry_run_recorded" ? "ARCHIVED" : verification.ok ? "VERIFIED" : mission.simulation ? "TESTED" : training.status === "trained" ? "TRAINED" : training.status === "training" ? "TRAINING" : "READY"}</b></header>
+      <header class="rl-mission-header"><div><span>REPRODUCIBLE RL LAB</span><strong>${portMission ? "公开港区交通观测驱动的作业协同训练" : "真实时序数据驱动的能源调度训练"}</strong><small>4 RL Algorithms · PID Baseline · Chronological Holdout · No Train Rendering</small></div><b>${dispatch.status === "dry_run_recorded" ? "ARCHIVED" : verification.ok ? "VERIFIED" : mission.simulation ? "TESTED" : training.status === "trained" ? "TRAINED" : training.status === "training" ? "TRAINING" : "READY"}</b></header>
       <div class="rl-topology" data-agent-target="rl-mission-topology"><div class="rl-link-beam"></div>${topology}</div>
       <div class="rl-mission-grid">
         <article class="rl-panel" data-agent-target="rl-mission-scenario"><header><span>01 · MEASURED DATA</span><b>${dataset.available ? "HASHED" : "WAITING"}</b></header><div class="rl-fleet-orbit"><i></i><strong>${dataset.row_count ?? "—"}<small> ROWS</small></strong><span>${dataset.port_data ? "PORT DATA" : "PUBLIC BENCHMARK"}</span></div><div class="rl-mini-stats"><span>步长<b>${dataset.step_minutes ?? "—"}m</b></span><span>训练<b>${config.episodes ?? training.config?.episodes ?? "—"}</b></span><span>种子<b>${config.seed ?? training.config?.seed ?? "—"}</b></span></div><p>${escapeHtml(dataset.label || "等待数据校验")} · SHA-256 ${escapeHtml(String(dataset.sha256 || "—").slice(0,12))}</p></article>
@@ -3204,7 +3219,7 @@
         mission.verification = await api("/api/rl-mission/verify", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...payload,run_id:mission.runId}), timeoutMs:18000 });
         renderAutomationPlan();
         return mission.verification.ok
-          ? `复现守护栏验证通过：${mission.verification.passed}/${mission.verification.total} 项，包括训练无渲染、测试隔离、五基线和模型哈希。`
+          ? `复现守护栏验证通过：${mission.verification.passed}/${mission.verification.total} 项，包括训练无渲染、测试隔离、六种候选与强基线、模型哈希。`
           : "复现守护栏未通过，结果归档链已保持锁定。";
       }
       if (action.kind === "dispatch_rl_dry_run") {
@@ -3410,15 +3425,20 @@
     const verification = mission.verification || {};
     const dispatch = mission.dispatch || {};
     const race = simulation.race || [];
-    const raceLines = race.map((item) => `• ${item.label}：score=${formatNumber(item.score)}，成本变化 ${formatNumber(item.cost_saving_percent)}%，峰值变化 ${formatNumber(item.peak_reduction_percent)}%，约束违例 ${formatNumber(item.constraint_violations)}`).join("\n");
-    const answer = `可复现RL能源调度实验已完成。\n\n`+
+    const portMission = dataset.environment_type === "port_operations" || simulation.environment_type === "port_operations";
+    const raceLines = race.map((item) => portMission
+      ? `• ${item.label}：评分 ${formatNumber(item.score)}，服务量 ${formatNumber(item.served_units)}，平均积压 ${formatNumber(item.average_backlog_units)}，等待代理 ${formatNumber(item.wait_proxy_hours)}小时，约束违例 ${formatNumber(item.constraint_violations)}`
+      : `• ${item.label}：评分 ${formatNumber(item.score)}，成本变化 ${formatNumber(item.cost_saving_percent)}%，峰值变化 ${formatNumber(item.peak_reduction_percent)}%，约束违例 ${formatNumber(item.constraint_violations)}`).join("\n");
+    const answer = `可复现强化学习${portMission ? "港口作业协同" : "能源调度"}实验已完成。\n\n`+
       `数据：${dataset.label || "—"}，${dataset.row_count || 0}条真实观测，SHA-256 ${String(dataset.sha256 || "—")}。\n`+
-      `数据划分：按时间顺序70%训练、15%验证、15%保留测试；默认公开数据不是港口实绩。\n`+
+      `数据划分：按时间顺序70%训练、15%验证、15%保留测试；${portMission ? "船舶交通字段为公开实测，作业指标为校准仿真输出，不是码头生产实绩" : "默认公开能源数据不是港口实绩"}。\n`+
       `训练：Q-learning、SARSA、Expected SARSA、Double Q-learning共完成 ${training.completed_training_episodes || 0} 个episode；PID与现场SOP规则作为非学习强基线不训练。训练阶段rendering_performed=${Boolean(training.training?.rendering_performed)}。\n`+
       `测试：训练全部完成后才读取保留测试段并生成轨迹，领先算法 ${simulation.best_algorithm_id || "—"}。\n\n`+
       `六种候选与基线结果：\n${raceLines || "• 测试结果未返回。"}\n\n`+
       `复现门禁：${verification.passed || 0}/${verification.total || 0}项通过；归档状态 ${dispatch.status || "未归档"}，production_executed=${Boolean(dispatch.production_executed)}。\n\n`+
-      `接港口方式：提供同一timestamp/load_kw CSV契约并设置XIAOYI_RL_DATASET_PATH；算法、时间划分、模型哈希、测试隔离和前端进度无需改代码。`;
+      (portMission
+        ? `接入站点方式：按港口交通观测字段契约提供时间、船舶数量、航速和船型数据，并登记码头能力参数；算法、时间划分、模型哈希和测试隔离保持不变。`
+        : `接入站点方式：按统一能源时序数据契约提供时间与负荷数据；算法、时间划分、模型哈希和测试隔离保持不变。`);
     commitAutomationChat({ question:plan.command, answer, intent:"rl_energy_training_lab", mode:"ops", confidence:"高", sourceQuality:"public_dataset", grounded:true, nextQuestions:["解释六种候选与基线的更新规则", "查看数据和模型哈希", "如何替换为港口EMS与AGV数据"] });
     return "真实训练、保留测试集评测、六种候选与基线结果、模型哈希与数据边界已回写智能对话。";
   }

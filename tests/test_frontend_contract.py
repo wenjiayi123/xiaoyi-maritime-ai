@@ -274,7 +274,7 @@ def test_frontend_asset_revision_and_responsive_profile_label_are_current() -> N
     html, _ = _read_frontend()
 
     assert "/web/styles.css?v=20260814-linkage-r3" in html
-    assert "/web/app.js?v=20260814-linkage-r3" in html
+    assert "/web/app.js?v=20260825-flow-r2" in html
     assert re.search(
         r'<button class="profile-button"[^>]*aria-label="打开管理员工作台"',
         html,

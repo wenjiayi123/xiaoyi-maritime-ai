@@ -57,6 +57,21 @@ def test_operational_questions_do_not_become_ui_commands() -> None:
         assert plan["actions"] == []
 
 
+def test_current_workbench_handover_summary_stays_in_runtime_evidence_chat() -> None:
+    response = client.post(
+        "/api/automation/plans",
+        json={
+            "command": "按船舶、设备、堆场、闸口、告警五部分生成当前工作台交班摘要。"
+        },
+    )
+
+    assert response.status_code == 201
+    plan = response.json()
+    assert plan["intent"] == "general_question"
+    assert plan["actionable"] is False
+    assert plan["actions"] == []
+
+
 def test_launch_simulator_command_builds_whitelisted_runtime_sequence() -> None:
     response = client.post("/api/automation/plans", json={"command": "启动模拟器"})
 

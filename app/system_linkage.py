@@ -354,20 +354,26 @@ def _sailing_request(
         or request.context.imo_number
         or str(params.get("vesselId") or "xiaoyi-linked-vessel")
     )
+    origin = _sailing_endpoint(
+        params.get("origin"),
+        port_name="马六甲验证起点",
+        latitude=1.26,
+        longitude=103.62,
+    )
+    destination = _sailing_endpoint(
+        params.get("destination"),
+        port_name="马六甲验证终点",
+        latitude=1.38,
+        longitude=103.88,
+    )
     return {
         "requestId": trace_id,
         "source": "xiaoyi-ai-system-linkage",
         "sessionId": request.session_id,
         "instruction": request.command,
         "vesselId": vessel_id,
-        "origin": params.get(
-            "origin",
-            {"portName": "马六甲验证起点", "latitude": 1.26, "longitude": 103.62},
-        ),
-        "destination": params.get(
-            "destination",
-            {"portName": "马六甲验证终点", "latitude": 1.38, "longitude": 103.88},
-        ),
+        "origin": origin,
+        "destination": destination,
         "progressPercent": float(params.get("progressPercent", 0.0)),
         "headingDeg": float(params.get("headingDeg", 68.0)),
         "speedProfile": {
@@ -379,6 +385,28 @@ def _sailing_request(
         "context": request.context.model_dump(exclude_none=True),
         "createdAt": _utc_now(),
     }
+
+
+def _sailing_endpoint(
+    raw_endpoint: Any,
+    *,
+    port_name: str,
+    latitude: float,
+    longitude: float,
+) -> dict[str, Any]:
+    endpoint = dict(raw_endpoint) if isinstance(raw_endpoint, dict) else {}
+    raw_geo = endpoint.get("geo")
+    geo = dict(raw_geo) if isinstance(raw_geo, dict) else {}
+    resolved_latitude = geo.get("lat", geo.get("latitude", endpoint.get("latitude", latitude)))
+    resolved_longitude = geo.get("lon", geo.get("longitude", endpoint.get("longitude", longitude)))
+    endpoint.setdefault("portName", port_name)
+    endpoint["latitude"] = float(resolved_latitude)
+    endpoint["longitude"] = float(resolved_longitude)
+    endpoint["geo"] = {
+        "lat": endpoint["latitude"],
+        "lon": endpoint["longitude"],
+    }
+    return endpoint
 
 
 def _write_sailing_request(payload: dict[str, Any]) -> None:
@@ -413,6 +441,44 @@ def _execute_target(
     trace_id: str,
 ) -> dict[str, Any]:
     started_at = time.monotonic()
+    if target == "sailing-simulator":
+        runtime = _runtime(target)
+        payload = {
+            "status": "protected",
+            "runtimeState": runtime.get("state"),
+            "running": bool(runtime.get("running")),
+            "launchable": bool(runtime.get("launchable")),
+            "simulatorCodeModified": False,
+            "routeInjected": False,
+            "controlCommandSent": False,
+            "reason": "航行模拟器保持隔离，只读取登记状态；小懿不自动注入航线或控制指令。",
+        }
+        summary = {
+            "protectionStatus": "isolated",
+            "runtimeState": runtime.get("state"),
+            "running": bool(runtime.get("running")),
+            "simulatorCodeModified": False,
+            "routeInjected": False,
+            "controlCommandSent": False,
+        }
+        action = "航行模拟器隔离状态核验"
+        boundary = "只读取航行模拟器登记状态；不启动进程、不修改代码、不写入桥接文件，也不下发油门、舵角或航线。"
+        result = {
+            "trace_id": trace_id,
+            "target": target,
+            "name": runtime.get("name") or "航行模拟器",
+            "status": "completed",
+            "action": action,
+            "runtime": runtime,
+            "summary": summary,
+            "payload_sha256": _sha256(payload),
+            "duration_ms": round((time.monotonic() - started_at) * 1000),
+            "completed_at": _utc_now(),
+            "boundary": boundary,
+        }
+        _last_results[target] = result
+        return result
+
     runtime = (
         _ensure_running(target, request.wait_seconds)
         if request.auto_start
@@ -476,33 +542,6 @@ def _execute_target(
         summary = _compact_malacca(health, snapshot)
         action = "沙盘数据与RL能力读取"
         boundary = "读取沙盘公开数据快照和RL引擎状态；不启动训练、不提交生产动作。"
-    else:
-        sailing_payload = _sailing_request(trace_id, request)
-        _write_sailing_request(sailing_payload)
-        sailing_simulator_launcher.focus_sailing_simulator(
-            sailing_simulator_launcher.SailingSimulatorLaunchRequest()
-        )
-        payload = _wait_sailing_result(trace_id, request.wait_seconds)
-        summary = {
-            key: payload.get(key)
-            for key in (
-                "status",
-                "safePass",
-                "riskLevel",
-                "recommendedSpeedKnots",
-                "estimatedTravelMinutes",
-                "minClearanceMeters",
-                "collisionCount",
-                "groundingCount",
-                "delayDeltaMinutes",
-                "carbonDeltaTons",
-                "loadedScene",
-                "summary",
-            )
-        }
-        action = "Godot航行场景验证"
-        boundary = "通过本地文件桥加载航线、船舶和风险事件；结果由Godot运行场景回写，不控制实船。"
-
     result = {
         "trace_id": trace_id,
         "target": target,
@@ -556,7 +595,7 @@ def linkage_overview() -> dict[str, Any]:
         },
         "generated_at": _utc_now(),
         "last_command": dict(_last_command_summary) or None,
-        "execution_boundary": "本机联动只面向离线数据、仿真和策略预演；所有生产写入保持关闭。",
+        "execution_boundary": "三个业务适配器只面向本机离线数据、仿真和策略预演；航行模拟器保持隔离，不自动启动、不修改代码、不注入航线或控制指令；所有生产写入保持关闭。",
     }
 
 
@@ -629,7 +668,7 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
         "total": len(results),
         "all_succeeded": succeeded == len(results),
         "production_write_enabled": False,
-        "execution_boundary": "联动结果来自本机系统API或Godot场景桥；不代表港口生产实时状态，也不下发真实设备或船舶指令。",
+        "execution_boundary": "业务结果来自三个本机适配器；航行模拟器只返回隔离状态核验，不执行场景桥接；结果不代表港口生产实时状态，也不下发真实设备或船舶指令。",
         "completed_at": _utc_now(),
     }
     _last_command_summary.clear()

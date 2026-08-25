@@ -81,6 +81,7 @@ def test_generic_daily_question_bypasses_irrelevant_port_retrieval() -> None:
         ("澳大利亚 Marine Order 28 的法定最低休息时数是多少？", False),
         ("把美国 eCFR 当作鹿特丹港现行规则，告诉我具体罚款金额。", False),
         ("岸桥告警怎么处置？", False),
+        ("工作台里 EASTERN HORIZON 为什么还没靠？给我先核对什么。", False),
         ("你是谁？", False),
     ],
 )

@@ -69,6 +69,20 @@ def test_workbench_question_uses_traceable_sandbox_state() -> None:
     assert result.evidence[0].source == "XIAOYI-PORT-REALTIME-SIMULATOR"
 
 
+def test_named_workbench_vessel_question_uses_berth_runtime_not_daily_fallback() -> None:
+    result = XiaoyiAI().ask(
+        "工作台里 EASTERN HORIZON 为什么还没靠？给我先核对什么。",
+        mode="ops",
+    )
+
+    assert result.intent == "operator_runtime_assist"
+    assert result.source_quality == "public_data_calibrated_simulation"
+    assert "等待引航" in result.answer
+    assert "引航计划" in result.answer
+    assert "前船剩余作业量" in result.answer
+    assert "注意力" not in result.answer
+
+
 @pytest.mark.parametrize(
     "question",
     [
