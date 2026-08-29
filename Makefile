@@ -1,4 +1,4 @@
-.PHONY: install install-dev run test lint check release-check benchmark benchmark-verify benchmark-verify-deep sbom sbom-verify dependency-audit-verify docker-build
+.PHONY: install install-dev run test lint privacy-scan check release-check benchmark benchmark-verify benchmark-verify-deep sbom sbom-verify dependency-audit-verify docker-build
 
 BENCHMARK_TAG ?=
 
@@ -18,7 +18,10 @@ test:
 lint:
 	python -m ruff check app scripts tests
 
-check:
+privacy-scan:
+	python scripts/public_privacy_scan.py
+
+check: privacy-scan
 	python -m compileall -q app scripts
 	python -m ruff check app scripts tests
 	python scripts/release_check.py
