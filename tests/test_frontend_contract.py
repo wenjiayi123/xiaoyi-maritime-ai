@@ -273,8 +273,8 @@ def test_literal_button_actions_are_all_registered() -> None:
 def test_frontend_asset_revision_and_responsive_profile_label_are_current() -> None:
     html, _ = _read_frontend()
 
-    assert "/web/styles.css?v=20260814-linkage-r3" in html
-    assert "/web/app.js?v=20260825-flow-r2" in html
+    assert "/web/styles.css?v=20260907-agent-v1" in html
+    assert "/web/app.js?v=20260907-agent-v1" in html
     assert re.search(
         r'<button class="profile-button"[^>]*aria-label="打开管理员工作台"',
         html,
@@ -321,7 +321,8 @@ def test_chat_surfaces_decision_readiness_and_evidence_conflict() -> None:
     assert "data.decision_readiness" in javascript
     assert "data.evidence_health" in javascript
     assert "证据冲突·待裁决" in javascript
-    assert "模型已正常回答；本地证据不足提醒已附在答案底部" in javascript
+    assert "回答已完成，请结合来源说明核验" in javascript
+    assert "生成服务未完成本次回答，已保留本地证据与核验说明" in javascript
 
 
 def test_chat_surfaces_claim_alignment_and_numeric_integrity() -> None:
@@ -418,7 +419,7 @@ def test_chat_buffers_stream_and_atomically_displays_verified_answer() -> None:
     assert "证据检索已完成，正在生成并校验完整答案" in javascript
     assert "streamedAnswer += text" in javascript
     assert (
-        'data.intent === "identity" ? "身份与能力介绍已完成 · 本机生成模型参与表达"'
+        'data.intent === "identity" ? "身份与能力介绍已完成"'
         in javascript
     )
 

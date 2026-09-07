@@ -66,6 +66,8 @@ def required_permission(method: str, path: str) -> str | None:
         return "rl.manage"
     if path.startswith("/api/automation"):
         return "automation.execute"
+    if path.startswith("/api/linked-agent"):
+        return "operations.manage"
     if path.startswith("/api/tasks") or path.startswith("/api/reports"):
         return "operations.manage"
     if path.startswith("/api/port-simulator"):

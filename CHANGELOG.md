@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- Added eight local linked-agent actions with parameter previews, asynchronous
+  observation, same-dataset energy comparisons, Malacca scenario/clock changes,
+  verified configuration restoration, cancellation and persistent receipts.
+  Natural-language tasks return measured results to chat. Unknown parameters
+  prompt clarification; duplicate submissions do not repeat a prepared action.
+  See `docs/LINKED_AGENT_OPERATIONS.md` for scope and real adapter acceptance.
+
+- Improved multi-turn topic and jurisdiction retention, immediate missing-context
+  clarification, cited official-source lookup, mode-aware generation, and
+  incomplete-stream fallback. Added bounded query-embedding caching and timing.
+- Corrected downstream action receipt validation and audit identity; preserved
+  linkage drafts, retry paths and received receipts across status refreshes.
+  Completed answers now reveal their beginning instead of hiding short text.
+- Added dated September runtime evidence and benchmark revisions while retaining
+  historical failures and expired-source review requirements. See
+  `docs/ASSISTANT_REVIEW_20260907.md` for measurements and acceptance boundaries.
+
 - Added a deterministic, public-data-calibrated port realtime simulator with a
   two-second SSE stream, ten operational domains, 153 canonical fields, five
   causal scenarios, and 168 equipment objects. All simulator values are marked

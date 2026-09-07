@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from dataclasses import dataclass
 from typing import Literal
+from urllib.parse import urlsplit
 
 
 Environment = Literal["local", "staging", "production"]
@@ -77,9 +78,15 @@ class Settings:
 
     @property
     def model_endpoint_is_local(self) -> bool:
-        return self.model_base_url.startswith(
-            ("http://127.0.0.1", "http://localhost", "http://[::1]")
-        )
+        try:
+            parsed = urlsplit(self.model_base_url)
+            return (
+                parsed.scheme == "http"
+                and parsed.hostname in {"127.0.0.1", "localhost", "::1"}
+                and parsed.username is None and parsed.password is None
+            )
+        except ValueError:
+            return False
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -137,7 +144,7 @@ class Settings:
             ),
             embedding_timeout_seconds=_number(
                 "XIAOYI_EMBEDDING_TIMEOUT_SECONDS",
-                60.0,
+                6.0,
                 minimum=1.0,
             ),
             log_level=os.getenv("XIAOYI_LOG_LEVEL", "INFO").upper(),

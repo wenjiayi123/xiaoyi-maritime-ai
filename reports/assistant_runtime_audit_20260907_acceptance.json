@@ -1,0 +1,931 @@
+{
+  "generated_at": "2026-09-07T07:46:14.279879+00:00",
+  "scope": "Local engineering acceptance; no public deployment, independent blind evaluation or field production authority.",
+  "baseline_commit": "3c28a040ba41309ddb65a40df2a821131d5ec5b2",
+  "checks": {
+    "pytest": "412 passed in 48.11s",
+    "frontend_contracts_after_scroll_fix": "27 passed in 0.36s",
+    "node_properties": "✔ property fuzz: arbitrary JSON never bypasses object-only telemetry boundary (104.572068ms)\n✔ property fuzz: SSE parser returns only bounded named object events (6.368454ms)\n✔ property fuzz: energy ranges fail closed to today (43.379073ms)\n✔ property fuzz: entropy fallback produces fixed-shape session identifiers (17.160811ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 371.500738\n",
+    "node_syntax": "passed",
+    "ruff": "passed",
+    "compileall": "passed",
+    "pip_check": "passed",
+    "public_privacy_scan": "passed",
+    "release_check": "release-check: PASS (local engineering evidence)\n- required governance and deployment files present\n- public dataset provenance hash verified\n- fixed RAG benchmark report and evidence hashes verified\n- fixed assistant challenge benchmark and evidence hashes verified\n- fixed decision-assurance benchmark and evidence hashes verified\n- fixed claim-evidence alignment benchmark and evidence hashes verified\n- fixed daily-operations benchmark and evidence hashes verified\n- fixed port-question-universe benchmark and evidence hashes verified\n- fixed multi-dataset RL benchmark and evidence hashes verified\n- ten-domain realtime simulator contract, hashes, approvals and rollback verified\n- CycloneDX SBOM and GitHub Action commit pins verified\n- runtime and development dependency vulnerability admission verified\n- no high-confidence credential patterns found\n"
+  },
+  "knowledge_status": {
+    "status": "ready",
+    "document_count": 129,
+    "chunk_count": 882,
+    "official_verified_documents": 68,
+    "official_verified_chunks": 264,
+    "official_summary_documents": 45,
+    "official_full_text_documents": 0,
+    "official_locator_documents": 23,
+    "internal_curated_documents": 61,
+    "unregistered_documents": 0,
+    "review_current_documents": 47,
+    "review_due_documents": 21,
+    "review_date_missing_documents": 0,
+    "jurisdiction_documents": {
+      "AU": 1,
+      "CN": 18,
+      "EU": 1,
+      "GB": 2,
+      "GLOBAL": 95,
+      "JP": 1,
+      "MY": 4,
+      "NL": 1,
+      "REGIONAL": 1,
+      "SG": 4,
+      "US": 1
+    },
+    "completeness_claim": "partial_auditable_coverage",
+    "registry_version": "2026-07-26-question-universe-5",
+    "index_sha256": "8139112712f6574bb20d80174f3286f2bbe2f6af479e181b38b01649eb67a63c",
+    "index_built_at": "2026-09-07T07:16:32.343710Z",
+    "strict_evidence_default": true,
+    "notice": "专业模式默认严格证据检索。官方摘要、目录定位、授权全文/摘录与内部整理资料分级展示；官方发布页摘要不等于法规全文，证据不足时拒绝生成专业事实。"
+  },
+  "openapi_inventory": [
+    [
+      "get",
+      "/api/automation/plans",
+      [
+        "小懿智能操作"
+      ]
+    ],
+    [
+      "post",
+      "/api/automation/plans",
+      [
+        "小懿智能操作"
+      ]
+    ],
+    [
+      "get",
+      "/api/automation/plans/{plan_id}",
+      [
+        "小懿智能操作"
+      ]
+    ],
+    [
+      "post",
+      "/api/automation/plans/{plan_id}/next",
+      [
+        "小懿智能操作"
+      ]
+    ],
+    [
+      "post",
+      "/api/automation/plans/{plan_id}/confirm",
+      [
+        "小懿智能操作"
+      ]
+    ],
+    [
+      "get",
+      "/api/advanced-rl/health",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/scenario",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/inference",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/benchmark",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/replay",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/verify",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/weather/dispatch",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/marl/scenario",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/marl/coordinate",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/marl/verify",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "post",
+      "/api/advanced-rl/marl/dispatch",
+      [
+        "已退役RL展示接口"
+      ]
+    ],
+    [
+      "get",
+      "/api/connectors",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "get",
+      "/api/connectors/{connector_id}",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "get",
+      "/api/connectors/{connector_id}/field-mappings",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "post",
+      "/api/connectors/{connector_id}/health-check",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "get",
+      "/api/connectors/{connector_id}/health",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "post",
+      "/api/connectors/{connector_id}/write-preflight",
+      [
+        "港口系统连接器"
+      ]
+    ],
+    [
+      "get",
+      "/api/knowledge/status",
+      [
+        "可审计知识库"
+      ]
+    ],
+    [
+      "get",
+      "/api/knowledge/catalog",
+      [
+        "可审计知识库"
+      ]
+    ],
+    [
+      "get",
+      "/api/knowledge/authority-coverage",
+      [
+        "可审计知识库"
+      ]
+    ],
+    [
+      "get",
+      "/api/knowledge/sources",
+      [
+        "可审计知识库"
+      ]
+    ],
+    [
+      "post",
+      "/api/knowledge/search",
+      [
+        "可审计知识库"
+      ]
+    ],
+    [
+      "get",
+      "/api/knowledge/intake",
+      [
+        "知识资料待审核入库"
+      ]
+    ],
+    [
+      "post",
+      "/api/knowledge/intake",
+      [
+        "知识资料待审核入库"
+      ]
+    ],
+    [
+      "get",
+      "/api/dashboard",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/runtime/status",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/runtime/snapshot",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/operations/overview",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/energy",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/alerts",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/tasks/templates",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/tasks",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "post",
+      "/api/tasks",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/tasks/{task_id}",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "post",
+      "/api/tasks/{task_id}/next",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "post",
+      "/api/reports",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/reports/{report_id}",
+      [
+        "港航运营数据"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/status",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/contract",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/snapshot",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/history",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/decisions",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/events",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "post",
+      "/api/port-simulator/scenario",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "post",
+      "/api/port-simulator/decisions/{decision_id}/approve",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "post",
+      "/api/port-simulator/decisions/{decision_id}/execute",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "post",
+      "/api/port-simulator/decisions/{decision_id}/rollback",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/port-simulator/stream",
+      [
+        "港口实时数据模拟器"
+      ]
+    ],
+    [
+      "get",
+      "/api/hub/systems",
+      [
+        "小懿跨系统能力中枢"
+      ]
+    ],
+    [
+      "get",
+      "/api/hub/capabilities",
+      [
+        "小懿跨系统能力中枢"
+      ]
+    ],
+    [
+      "post",
+      "/api/hub/capabilities/{capability_id}/invoke",
+      [
+        "小懿跨系统能力中枢"
+      ]
+    ],
+    [
+      "post",
+      "/api/context/resolve",
+      [
+        "统一港航业务上下文"
+      ]
+    ],
+    [
+      "get",
+      "/api/context/{session_id}",
+      [
+        "统一港航业务上下文"
+      ]
+    ],
+    [
+      "post",
+      "/api/evidence/fuse",
+      [
+        "知识与系统证据融合"
+      ]
+    ],
+    [
+      "post",
+      "/api/orchestrator/run",
+      [
+        "小懿跨系统自然语言编排"
+      ]
+    ],
+    [
+      "get",
+      "/api/orchestrator/examples",
+      [
+        "小懿跨系统自然语言编排"
+      ]
+    ],
+    [
+      "get",
+      "/api/governance/identity",
+      [
+        "身份权限与持久审计"
+      ]
+    ],
+    [
+      "post",
+      "/api/governance/authorize",
+      [
+        "身份权限与持久审计"
+      ]
+    ],
+    [
+      "get",
+      "/api/governance/audit",
+      [
+        "身份权限与持久审计"
+      ]
+    ],
+    [
+      "get",
+      "/api/governance/metrics",
+      [
+        "身份权限与持久审计"
+      ]
+    ],
+    [
+      "get",
+      "/api/evaluation/summary",
+      [
+        "RAG评测与知识反馈闭环"
+      ]
+    ],
+    [
+      "post",
+      "/api/evaluation/run",
+      [
+        "RAG评测与知识反馈闭环"
+      ]
+    ],
+    [
+      "post",
+      "/api/evaluation/feedback",
+      [
+        "RAG评测与知识反馈闭环"
+      ]
+    ],
+    [
+      "get",
+      "/api/evaluation/feedback",
+      [
+        "RAG评测与知识反馈闭环"
+      ]
+    ],
+    [
+      "post",
+      "/api/evaluation/feedback/{feedback_id}/review",
+      [
+        "RAG评测与知识反馈闭环"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-mission/health",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/scenario",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/train",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-mission/training/{run_id}",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/training-replay",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/simulate",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/verify",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-mission/dispatch",
+      [
+        "小懿RL训练工作流"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/health",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/algorithms",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/datasets",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/contracts",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/evidence",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-lab/advisor",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-lab/runs",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/runs",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/rl-lab/runs/{run_id}",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-lab/runs/{run_id}/cancel",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "post",
+      "/api/rl-lab/runs/{run_id}/evaluate",
+      [
+        "可复现RL训练实验室"
+      ]
+    ],
+    [
+      "get",
+      "/api/sailing-simulator/status",
+      [
+        "航行模拟器启动器"
+      ]
+    ],
+    [
+      "post",
+      "/api/sailing-simulator/launch",
+      [
+        "航行模拟器启动器"
+      ]
+    ],
+    [
+      "post",
+      "/api/sailing-simulator/focus",
+      [
+        "航行模拟器启动器"
+      ]
+    ],
+    [
+      "get",
+      "/api/simulator/status",
+      [
+        "港口模拟器启动器"
+      ]
+    ],
+    [
+      "post",
+      "/api/simulator/launch",
+      [
+        "港口模拟器启动器"
+      ]
+    ],
+    [
+      "get",
+      "/api/linked-systems/status",
+      [
+        "小懿本机联动启动器"
+      ]
+    ],
+    [
+      "post",
+      "/api/linked-systems/launch",
+      [
+        "小懿本机联动启动器"
+      ]
+    ],
+    [
+      "get",
+      "/api/conversations/{session_id}",
+      [
+        "持久对话历史"
+      ]
+    ],
+    [
+      "delete",
+      "/api/conversations/{session_id}",
+      [
+        "持久对话历史"
+      ]
+    ],
+    [
+      "get",
+      "/api/models",
+      [
+        "模型适配与生成边界"
+      ]
+    ],
+    [
+      "get",
+      "/api/models/admission",
+      [
+        "模型适配与生成边界"
+      ]
+    ],
+    [
+      "get",
+      "/api/models/security-benchmark",
+      [
+        "模型适配与生成边界"
+      ]
+    ],
+    [
+      "get",
+      "/health/live",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/health/ready",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/api/system/readiness",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/api/system/info",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/api/system/competitive-benchmark",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/api/system/site-admission",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/metrics",
+      [
+        "系统健康与可观测性"
+      ]
+    ],
+    [
+      "get",
+      "/api/system-linkage/overview",
+      [
+        "小懿四系统联动网关"
+      ]
+    ],
+    [
+      "post",
+      "/api/system-linkage/start",
+      [
+        "小懿四系统联动网关"
+      ]
+    ],
+    [
+      "post",
+      "/api/system-linkage/command",
+      [
+        "小懿四系统联动网关"
+      ]
+    ],
+    [
+      "get",
+      "/",
+      []
+    ],
+    [
+      "get",
+      "/health",
+      []
+    ],
+    [
+      "get",
+      "/api/knowledge",
+      []
+    ],
+    [
+      "get",
+      "/api/operator/scenarios",
+      []
+    ],
+    [
+      "post",
+      "/api/chat",
+      []
+    ],
+    [
+      "post",
+      "/api/chat/stream",
+      []
+    ],
+    [
+      "delete",
+      "/api/chat/generations/{generation_id}",
+      []
+    ]
+  ],
+  "browser_acceptance": {
+    "main_navigation": [
+      "chat",
+      "decisions",
+      "analytics",
+      "rl",
+      "knowledge",
+      "tasks"
+    ],
+    "avatar_return_flow": "visible",
+    "clarification": "complete_text_visible_without_clicking_answer",
+    "official_lookup": "registered_urls_and_citations_visible; 1.5 seconds processing label",
+    "linkage_draft_refresh": "preserved",
+    "unmatched_command": "needs_clarification; 0/1",
+    "mapped_rl_panel": "completed dry-run; 1/1",
+    "training_center": "asynchronous final evidence pass and policy blocked",
+    "all_buttons_devices_roles_exhaustively_tested": false
+  },
+  "benchmark_revisions": {
+    "v2": "specific verified MCA source accepted in addition to general directory",
+    "v3": "evaluation_date 2026-09-07; expired sources must retain review_due blocker",
+    "original_fixtures_and_registry_unchanged": true,
+    "first_failed_reports_preserved": true
+  },
+  "runtime_evidence": "reports/assistant_runtime_audit_20260907_final.json",
+  "cleanup": {
+    "started_audit_services_stopped": true,
+    "preexisting_port_dt_preserved": true,
+    "loopback_ports_listening": {
+      "8000": true,
+      "8012": false,
+      "8013": false,
+      "5173": false,
+      "5174": false,
+      "8808": false,
+      "11435": false,
+      "11436": false
+    }
+  },
+  "final_file_sha256": {
+    ".env.example": "2cbdfcf1a920eee54de48d7dc3745226306995dabb348c5982b2d0a3062b3ac4",
+    "CHANGELOG.md": "aec317ad94233d5bfa0710ea81c84b01bb941ab825ab7e47a2dc25e0153bb897",
+    "README.md": "93259304bbb61bbd21585c9391b608b1735c1636b93b156e3893ef31dbbefaf2",
+    "app/assistant_evaluation.py": "3fd613ed4412ba70a995f351b532836acde7dfd11f2e97e033fc3f08775b2036",
+    "app/config.py": "3398ab1593a2d0dc741b681c9a56281da12e5fd3477aa18a0644a15890543078",
+    "app/decision_evaluation.py": "017b883dee75143a6932bb9a9a7147fed7a8c96b82d09d24a33d6832cdb486fe",
+    "app/main.py": "176417c09d3daa9dff9ae3fe4f6dbc73f8a5fe7c3b505856770ccb7c421ea747",
+    "app/model_gateway.py": "5cb908a14763f2dacac83770c49f6d67a185df9c79816ef5a5813e8a60271000",
+    "app/models.py": "fe07dd8a07232a69a927bd962faaec9a2910fc21eb46074287a7f5e9a5a4cd45",
+    "app/query_intelligence.py": "5b768556c56f3d2a457c672a8db933d71905449b942f3aa4d8ef1706828b1c33",
+    "app/retrieval.py": "65e7c1b4fa514b2061bd82d34c119ec77f37bcde4c9b8b822637a2bb24ba81b2",
+    "app/settings.py": "cc57728cff5eee57b5c03be62c1e900f818008b70fec76905b0d7169b86a8ddc",
+    "app/system_linkage.py": "785ebcc8c3fbf63a7b0a2225e644b6be30178ba1848a997208bbff75753c28c0",
+    "app/vector_retrieval.py": "78d41c245007c8c23e59d39df9f344c26f0ffa6cdfbbb877b9204fc725174e34",
+    "app/xiaoyi.py": "ba9253c3b95dbcc9fd10502ead6b972f61aefe204e172baf954ea05aa7fbd27e",
+    "data/evaluation/maritime_assistant_benchmark_v2_20260907.json": "4b3cde52bb263580fad01d50505273cb22dcc51dfb97b7b4260cbbe078b151c0",
+    "data/evaluation/maritime_decision_readiness_benchmark_v3_20260907.json": "a54826689fda1e70b7895ec65d32f18ec24f6fca10db1ebd466cd96138750455",
+    "docs/ASSISTANT_REVIEW_20260907.md": "b9c5bfa008ba3a1a403bcc74d1ef1cbbe80f00f497d5eaf2732fa1dd4915f958",
+    "scripts/release_check.py": "7b8892f3762a43eaae72eb413639c429a3cba9215dbefdab771203093d5afa77",
+    "scripts/run_assistant_benchmark.py": "39a15b638f5335faa1cdff917eac1a008296b53451bedff9d2742902f59fe3c3",
+    "scripts/run_assistant_runtime_audit.py": "b863ff8bae1d557b77442375cd7bcd171d9ef39e10f216aa58ebce21b3e6b2d5",
+    "scripts/run_decision_benchmark.py": "eceb60c0fe247d9327f95799676193bd0d4b90e2871e7711321457e9ccc2086e",
+    "tests/test_assistant_improvements.py": "2a2610e6013f132c30b889dd95a4c69790114a7b5b21b69355acf6dcd72a1a17",
+    "tests/test_frontend_contract.py": "33d4168ebc92a4a29eb13aa32a3649c3439d951a502978400875d5bc0f3e8fac",
+    "tests/test_intelligence_hub.py": "dd41af46b484ae2bcedb5e1d4b851aecb24c0fe57891adc30a5917c39d639cf8",
+    "web/app.js": "82f3fd7d175ca7d0a446b4814e90542b41e7123383935920d001cbf1341f935d"
+  }
+}

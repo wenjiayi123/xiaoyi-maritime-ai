@@ -13,7 +13,7 @@ from app.xiaoyi import XiaoyiAI
 
 
 BENCHMARK_PATH = (
-    BASE_DIR / "data" / "evaluation" / "maritime_assistant_benchmark_v2.json"
+    BASE_DIR / "data" / "evaluation" / "maritime_assistant_benchmark_v2_20260907.json"
 )
 
 
@@ -247,6 +247,7 @@ def run_assistant_benchmark(
     return {
         "benchmark_id": payload["benchmark_id"],
         "benchmark_sha256": _sha256(path),
+        "revision": payload.get("revision"),
         "case_count": len(all_rows),
         "combined_with_v1_case_count": base_case_count + len(all_rows),
         "dialogue": {"summary": dialogue_summary, "rows": dialogue},

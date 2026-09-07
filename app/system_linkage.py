@@ -5,6 +5,7 @@ import json
 import logging
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional
@@ -13,12 +14,13 @@ from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request as WebRequest
 from pydantic import BaseModel, Field
 
 from app import linked_system_launcher, sailing_simulator_launcher
 from app.domain_context import DomainContext
 from app.runtime_store import runtime_store
+from app.security import request_identity
 
 
 router = APIRouter(prefix="/api/system-linkage", tags=["小懿四系统联动网关"])
@@ -212,14 +214,12 @@ def _compact_port(
         if isinstance(action_payload.get("action"), dict)
         else {}
     )
-    execution = (
-        action_payload.get("execution")
-        if isinstance(action_payload.get("execution"), dict)
-        else {}
-    )
+    execution = action_payload.get("execution_result", action_payload.get("execution"))
+    execution = execution if isinstance(execution, dict) else {}
     systems = health.get("systems") if isinstance(health.get("systems"), dict) else {}
     return {
         "matched": action_payload.get("matched"),
+        "missing_parameters": action_payload.get("missing_parameters", []),
         "action_id": action.get("id"),
         "action_label": action.get("label") or action.get("button_label"),
         "route": action.get("route"),
@@ -554,7 +554,26 @@ def _execute_target(
         "duration_ms": round((time.monotonic() - started_at) * 1000),
         "completed_at": _utc_now(),
         "boundary": boundary,
+        "production_write_enabled": False,
     }
+    if target == "port-dt-multi":
+        if action_payload.get("matched") is not True:
+            result.update(
+                status="needs_clarification", error="linked_action_not_matched", retryable=False,
+                message="目标系统未识别这条指令。请明确要打开的面板或查询的业务对象，例如“打开强化学习面板”，再提交联动。",
+            )
+        elif summary.get("missing_parameters"):
+            result.update(
+                status="needs_clarification", error="linked_action_parameters_required", retryable=False,
+                message="目标动作缺少必要参数，请在目标系统确认业务对象和参数后重新提交。",
+            )
+        elif action_payload.get("ok") is False or summary.get("execution_status") not in {
+            "ready", "completed", "success", "succeeded", "dry_run", "preview",
+        }:
+            result.update(
+                status="failed", error="linked_action_not_completed", retryable=True,
+                message="目标系统没有返回已就绪的预演回执，请核查目标动作状态后重试。",
+            )
     _last_results[target] = result
     return result
 
@@ -563,7 +582,7 @@ def _execute_target(
 def linkage_overview() -> dict[str, Any]:
     _restore_linkage_state()
     systems: dict[str, Any] = {}
-    for target in _SYSTEM_TARGETS:
+    def inspect(target: SystemTarget) -> dict[str, Any]:
         try:
             runtime = _runtime(target)  # type: ignore[arg-type]
             error = None
@@ -576,11 +595,15 @@ def linkage_overview() -> dict[str, Any]:
                 "message": "目标系统状态暂不可用；详细原因已写入服务端日志。",
             }
             error = "linked_target_status_unavailable"
-        systems[target] = {
+        return {
             "runtime": runtime,
             "last_result": _last_results.get(target),
             "error": error,
         }
+    # Status probes are independent read-only calls. A slow offline target
+    # must not add its full timeout to every other target's probe.
+    with ThreadPoolExecutor(max_workers=4, thread_name_prefix="linkage-status") as pool:
+        systems = dict(zip(_SYSTEM_TARGETS, pool.map(inspect, _SYSTEM_TARGETS)))
     online_count = sum(bool(item["runtime"].get("running")) for item in systems.values())
     return {
         "systems": systems,
@@ -626,7 +649,8 @@ def start_linked_targets(payload: LinkageStartRequest) -> dict[str, Any]:
 
 
 @router.post("/command")
-def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
+def execute_linkage_command(payload: LinkageCommandRequest, request: WebRequest) -> dict[str, Any]:
+    identity = request_identity(request)
     targets: list[SystemTarget] = (
         list(_SYSTEM_TARGETS)
         if payload.target == "all"
@@ -689,8 +713,8 @@ def execute_linkage_command(payload: LinkageCommandRequest) -> dict[str, Any]:
     _persist_linkage_state()
     runtime_store.add_audit(
         correlation_id=correlation_id,
-        actor_id="local-admin",
-        actor_role="admin",
+        actor_id=identity.actor_id,
+        actor_role=identity.role,
         action="system_linkage.command",
         resource=",".join(targets),
         risk_level="medium",

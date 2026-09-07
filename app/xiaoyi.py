@@ -322,6 +322,17 @@ class XiaoyiAI:
                 for hit in qualified_hits
                 if source_is_applicable(hit.chunk.provenance, policy)
             ]
+            locator_question = policy.locator_facts_allowed and bool(
+                re.search(r"入口|哪里|何处|网址|链接|(?:哪个|哪些|从).{0,8}(?:官方页|目录)", question)
+            )
+            if locator_question:
+                source_order = {source: index for index, source in enumerate(dict.fromkeys(
+                    hit.chunk.source for hit in eligible_grounding_hits
+                ))}
+                eligible_grounding_hits.sort(key=lambda hit: (
+                    source_order[hit.chunk.source],
+                    {"来源定位": 0, "已核验事实": 1, "问答使用方式": 2, "适用边界": 3}.get(hit.chunk.title, 1),
+                ))
             if re.search(
                 r"(?:截至|当时|现在|现行|生效|废止|过去|未来|"
                 r"20\d{2}(?:年|[-/.]))",
@@ -385,6 +396,7 @@ class XiaoyiAI:
                     # compound question.  Keep a short daily query in the
                     # direct-answer path even when it adds a canonical search.
                     multi_part=len(base_queries) > 1,
+                    locator_question=locator_question,
                 )
             else:
                 locator_policy = replace(
@@ -1061,7 +1073,20 @@ class XiaoyiAI:
         policy: QueryEvidencePolicy,
         *,
         multi_part: bool = False,
+        locator_question: bool = False,
     ) -> str:
+        if locator_question:
+            for index, hit in enumerate(hits, start=1):
+                if hit.chunk.title != "来源定位" or not hit.chunk.provenance.official:
+                    continue
+                links = [line.strip().lstrip("-").strip() for line in hit.chunk.text.splitlines()
+                         if re.search(r"https?://", line)]
+                if links:
+                    # Quote registered locator lines with their actual evidence
+                    # indices, instead of answering "where" with a scope warning.
+                    return "官方来源定位：\n\n" + "\n".join(
+                        f"- {line} [E{index}]" for line in links[:4]
+                    ) + "\n\n来源状态：这些链接来自已登记的本地来源资料；实际办理前请核对官方页面当前版本、适用船舶和日期。目录或摘要不代替正式条文。"
         if not multi_part:
             for evidence_index, hit in enumerate(hits, start=1):
                 direct_answer = ""

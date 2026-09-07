@@ -62,6 +62,7 @@ class Evidence(BaseModel):
 class QueryAnalysis(BaseModel):
     original_question: str
     standalone_question: str
+    context_topic: str = ""
     resolution: Literal[
         "independent",
         "history_resolved",
@@ -164,6 +165,13 @@ class DecisionReadiness(BaseModel):
     rationale: str = ""
 
 
+class AnswerTiming(BaseModel):
+    preparation_ms: float = Field(0.0, ge=0.0)
+    generation_ms: float = Field(0.0, ge=0.0)
+    verification_ms: float = Field(0.0, ge=0.0)
+    total_ms: float = Field(0.0, ge=0.0)
+
+
 class ChatResponse(BaseModel):
     app: str
     mode: Mode
@@ -189,6 +197,7 @@ class ChatResponse(BaseModel):
     generation_model: Optional[str] = None
     generation_fallback: bool = False
     generation_notice: Optional[str] = None
+    timing: AnswerTiming = Field(default_factory=AnswerTiming)
     query_analysis: Optional[QueryAnalysis] = None
     subquestion_support: list[SubquestionSupport] = Field(default_factory=list)
     evidence_coverage: float = Field(0.0, ge=0.0, le=1.0)

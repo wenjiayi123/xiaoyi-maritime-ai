@@ -328,6 +328,7 @@
     activeController: null,
     activeGenerationId: null,
     generationId: 0,
+    composerTouched: false,
     thinkingTickerStop: null,
     activeTask: null,
     activeReport: null,
@@ -354,6 +355,7 @@
       (item) => item.sessionId === persistentSessionId
     )
   };
+  const linkedAgent = window.createLinkedAgent({api, openModal, escapeHtml, toast, isOpen:()=>state.modalKind === "linked-agent"});
 
   function loadArray(key) {
     try {
@@ -1036,6 +1038,7 @@
   function sourceQualityLabel(value) {
     return {
       official_verified:"官方发布来源", internal_curated:"内部整理未独立核验", sandbox_runtime:"历史运营沙箱事件流", public_data_calibrated_simulation:"公开数据校准实时模拟",
+      linked_simulation_receipt:"本机联动回执",
       mixed:"混合来源", unverified:"未验证", not_applicable:"不适用"
     }[value] || value || "未验证";
   }
@@ -1141,6 +1144,12 @@
       feed.scrollTop = Math.max(0, feed.scrollHeight - feed.clientHeight);
       const latestAnswer = $("#assistantMessage");
       if (!latestAnswer) return;
+      if (settle) {
+        // Once the complete answer is ready, show its beginning. Pinning the
+        // card's footer used to scroll short answers entirely out of view.
+        feed.scrollTop = Math.max(0, feed.scrollTop + latestAnswer.getBoundingClientRect().top - feed.getBoundingClientRect().top - 4);
+        return;
+      }
       const answerBounds = latestAnswer.getBoundingClientRect();
       if (answerBounds.bottom > window.innerHeight || answerBounds.top < 0) {
         latestAnswer.scrollIntoView({
@@ -1303,12 +1312,15 @@
     } else if (readiness === "partial") {
       badge.textContent = "部分就绪";
       badge.classList.add("partial");
+    } else if (data.source_quality === "linked_simulation_receipt") {
+      badge.textContent = "联动回执·已核验";
+      badge.classList.add("partial");
     } else if (sandboxRuntime) {
       badge.textContent = "沙箱态势·已追溯";
       badge.classList.add("partial");
     } else if (data.refusal_reason || !data.grounded) {
       const liveBoundary = data.refusal_reason === "live_data_connection_required";
-      badge.textContent = liveBoundary ? "实时数据待接入" : "未检索到本地证据";
+      badge.textContent = data.refusal_reason === "business_object_required" ? "等待补充业务对象" : liveBoundary ? "实时数据待接入" : "未检索到本地证据";
       badge.classList.add("pending");
     } else if (officialCount) {
       badge.textContent = `官方来源 ${officialCount}`;
@@ -1317,11 +1329,12 @@
       badge.textContent = `已索引证据 ${evidence.length}`;
       badge.classList.add("partial");
     }
-    if ($("#answerCoverageMetric")) $("#answerCoverageMetric").textContent = `${(Number(data.coverage || 0) * 100).toFixed(0)}%`;
+    if ($("#answerCoverageMetric")) $("#answerCoverageMetric").textContent = data.source_quality === "linked_simulation_receipt" ? "接口回读" : `${(Number(data.coverage || 0) * 100).toFixed(0)}%`;
     if ($("#answerSourceQuality")) $("#answerSourceQuality").textContent = sourceQualityLabel(data.source_quality);
   }
 
   async function ask() {
+    state.composerTouched = true;
     if (state.activeController) { stopGeneration(true); return; }
     if (state.automationRunning) stopAutomation("已由新指令终止上一条操作计划");
     const question = $("#question").value.trim();
@@ -1421,8 +1434,12 @@
       state.currentConfidence = data.confidence;
       $("#responseKpis").hidden = !["energy_analysis", "energy_carbon"].includes(data.intent);
       $("#analysisTitle").textContent = intentTitle(data.intent);
-      const generationLabel = data.generation_fallback ? `${data.generation_provider} 已回退` : data.generation_provider || "local_rules";
+      const generationLabel = data.refusal_reason === "business_object_required" ? "直接澄清" : data.generation_fallback ? "本地证据答复" : data.generation_provider === "openai_compatible" ? "模型生成" : "本地证据答复";
       $("#analysisDate").textContent = ["sandbox_runtime", "public_data_calibrated_simulation"].includes(data.source_quality) ? `${new Date().toLocaleDateString("zh-CN")} · 公开数据校准模拟态势 · ${generationLabel}` : `${new Date().toLocaleDateString("zh-CN")} · 本地生成式 RAG · ${generationLabel}`;
+      if (data.timing?.total_ms > 0) {
+        $("#analysisDate").textContent += ` · 处理 ${(data.timing.total_ms / 1000).toFixed(1)} 秒`;
+        $("#analysisDate").title = `理解与检索 ${(data.timing.preparation_ms / 1000).toFixed(2)} 秒 · 生成 ${(data.timing.generation_ms / 1000).toFixed(2)} 秒 · 校验 ${(data.timing.verification_ms / 1000).toFixed(2)} 秒（不含网络传输）`;
+      }
       $("#responseStatus").textContent = "融合分析与证据校验已完成，正在统一输出完整答案";
       if (!await typeAnswer(answer, runId, 24)) return;
       state.activeController = null;
@@ -1441,8 +1458,9 @@
         ? "已读取动态沙箱事件并保留生产数据边界"
         : liveBoundary ? "已说明实时数据边界与目标接入系统，未使用沙箱数值"
         : data.refusal_reason === "business_object_required" ? "业务对象不明确，等待补充后继续"
-        : data.intent === "identity" ? "身份与能力介绍已完成 · 本机生成模型参与表达"
-        : !data.grounded ? "模型已正常回答；本地证据不足提醒已附在答案底部" : "港航知识检索与证据分析已完成";
+        : data.generation_fallback ? "生成服务未完成本次回答，已保留本地证据与核验说明"
+        : data.intent === "identity" ? "身份与能力介绍已完成"
+        : !data.grounded ? "回答已完成，请结合来源说明核验" : "港航知识检索与证据分析已完成";
       if (data.grounded && data.answer_verification?.status === "passed") {
         $("#responseStatus").textContent += ` · 主张对齐 ${(Number(data.answer_verification.evidence_alignment || 0) * 100).toFixed(0)}% · 数字完整性 ${(Number(data.answer_verification.numeric_integrity || 0) * 100).toFixed(0)}%`;
       }
@@ -1463,6 +1481,7 @@
         $("#answer").classList.add("error");
         $("#answer").textContent = `连接受限：${error.message}\n\n当前问题与已显示内容已保留，请检查服务后重试。`;
         $("#responseStatus").textContent = "连接受限，已保留当前进度";
+        $("#next").innerHTML = `<button type="button" data-q="${escapeHtml(question)}" data-mode="${escapeHtml(mode)}">重试当前问题</button>`;
         scrollConversationToLatestAnswer({ settle:true });
         toast("问答服务连接失败", error.message, "warning", 5000);
       }
@@ -1479,6 +1498,8 @@
   }
 
   function intentTitle(intent) {
+    if (intent === "linked_agent_operation") return "联动操作与观测结果";
+    if (intent === "linked_agent_clarification") return "请明确联动参数";
     if (intent === "rl_agv_energy_optimization") return "RL联合优化结果";
     if (intent === "weather_berth_joint_rl_result") return "极端天气联合调度结果";
     if (intent === "qc_agv_yard_marl_result") return "多智能体协同优化结果";
@@ -1963,7 +1984,7 @@
   function linkageResultMarkup(result) {
     if (!result) return `<div class="system-linkage-empty">尚未执行联动任务</div>`;
     if (result.status !== "completed") {
-      return `<div class="system-linkage-error">${icon("alert")}<div><strong>最近一次联动失败</strong><span>${escapeHtml(result.message || "联动执行失败，未产生业务回执。")}</span><small>${escapeHtml(result.trace_id || "无 trace ID")} · ${escapeHtml(result.error || "linked_target_execution_failed")}</small>${result.retryable ? `<button type="button" data-linkage-run="${escapeHtml(result.target)}">重试当前系统</button>` : ""}</div></div>`;
+      return `<div class="system-linkage-error">${icon("alert")}<div><strong>${result.status === "needs_clarification" ? "联动指令需要补充" : "最近一次联动失败"}</strong><span>${escapeHtml(result.message || "联动执行失败，未产生业务回执。")}</span><small>${escapeHtml(result.trace_id || "无 trace ID")} · ${escapeHtml(result.error || "linked_target_execution_failed")}</small>${result.retryable ? `<button type="button" data-linkage-run="${escapeHtml(result.target)}" ${state.systemLinkageBusy ? "disabled" : ""}>重试当前系统</button>` : ""}</div></div>`;
     }
     const summary = result.summary || {};
     const facts = [];
@@ -2004,13 +2025,15 @@
     const passed = Number(batch.succeeded || 0);
     const total = Number(batch.total || 0);
     return `<section class="system-linkage-batch ${batch.all_succeeded ? "passed" : "partial"}">
-      <header><div><span>LAST ORCHESTRATION RECEIPT</span><strong>${batch.all_succeeded ? "本轮四系统联动全部完成" : "本轮联动存在未完成系统"}</strong></div><b>${passed}/${total}</b></header>
+      <header><div><span>LAST ORCHESTRATION RECEIPT</span><strong>${batch.all_succeeded ? "本轮所选系统联动完成" : "本轮联动存在未完成系统"}</strong></div><b>${passed}/${total}</b></header>
       <p>${escapeHtml(batch.command || "跨系统联动")}</p>
       <footer><span>关联 ID：${escapeHtml(batch.correlation_id || "—")}</span><span>完成时间：${formatDateTime(batch.completed_at)}</span><span>${failed.length ? `待重试：${failed.map((item) => escapeHtml(item)).join(" / ")}` : "全部系统已返回可审计回执"}</span><span>生产写入：关闭</span></footer>
     </section>`;
   }
 
   function renderSystemLinkage(payload) {
+    const existingCommand = $("#systemLinkageCommand");
+    if (existingCommand) state.systemLinkageDraft = existingCommand.value;
     state.systemLinkage = payload;
     const systems = payload.systems || {};
     if ($("#systemLaunchBadge")) $("#systemLaunchBadge").textContent = `${payload.online_count || 0}/${payload.total || 4}`;
@@ -2022,7 +2045,8 @@
         <span class="system-linkage-total">${payload.online_count || 0}<small>/ 4 ONLINE</small></span>
       </section>
       <section class="system-linkage-command">
-        <div><label for="systemLinkageCommand">跨系统演示指令</label><textarea id="systemLinkageCommand" rows="2">针对当前港航作业读取态势、重算能碳策略、读取沙盘能力，并核验航行模拟器隔离状态</textarea></div>
+        <button type="button" class="primary-button" data-action="linked-agent">${icon("spark")}参数调整与观测</button>
+        <div><label for="systemLinkageCommand">跨系统演示指令</label><textarea id="systemLinkageCommand" rows="2">${escapeHtml(state.systemLinkageDraft ?? "预览打开强化学习面板、重算能碳策略、读取沙盘能力，并核验航行模拟器隔离状态")}</textarea></div>
         <button type="button" class="primary-button" data-linkage-run="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}一键联动演示</button>
         <button type="button" class="outline-button" data-linkage-start="all" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("play")}启动三个业务系统</button>
         <button type="button" class="outline-button" data-linkage-refresh>${icon("command")}刷新状态</button>
@@ -2041,7 +2065,7 @@
           <div class="system-linkage-action"><span>适配器联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
           ${busy ? `<div class="system-linkage-running"><i></i><span>正在启动并执行，等待目标系统回写…</span></div>` : linkageResultMarkup(node.last_result)}
           <footer>
-            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${busy ? "disabled" : ""}>${icon("spark")}${item.target === "sailing-simulator" ? "只读核验" : online ? "执行联动" : "启动并联动"}</button>
+            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}${item.target === "sailing-simulator" ? "只读核验" : online ? "执行联动" : "启动并联动"}</button>
             <button type="button" class="drawer-button secondary" data-linkage-open="${item.target}" ${online ? "" : "disabled"}>${icon(item.target === "sailing-simulator" ? "ship" : "play")}${item.target === "sailing-simulator" ? "切换窗口" : "打开系统"}</button>
           </footer>
           <small class="system-linkage-message">${escapeHtml(runtime.message || "等待读取运行状态")}</small>
@@ -2074,6 +2098,7 @@
   }
 
   async function startSystemLinkage(target) {
+    if (state.systemLinkageBusy) return;
     const targets = target === "all" ? SYSTEM_LINKAGE_CATALOG.filter((item) => item.target !== "sailing-simulator").map((item) => item.target) : [target];
     state.systemLinkageBusy = target;
     if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
@@ -2092,7 +2117,10 @@
   }
 
   async function runSystemLinkage(target) {
+    if (state.systemLinkageBusy) return;
     const command = String($("#systemLinkageCommand")?.value || "读取当前业务态势并执行联动验证").trim();
+    if (command.length < 2 || command.length > 1000) { toast("请补充联动指令", "请输入 2 至 1000 个字符。", "warning"); return; }
+    state.systemLinkageDraft = command;
     state.systemLinkageBusy = target;
     if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
     try {
@@ -2101,11 +2129,20 @@
         body:JSON.stringify({ target, command, session_id:state.sessionId, auto_start:true, wait_seconds:30 }),
         timeoutMs:240000
       });
-      toast(response.all_succeeded ? "跨系统联动完成" : "跨系统联动部分完成", `${response.succeeded}/${response.total} 项成功 · ${response.correlation_id}`, response.all_succeeded ? "success" : "warning", 6500);
+      const current = state.systemLinkage || { systems:{} };
+      const systems = { ...current.systems };
+      (response.results || []).forEach((result) => {
+        systems[result.target] = { ...systems[result.target], last_result:result,
+          runtime:result.runtime || systems[result.target]?.runtime || {} };
+      });
+      state.systemLinkage = { ...current, systems, last_command:{ ...response,
+        failed_targets:(response.results || []).filter((result) => result.status !== "completed").map((result) => result.target) } };
+      toast(response.all_succeeded ? "跨系统联动完成" : response.succeeded ? "跨系统联动部分完成" : "联动尚未完成，请查看回执", `${response.succeeded}/${response.total} 项成功 · ${response.correlation_id}`, response.all_succeeded ? "success" : "warning", 6500);
     } catch (error) {
       toast("联动执行失败", error.message, "warning", 6500);
     } finally {
       state.systemLinkageBusy = null;
+      if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
       await loadSystemLinkage().catch(() => {});
     }
   }
@@ -2912,6 +2949,29 @@
 
   async function executeSemanticAction(action) {
     const parameters = action.parameters || {};
+    if (action.kind === "prepare_linked_operation") {
+      const prepared = await linkedAgent.prepare({action_id:parameters.action_id,parameters:JSON.parse(parameters.parameters_json),samples:3,interval_seconds:2,restore_after_observation:true});
+      state.automationContext.linkedAgentPlan = prepared;
+      return `目标 ${prepared.target} 已回读；本次参数 ${JSON.stringify(prepared.parameters)}；${prepared.mutates ? "调整模拟配置并在观测后恢复" : "仅读取或本次试算"}；方案 ${prepared.plan_sha256.slice(0,16)}`;
+    }
+    if (action.kind === "run_linked_operation") {
+      const result = await linkedAgent.runPlan(state.automationContext.linkedAgentPlan,()=>state.automationAbort);
+      state.automationContext.linkedAgentRun = result;
+      return `${result.plan.label}已完成，${result.observations.length} 次观测；${result.restored ? "原配置已恢复并核验" : "结果和参数已归档"}；回执 ${result.id}`;
+    }
+    if (action.kind === "present_linked_operation") {
+      const result=state.automationContext.linkedAgentRun;
+      if(!result || result.status !== "completed") throw new Error("尚无最终执行回执");
+      const evidence=[{id:`linked:${result.id}`,source:result.plan.before.source,title:result.plan.label,score:1,snippet:`目标 ${result.plan.target}；回执 ${result.id}；${result.observations.length} 次观测；生产权限关闭。`,official:false,source_quality:"linked_simulation_receipt",verification_status:"simulation_only"}];
+      commitAutomationChat({question:state.automationPlan.command,answer:linkedAgent.summarize(result),intent:"linked_agent_operation",evidence,grounded:true,confidence:"接口回读",sourceQuality:"linked_simulation_receipt"});
+      await linkedAgent.open(); linkedAgent.showRun(result);
+      return `${result.plan.label}：执行、观测及回执归档完成。生产权限关闭。`;
+    }
+    if (action.kind === "clarify_linked_operation") {
+      commitAutomationChat({question:state.automationPlan.command,answer:parameters.clarification,intent:"linked_agent_clarification",confidence:"待明确参数"});
+      await linkedAgent.open();
+      return "已列出可执行能力并提示补全参数，尚未执行联动操作。";
+    }
     const viewSelectors = {
       chat:'.top-nav [data-view-target="chat"]', decisions:'.top-nav [data-view-target="decisions"]',
       analytics:'.top-nav [data-view-target="analytics"]', knowledge:'.top-nav [data-view-target="knowledge"]',
@@ -3481,6 +3541,12 @@
     const action = plan?.actions.find((item) => item.id === plan.current_action_id) || plan?.actions.find((item) => item.status === "running");
     if (!plan || !action) return;
     setHeroState("confirm");
+    if (action.kind === "run_linked_operation") {
+      const prepared=state.automationContext.linkedAgentPlan;
+      if(!prepared) throw new Error("本轮参数预览已失效，请重新生成方案");
+      openModal("确认本轮模拟调整", "读取的目标配置与实际参数已列出；确认仅适用于本轮方案", `<div class="automation-confirmation"><strong>${escapeHtml(prepared.label)}</strong><div class="confirmation-scope"><span>目标：${escapeHtml(prepared.target)}</span><span>读取时间：${escapeHtml(prepared.before.observed_at)}</span><span>观测：${prepared.samples} 次，每 ${prepared.interval_seconds} 秒一次</span><span>方案：${escapeHtml(prepared.plan_sha256.slice(0,16))}</span></div><pre>${escapeHtml(JSON.stringify({当前配置:prepared.before.config,本次参数:prepared.parameters},null,2))}</pre><div class="drawer-note">本次会实际改变目标沙盘配置，${prepared.restore_after_observation ? "观测后恢复原配置并核验" : "保留本轮配置"}。恢复不会倒放模拟业务时间。生产权限关闭。</div></div>`, `<button type="button" class="drawer-button secondary" data-modal-action="reject-automation">拒绝并停止</button><button type="button" class="drawer-button warning" data-modal-action="confirm-automation">确认本轮模拟调整</button>`, "automation-confirm");
+      return;
+    }
     if (["weather_berth_joint_rl","qc_agv_yard_marl"].includes(plan.intent)) {
       const mission = state.automationContext.advancedRL || {};
       const verification = mission.verification || {};
@@ -3516,7 +3582,7 @@
       closeModal();
       openAutomationPlan(state.automationPlan);
       if (confirmed) void executeAutomationPlan();
-      else toast("已拒绝生产操作", "当前计划已取消，后续步骤不会执行。", "warning", 5200);
+      else toast("已拒绝当前操作", "当前计划已取消，后续步骤不会执行。", "warning", 5200);
     } catch (error) {
       toast("确认记录失败", error.message, "warning");
     }
@@ -3883,7 +3949,7 @@
 
   function bindEvents() {
     $("#composerForm").addEventListener("submit", (event) => { event.preventDefault(); ask(); });
-    $("#question").addEventListener("input", autoGrowQuestion);
+    $("#question").addEventListener("input", () => {state.composerTouched=true;autoGrowQuestion();});
     $("#question").addEventListener("keydown", (event) => {
       if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); ask(); }
     });
@@ -3911,6 +3977,7 @@
     $("#drawerBackdrop").addEventListener("click", closeDrawer);
 
     document.addEventListener("input", (event) => {
+      if (event.target.id === "systemLinkageCommand") state.systemLinkageDraft = event.target.value;
       if (!event.target.matches?.("[data-catalog-search]")) return;
       state.knowledgeCatalogQuery = event.target.value;
       renderKnowledgeCatalogResults();
@@ -4004,6 +4071,7 @@
       connectors:openConnectors,
       "intelligence-hub":openIntelligenceHub,
       "system-linkage":openSystemLinkage,
+      "linked-agent":()=>linkedAgent.open(),
       "rag-evaluation":() => openIntelligenceHub("evaluation"),
       "hub-run-demo":runHubDemo,
       "hub-run-evaluation":runHubEvaluation,
@@ -4088,11 +4156,13 @@
     await Promise.allSettled([loadDashboard(), loadSimulatorSnapshot(), loadKnowledge(), loadTasksAndTemplates(), loadConnectorSummary(), loadServerConversation()]);
     connectSimulatorStream();
     void loadSystemLinkage({ render:false }).catch(() => {});
-    showWelcome();
-    if (state.conversationTurns.length) {
-      const latest = state.conversationTurns[state.conversationTurns.length - 1];
-      const stored = state.topics.find((item) => item.id === latest.id);
-      if (stored) restoreTopic(stored.id);
+    if (!state.composerTouched && !state.automationPlan && !state.activeController) {
+      showWelcome();
+      if (state.conversationTurns.length) {
+        const latest = state.conversationTurns[state.conversationTurns.length - 1];
+        const stored = state.topics.find((item) => item.id === latest.id);
+        if (stored) restoreTopic(stored.id);
+      }
     }
     setInterval(() => { if (!document.hidden) void loadDashboard(true); }, 15000);
   }

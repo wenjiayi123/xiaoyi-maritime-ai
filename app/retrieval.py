@@ -955,6 +955,8 @@ def get_shared_knowledge_base() -> KnowledgeBase:
     ):
         _SHARED_KNOWLEDGE_BASE = KnowledgeBase()
         _SHARED_KNOWLEDGE_SIGNATURE = _knowledge_inputs_signature()
+    else:
+        _SHARED_KNOWLEDGE_BASE._dense_index = get_dense_vector_index()
     return _SHARED_KNOWLEDGE_BASE
 
 

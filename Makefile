@@ -27,6 +27,7 @@ check: privacy-scan
 	python scripts/release_check.py
 	python -m pip check
 	node --check web/app.js
+	node --check web/linked_agent.js
 	node --check web/runtime_contract.js
 	pnpm test:fuzz
 
@@ -37,10 +38,10 @@ benchmark:
 	python scripts/run_rag_benchmark.py run --output-tag "$(BENCHMARK_TAG)"
 
 benchmark-verify:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r3
+	python scripts/run_rag_benchmark.py verify --output-tag 20260907_review
 
 benchmark-verify-deep:
-	python scripts/run_rag_benchmark.py verify --output-tag 20260814_r3 --deep
+	python scripts/run_rag_benchmark.py verify --output-tag 20260907_review --deep
 
 sbom:
 	python scripts/build_sbom.py build

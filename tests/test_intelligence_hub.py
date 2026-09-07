@@ -233,7 +233,7 @@ def test_evaluation_summary_labels_committed_report_as_pinned_not_live() -> None
     benchmark = payload["latest_benchmark"]
 
     assert benchmark["status"] == "pinned_release_evidence"
-    assert benchmark["evidence_source"] == "reports/maritime_rag_benchmark_v1_20260814_r3.json"
+    assert benchmark["evidence_source"] == "reports/maritime_rag_benchmark_v1_20260907_review.json"
     assert benchmark["live_rerun"] is False
     assert benchmark["report_sha256"]
     assert benchmark["verified_metrics"]["fixed_test_case_count"] == 35

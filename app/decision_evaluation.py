@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import date
 from pathlib import Path
 from typing import Any
 
@@ -17,7 +18,7 @@ BENCHMARK_PATH = (
     BASE_DIR
     / "data"
     / "evaluation"
-    / "maritime_decision_readiness_benchmark_v3.json"
+    / "maritime_decision_readiness_benchmark_v3_20260907.json"
 )
 
 
@@ -248,6 +249,7 @@ def _checks(
 def _evaluate_query_cases(
     cases: list[dict[str, Any]],
     engine: XiaoyiAI,
+    as_of_date: date | None = None,
 ) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     for case in cases:
@@ -258,6 +260,7 @@ def _evaluate_query_cases(
                 analysis.subquestions,
                 mode=case.get("mode", "expert"),
                 top_k=8,
+                as_of_date=as_of_date,
             )
         else:
             response = engine.ask(
@@ -265,6 +268,7 @@ def _evaluate_query_cases(
                 mode=case.get("mode", "expert"),
                 top_k=8,
                 retrieval_queries=analysis.subquestions,
+                as_of_date=as_of_date,
             )
         response = response.model_copy(
             update={"answer_verification": verify_response(response)}
@@ -346,7 +350,8 @@ def run_decision_benchmark(
 ) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     engine = XiaoyiAI()
-    query_rows = _evaluate_query_cases(payload["query_cases"], engine)
+    evaluation_date = date.fromisoformat(payload["evaluation_date"]) if payload.get("evaluation_date") else date.today()
+    query_rows = _evaluate_query_cases(payload["query_cases"], engine, evaluation_date)
     assurance_rows = _evaluate_assurance_cases(payload["assurance_cases"])
     all_rows = [*query_rows, *assurance_rows]
     base = payload["base_benchmarks"]
@@ -354,6 +359,8 @@ def run_decision_benchmark(
     return {
         "benchmark_id": payload["benchmark_id"],
         "benchmark_sha256": _sha256(path),
+        "evaluation_date": evaluation_date.isoformat(),
+        "revision": payload.get("revision"),
         "case_count": len(all_rows),
         "combined_case_count": int(base["v1_case_count"])
         + int(base["v2_case_count"])

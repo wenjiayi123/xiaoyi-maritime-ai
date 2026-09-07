@@ -20,7 +20,7 @@ from app.knowledge_api import get_knowledge_status  # noqa: E402
 REPORT_JSON = ROOT / "reports" / "maritime_decision_readiness_benchmark_v3.json"
 REPORT_MARKDOWN = ROOT / "reports" / "maritime_decision_readiness_benchmark_v3.md"
 EVIDENCE_FILES = (
-    "data/evaluation/maritime_decision_readiness_benchmark_v3.json",
+    "data/evaluation/maritime_decision_readiness_benchmark_v3_20260907.json",
     "data/xiaoyi_index.json",
     "data/source_registry.json",
     "app/decision_assurance.py",

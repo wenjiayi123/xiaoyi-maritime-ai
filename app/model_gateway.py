@@ -177,7 +177,7 @@ class ModelGateway:
                 "prompt_injection_detections": self._prompt_injection_detections,
                 "prompt_security_benchmark": _prompt_security_benchmark_summary(),
                 "lora_admission": _lora_admission_summary(),
-                "answer_strategy": "mandatory_hybrid_generation",
+                "answer_strategy": "evidence_first_hybrid_generation",
                 "critical_fact_policy": "index_locked",
                 "missing_evidence_behavior": "answer_with_notice",
                 "minimum_answer_review_seconds": (
@@ -242,7 +242,18 @@ class ModelGateway:
                 f"{','.join(item.jurisdictions) or '辖区未登记'}\n"
                 f"{secured.text}\n</untrusted_evidence>"
             )
-        mode_directive = ""
+        mode_directive = {
+            "expert": "专业模式：先围绕用户实际问题解释要点，避免套用无关处置流程。",
+            "ops": "运营模式：建议围绕作业顺序、约束和交接闭环。",
+            "sop": "流程模式：按准备、核对、异常处理、复核的顺序给出简洁步骤；只保留与问题有关的步骤。",
+            "brief": "简报模式：结论在锁定内容中已有时，仅补充一至两句必要提示，避免重复。",
+        }.get(response.mode, "")
+        definition_question = response.intent == "definition"
+        grounded_focus = (
+            "定义问题：用两句通俗的话解释证据中的业务用途或概念区别；不要添加故障恢复、审批、应急或闭环记录等无关流程。"
+            if definition_question else
+            "有据问题：在证据结论之后补充一个简短段落，约80至130个汉字；围绕用户所问的原因、比较或步骤回答，流程问题再补充执行顺序、复核条件与闭环记录。"
+        )
         workforce_directive = (
             "日常问题先正常回答，再说明对港航当班的影响和对应岗位建议。"
             if response.intent == "workforce_general"
@@ -270,8 +281,7 @@ class ModelGateway:
                     "异常处理和人工确认边界；不要标题、编号或复述证据结论。"
                     if uncovered_focus
                     else
-                    "有据问题：在证据结论之后只写1个简短段落、共3个完整句子，"
-                    "总正文约80至130个汉字。依次补充执行顺序、复核条件与闭环记录；"
+                    grounded_focus +
                     "不得新增具体岗位、责任人或联络对象，不要标题、编号或复述证据结论。"
                 )
                 + "不得重复整段证据结论，不新增数值、日期、"
@@ -326,7 +336,7 @@ class ModelGateway:
                 + (
                     f"优先回答这些未覆盖子问题：{uncovered_focus}。"
                     if uncovered_focus
-                    else "只从执行顺序、人工复核和恢复条件中选择两个重点补充建议；"
+                    else ("只解释概念用途与区别；" if definition_question else "围绕本次问题补充相关建议；")
                 )
                 + "建议若不是证据原句，不附[E]编号。"
             )
@@ -480,7 +490,13 @@ class ModelGateway:
         ) as upstream:
             raw = upstream.read(2_000_000)
         data = json.loads(raw)
-        content = data.get("choices", [{}])[0].get("message", {}).get("content")
+        choices = data.get("choices") if isinstance(data, dict) else None
+        if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+            raise ValueError("模型接口返回了无效的choices")
+        if choices[0].get("finish_reason") == "length":
+            raise ValueError("模型达到输出上限，未形成完整答案")
+        message = choices[0].get("message")
+        content = message.get("content") if isinstance(message, dict) else None
         if not isinstance(content, str) or not content.strip():
             raise ValueError("模型接口未返回有效choices[0].message.content")
         return content.strip()
@@ -492,6 +508,8 @@ class ModelGateway:
         history: list[dict[str, Any]] | None = None,
         generation_id: str | None = None,
     ) -> Generator[str, None, None]:
+        started_at = time.monotonic()
+        completed = False
         with self._open_request(
             question,
             response,
@@ -500,18 +518,36 @@ class ModelGateway:
             generation_id=generation_id,
         ) as upstream:
             for raw_line in upstream:
+                if time.monotonic() - started_at > self.settings.model_timeout_seconds:
+                    raise TimeoutError("模型生成超过本次回答时限")
                 line = raw_line.decode("utf-8", errors="replace").strip()
                 if not line.startswith("data:"):
                     continue
                 payload = line[5:].strip()
-                if not payload or payload == "[DONE]":
+                if payload == "[DONE]":
+                    completed = True
+                    break
+                if not payload:
                     continue
                 data = json.loads(payload)
-                choice = data.get("choices", [{}])[0]
+                choices = data.get("choices") if isinstance(data, dict) else None
+                if choices == [] and isinstance(data.get("usage"), dict):
+                    continue
+                if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+                    raise ValueError("模型事件流返回了无效的choices")
+                choice = choices[0]
+                if choice.get("finish_reason") == "length":
+                    raise ValueError("模型达到输出上限，未形成完整答案")
+                if choice.get("finish_reason") == "stop":
+                    completed = True
                 delta = choice.get("delta", {})
+                if not isinstance(delta, dict):
+                    raise ValueError("模型事件流返回了无效的delta")
                 content = delta.get("content")
                 if isinstance(content, str) and content:
                     yield content
+        if not completed:
+            raise ValueError("模型事件流提前中断，未收到完成标记")
 
     def cancel_generation(self, generation_id: str) -> dict[str, Any]:
         if not re.fullmatch(r"[A-Za-z0-9._:-]{8,120}", generation_id):
@@ -977,8 +1013,12 @@ class ModelGateway:
         return f"{answer.rstrip()}{_WORKFORCE_GENERAL_SUFFIX}"
 
     def _skip_reason(self, response: ChatResponse) -> str | None:
+        if response.refusal_reason == "business_object_required":
+            return "clarification_required"
         if self._should_use_policy_boundary(response):
             return "strict_evidence_boundary"
+        if response.grounded and response.answer.startswith("官方来源定位："):
+            return "registered_locator_answer"
         if (
             not self.settings.model_endpoint_is_local
             and not self.settings.model_external_data_allowed
@@ -995,6 +1035,10 @@ class ModelGateway:
 
     @staticmethod
     def _skip_notice(reason: str) -> str:
+        if reason == "clarification_required":
+            return "当前缺少业务对象，已直接请求补充，未调用生成模型。"
+        if reason == "registered_locator_answer":
+            return "已直接返回带引用的登记官方来源入口，无需生成模型改写；请按来源日期核验现行页面。"
         if reason == "strict_evidence_boundary":
             return (
                 "严格证据边界已触发，未调用生成模型；"
@@ -1069,9 +1113,9 @@ class ModelGateway:
         if skip_reason:
             self._hold_minimum_review_window(review_started_at)
             return response.model_copy(update={
-                "generation_provider": self.settings.model_provider,
-                "generation_model": self.settings.model_name or None,
-                "generation_fallback": True,
+                "generation_provider": "local_rules" if skip_reason in {"registered_locator_answer", "clarification_required"} else self.settings.model_provider,
+                "generation_model": "local-evidence-composer" if skip_reason in {"registered_locator_answer", "clarification_required"} else self.settings.model_name or None,
+                "generation_fallback": skip_reason not in {"registered_locator_answer", "clarification_required"},
                 "generation_notice": self._skip_notice(skip_reason),
             })
         with self._lock:
@@ -1121,9 +1165,9 @@ class ModelGateway:
         if skip_reason:
             self._hold_minimum_review_window(review_started_at)
             return response.model_copy(update={
-                "generation_provider": self.settings.model_provider,
-                "generation_model": self.settings.model_name or None,
-                "generation_fallback": True,
+                "generation_provider": "local_rules" if skip_reason in {"registered_locator_answer", "clarification_required"} else self.settings.model_provider,
+                "generation_model": "local-evidence-composer" if skip_reason in {"registered_locator_answer", "clarification_required"} else self.settings.model_name or None,
+                "generation_fallback": skip_reason not in {"registered_locator_answer", "clarification_required"},
                 "generation_notice": self._skip_notice(skip_reason),
             })
         with self._lock:

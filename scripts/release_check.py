@@ -12,6 +12,9 @@ REQUIRED = (
     "CHANGELOG.md", "Dockerfile", "compose.yaml", "requirements.lock", "pyproject.toml",
     "package.json", "pnpm-lock.yaml", "web/runtime_contract.js",
     "tests/frontend_security.fuzz.test.js",
+    "app/linked_agent.py", "app/linked_agent_catalog.py", "web/linked_agent.js",
+    "tests/test_linked_agent.py", "scripts/run_linked_agent_acceptance.py",
+    "docs/LINKED_AGENT_OPERATIONS.md", "reports/linked_agent_acceptance_20260907_v3.json",
     "CODE_OF_CONDUCT.md", "GOVERNANCE.md", "SUPPORT.md", "CITATION.cff",
     ".github/workflows/ci.yml", ".github/workflows/dependency-review.yml",
     ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml",
@@ -195,6 +198,20 @@ def main() -> int:
             errors.append(f"缺少发布文件：{relative}")
 
     try:
+        report = json.loads((ROOT / "reports/linked_agent_acceptance_20260907_v3.json").read_text())
+        expected = {"port.observe", "port.evaluate", "energy.observe", "energy.compare", "malacca.observe", "malacca.scenario", "malacca.clock", "sailing.observe"}
+        if report.get("passed") is not True or {row["action"] for row in report["rows"]} != expected or len(report["rows"]) != 8:
+            errors.append("联动智能体八项真实适配器验收不完整")
+        for row in report["rows"]:
+            if row.get("passed") is not True or not all(row["checks"].values()) or row["run"]["production_authority"] is not False:
+                errors.append(f"联动动作未通过验收：{row['action']}")
+        for relative, expected_digest in report["source_sha256"].items():
+            if hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() != expected_digest:
+                errors.append(f"联动智能体验收后源文件已变化：{relative}")
+    except (KeyError, OSError, TypeError, ValueError) as exc:
+        errors.append(f"联动智能体验收不可验证：{exc}")
+
+    try:
         model_registry = json.loads(
             (ROOT / "data/model_registry.json").read_text(encoding="utf-8")
         )
@@ -333,7 +350,7 @@ def main() -> int:
             errors.append(f"公开RL数据血缘不可验证：{dataset_id}: {exc}")
 
     benchmark_report_path = (
-        ROOT / "reports/maritime_rag_benchmark_v1_20260814_r3.json"
+        ROOT / "reports/maritime_rag_benchmark_v1_20260907_review.json"
     )
     try:
         benchmark_report = json.loads(
@@ -372,7 +389,7 @@ def main() -> int:
         errors.append(f"RAG基准报告不可验证：{exc}")
 
     assistant_report_path = (
-        ROOT / "reports/maritime_assistant_benchmark_v2_20260814_r3.json"
+        ROOT / "reports/maritime_assistant_benchmark_v2_20260907_review_r2.json"
     )
     try:
         assistant_report = json.loads(
@@ -400,7 +417,7 @@ def main() -> int:
         errors.append(f"助手困难基准报告不可验证：{exc}")
 
     decision_report_path = (
-        ROOT / "reports/maritime_decision_readiness_benchmark_v3_20260814_r3.json"
+        ROOT / "reports/maritime_decision_readiness_benchmark_v3_20260907_review_r2.json"
     )
     try:
         decision_report = json.loads(
@@ -431,7 +448,7 @@ def main() -> int:
         errors.append(f"决策保障基准报告不可验证：{exc}")
 
     alignment_report_path = (
-        ROOT / "reports/maritime_claim_alignment_benchmark_v4_20260814_r3.json"
+        ROOT / "reports/maritime_claim_alignment_benchmark_v4_20260907_review_r2.json"
     )
     try:
         alignment_report = json.loads(
@@ -470,7 +487,7 @@ def main() -> int:
         errors.append(f"主张证据对齐基准报告不可验证：{exc}")
 
     daily_report_path = (
-        ROOT / "reports/maritime_daily_operations_benchmark_v5_20260814_r3.json"
+        ROOT / "reports/maritime_daily_operations_benchmark_v5_20260907_review.json"
     )
     try:
         daily_report = json.loads(daily_report_path.read_text(encoding="utf-8"))
@@ -507,7 +524,7 @@ def main() -> int:
         errors.append(f"日常问答基准报告不可验证：{exc}")
 
     universe_report_path = (
-        ROOT / "reports/maritime_question_universe_benchmark_v6_20260814_r3.json"
+        ROOT / "reports/maritime_question_universe_benchmark_v6_20260907_review.json"
     )
     try:
         universe_report = json.loads(

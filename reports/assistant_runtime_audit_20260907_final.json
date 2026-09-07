@@ -1,0 +1,870 @@
+{
+  "generated_at": "2026-09-07T07:39:09.682817+00:00",
+  "scope": "Local complete-answer observations, not a throughput SLA, blind quality test or field production acceptance.",
+  "model": {
+    "provider": "openai_compatible",
+    "model": "xiaoyi-local-4b",
+    "local_generation_enabled": true,
+    "answer_strategy": "evidence_first_hybrid_generation"
+  },
+  "cases": [
+    {
+      "id": "clarification",
+      "question": "那这个要求呢？",
+      "elapsed_ms": 27.867,
+      "answer": "我还不能确定你指的是哪项要求或哪个业务对象。请补充刚才的问题、法规名称，或船舶、设备、港口及时间范围，我再继续分析。",
+      "intent": "operator_clarification",
+      "timing": {
+        "preparation_ms": 3.262,
+        "generation_ms": 0.063,
+        "verification_ms": 0.153,
+        "total_ms": 3.478
+      },
+      "query_analysis": {
+        "original_question": "那这个要求呢？",
+        "standalone_question": "那这个要求呢？",
+        "context_topic": "",
+        "resolution": "clarification_required",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "那这个要求呢？"
+        ],
+        "dimensions": [],
+        "complexity": 1,
+        "requires_clarification": true,
+        "clarification_reason": "当前问题包含指代，但本会话没有可用的上一轮上下文"
+      },
+      "generation_provider": "local_rules",
+      "generation_fallback": false,
+      "generation_notice": "当前缺少业务对象，已直接请求补充，未调用生成模型。",
+      "grounded": false,
+      "refusal_reason": "business_object_required",
+      "answer_verification": {
+        "status": "not_applicable",
+        "claim_count": 0,
+        "supported_claim_count": 0,
+        "citation_coverage": 0.0,
+        "citation_validity": 0.0,
+        "evidence_alignment": 0.0,
+        "numeric_integrity": 0.0,
+        "advisory_checked": false,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "decision_readiness": {
+        "status": "needs_clarification",
+        "risk_level": "medium",
+        "blockers": [
+          "ambiguous_context"
+        ],
+        "next_action": "当前问题包含指代，但本会话没有可用的上一轮上下文",
+        "requires_human_confirmation": false,
+        "rationale": "当前追问无法从本会话安全继承明确主题。"
+      },
+      "evidence_ids": []
+    },
+    {
+      "id": "lookup",
+      "question": "新加坡船舶到港报告的官方入口在哪里？",
+      "elapsed_ms": 1556.148,
+      "answer": "官方来源定位：\n\n- 到港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-arriving-in-singapore [E1]\n- 离港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-departing-singapore [E1]\n\n来源状态：这些链接来自已登记的本地来源资料；实际办理前请核对官方页面当前版本、适用船舶和日期。目录或摘要不代替正式条文。",
+      "intent": "shipping",
+      "timing": {
+        "preparation_ms": 1542.83,
+        "generation_ms": 0.03,
+        "verification_ms": 4.981,
+        "total_ms": 1547.841
+      },
+      "query_analysis": {
+        "original_question": "新加坡船舶到港报告的官方入口在哪里？",
+        "standalone_question": "新加坡船舶到港报告的官方入口在哪里？",
+        "context_topic": "新加坡船舶到港报告的官方入口在哪里？",
+        "resolution": "independent",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "新加坡船舶到港报告的官方入口在哪里？"
+        ],
+        "dimensions": [
+          "jurisdiction"
+        ],
+        "complexity": 2,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "local_rules",
+      "generation_fallback": false,
+      "generation_notice": "已直接返回带引用的登记官方来源入口，无需生成模型改写；请按来源日期核验现行页面。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 2,
+        "supported_claim_count": 2,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": false,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "到港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-arriving-in-singapore [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "101_sg_vessel_arrival_departure_procedures:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "离港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-departing-singapore [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "101_sg_vessel_arrival_departure_procedures:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "medium",
+        "blockers": [
+          "source_review_due"
+        ],
+        "next_action": "采用前打开原始来源核对版本、适用日期和现场制度，并由责任岗位确认。",
+        "requires_human_confirmation": true,
+        "rationale": "已有支持证据，但法规、合规或来源复核状态要求人工确认。"
+      },
+      "evidence_ids": [
+        "101_sg_vessel_arrival_departure_procedures:1",
+        "101_sg_vessel_arrival_departure_procedures:2",
+        "101_sg_vessel_arrival_departure_procedures:3",
+        "101_sg_vessel_arrival_departure_procedures:4",
+        "100_sg_active_port_marine_circulars_2026:1"
+      ]
+    },
+    {
+      "id": "handover",
+      "question": "港口交班要交什么？",
+      "elapsed_ms": 17308.776,
+      "answer": "证据锁定结论：\n不能遗漏未闭环异常、高风险作业与隔离状态、船期和泊位变更、设备限制、单证与放行卡点、待回复客户事项、负责人和下次动作时间。 [E1]\n\n模型综合建议（需人工复核）：\n港口交班需确保所有关键信息清晰传达，包括未闭环异常、高风险作业状态、船期和泊位变更、设备使用限制、单证及放行卡要点、待处理客户事项以及后续负责人和行动计划。\n\n这些内容直接关系到后续作业的连续性和安全性，必须准确无误地交接。",
+      "intent": "port_knowledge",
+      "timing": {
+        "preparation_ms": 1433.785,
+        "generation_ms": 15861.47,
+        "verification_ms": 1.094,
+        "total_ms": 17296.349
+      },
+      "query_analysis": {
+        "original_question": "港口交班要交什么？",
+        "standalone_question": "港口交班要交什么？",
+        "context_topic": "港口交班要交什么？",
+        "resolution": "independent",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "港口交班要交什么？"
+        ],
+        "dimensions": [],
+        "complexity": 1,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "openai_compatible",
+      "generation_fallback": false,
+      "generation_notice": "回答采用索引锁定关键事实与本地生成模型综合分析的混合链路；法规、数值、实时状态和安全边界不得由生成模型覆盖。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": true,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "不能遗漏未闭环异常、高风险作业与隔离状态、船期和泊位变更、设备限制、单证与放行卡点、待回复客户事项、负责人和下次动作时间。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "54_daily_port_operations_shift_qa:13"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。 标注为“模型综合建议（需人工复核）”且未附证据编号的内容不计入证据支持率，不得作为已核验事实或直接生产指令；但其中的生产控制动作和责任岗位分配仍接受独立安全门禁，命中时回答整体转为 needs_review。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "high",
+        "blockers": [
+          "internal_sop_requires_site_validation"
+        ],
+        "next_action": "仅作为 recommendation_only 建议；由现场授权岗位核对有效SOP、设备联锁、告警等级和当前工况后决定是否执行，并保留审批与回滚记录。",
+        "requires_human_confirmation": true,
+        "rationale": "引用完整性已通过，但控制动作来自项目内部整理资料，未完成现场制度映射、设备标定和影子运行，不能直接转成生产指令。"
+      },
+      "evidence_ids": [
+        "54_daily_port_operations_shift_qa:13"
+      ]
+    },
+    {
+      "id": "handover_repeat",
+      "question": "港口交班要交什么？",
+      "elapsed_ms": 16097.924,
+      "answer": "证据锁定结论：\n不能遗漏未闭环异常、高风险作业与隔离状态、船期和泊位变更、设备限制、单证与放行卡点、待回复客户事项、负责人和下次动作时间。 [E1]\n\n模型综合建议（需人工复核）：\n港口交班需确保所有关键信息清晰传达，包括未闭环异常、高风险作业状态、船期和泊位变更、设备使用限制、单证及放行卡要点、待处理客户事项以及后续负责人和动作时间。\n\n这些内容直接关系到后续作业的连续性和安全性，必须准确无误地交接。",
+      "intent": "port_knowledge",
+      "timing": {
+        "preparation_ms": 442.264,
+        "generation_ms": 15644.741,
+        "verification_ms": 0.465,
+        "total_ms": 16087.47
+      },
+      "query_analysis": {
+        "original_question": "港口交班要交什么？",
+        "standalone_question": "港口交班要交什么？",
+        "context_topic": "港口交班要交什么？",
+        "resolution": "independent",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "港口交班要交什么？"
+        ],
+        "dimensions": [],
+        "complexity": 1,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "openai_compatible",
+      "generation_fallback": false,
+      "generation_notice": "回答采用索引锁定关键事实与本地生成模型综合分析的混合链路；法规、数值、实时状态和安全边界不得由生成模型覆盖。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": true,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "不能遗漏未闭环异常、高风险作业与隔离状态、船期和泊位变更、设备限制、单证与放行卡点、待回复客户事项、负责人和下次动作时间。 [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "54_daily_port_operations_shift_qa:13"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。 标注为“模型综合建议（需人工复核）”且未附证据编号的内容不计入证据支持率，不得作为已核验事实或直接生产指令；但其中的生产控制动作和责任岗位分配仍接受独立安全门禁，命中时回答整体转为 needs_review。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "high",
+        "blockers": [
+          "internal_sop_requires_site_validation"
+        ],
+        "next_action": "仅作为 recommendation_only 建议；由现场授权岗位核对有效SOP、设备联锁、告警等级和当前工况后决定是否执行，并保留审批与回滚记录。",
+        "requires_human_confirmation": true,
+        "rationale": "引用完整性已通过，但控制动作来自项目内部整理资料，未完成现场制度映射、设备标定和影子运行，不能直接转成生产指令。"
+      },
+      "evidence_ids": [
+        "54_daily_port_operations_shift_qa:13"
+      ]
+    },
+    {
+      "id": "definition",
+      "question": "TOS 是什么？",
+      "elapsed_ms": 11656.094,
+      "answer": "证据锁定结论：\nTOS 是 Terminal Operating System，主要支撑码头生产计划与作业执行；PCS 是 Port Community System，主要支撑港口社区多参与方之间的信息协同。 [E5]\n\n模型综合建议（需人工复核）：\nTOS 是码头内部用于管理生产计划和作业执行的系统，主要连接各类资源进行高效调度。\n\n与之不同，PCS 更侧重于港口内外部多方协作，处理信息共享与外部数据交互。",
+      "intent": "definition",
+      "timing": {
+        "preparation_ms": 1444.902,
+        "generation_ms": 10199.536,
+        "verification_ms": 1.396,
+        "total_ms": 11645.834
+      },
+      "query_analysis": {
+        "original_question": "TOS 是什么？",
+        "standalone_question": "TOS 是什么？",
+        "context_topic": "TOS 是什么？",
+        "resolution": "independent",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "TOS 是什么？"
+        ],
+        "dimensions": [],
+        "complexity": 1,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "openai_compatible",
+      "generation_fallback": false,
+      "generation_notice": "回答采用索引锁定关键事实与本地生成模型综合分析的混合链路；法规、数值、实时状态和安全边界不得由生成模型覆盖。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": true,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "TOS 是 Terminal Operating System，主要支撑码头生产计划与作业执行；PCS 是 Port Community System，主要支撑港口社区多参与方之间的信息协同。 [E5]",
+            "citation_indices": [
+              5
+            ],
+            "evidence_ids": [
+              "59_bilingual_port_spoken_abbreviations_qa:8"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。 标注为“模型综合建议（需人工复核）”且未附证据编号的内容不计入证据支持率，不得作为已核验事实或直接生产指令；但其中的生产控制动作和责任岗位分配仍接受独立安全门禁，命中时回答整体转为 needs_review。"
+      },
+      "decision_readiness": {
+        "status": "ready",
+        "risk_level": "low",
+        "blockers": [],
+        "next_action": "可在当前证据登记范围内使用，并保留证据编号与审计记录。",
+        "requires_human_confirmation": false,
+        "rationale": "支持证据、引用完整性和当前可见的新鲜度未触发阻断条件。"
+      },
+      "evidence_ids": [
+        "38_definition_process_role_qa:1",
+        "18_smart_port_ai_data:6",
+        "41_data_system_interface_qa:4",
+        "06_tos_and_digital:3",
+        "59_bilingual_port_spoken_abbreviations_qa:8"
+      ]
+    },
+    {
+      "id": "scope_cn",
+      "question": "中国船舶到港报告的官方入口在哪里？",
+      "elapsed_ms": 485.035,
+      "answer": "官方来源定位：\n\n- 官方公开页面：https://js.msa.gov.cn/art/2021/8/5/art_842_981.html [E1]\n\n来源状态：这些链接来自已登记的本地来源资料；实际办理前请核对官方页面当前版本、适用船舶和日期。目录或摘要不代替正式条文。",
+      "intent": "shipping",
+      "timing": {
+        "preparation_ms": 475.227,
+        "generation_ms": 0.022,
+        "verification_ms": 0.739,
+        "total_ms": 475.988
+      },
+      "query_analysis": {
+        "original_question": "中国船舶到港报告的官方入口在哪里？",
+        "standalone_question": "中国船舶到港报告的官方入口在哪里？",
+        "context_topic": "中国船舶到港报告的官方入口在哪里？",
+        "resolution": "independent",
+        "inherited_from_answer_id": null,
+        "subquestions": [
+          "中国船舶到港报告的官方入口在哪里？"
+        ],
+        "dimensions": [
+          "jurisdiction"
+        ],
+        "complexity": 2,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "local_rules",
+      "generation_fallback": false,
+      "generation_notice": "已直接返回带引用的登记官方来源入口，无需生成模型改写；请按来源日期核验现行页面。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 1,
+        "supported_claim_count": 1,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": false,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "官方公开页面：https://js.msa.gov.cn/art/2021/8/5/art_842_981.html [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "53_cn_vessel_port_reporting:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [
+              "date:2021-08-05",
+              "842",
+              "981"
+            ],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "medium",
+        "blockers": [],
+        "next_action": "采用前打开原始来源核对版本、适用日期和现场制度，并由责任岗位确认。",
+        "requires_human_confirmation": true,
+        "rationale": "已有支持证据，但法规、合规或来源复核状态要求人工确认。"
+      },
+      "evidence_ids": [
+        "53_cn_vessel_port_reporting:1",
+        "53_cn_vessel_port_reporting:2",
+        "53_cn_vessel_port_reporting:3",
+        "60_cn_port_law:4",
+        "45_imo_maritime_single_window:2"
+      ]
+    },
+    {
+      "id": "scope_sg",
+      "question": "那在新加坡呢？",
+      "elapsed_ms": 332.089,
+      "answer": "官方来源定位：\n\n- 到港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-arriving-in-singapore [E1]\n- 离港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-departing-singapore [E1]\n\n来源状态：这些链接来自已登记的本地来源资料；实际办理前请核对官方页面当前版本、适用船舶和日期。目录或摘要不代替正式条文。",
+      "intent": "shipping",
+      "timing": {
+        "preparation_ms": 320.431,
+        "generation_ms": 0.065,
+        "verification_ms": 1.525,
+        "total_ms": 322.021
+      },
+      "query_analysis": {
+        "original_question": "那在新加坡呢？",
+        "standalone_question": "新加坡船舶到港报告的官方入口在哪里？",
+        "context_topic": "新加坡船舶到港报告的官方入口在哪里",
+        "resolution": "history_resolved",
+        "inherited_from_answer_id": "answer-21fc378e88f247eb90d9305946edea9d",
+        "subquestions": [
+          "新加坡船舶到港报告的官方入口在哪里？"
+        ],
+        "dimensions": [
+          "jurisdiction"
+        ],
+        "complexity": 2,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "local_rules",
+      "generation_fallback": false,
+      "generation_notice": "已直接返回带引用的登记官方来源入口，无需生成模型改写；请按来源日期核验现行页面。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 2,
+        "supported_claim_count": 2,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": false,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "到港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-arriving-in-singapore [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "101_sg_vessel_arrival_departure_procedures:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "离港官方页：https://www.mpa.gov.sg/port-marine-ops/arrivals-and-departures/vessels-departing-singapore [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "101_sg_vessel_arrival_departure_procedures:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "medium",
+        "blockers": [
+          "source_review_due"
+        ],
+        "next_action": "采用前打开原始来源核对版本、适用日期和现场制度，并由责任岗位确认。",
+        "requires_human_confirmation": true,
+        "rationale": "已有支持证据，但法规、合规或来源复核状态要求人工确认。"
+      },
+      "evidence_ids": [
+        "101_sg_vessel_arrival_departure_procedures:1",
+        "101_sg_vessel_arrival_departure_procedures:2",
+        "101_sg_vessel_arrival_departure_procedures:3",
+        "101_sg_vessel_arrival_departure_procedures:4",
+        "100_sg_active_port_marine_circulars_2026:1"
+      ]
+    },
+    {
+      "id": "scope_my",
+      "question": "那在马来西亚呢？",
+      "elapsed_ms": 500.017,
+      "answer": "官方来源定位：\n\n- 官方通告栏目：https://www.marine.gov.my/en/informasi/notis/malaysia-shipping-notice/ [E1]\n- 官方有效清单 PDF：https://www.marine.gov.my/wp-content/uploads/2026/01/MSN-01_2026_Senarai-NPM-yang-Masih-Aktif.pdf [E1]\n\n来源状态：这些链接来自已登记的本地来源资料；实际办理前请核对官方页面当前版本、适用船舶和日期。目录或摘要不代替正式条文。",
+      "intent": "shipping",
+      "timing": {
+        "preparation_ms": 489.455,
+        "generation_ms": 0.035,
+        "verification_ms": 1.456,
+        "total_ms": 490.946
+      },
+      "query_analysis": {
+        "original_question": "那在马来西亚呢？",
+        "standalone_question": "马来西亚船舶到港报告的官方入口在哪里？",
+        "context_topic": "马来西亚船舶到港报告的官方入口在哪里",
+        "resolution": "history_resolved",
+        "inherited_from_answer_id": "answer-418f6503f8504abe985b32d836978df3",
+        "subquestions": [
+          "马来西亚船舶到港报告的官方入口在哪里？"
+        ],
+        "dimensions": [
+          "jurisdiction"
+        ],
+        "complexity": 2,
+        "requires_clarification": false,
+        "clarification_reason": null
+      },
+      "generation_provider": "local_rules",
+      "generation_fallback": false,
+      "generation_notice": "已直接返回带引用的登记官方来源入口，无需生成模型改写；请按来源日期核验现行页面。",
+      "grounded": true,
+      "refusal_reason": null,
+      "answer_verification": {
+        "status": "passed",
+        "claim_count": 2,
+        "supported_claim_count": 2,
+        "citation_coverage": 1.0,
+        "citation_validity": 1.0,
+        "evidence_alignment": 1.0,
+        "numeric_integrity": 1.0,
+        "advisory_checked": false,
+        "advisory_safe": true,
+        "advisory_issues": [],
+        "claims": [
+          {
+            "claim": "官方通告栏目：https://www.marine.gov.my/en/informasi/notis/malaysia-shipping-notice/ [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "103_my_active_shipping_notices_2026:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          },
+          {
+            "claim": "官方有效清单 PDF：https://www.marine.gov.my/wp-content/uploads/2026/01/MSN-01_2026_Senarai-NPM-yang-Masih-Aktif.pdf [E1]",
+            "citation_indices": [
+              1
+            ],
+            "evidence_ids": [
+              "103_my_active_shipping_notices_2026:1"
+            ],
+            "citation_valid": true,
+            "alignment_score": 1.0,
+            "alignment_basis": "exact",
+            "numeric_tokens": [
+              "2026",
+              "01"
+            ],
+            "unsupported_numeric_tokens": [],
+            "numeric_integrity": true,
+            "supported": true
+          }
+        ],
+        "issues": [],
+        "scope_notice": "该校验确定性检查引用编号、主张与证据的词面对齐，以及数字、日期和量值是否出现在所引证据中；不把词面对齐冒充为语义蕴含、事实正确性或法律判断。"
+      },
+      "decision_readiness": {
+        "status": "ready_with_review",
+        "risk_level": "medium",
+        "blockers": [
+          "source_review_due"
+        ],
+        "next_action": "采用前打开原始来源核对版本、适用日期和现场制度，并由责任岗位确认。",
+        "requires_human_confirmation": true,
+        "rationale": "已有支持证据，但法规、合规或来源复核状态要求人工确认。"
+      },
+      "evidence_ids": [
+        "103_my_active_shipping_notices_2026:1",
+        "103_my_active_shipping_notices_2026:2",
+        "103_my_active_shipping_notices_2026:3",
+        "103_my_active_shipping_notices_2026:4",
+        "102_my_marine_legislation_directory:1"
+      ]
+    }
+  ],
+  "retrieval": {
+    "circuit_open": false,
+    "query_cache_hits": 6,
+    "query_cache_entries": 8,
+    "upstream_requests": 8,
+    "fallbacks": 0,
+    "query_timeout_seconds": 6.0,
+    "configured": true,
+    "enabled": true,
+    "model": "xiaoyi-embedding-0.6b",
+    "record_count": 882,
+    "dimensions": 1024,
+    "last_error": null,
+    "notice": "真实稠密向量召回已启用；Sparse/BM25仍作为可审计对照与回退。"
+  },
+  "linkage": {
+    "correlation_id": "link-ad21d327f0d94b27860675d97653fafb",
+    "succeeded": 4,
+    "total": 4,
+    "all_succeeded": true,
+    "production_write_enabled": false,
+    "completed_at": "2026-09-07T07:39:58.503898+00:00",
+    "results": [
+      {
+        "trace_id": "link-ad21d327f0d94b27860675d97653fafb-1",
+        "target": "port-dt-multi",
+        "name": "港口数字孪生",
+        "status": "completed",
+        "action": "自然语言动作映射与联动健康核验",
+        "summary": {
+          "matched": true,
+          "missing_parameters": [],
+          "action_id": "open_rl_panel",
+          "action_label": "打开强化学习面板",
+          "route": "/rl-panel",
+          "execution_status": "ready",
+          "dry_run": true,
+          "requires_human_confirm": false,
+          "integration_ready": true,
+          "online_systems": 2,
+          "registered_systems": 4,
+          "desktop_integrations_enabled": true,
+          "production_write_enabled": false
+        },
+        "payload_sha256": "a6c480a0a6c8f02a8965586e9b071da42f98e3d31c10562ce9c1f0557b17cb96",
+        "duration_ms": 90,
+        "completed_at": "2026-09-07T07:39:57.750786+00:00",
+        "boundary": "真实调用数字孪生动作网关与联动健康接口；只生成 dry-run 动作包，不下发生产控制。",
+        "production_write_enabled": false
+      },
+      {
+        "trace_id": "link-ad21d327f0d94b27860675d97653fafb-2",
+        "target": "energy-cockpit",
+        "name": "能碳驾驶舱",
+        "status": "completed",
+        "action": "能碳策略重算",
+        "summary": {
+          "scenario_id": "port_la_2025_public_benchmark",
+          "green_preference": 0.68,
+          "kpis": [
+            {
+              "label": "测试轨迹碳排放",
+              "value": 118542.333,
+              "unit": "kgCO2e",
+              "delta": -49403.061
+            },
+            {
+              "label": "单箱碳强度",
+              "value": 3.976015,
+              "unit": "kg/TEU",
+              "delta": -1.6570230000000001
+            },
+            {
+              "label": "岸电使用率",
+              "value": 100.0,
+              "unit": "%",
+              "delta": 75.0
+            },
+            {
+              "label": "综合调度成本",
+              "value": 569367.554,
+              "unit": "CNY",
+              "delta": -71585.69799999997
+            }
+          ],
+          "strategies": [
+            "Reference:FixedRule",
+            "MPC"
+          ],
+          "total_cost_saving_cny": 71585.7,
+          "abatement_ton": 49.4,
+          "dataset_id": "port_la_2020_2025_hourly",
+          "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+          "production_dispatch_enabled": false
+        },
+        "payload_sha256": "03492d662c3c24dda3e55f46a8a5b26d502a9d03aad5b20c71bfaaec3bd5c7e3",
+        "duration_ms": 635,
+        "completed_at": "2026-09-07T07:39:58.386263+00:00",
+        "boundary": "调用能碳后端执行离线策略重算；数据来自登记数据集，不写入生产调度。",
+        "production_write_enabled": false
+      },
+      {
+        "trace_id": "link-ad21d327f0d94b27860675d97653fafb-3",
+        "target": "malacca-sandbox",
+        "name": "马六甲推演",
+        "status": "completed",
+        "action": "沙盘数据与RL能力读取",
+        "summary": {
+          "service_status": "ok",
+          "engine": "dataset-calibrated-port-control",
+          "algorithms": [
+            "q-learning",
+            "sarsa",
+            "expected-sarsa",
+            "dyna-q",
+            "mpc"
+          ],
+          "training_rendering": false,
+          "evaluation_rendering": "trace-driven",
+          "dataset": {
+            "source": "MPA data.gov.sg + Open-Meteo Marine + AIS研究实证基线",
+            "agency": "Maritime and Port Authority of Singapore",
+            "collection_id": "394",
+            "dataset_ids": [
+              "d_d48c5a038904f6da3c603cd854b6c191",
+              "d_8f264219109e61fffa87ac64dd5a9a65"
+            ],
+            "period": "2026-07"
+          },
+          "scenario": {
+            "id": "malacca-public-evidence-operational-scenario",
+            "name": "马六甲海峡公开数据实证推演场景",
+            "port_count": 32,
+            "channel_count": 6,
+            "monitored_vessels": 11655
+          },
+          "weather": {
+            "wind_speed_ms": 3.6,
+            "wave_height_m": 0.3,
+            "visibility_km": 7.3
+          },
+          "production_write_enabled": false
+        },
+        "payload_sha256": "bf4d8f9a5962c28e9b6827fc81b0ab9d2b9ee87aae62e3998baef6179ab9b6bb",
+        "duration_ms": 11,
+        "completed_at": "2026-09-07T07:39:58.397435+00:00",
+        "boundary": "读取沙盘公开数据快照和RL引擎状态；不启动训练、不提交生产动作。",
+        "production_write_enabled": false
+      },
+      {
+        "trace_id": "link-ad21d327f0d94b27860675d97653fafb-4",
+        "target": "sailing-simulator",
+        "name": "航行模拟器",
+        "status": "completed",
+        "action": "航行模拟器隔离状态核验",
+        "summary": {
+          "protectionStatus": "isolated",
+          "runtimeState": "offline",
+          "running": false,
+          "simulatorCodeModified": false,
+          "routeInjected": false,
+          "controlCommandSent": false
+        },
+        "payload_sha256": "5490b4bcb3e9e1bab6aa673818a7c10c6b659d597877c382843d308414b5a5af",
+        "duration_ms": 106,
+        "completed_at": "2026-09-07T07:39:58.503758+00:00",
+        "boundary": "只读取航行模拟器登记状态；不启动进程、不修改代码、不写入桥接文件，也不下发油门、舵角或航线。"
+      }
+    ]
+  },
+  "code_sha256": {
+    "app/main.py": "176417c09d3daa9dff9ae3fe4f6dbc73f8a5fe7c3b505856770ccb7c421ea747",
+    "app/models.py": "fe07dd8a07232a69a927bd962faaec9a2910fc21eb46074287a7f5e9a5a4cd45",
+    "app/query_intelligence.py": "5b768556c56f3d2a457c672a8db933d71905449b942f3aa4d8ef1706828b1c33",
+    "app/xiaoyi.py": "ba9253c3b95dbcc9fd10502ead6b972f61aefe204e172baf954ea05aa7fbd27e",
+    "app/model_gateway.py": "5cb908a14763f2dacac83770c49f6d67a185df9c79816ef5a5813e8a60271000",
+    "app/vector_retrieval.py": "78d41c245007c8c23e59d39df9f344c26f0ffa6cdfbbb877b9204fc725174e34",
+    "app/retrieval.py": "65e7c1b4fa514b2061bd82d34c119ec77f37bcde4c9b8b822637a2bb24ba81b2",
+    "app/settings.py": "cc57728cff5eee57b5c03be62c1e900f818008b70fec76905b0d7169b86a8ddc",
+    "app/system_linkage.py": "785ebcc8c3fbf63a7b0a2225e644b6be30178ba1848a997208bbff75753c28c0",
+    "web/app.js": "a2190077ec7bb348dc0cc952f56c785a2132871966a165dbc040643d0993c38c"
+  }
+}

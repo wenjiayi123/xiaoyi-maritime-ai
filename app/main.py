@@ -27,7 +27,7 @@ from app.governance import router as governance_router
 from app.knowledge_api import get_knowledge_status, router as knowledge_router
 from app.knowledge_intake import router as knowledge_intake_router
 from app.linked_system_launcher import router as linked_system_launcher_router
-from app.models import ChatRequest, ChatResponse, QueryAnalysis
+from app.models import AnswerTiming, ChatRequest, ChatResponse, QueryAnalysis
 from app.model_gateway import model_gateway, router as model_router
 from app.observability import telemetry
 from app.operations import router as operations_router
@@ -44,6 +44,7 @@ from app.simulator_launcher import router as simulator_launcher_router
 from app.settings import settings
 from app.system_api import router as system_router
 from app.system_linkage import router as system_linkage_router
+from app.linked_agent import router as linked_agent_router
 from app.xiaoyi import XiaoyiAI
 
 
@@ -100,6 +101,7 @@ app.include_router(conversations_router)
 app.include_router(model_router)
 app.include_router(system_router)
 app.include_router(system_linkage_router)
+app.include_router(linked_agent_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -142,6 +144,7 @@ def frontline_operator_scenarios() -> dict[str, object]:
 
 
 def _prepare_answer(payload: ChatRequest, request: Request):
+    started_at = time.monotonic()
     identity = request_identity(request)
     history = (
         runtime_store.list_chat_turns(
@@ -154,7 +157,17 @@ def _prepare_answer(payload: ChatRequest, request: Request):
         else []
     )
     query_analysis = build_query_analysis(payload.question, history=history)
-    if len(query_analysis.subquestions) > 1:
+    if query_analysis.requires_clarification:
+        response = ChatResponse(
+            app=APP_NAME, mode=payload.mode, question=payload.question,
+            intent="operator_clarification",
+            answer="我还不能确定你指的是哪项要求或哪个业务对象。请补充刚才的问题、法规名称，或船舶、设备、港口及时间范围，我再继续分析。",
+            evidence=[], confidence="low",
+            next_questions=["港口交接班需要交代哪些事项？", "船舶到港报告应从哪里核验？"],
+            strict_evidence=payload.strict_evidence, source_quality="not_applicable",
+            refusal_reason="business_object_required", completion_status="not_applicable",
+        )
+    elif len(query_analysis.subquestions) > 1:
         response = engine.ask_compound(
             query_analysis.standalone_question,
             query_analysis.subquestions,
@@ -178,6 +191,7 @@ def _prepare_answer(payload: ChatRequest, request: Request):
         update={
             "question": payload.question,
             "query_analysis": query_analysis,
+            "timing": AnswerTiming(preparation_ms=round((time.monotonic() - started_at) * 1000, 3)),
         }
     )
     return identity, history, query_analysis, response
@@ -199,6 +213,7 @@ def _finalize_answer(
     query_analysis,
     response: ChatResponse,
 ) -> ChatResponse:
+    verification_started_at = time.monotonic()
     response = response.model_copy(
         update={"answer_verification": verify_response(response)}
     )
@@ -213,7 +228,12 @@ def _finalize_answer(
         }
     )
     answer_id = f"answer-{uuid4().hex}"
-    response = response.model_copy(update={"session_id": payload.session_id, "answer_id": answer_id})
+    verification_ms = (time.monotonic() - verification_started_at) * 1000
+    timing = response.timing.model_copy(update={
+        "verification_ms": round(verification_ms, 3),
+        "total_ms": round(response.timing.preparation_ms + response.timing.generation_ms + verification_ms, 3),
+    })
+    response = response.model_copy(update={"session_id": payload.session_id, "answer_id": answer_id, "timing": timing})
     if settings.chat_retention_enabled:
         runtime_store.save_chat_turn(
             session_id=payload.session_id,
@@ -241,6 +261,7 @@ def _finalize_answer(
             "numeric_integrity": response.answer_verification.numeric_integrity,
             "evidence_health": response.evidence_health.status,
             "decision_readiness": response.decision_readiness.status,
+            "timing": response.timing.model_dump(),
         },
         detail="问答结果已记录证据策略与回答校验指标；校验结果不阻断生成答案，审计仅保存请求与结果哈希。",
     )
@@ -250,12 +271,16 @@ def _finalize_answer(
 def _answer(payload: ChatRequest, request: Request) -> ChatResponse:
     review_started_at = time.monotonic()
     identity, history, query_analysis, response = _prepare_answer(payload, request)
+    generation_started_at = time.monotonic()
     response = model_gateway.enhance(
         query_analysis.standalone_question,
         response,
         history=_generation_history(history, query_analysis),
         review_started_at=review_started_at,
     )
+    response = response.model_copy(update={"timing": response.timing.model_copy(update={
+        "generation_ms": round((time.monotonic() - generation_started_at) * 1000, 3),
+    })})
     return _finalize_answer(
         payload,
         request,
@@ -299,6 +324,7 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
             "generation_provider": model_gateway.status()["provider"],
         }
         yield f"event: metadata\ndata: {json.dumps(metadata, ensure_ascii=False)}\n\n"
+        generation_started_at = time.monotonic()
         stream = model_gateway.enhance_stream(
             query_analysis.standalone_question,
             prepared_response,
@@ -318,6 +344,9 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
         if not streamed:
             for chunk in natural_chunks(response.answer):
                 yield f"event: token\ndata: {json.dumps({'text': chunk}, ensure_ascii=False)}\n\n"
+        response = response.model_copy(update={"timing": response.timing.model_copy(update={
+            "generation_ms": round((time.monotonic() - generation_started_at) * 1000, 3),
+        })})
         response = _finalize_answer(
             payload,
             request,

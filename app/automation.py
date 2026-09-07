@@ -12,11 +12,17 @@ from pydantic import BaseModel, Field
 
 from app.security import request_identity
 from app.runtime_store import runtime_store
+from app.linked_agent_catalog import ACTIONS as LINKED_ACTIONS, parse_command as parse_linked_command
+import json
 
 
 router = APIRouter(prefix="/api/automation", tags=["小懿智能操作"])
 
 ActionKind = Literal[
+    "prepare_linked_operation",
+    "run_linked_operation",
+    "present_linked_operation",
+    "clarify_linked_operation",
     "navigate",
     "set_range",
     "set_mode",
@@ -360,6 +366,20 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
     # commands to manipulate it. Explicit imperative phrases continue below.
     if _looks_like_question(command, text):
         return intent, summary, 0.92, actions
+
+    linked = parse_linked_command(command)
+    if linked and linked.get("clarification"):
+        return "linked_agent_clarification", linked["clarification"], .99, [
+            _action("clarify_linked_operation", "明确目标与可执行参数", "systemLaunchHubBtn", linked, phase="准备")
+        ]
+    if linked and linked.get("action_id"):
+        spec = LINKED_ACTIONS[linked["action_id"]]
+        parameters = {"action_id": linked["action_id"], "parameters_json": json.dumps(linked["parameters"], ensure_ascii=False)}
+        return "linked_agent_operation", f"{spec['label']}：读取实际配置、执行本轮参数、观测并归档回执。模拟配置默认观测后恢复。", .99, [
+            _action("prepare_linked_operation", "读取目标并预览参数", "systemLaunchHubBtn", parameters, phase="准备"),
+            _action("run_linked_operation", spec["label"], "systemLaunchHubBtn", phase="执行", risk_level="medium" if spec.get("mutates") else "low", requires_confirmation=bool(spec.get("mutates"))),
+            _action("present_linked_operation", "查看观测、差值与恢复回执", "systemLaunchHubBtn", phase="交付"),
+        ]
 
     runtime_handover_request = (
         "交班" in text

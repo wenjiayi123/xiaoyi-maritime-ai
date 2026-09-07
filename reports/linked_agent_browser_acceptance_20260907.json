@@ -1,0 +1,2945 @@
+{
+  "generated_at": "2026-09-07T08:27:10.365218+00:00",
+  "scope": "Manual browser acceptance through actual UI controls, with retrieved backend receipts. Browser timing and metrics are not a production benchmark. Earlier rows predate the final UI corrections; the final port/cancel/manual-restore flows used the final UI.",
+  "additional_ui_checks": [
+    "natural-language form parameters",
+    "read-only preflight with actual source configuration",
+    "action history reopens persisted receipt",
+    "explicit simulation-change confirmation",
+    "chat result matches actual receipt",
+    "startup input preserved",
+    "linked receipt provenance badge"
+  ],
+  "passed": true,
+  "rows": [
+    {
+      "case": "console_energy_compare",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "applied": false,
+        "changes": [
+          {
+            "after": 1233.675,
+            "before": 1035.714,
+            "change": 197.961,
+            "metric": "carbon_kg"
+          },
+          {
+            "after": 4294.176,
+            "before": 3403.484,
+            "change": 890.692,
+            "metric": "cost_cny"
+          },
+          {
+            "after": 3003.536,
+            "before": 2956.589,
+            "change": 46.947,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "equipment_life_cost_cny"
+          },
+          {
+            "after": 13778.485,
+            "before": 13778.485,
+            "change": 0.0,
+            "metric": "grid_peak_kw"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "safety_violations"
+          },
+          {
+            "after": 100.0,
+            "before": 100.0,
+            "change": 0.0,
+            "metric": "service_fulfilment_pct"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:15:28.795188+00:00",
+        "evaluation": {
+          "baseline": {
+            "parameters": {
+              "carbon_price_cny_per_ton": 100.0,
+              "green_preference": 0.5
+            },
+            "payload_sha256": "eb168262dc63a988ea63e83a63a7b1b34d43e67e10fc556d4651add4a2d2e5f0",
+            "summary": {
+              "abatement_ton": 49.56,
+              "dataset_id": "port_la_2020_2025_hourly",
+              "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+              "green_preference": 0.5,
+              "kpis": [
+                {
+                  "delta": -49560.186,
+                  "label": "测试轨迹碳排放",
+                  "unit": "kgCO2e",
+                  "value": 118385.208
+                },
+                {
+                  "delta": -1.662293,
+                  "label": "单箱碳强度",
+                  "unit": "kg/TEU",
+                  "value": 3.970745
+                },
+                {
+                  "delta": 75.0,
+                  "label": "岸电使用率",
+                  "unit": "%",
+                  "value": 100.0
+                },
+                {
+                  "delta": -67882.89000000001,
+                  "label": "综合调度成本",
+                  "unit": "CNY",
+                  "value": 573070.362
+                }
+              ],
+              "production_dispatch_enabled": false,
+              "scenario_id": "port_la_2025_public_benchmark",
+              "strategies": [
+                "Reference:FixedRule",
+                "MPC"
+              ],
+              "total_cost_saving_cny": 67882.89
+            }
+          },
+          "candidate": {
+            "parameters": {
+              "carbon_price_cny_per_ton": 100.0,
+              "green_preference": 0.8
+            },
+            "payload_sha256": "cad78592a47913c279988c05021df2cb0e6fe94bfa4eefa03c9d5c1d84e1e82c",
+            "summary": {
+              "abatement_ton": 49.26,
+              "dataset_id": "port_la_2020_2025_hourly",
+              "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+              "green_preference": 0.8,
+              "kpis": [
+                {
+                  "delta": -49258.943,
+                  "label": "测试轨迹碳排放",
+                  "unit": "kgCO2e",
+                  "value": 118686.451
+                },
+                {
+                  "delta": -1.652189,
+                  "label": "单箱碳强度",
+                  "unit": "kg/TEU",
+                  "value": 3.980849
+                },
+                {
+                  "delta": 75.0,
+                  "label": "岸电使用率",
+                  "unit": "%",
+                  "value": 100.0
+                },
+                {
+                  "delta": -71656.30799999996,
+                  "label": "综合调度成本",
+                  "unit": "CNY",
+                  "value": 569296.944
+                }
+              ],
+              "production_dispatch_enabled": false,
+              "scenario_id": "port_la_2025_public_benchmark",
+              "strategies": [
+                "Reference:FixedRule",
+                "MPC"
+              ],
+              "total_cost_saving_cny": 71656.31
+            }
+          },
+          "changes": [
+            {
+              "after": 0.8,
+              "before": 0.5,
+              "change": 0.3,
+              "metric": "green_preference"
+            },
+            {
+              "after": 71656.31,
+              "before": 67882.89,
+              "change": 3773.42,
+              "metric": "total_cost_saving_cny"
+            },
+            {
+              "after": 49.26,
+              "before": 49.56,
+              "change": -0.3,
+              "metric": "abatement_ton"
+            }
+          ],
+          "scope": "同一公开离线数据集的参数试算；未改变目标驾驶舱的全局参数，运行态观测是另一条数据链。"
+        },
+        "events": [
+          {
+            "at": "2026-09-07T08:15:28.796625+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "1bd654f00e29513bdd5b89458fd573892fdbddab471b7a305e54d14cced41119",
+            "sha256": "75b15ef58abaea0fca3c0b3b0378c8916f51149dfbd46c391b7c8eed86dda142",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:15:29.957436+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "75b15ef58abaea0fca3c0b3b0378c8916f51149dfbd46c391b7c8eed86dda142",
+            "result_sha256": "93c17415e7831abfb6c35e61d3cd60b0f378e7a9e20050f4c9223f02740b5492",
+            "sha256": "b28b4e520ad8cfdcde1723a0ed231d219b0c2982bcad9b85d11b6587c6438e07",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:15:29.992647+00:00",
+            "event": "observation",
+            "previous_sha256": "b28b4e520ad8cfdcde1723a0ed231d219b0c2982bcad9b85d11b6587c6438e07",
+            "result_sha256": "9e57c07d4e17a9635c90f54036a6411c324bfd685909a373cb0400f254c390f1",
+            "sha256": "c42b8f0f2da61a588b80c76db2236b3bb978d48250a74ab5639c48910887a48d",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:15:32.025270+00:00",
+            "event": "observation",
+            "previous_sha256": "c42b8f0f2da61a588b80c76db2236b3bb978d48250a74ab5639c48910887a48d",
+            "result_sha256": "1caab56e99296cca092bdc0fa64d6ae43d6242a9379f30d3872fe75c3cd1e2f4",
+            "sha256": "a06ea482db00f1bc893405ab16cf018b791818f536a3af1dceffee84d59013ce",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:15:34.053525+00:00",
+            "event": "observation",
+            "previous_sha256": "a06ea482db00f1bc893405ab16cf018b791818f536a3af1dceffee84d59013ce",
+            "result_sha256": "0eb7c0a841ce7726f00101053b09350a15e9a6660ce49d55434c1a25d64a8919",
+            "sha256": "07f2044a464f2f6ff9879e7ecbf67c6c69324042075369803e9d789dc9f02b46",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:15:34.055874+00:00",
+            "event": "finished",
+            "previous_sha256": "07f2044a464f2f6ff9879e7ecbf67c6c69324042075369803e9d789dc9f02b46",
+            "result_sha256": "ac3efff975fca7bbee6c181c16c2210622cb5f971bddb43dd2d3cbac010342a0",
+            "sha256": "2be88afc9a4eb858f05a2485e12216eea34f7b9ea8764a1196ecc0d47a5441b4",
+            "status": "completed"
+          }
+        ],
+        "id": "lar-ce3702e9360ddd3687b11a4ea043a40c",
+        "observations": [
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 1233.675,
+              "cost_cny": 4294.176,
+              "energy_kwh": 3003.536,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:15:29.989978+00:00",
+            "payload_sha256": "b68edb18b7ae72392963b6ba6d0cbc464725fa015cc2bd38a3cde246b4e4d546",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-09T21:10:00Z"
+          },
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 1233.675,
+              "cost_cny": 4294.176,
+              "energy_kwh": 3003.536,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:15:32.024561+00:00",
+            "payload_sha256": "b68edb18b7ae72392963b6ba6d0cbc464725fa015cc2bd38a3cde246b4e4d546",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-09T21:10:00Z"
+          },
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 1233.675,
+              "cost_cny": 4294.176,
+              "energy_kwh": 3003.536,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:15:34.052633+00:00",
+            "payload_sha256": "b68edb18b7ae72392963b6ba6d0cbc464725fa015cc2bd38a3cde246b4e4d546",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-09T21:10:00Z"
+          }
+        ],
+        "plan": {
+          "action_id": "energy.compare",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 1035.714,
+              "cost_cny": 3403.484,
+              "energy_kwh": 2956.589,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:15:24.285310+00:00",
+            "payload_sha256": "9243171708dcb4ab3fe47b51832b05f3f956865d82cf574f2ef4594b79748609",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-09T15:25:00Z"
+          },
+          "created_at": "2026-09-07T08:15:24.286150+00:00",
+          "expires_at_epoch": 1788769224.286171,
+          "id": "lap-eb84341da54e456e8eacd5f637253718",
+          "interval_seconds": 2.0,
+          "label": "能碳参数对比试算",
+          "mutates": false,
+          "parameters": {
+            "baseline_green_preference": 0.5,
+            "carbon_price_cny_per_ton": 100.0,
+            "green_preference": 0.8
+          },
+          "plan_sha256": "02b2e36adb8276edf8f4b18cfb2cd54f789bc2dc880b70b435b8fd8df310fc7d",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-ce3702e9360ddd3687b11a4ea043a40c",
+          "samples": 3,
+          "target": "energy-cockpit"
+        },
+        "production_authority": false,
+        "restored": false,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:15:34.055874+00:00"
+      }
+    },
+    {
+      "case": "console_malacca_restore",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "after_apply": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "peak-arrivals"
+          },
+          "metrics": {
+            "carbon_tons": 1.403,
+            "cost_myr": 1160.9,
+            "delay_minutes": 0.0,
+            "energy_kwh": 2418.55,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 0.0,
+            "resilience_index": 98.5,
+            "safety_risk_percent": 3.3,
+            "service_level_percent": 100.0,
+            "throughput_teu": 1833.0
+          },
+          "observed_at": "2026-09-07T08:18:41.181334+00:00",
+          "payload_sha256": "1df3378925c52bf323b5642e4c3c5fd984fa4fb19e53ed6be7c61ca2ac3371d6",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-03T14:30:00.000Z"
+        },
+        "after_restore": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "normal"
+          },
+          "metrics": {
+            "carbon_tons": 1.401,
+            "cost_myr": 1159.65,
+            "delay_minutes": 4.0,
+            "energy_kwh": 2415.93,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 1.0,
+            "resilience_index": 97.1,
+            "safety_risk_percent": 3.6,
+            "service_level_percent": 60.0,
+            "throughput_teu": 1821.0
+          },
+          "observed_at": "2026-09-07T08:18:45.410607+00:00",
+          "payload_sha256": "6080298e76b4d9a142adfda307122d47fed19a315c23eaac69fe90a18826819b",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-03T14:45:00.000Z"
+        },
+        "applied": true,
+        "changes": [
+          {
+            "after": 1.401,
+            "before": 1.404,
+            "change": -0.003,
+            "metric": "carbon_tons"
+          },
+          {
+            "after": 1159.65,
+            "before": 1162.1,
+            "change": -2.45,
+            "metric": "cost_myr"
+          },
+          {
+            "after": 4.0,
+            "before": 0.0,
+            "change": 4.0,
+            "metric": "delay_minutes"
+          },
+          {
+            "after": 2415.93,
+            "before": 2421.05,
+            "change": -5.12,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 11348.0,
+            "before": 11348.0,
+            "change": 0.0,
+            "metric": "peak_grid_kw"
+          },
+          {
+            "after": 1.0,
+            "before": 0.0,
+            "change": 1.0,
+            "metric": "queue_vessels"
+          },
+          {
+            "after": 97.1,
+            "before": 98.3,
+            "change": -1.2,
+            "metric": "resilience_index"
+          },
+          {
+            "after": 3.6,
+            "before": 3.7,
+            "change": -0.1,
+            "metric": "safety_risk_percent"
+          },
+          {
+            "after": 60.0,
+            "before": 100.0,
+            "change": -40.0,
+            "metric": "service_level_percent"
+          },
+          {
+            "after": 1821.0,
+            "before": 1842.0,
+            "change": -21.0,
+            "metric": "throughput_teu"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:18:41.058392+00:00",
+        "events": [
+          {
+            "at": "2026-09-07T08:18:41.060044+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "0d5ff00c69d69ff8361a8ccc11ad9eeee043517e30de0d1053a1045db7b8c994",
+            "sha256": "6387fcdf859fd348eefa3511008ff1dcfe4b882bffe3688150c580952712b442",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:41.100033+00:00",
+            "event": "write-intent",
+            "previous_sha256": "6387fcdf859fd348eefa3511008ff1dcfe4b882bffe3688150c580952712b442",
+            "result_sha256": "a7f56144fb73d99e1125554e8518bbe440f019c69cf5bcd23b429a08fb0143ee",
+            "sha256": "1e4479ed7070b63ae5940afd175ef21f5d3471223adc9c18865e222b2feaa9c0",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:41.137973+00:00",
+            "event": "write-receipt",
+            "previous_sha256": "1e4479ed7070b63ae5940afd175ef21f5d3471223adc9c18865e222b2feaa9c0",
+            "result_sha256": "43749a942c686cd8147f7c532eb23fa80530c7b83ba2f61d17c31c9dfc4ccaa1",
+            "sha256": "fc9ba5afd78c8855cd0b913b163598de2cba9af8dd5b5d51ee2b8243666c2351",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:41.183639+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "fc9ba5afd78c8855cd0b913b163598de2cba9af8dd5b5d51ee2b8243666c2351",
+            "result_sha256": "169d848d926b6b394dfe345a8e256078549da65a17012c1803749325d691306f",
+            "sha256": "3bc8cbd4a3f29eed70468ce028d9450402ca9d53d2011d4f4341beaa8f80af4c",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:41.219027+00:00",
+            "event": "observation",
+            "previous_sha256": "3bc8cbd4a3f29eed70468ce028d9450402ca9d53d2011d4f4341beaa8f80af4c",
+            "result_sha256": "9506aab6ed2b6d59d62ce50f61e7a3aabe06ea117d292579df566f00c9c64a56",
+            "sha256": "602142ebb14285626589a807fc9912c57bd4ba6800338eedbc3cc49fbe46070f",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:43.254671+00:00",
+            "event": "observation",
+            "previous_sha256": "602142ebb14285626589a807fc9912c57bd4ba6800338eedbc3cc49fbe46070f",
+            "result_sha256": "e128226f9f3a73baa0fed913fa8098d92208a61c9404131b041b65cdc4a04fb5",
+            "sha256": "4265285a31915e9131bfa5f4505cba073c3a3e3768b77c0e095d8ae0223f7102",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:45.295844+00:00",
+            "event": "observation",
+            "previous_sha256": "4265285a31915e9131bfa5f4505cba073c3a3e3768b77c0e095d8ae0223f7102",
+            "result_sha256": "ee80ce17a519356a91e9d75f85e13e9a0b6e554403c3fc8026139349a166393a",
+            "sha256": "8a210d787fe665e274c070c329bb207b41d6158f2d27f2e494657d8c833bb325",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:18:45.415709+00:00",
+            "event": "finished",
+            "previous_sha256": "8a210d787fe665e274c070c329bb207b41d6158f2d27f2e494657d8c833bb325",
+            "result_sha256": "ff85f895586a0ec45b2da48d9f5cd23290a68dc9fcca41a5dbb3da8fc169ec5c",
+            "sha256": "9af1a1c8791d17714883bcc4c97729a39f203770de9cd8c93e7261b7582c85c3",
+            "status": "completed"
+          }
+        ],
+        "expected_config": {
+          "run_id": "ops-1135cd3c-a52eac07",
+          "running": true,
+          "scenario": "peak-arrivals"
+        },
+        "id": "lar-d97fc0ff690271b7152986d3ee7fde98",
+        "observations": [
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.403,
+              "cost_myr": 1160.9,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2418.55,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.5,
+              "safety_risk_percent": 3.3,
+              "service_level_percent": 100.0,
+              "throughput_teu": 1833.0
+            },
+            "observed_at": "2026-09-07T08:18:41.217106+00:00",
+            "payload_sha256": "647125ab45bdbf027644178fcfe2f8374a7acca26b815e01faa054206b90f2d7",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-03T14:30:00.000Z"
+          },
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.401,
+              "cost_myr": 1159.65,
+              "delay_minutes": 4.0,
+              "energy_kwh": 2415.93,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 1.0,
+              "resilience_index": 97.1,
+              "safety_risk_percent": 3.6,
+              "service_level_percent": 60.0,
+              "throughput_teu": 1821.0
+            },
+            "observed_at": "2026-09-07T08:18:43.252439+00:00",
+            "payload_sha256": "d522bcd8c1f23fa8ed608dc8a1e804b5946707b584ee51cacbbab86d05fc46e5",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-03T14:45:00.000Z"
+          },
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.401,
+              "cost_myr": 1159.65,
+              "delay_minutes": 4.0,
+              "energy_kwh": 2415.93,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 1.0,
+              "resilience_index": 97.1,
+              "safety_risk_percent": 3.6,
+              "service_level_percent": 60.0,
+              "throughput_teu": 1821.0
+            },
+            "observed_at": "2026-09-07T08:18:45.293660+00:00",
+            "payload_sha256": "e8bc8a6045c09079f43b46a00e2ebf37e7dc7d8ae5ec088646cb6df58b36f1bb",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-03T14:45:00.000Z"
+          }
+        ],
+        "operation_receipt_sha256": "0f4bad10f3d6a968f6aafcf0d5a581b84b4dbd109718d57f32a3ca798e961cdc",
+        "plan": {
+          "action_id": "malacca.scenario",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "normal"
+            },
+            "metrics": {
+              "carbon_tons": 1.404,
+              "cost_myr": 1162.1,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2421.05,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.3,
+              "safety_risk_percent": 3.7,
+              "service_level_percent": 100.0,
+              "throughput_teu": 1842.0
+            },
+            "observed_at": "2026-09-07T08:18:34.922306+00:00",
+            "payload_sha256": "a8bad19d541161db5c154903f9b52b37abe2c72d71d284218622effc4cdad604",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-03T14:15:00.000Z"
+          },
+          "created_at": "2026-09-07T08:18:34.924869+00:00",
+          "expires_at_epoch": 1788769414.924892,
+          "id": "lap-d218455640b843008bfc837d395b2c15",
+          "interval_seconds": 2.0,
+          "label": "调整马六甲模拟情景",
+          "mutates": true,
+          "parameters": {
+            "scenario": "peak-arrivals"
+          },
+          "plan_sha256": "51f38f77f95d96e3c311e56b93a933677affc75810f51282e16b2b98e6318893",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-d97fc0ff690271b7152986d3ee7fde98",
+          "samples": 3,
+          "target": "malacca-sandbox"
+        },
+        "production_authority": false,
+        "restore_receipt_sha256": "40fbe4148cc6f0400a259b35575a7049d77168a5868d54b7f8637c64c853f44a",
+        "restored": true,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:18:45.415709+00:00",
+        "write_attempted": true
+      }
+    },
+    {
+      "case": "chat_energy_result",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "applied": false,
+        "changes": [
+          {
+            "after": 933.723,
+            "before": 875.387,
+            "change": 58.336,
+            "metric": "carbon_kg"
+          },
+          {
+            "after": 6948.517,
+            "before": 5542.512,
+            "change": 1406.005,
+            "metric": "cost_cny"
+          },
+          {
+            "after": 3181.237,
+            "before": 2584.903,
+            "change": 596.334,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 0.0,
+            "before": 108.0,
+            "change": -108.0,
+            "metric": "equipment_life_cost_cny"
+          },
+          {
+            "after": 13778.485,
+            "before": 13778.485,
+            "change": 0.0,
+            "metric": "grid_peak_kw"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "safety_violations"
+          },
+          {
+            "after": 100.0,
+            "before": 100.0,
+            "change": 0.0,
+            "metric": "service_fulfilment_pct"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:19:12.304998+00:00",
+        "evaluation": {
+          "baseline": {
+            "parameters": {
+              "carbon_price_cny_per_ton": 100.0,
+              "green_preference": 0.5
+            },
+            "payload_sha256": "eb168262dc63a988ea63e83a63a7b1b34d43e67e10fc556d4651add4a2d2e5f0",
+            "summary": {
+              "abatement_ton": 49.56,
+              "dataset_id": "port_la_2020_2025_hourly",
+              "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+              "green_preference": 0.5,
+              "kpis": [
+                {
+                  "delta": -49560.186,
+                  "label": "测试轨迹碳排放",
+                  "unit": "kgCO2e",
+                  "value": 118385.208
+                },
+                {
+                  "delta": -1.662293,
+                  "label": "单箱碳强度",
+                  "unit": "kg/TEU",
+                  "value": 3.970745
+                },
+                {
+                  "delta": 75.0,
+                  "label": "岸电使用率",
+                  "unit": "%",
+                  "value": 100.0
+                },
+                {
+                  "delta": -67882.89000000001,
+                  "label": "综合调度成本",
+                  "unit": "CNY",
+                  "value": 573070.362
+                }
+              ],
+              "production_dispatch_enabled": false,
+              "scenario_id": "port_la_2025_public_benchmark",
+              "strategies": [
+                "Reference:FixedRule",
+                "MPC"
+              ],
+              "total_cost_saving_cny": 67882.89
+            }
+          },
+          "candidate": {
+            "parameters": {
+              "carbon_price_cny_per_ton": 100.0,
+              "green_preference": 0.8
+            },
+            "payload_sha256": "cad78592a47913c279988c05021df2cb0e6fe94bfa4eefa03c9d5c1d84e1e82c",
+            "summary": {
+              "abatement_ton": 49.26,
+              "dataset_id": "port_la_2020_2025_hourly",
+              "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+              "green_preference": 0.8,
+              "kpis": [
+                {
+                  "delta": -49258.943,
+                  "label": "测试轨迹碳排放",
+                  "unit": "kgCO2e",
+                  "value": 118686.451
+                },
+                {
+                  "delta": -1.652189,
+                  "label": "单箱碳强度",
+                  "unit": "kg/TEU",
+                  "value": 3.980849
+                },
+                {
+                  "delta": 75.0,
+                  "label": "岸电使用率",
+                  "unit": "%",
+                  "value": 100.0
+                },
+                {
+                  "delta": -71656.30799999996,
+                  "label": "综合调度成本",
+                  "unit": "CNY",
+                  "value": 569296.944
+                }
+              ],
+              "production_dispatch_enabled": false,
+              "scenario_id": "port_la_2025_public_benchmark",
+              "strategies": [
+                "Reference:FixedRule",
+                "MPC"
+              ],
+              "total_cost_saving_cny": 71656.31
+            }
+          },
+          "changes": [
+            {
+              "after": 0.8,
+              "before": 0.5,
+              "change": 0.3,
+              "metric": "green_preference"
+            },
+            {
+              "after": 71656.31,
+              "before": 67882.89,
+              "change": 3773.42,
+              "metric": "total_cost_saving_cny"
+            },
+            {
+              "after": 49.26,
+              "before": 49.56,
+              "change": -0.3,
+              "metric": "abatement_ton"
+            }
+          ],
+          "scope": "同一公开离线数据集的参数试算；未改变目标驾驶舱的全局参数，运行态观测是另一条数据链。"
+        },
+        "events": [
+          {
+            "at": "2026-09-07T08:19:12.306144+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "a1fc90f6aba9e5d093a34afefd60821521f40f80e796831bcb4d1199b66f782f",
+            "sha256": "86098dd5e2d4c4f1395488f96de367f03deb9d6e3b1e5c8096217f2794a6c866",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:19:13.434568+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "86098dd5e2d4c4f1395488f96de367f03deb9d6e3b1e5c8096217f2794a6c866",
+            "result_sha256": "dc1d7c48ae7027eafbc873b0954257277d8f3ab6c648f19a848101756a155ca5",
+            "sha256": "708ffab7cd939986403085196035ec60d4471599c50308ff6c05055a7b151f59",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:19:13.460288+00:00",
+            "event": "observation",
+            "previous_sha256": "708ffab7cd939986403085196035ec60d4471599c50308ff6c05055a7b151f59",
+            "result_sha256": "4d86103f44d5454ba81397dd4840b7c945bc4eed0abf68145263b90b725b9d98",
+            "sha256": "5ffe14decf21456a36480b00a79c249c5ab70ca21cadf2282e851eeb773479db",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:19:15.491357+00:00",
+            "event": "observation",
+            "previous_sha256": "5ffe14decf21456a36480b00a79c249c5ab70ca21cadf2282e851eeb773479db",
+            "result_sha256": "faf4874ba8a04b97f6ca48dc56eb8544dfe2c2bb2c8c1ff904f28f0962b62911",
+            "sha256": "7b0a59d3adb3ff9ea0e2c1338ab37991bca305c8432ca39f020487f87e870bd1",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:19:17.522245+00:00",
+            "event": "observation",
+            "previous_sha256": "7b0a59d3adb3ff9ea0e2c1338ab37991bca305c8432ca39f020487f87e870bd1",
+            "result_sha256": "73984df84b32a177b77a9f65c3a1e2421298a5cbe614d3bfdaad99dc5527c861",
+            "sha256": "e8a0a2c4494fd548530ff7294093092d45e46ae887873d0403b96604ef3606bc",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:19:17.524324+00:00",
+            "event": "finished",
+            "previous_sha256": "e8a0a2c4494fd548530ff7294093092d45e46ae887873d0403b96604ef3606bc",
+            "result_sha256": "1b40c0682811a098bc222f741cbedccdd8922b79f1fc5545958e6b648019637e",
+            "sha256": "013c1765d3d195a5490ade5a59ede97440a25a443ba2b3739e89a3a0f71df7e0",
+            "status": "completed"
+          }
+        ],
+        "id": "lar-abd572ccb55943ad2aaedb814f27574a",
+        "observations": [
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 997.043,
+              "cost_cny": 7434.923,
+              "energy_kwh": 3272.915,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:19:13.459309+00:00",
+            "payload_sha256": "2d695c369aad2a8ff1abe72a6c45ad3cdfb2eee9d25befbff14ff9fc49e196b3",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-10T08:10:00Z"
+          },
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 933.723,
+              "cost_cny": 6948.517,
+              "energy_kwh": 3181.237,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:19:15.490645+00:00",
+            "payload_sha256": "cf55eeff2c3bf0b9b9be63bf3a48bb0b566ed069a2832ada652eb5c38034c68c",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-10T08:25:00Z"
+          },
+          {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 933.723,
+              "cost_cny": 6948.517,
+              "energy_kwh": 3181.237,
+              "equipment_life_cost_cny": 0.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:19:17.521307+00:00",
+            "payload_sha256": "cf55eeff2c3bf0b9b9be63bf3a48bb0b566ed069a2832ada652eb5c38034c68c",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-10T08:25:00Z"
+          }
+        ],
+        "plan": {
+          "action_id": "energy.compare",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "scenario": {
+                "remaining_steps": 0,
+                "scenario_id": "normal",
+                "settlement_evidence": false
+              },
+              "state": "running"
+            },
+            "metrics": {
+              "carbon_kg": 875.387,
+              "cost_cny": 5542.512,
+              "energy_kwh": 2584.903,
+              "equipment_life_cost_cny": 108.0,
+              "grid_peak_kw": 13778.485,
+              "safety_violations": 0.0,
+              "service_fulfilment_pct": 100.0
+            },
+            "observed_at": "2026-09-07T08:19:10.852255+00:00",
+            "payload_sha256": "636c7955866a1433e583928b8fd1ca6755a606b164f4d05782ea7657a8bc6b55",
+            "production_authority": false,
+            "quality": {
+              "classification_counts": {
+                "derived": 19,
+                "measured": 4,
+                "simulated": 28
+              },
+              "classification_pct": {
+                "derived": 37.25,
+                "measured": 7.84,
+                "simulated": 54.9
+              },
+              "critical_reasons": [],
+              "energy_balance_error_kw": 0.0,
+              "freshness_seconds": 0.0,
+              "quality_status_counts": {
+                "插值": 1,
+                "正常": 50
+              },
+              "source_type_counts": {
+                "公开观测": 2,
+                "官方聚合": 2,
+                "工程派生": 19,
+                "物理模拟": 28
+              },
+              "status": "pass"
+            },
+            "source": "/api/runtime/snapshot",
+            "source_time": "2026-09-10T03:10:00Z"
+          },
+          "created_at": "2026-09-07T08:19:10.852993+00:00",
+          "expires_at_epoch": 1788769450.853007,
+          "id": "lap-5d6ae0c7e6b944c1bd8d1d579841d1ab",
+          "interval_seconds": 2.0,
+          "label": "能碳参数对比试算",
+          "mutates": false,
+          "parameters": {
+            "baseline_green_preference": 0.5,
+            "carbon_price_cny_per_ton": 100.0,
+            "green_preference": 0.8
+          },
+          "plan_sha256": "d851982b76758b74dfa0a472d2befac6216e70ce9243c8675d855432ed63ccd9",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-abd572ccb55943ad2aaedb814f27574a",
+          "samples": 3,
+          "target": "energy-cockpit"
+        },
+        "production_authority": false,
+        "restored": false,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:19:17.524324+00:00"
+      }
+    },
+    {
+      "case": "chat_malacca_confirm_restore",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "after_apply": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "peak-arrivals"
+          },
+          "metrics": {
+            "carbon_tons": 1.206,
+            "cost_myr": 1298.62,
+            "delay_minutes": 20.2,
+            "energy_kwh": 2094.55,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 7.0,
+            "resilience_index": 92.1,
+            "safety_risk_percent": 3.2,
+            "service_level_percent": 45.5,
+            "throughput_teu": 3760.0
+          },
+          "observed_at": "2026-09-07T08:24:59.457512+00:00",
+          "payload_sha256": "dad6f5f0a0de596a222467022d81f1cad5cc26e1d6c995c48d20db915f6351d4",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T09:30:00.000Z"
+        },
+        "after_restore": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "normal"
+          },
+          "metrics": {
+            "carbon_tons": 1.245,
+            "cost_myr": 1335.87,
+            "delay_minutes": 26.0,
+            "energy_kwh": 2154.63,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 9.0,
+            "resilience_index": 90.2,
+            "safety_risk_percent": 3.3,
+            "service_level_percent": 31.3,
+            "throughput_teu": 3745.0
+          },
+          "observed_at": "2026-09-07T08:25:03.677040+00:00",
+          "payload_sha256": "93fdd0ace4e145c439305f566a8edc8968d188fc80a0219d8410f5d712e22010",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T09:45:00.000Z"
+        },
+        "applied": true,
+        "changes": [
+          {
+            "after": 1.245,
+            "before": 0.797,
+            "change": 0.448,
+            "metric": "carbon_tons"
+          },
+          {
+            "after": 1335.87,
+            "before": 888.27,
+            "change": 447.6,
+            "metric": "cost_myr"
+          },
+          {
+            "after": 26.0,
+            "before": 37.5,
+            "change": -11.5,
+            "metric": "delay_minutes"
+          },
+          {
+            "after": 2154.63,
+            "before": 1432.7,
+            "change": 721.93,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 11348.0,
+            "before": 11348.0,
+            "change": 0.0,
+            "metric": "peak_grid_kw"
+          },
+          {
+            "after": 9.0,
+            "before": 13.0,
+            "change": -4.0,
+            "metric": "queue_vessels"
+          },
+          {
+            "after": 90.2,
+            "before": 86.5,
+            "change": 3.7,
+            "metric": "resilience_index"
+          },
+          {
+            "after": 3.3,
+            "before": 3.4,
+            "change": -0.1,
+            "metric": "safety_risk_percent"
+          },
+          {
+            "after": 31.3,
+            "before": 29.4,
+            "change": 1.9,
+            "metric": "service_level_percent"
+          },
+          {
+            "after": 3745.0,
+            "before": 3845.0,
+            "change": -100.0,
+            "metric": "throughput_teu"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:24:59.341673+00:00",
+        "events": [
+          {
+            "at": "2026-09-07T08:24:59.343281+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "0afc27b34284fe25cd63ccb43ba2568518097ebe72acb8c6fd6cd426ec2da8e3",
+            "sha256": "06ee6ebcea9664a34d0c321198ed52cd48048b0d173518d474c0f88590ffb995",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:24:59.379842+00:00",
+            "event": "write-intent",
+            "previous_sha256": "06ee6ebcea9664a34d0c321198ed52cd48048b0d173518d474c0f88590ffb995",
+            "result_sha256": "1555dbbddeeae6c4548b44f1ae542c231e1f99ea8dbdffebf580b5d3602969b5",
+            "sha256": "17a56acf6cc7210acc4058c7c281e2fbe100618a961ad22db8250534b2c826a5",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:24:59.417912+00:00",
+            "event": "write-receipt",
+            "previous_sha256": "17a56acf6cc7210acc4058c7c281e2fbe100618a961ad22db8250534b2c826a5",
+            "result_sha256": "fe6e98cda922c30367755d3a553445316a04a7ca3a93689cfc26f5d4d2122434",
+            "sha256": "dd1f9af74181d5732e5458d1c0f6f5ce2e12779c0c50398997185854a3c05aff",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:24:59.459724+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "dd1f9af74181d5732e5458d1c0f6f5ce2e12779c0c50398997185854a3c05aff",
+            "result_sha256": "5fd48941bc24e48a445fb5fb6d1e048c1e41f2f72ed1f28745a507b9afd54fd8",
+            "sha256": "d4b26ee4c6733ed2552fe62ccd7768de17b1a4c151fb30209ff532cf2d682eb5",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:24:59.495842+00:00",
+            "event": "observation",
+            "previous_sha256": "d4b26ee4c6733ed2552fe62ccd7768de17b1a4c151fb30209ff532cf2d682eb5",
+            "result_sha256": "c8b93143a74cde29d6291d552f9d945691ec24ea798ec72dadf37c967cea6967",
+            "sha256": "456014e8607b695276bafab26a6ea8ade1793cef2416e7f2f934c9f9f922516c",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:01.540309+00:00",
+            "event": "observation",
+            "previous_sha256": "456014e8607b695276bafab26a6ea8ade1793cef2416e7f2f934c9f9f922516c",
+            "result_sha256": "555b78e711631cb4d952b783baaa18fc8ec9c96dc816a9d4f11e5b19edc35108",
+            "sha256": "67767ceea1a76fe05a8d42f500aa258e6761ec5e2ec71b2b49cdc3c44445b963",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:03.582020+00:00",
+            "event": "observation",
+            "previous_sha256": "67767ceea1a76fe05a8d42f500aa258e6761ec5e2ec71b2b49cdc3c44445b963",
+            "result_sha256": "39b9acc6a55ff858bd98bd297f0ff93dfba833ab4507619effc8c89352d97457",
+            "sha256": "d856296bbde7e271544e63fac109a8738134342ef5d45fef29f41029c22cbcf0",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:03.681024+00:00",
+            "event": "finished",
+            "previous_sha256": "d856296bbde7e271544e63fac109a8738134342ef5d45fef29f41029c22cbcf0",
+            "result_sha256": "311d5452968ccb52380cd5b926628188d66bc865ac6c81b5a558fbc6be26264a",
+            "sha256": "daef76356404c041c7ab158c378c01a99802e4d797b065fded9527c052919e87",
+            "status": "completed"
+          }
+        ],
+        "expected_config": {
+          "run_id": "ops-1135cd3c-a52eac07",
+          "running": true,
+          "scenario": "peak-arrivals"
+        },
+        "id": "lar-c523e2a20ec374ba546eb5f675dec3ac",
+        "observations": [
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.206,
+              "cost_myr": 1298.62,
+              "delay_minutes": 20.2,
+              "energy_kwh": 2094.55,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 7.0,
+              "resilience_index": 92.1,
+              "safety_risk_percent": 3.2,
+              "service_level_percent": 45.5,
+              "throughput_teu": 3760.0
+            },
+            "observed_at": "2026-09-07T08:24:59.493542+00:00",
+            "payload_sha256": "8c71aaef8f3afaa72c686ad79878cd23c1a88dee7a2f879bc71c485e7ccbd11c",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T09:30:00.000Z"
+          },
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.206,
+              "cost_myr": 1298.62,
+              "delay_minutes": 20.2,
+              "energy_kwh": 2094.55,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 7.0,
+              "resilience_index": 92.1,
+              "safety_risk_percent": 3.2,
+              "service_level_percent": 45.5,
+              "throughput_teu": 3760.0
+            },
+            "observed_at": "2026-09-07T08:25:01.538137+00:00",
+            "payload_sha256": "aefe58220243af2511070f9db879960b9499a9b2d6afd224cb653975f4c6a039",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T09:30:00.000Z"
+          },
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.245,
+              "cost_myr": 1335.87,
+              "delay_minutes": 26.0,
+              "energy_kwh": 2154.63,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 9.0,
+              "resilience_index": 90.2,
+              "safety_risk_percent": 3.3,
+              "service_level_percent": 31.3,
+              "throughput_teu": 3745.0
+            },
+            "observed_at": "2026-09-07T08:25:03.579353+00:00",
+            "payload_sha256": "fd7f8b11f7ecd30ce38b70cfeda35c8d5744cc90b09760fe2b0846d7c66d4f43",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T09:45:00.000Z"
+          }
+        ],
+        "operation_receipt_sha256": "59bb022f4ab811b78f4754c52750b81b662e5e5b14f3f3658f68fe7265930917",
+        "plan": {
+          "action_id": "malacca.scenario",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "normal"
+            },
+            "metrics": {
+              "carbon_tons": 0.797,
+              "cost_myr": 888.27,
+              "delay_minutes": 37.5,
+              "energy_kwh": 1432.7,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 13.0,
+              "resilience_index": 86.5,
+              "safety_risk_percent": 3.4,
+              "service_level_percent": 29.4,
+              "throughput_teu": 3845.0
+            },
+            "observed_at": "2026-09-07T08:23:53.415806+00:00",
+            "payload_sha256": "b2fcb2d26364ca950d9055c1d59e34948cd15a8f51234e4a1f155d45ecf0efe6",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T06:15:00.000Z"
+          },
+          "created_at": "2026-09-07T08:23:53.418439+00:00",
+          "expires_at_epoch": 1788769733.418457,
+          "id": "lap-8033873265e84e7a8f26577fd4183de2",
+          "interval_seconds": 2.0,
+          "label": "调整马六甲模拟情景",
+          "mutates": true,
+          "parameters": {
+            "scenario": "peak-arrivals"
+          },
+          "plan_sha256": "b6bfc12a4b8cfe82df5f2a74adf1e4197842ded927294689352b7e8fe603a125",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-c523e2a20ec374ba546eb5f675dec3ac",
+          "samples": 3,
+          "target": "malacca-sandbox"
+        },
+        "production_authority": false,
+        "restore_receipt_sha256": "68f0bfa69a3cc13297dd538b49be5102f3c0c615f90bfd55a2bcd70e92ef4d51",
+        "restored": true,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:25:03.681024+00:00",
+        "write_attempted": true
+      }
+    },
+    {
+      "case": "chat_port_provenance_and_startup_input_preserved",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "applied": false,
+        "changes": [
+          {
+            "after": 22155.671777,
+            "before": 22131.200117,
+            "change": 24.47166,
+            "metric": "aggregate_kw"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:25:50.177935+00:00",
+        "events": [
+          {
+            "at": "2026-09-07T08:25:50.179568+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "0ce8c5d0d8c16889f4973d1556b61b13025666a4e515801b4c4eab568a0d3366",
+            "sha256": "8067d39abcc2fc2624d4c82ffd9fabc81edea33605d6f12a54d2d8dba36fdb19",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:50.416324+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "8067d39abcc2fc2624d4c82ffd9fabc81edea33605d6f12a54d2d8dba36fdb19",
+            "result_sha256": "8fcc023eac340ea6dfe50d1f327b05f158a050f87af6fd82c55ecc3d97babbf3",
+            "sha256": "a75fce879b57f8b9dd0030189e8cdc3e6b67169a3261e7e601978d815b358c24",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:50.510538+00:00",
+            "event": "observation",
+            "previous_sha256": "a75fce879b57f8b9dd0030189e8cdc3e6b67169a3261e7e601978d815b358c24",
+            "result_sha256": "f5cd92edbcd94e77907d0510e59baf39aa0e114ad1124cdad34f46cc6d077cf4",
+            "sha256": "7c27ba72dc4fdfaec65e9e49ffa8798513795258153890739b06c64c019a46a7",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:52.612181+00:00",
+            "event": "observation",
+            "previous_sha256": "7c27ba72dc4fdfaec65e9e49ffa8798513795258153890739b06c64c019a46a7",
+            "result_sha256": "6ae90c7fab4ae2154f1f1eb2f4ae8bf32b26389b2ceb2a244e7a2c2dede91284",
+            "sha256": "ffcffd0fc9c11da6e8f788023d034140656b0a5bca6c18a64715a8488d838d2a",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:54.714493+00:00",
+            "event": "observation",
+            "previous_sha256": "ffcffd0fc9c11da6e8f788023d034140656b0a5bca6c18a64715a8488d838d2a",
+            "result_sha256": "f14872d4052e55788826123bae3a454e9322677d2a3debd7c13b0d6d0470d864",
+            "sha256": "862e4490896da28977f26fd22046c775e9e2a88274f4a1882056912f61885168",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:25:54.716834+00:00",
+            "event": "finished",
+            "previous_sha256": "862e4490896da28977f26fd22046c775e9e2a88274f4a1882056912f61885168",
+            "result_sha256": "11ba1ba4e1d5613ef9368aca8899a0a4c3ca944eceffe93d2b666a097d10ec4a",
+            "sha256": "1f19db8706b57a8c714bf674734582cf8459122efd25a54972f32d8733eed094",
+            "status": "completed"
+          }
+        ],
+        "id": "lar-0c4dbcc7cbc5f1fa49589b29554a19d9",
+        "observations": [
+          {
+            "config": {
+              "data_mode": "calibrated_public_replay_simulator",
+              "policy_id": "rl-20260813T063524662Z"
+            },
+            "metrics": {
+              "aggregate_kw": 22155.671777
+            },
+            "observed_at": "2026-09-07T08:25:50.510367+00:00",
+            "payload_sha256": "138f10a09d87af21abefa6fe39dc35860a2c64ebd19d99c2d14b1d8694d84c35",
+            "production_authority": false,
+            "quality": {},
+            "source": "/api/v3/runtime/frame",
+            "source_time": "2026-09-07T09:25:50.269211+00:00"
+          },
+          {
+            "config": {
+              "data_mode": "calibrated_public_replay_simulator",
+              "policy_id": "rl-20260813T063524662Z"
+            },
+            "metrics": {
+              "aggregate_kw": 22155.671777
+            },
+            "observed_at": "2026-09-07T08:25:52.612006+00:00",
+            "payload_sha256": "aea2660077f10bb601007525de4db162ca8c9fec6f7d0583c4c3bb4689dfcae0",
+            "production_authority": false,
+            "quality": {},
+            "source": "/api/v3/runtime/frame",
+            "source_time": "2026-09-07T09:25:50.269211+00:00"
+          },
+          {
+            "config": {
+              "data_mode": "calibrated_public_replay_simulator",
+              "policy_id": "rl-20260813T063524662Z"
+            },
+            "metrics": {
+              "aggregate_kw": 22155.671777
+            },
+            "observed_at": "2026-09-07T08:25:54.714344+00:00",
+            "payload_sha256": "eecb96c734615485bac5b0d585467915349f4fbd2b180e025237235cbbbd7a24",
+            "production_authority": false,
+            "quality": {},
+            "source": "/api/v3/runtime/frame",
+            "source_time": "2026-09-07T09:25:50.269211+00:00"
+          }
+        ],
+        "plan": {
+          "action_id": "port.observe",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "data_mode": "calibrated_public_replay_simulator",
+              "policy_id": "rl-20260813T063524662Z"
+            },
+            "metrics": {
+              "aggregate_kw": 22131.200117
+            },
+            "observed_at": "2026-09-07T08:25:48.723473+00:00",
+            "payload_sha256": "b3da643b1986f1f1254cd8bab0a82e75d33dd52bf4e6ef68b20fbfc738ac67c2",
+            "production_authority": false,
+            "quality": {},
+            "source": "/api/v3/runtime/frame",
+            "source_time": "2026-09-07T09:25:48.564728+00:00"
+          },
+          "created_at": "2026-09-07T08:25:48.723709+00:00",
+          "expires_at_epoch": 1788769848.723721,
+          "id": "lap-0d766ca6f62f4ed6a1fa5dfee223d571",
+          "interval_seconds": 2.0,
+          "label": "观测数字孪生",
+          "mutates": false,
+          "parameters": {},
+          "plan_sha256": "1e6aa8ef4f996923e36e5b9f5752d20859df5781f38966699a11abd6b2249ebc",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-0c4dbcc7cbc5f1fa49589b29554a19d9",
+          "samples": 3,
+          "target": "port-dt-multi"
+        },
+        "production_authority": false,
+        "restored": false,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:25:54.716834+00:00"
+      }
+    },
+    {
+      "case": "cancel_observation_restore",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "after_apply": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "peak-arrivals"
+          },
+          "metrics": {
+            "carbon_tons": 1.258,
+            "cost_myr": 1344.41,
+            "delay_minutes": 0.0,
+            "energy_kwh": 2168.4,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 0.0,
+            "resilience_index": 98.4,
+            "safety_risk_percent": 3.5,
+            "service_level_percent": 100.0,
+            "throughput_teu": 2070.0
+          },
+          "observed_at": "2026-09-07T08:26:10.195282+00:00",
+          "payload_sha256": "c537ef4d3ba55972a1e376a1d65831f4906bc3be7ec1a5bc154e2a4829726f19",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T13:00:00.000Z"
+        },
+        "after_restore": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "normal"
+          },
+          "metrics": {
+            "carbon_tons": 1.355,
+            "cost_myr": 1448.18,
+            "delay_minutes": 0.0,
+            "energy_kwh": 2335.78,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 0.0,
+            "resilience_index": 98.4,
+            "safety_risk_percent": 3.5,
+            "service_level_percent": 100.0,
+            "throughput_teu": 2736.0
+          },
+          "observed_at": "2026-09-07T08:26:15.668062+00:00",
+          "payload_sha256": "e1f3ea2b15911f254a86e072c3f1b5011420ef4a6d9ea27dce0b6f3f77643716",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T13:15:00.000Z"
+        },
+        "applied": true,
+        "changes": [
+          {
+            "after": 1.258,
+            "before": 1.258,
+            "change": 0.0,
+            "metric": "carbon_tons"
+          },
+          {
+            "after": 1344.41,
+            "before": 1344.41,
+            "change": 0.0,
+            "metric": "cost_myr"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "delay_minutes"
+          },
+          {
+            "after": 2168.4,
+            "before": 2168.4,
+            "change": 0.0,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 11348.0,
+            "before": 11348.0,
+            "change": 0.0,
+            "metric": "peak_grid_kw"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "queue_vessels"
+          },
+          {
+            "after": 98.4,
+            "before": 98.4,
+            "change": 0.0,
+            "metric": "resilience_index"
+          },
+          {
+            "after": 3.5,
+            "before": 3.5,
+            "change": 0.0,
+            "metric": "safety_risk_percent"
+          },
+          {
+            "after": 100.0,
+            "before": 100.0,
+            "change": 0.0,
+            "metric": "service_level_percent"
+          },
+          {
+            "after": 2070.0,
+            "before": 2070.0,
+            "change": 0.0,
+            "metric": "throughput_teu"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:26:10.079003+00:00",
+        "events": [
+          {
+            "at": "2026-09-07T08:26:10.080448+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "84ba0eb9b97876d22a37a7761b270a266508018346cf199b60798d5a09ab8f3b",
+            "sha256": "b0a9e427012cabea1aabee472f53238ef86d8f34f463d7a86be90be91024b2d5",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:10.116611+00:00",
+            "event": "write-intent",
+            "previous_sha256": "b0a9e427012cabea1aabee472f53238ef86d8f34f463d7a86be90be91024b2d5",
+            "result_sha256": "cf1c5fbf4db7c1ff2183f891d40fd0734b8f262f874398b87c1c68ee1e54732f",
+            "sha256": "ccdf74e8e094048a8ae3a0a5c45259110eb86b1879babac9c77109d383793d0f",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:10.154269+00:00",
+            "event": "write-receipt",
+            "previous_sha256": "ccdf74e8e094048a8ae3a0a5c45259110eb86b1879babac9c77109d383793d0f",
+            "result_sha256": "5d91da912285a8cda237293c316cc009a56529f940aa4a0922b3671c81840f90",
+            "sha256": "e3ab424f204610b85915cf9890c816587bdff4a7fe02f73c4d27de4cf2e3efc2",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:10.197912+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "e3ab424f204610b85915cf9890c816587bdff4a7fe02f73c4d27de4cf2e3efc2",
+            "result_sha256": "dec540096f6100f3fafde074ea8f0d7518bdac48556ab302067c1cda1348c5b7",
+            "sha256": "ea554a29da2857d0718530bf20e48259261d7ab3e6361e987a88afe025630de3",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:10.233860+00:00",
+            "event": "observation",
+            "previous_sha256": "ea554a29da2857d0718530bf20e48259261d7ab3e6361e987a88afe025630de3",
+            "result_sha256": "7ec30fe27693bd05f0d7567b75a5fb591c9bd0dfcf3e7280aa676bf5f45bd207",
+            "sha256": "57352293d6c12ac7062ea005ecd621f0e86f48ef895091666ff0d7d69fc8a1fd",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:15.673104+00:00",
+            "event": "finished",
+            "previous_sha256": "57352293d6c12ac7062ea005ecd621f0e86f48ef895091666ff0d7d69fc8a1fd",
+            "result_sha256": "09ded5331a27bf913b198cf309aee1e4856ca0aea4d51ce0a5d156315b36012f",
+            "sha256": "cb35ae3446eaeb49b7558cb0a0f01f1ece487a54bc0f0a8a61ae28199fbfe547",
+            "status": "cancelled"
+          }
+        ],
+        "expected_config": {
+          "run_id": "ops-1135cd3c-a52eac07",
+          "running": true,
+          "scenario": "peak-arrivals"
+        },
+        "id": "lar-c907fd03b0a424c8a6918291f1e9b469",
+        "observations": [
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.258,
+              "cost_myr": 1344.41,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2168.4,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.4,
+              "safety_risk_percent": 3.5,
+              "service_level_percent": 100.0,
+              "throughput_teu": 2070.0
+            },
+            "observed_at": "2026-09-07T08:26:10.230938+00:00",
+            "payload_sha256": "21c57011055f853c7e0330d4fa2e36dd51cce801bf6ab93b124bbb1a903aa06b",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T13:00:00.000Z"
+          }
+        ],
+        "operation_receipt_sha256": "2cbaac8e84559cadf27c8da333c14d43ed7a00238699b38704871a7bdb48b1c3",
+        "plan": {
+          "action_id": "malacca.scenario",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "normal"
+            },
+            "metrics": {
+              "carbon_tons": 1.258,
+              "cost_myr": 1344.41,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2168.4,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.4,
+              "safety_risk_percent": 3.5,
+              "service_level_percent": 100.0,
+              "throughput_teu": 2070.0
+            },
+            "observed_at": "2026-09-07T08:26:09.807064+00:00",
+            "payload_sha256": "34a36f774ce657d93f383b31f028250e7fe6b2f93acf6fa1c63fa20926da4d3a",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T13:00:00.000Z"
+          },
+          "created_at": "2026-09-07T08:26:09.809207+00:00",
+          "expires_at_epoch": 1788769869.809236,
+          "id": "lap-84317d39667243b0bf8dfff9cb4a3fa2",
+          "interval_seconds": 10.0,
+          "label": "调整马六甲模拟情景",
+          "mutates": true,
+          "parameters": {
+            "scenario": "peak-arrivals"
+          },
+          "plan_sha256": "87a6f3a9f8afa14154d7c4b3c18a89c6672157069330b6962f24c445abb0bdbb",
+          "production_authority": false,
+          "restore_after_observation": true,
+          "run_id": "lar-c907fd03b0a424c8a6918291f1e9b469",
+          "samples": 12,
+          "target": "malacca-sandbox"
+        },
+        "production_authority": false,
+        "restore_receipt_sha256": "2b9f81c4aa83bdcd1c3607c5c8ef6dcb095173fd013641d54a6f7d1a9eaf4e61",
+        "restored": true,
+        "status": "cancelled",
+        "updated_at": "2026-09-07T08:26:15.673104+00:00",
+        "write_attempted": true
+      }
+    },
+    {
+      "case": "manual_restore_after_retained_change",
+      "browser_observed": true,
+      "run": {
+        "actor_id": "local-admin",
+        "actor_role": "admin",
+        "after_apply": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "peak-arrivals"
+          },
+          "metrics": {
+            "carbon_tons": 1.421,
+            "cost_myr": 1176.33,
+            "delay_minutes": 0.0,
+            "energy_kwh": 2450.68,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 0.0,
+            "resilience_index": 98.4,
+            "safety_risk_percent": 3.5,
+            "service_level_percent": 100.0,
+            "throughput_teu": 1989.0
+          },
+          "observed_at": "2026-09-07T08:26:33.630500+00:00",
+          "payload_sha256": "c1bb2e2c66ebb0e4b62dcecce7b3cbc87879428004d56938fff7b9e6e42a1e44",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T14:15:00.000Z"
+        },
+        "after_restore": {
+          "config": {
+            "run_id": "ops-1135cd3c-a52eac07",
+            "running": true,
+            "scenario": "normal"
+          },
+          "metrics": {
+            "carbon_tons": 1.516,
+            "cost_myr": 1254.67,
+            "delay_minutes": 0.0,
+            "energy_kwh": 2613.9,
+            "peak_grid_kw": 11348.0,
+            "queue_vessels": 0.0,
+            "resilience_index": 98.3,
+            "safety_risk_percent": 3.7,
+            "service_level_percent": 100.0,
+            "throughput_teu": 2632.0
+          },
+          "observed_at": "2026-09-07T08:26:41.246855+00:00",
+          "payload_sha256": "d0ceadca0aa44badc5c14eca700c8dcf93eee803b70b316d23c5201e4291a403",
+          "production_authority": false,
+          "quality": {
+            "completeness_percent": 100,
+            "consistency_checks": [
+              {
+                "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                "id": "flow-conservation",
+                "passed": true
+              },
+              {
+                "detail": "0% ≤ yard occupancy ≤ 100%",
+                "id": "yard-capacity",
+                "passed": true
+              },
+              {
+                "detail": "15% ≤ SOC ≤ 95%",
+                "id": "battery-envelope",
+                "passed": true
+              },
+              {
+                "detail": "grid load ≤ 18 MW transformer capacity",
+                "id": "transformer-envelope",
+                "passed": true
+              },
+              {
+                "detail": "positive throughput requires positive equipment and grid energy",
+                "id": "causal-energy-link",
+                "passed": true
+              }
+            ],
+            "degraded_fields": 0,
+            "derived_fields": 18,
+            "measured_fields": 0,
+            "normal_fields": 61,
+            "simulated_fields": 43,
+            "total_fields": 61
+          },
+          "source": "/api/operations/snapshot",
+          "source_time": "2026-01-04T14:30:00.000Z"
+        },
+        "applied": true,
+        "changes": [
+          {
+            "after": 1.421,
+            "before": 1.421,
+            "change": 0.0,
+            "metric": "carbon_tons"
+          },
+          {
+            "after": 1176.33,
+            "before": 1176.33,
+            "change": 0.0,
+            "metric": "cost_myr"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "delay_minutes"
+          },
+          {
+            "after": 2450.68,
+            "before": 2450.68,
+            "change": 0.0,
+            "metric": "energy_kwh"
+          },
+          {
+            "after": 11348.0,
+            "before": 11348.0,
+            "change": 0.0,
+            "metric": "peak_grid_kw"
+          },
+          {
+            "after": 0.0,
+            "before": 0.0,
+            "change": 0.0,
+            "metric": "queue_vessels"
+          },
+          {
+            "after": 98.4,
+            "before": 98.4,
+            "change": 0.0,
+            "metric": "resilience_index"
+          },
+          {
+            "after": 3.5,
+            "before": 3.5,
+            "change": 0.0,
+            "metric": "safety_risk_percent"
+          },
+          {
+            "after": 100.0,
+            "before": 100.0,
+            "change": 0.0,
+            "metric": "service_level_percent"
+          },
+          {
+            "after": 1989.0,
+            "before": 1989.0,
+            "change": 0.0,
+            "metric": "throughput_teu"
+          }
+        ],
+        "comparison_notice": "观测差值包含模拟时间演进，不能单独归因为参数调整。",
+        "created_at": "2026-09-07T08:26:33.510918+00:00",
+        "events": [
+          {
+            "at": "2026-09-07T08:26:33.512187+00:00",
+            "event": "accepted",
+            "previous_sha256": "0000000000000000000000000000000000000000000000000000000000000000",
+            "result_sha256": "197b1aa7d97010acc6439c04d69969313b9bad967ebf47d96aa7fd0162dd439c",
+            "sha256": "a17dfce489f3cd4c874f6a153691035f3d2dc9f296cfbab2cad7beeb4ae32c43",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:33.548166+00:00",
+            "event": "write-intent",
+            "previous_sha256": "a17dfce489f3cd4c874f6a153691035f3d2dc9f296cfbab2cad7beeb4ae32c43",
+            "result_sha256": "81e72d09418f6bdcbb53e9b607daba75d4a59da21fcc1be811647848a95f1ba5",
+            "sha256": "918e73300ee2edfaf689e4bb2a78b74079291015e5c8507cefcee5748f3b0133",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:33.597184+00:00",
+            "event": "write-receipt",
+            "previous_sha256": "918e73300ee2edfaf689e4bb2a78b74079291015e5c8507cefcee5748f3b0133",
+            "result_sha256": "b7bc5416de10ce375537e86da8847562c179a067bb631efe922f596e4b7ba808",
+            "sha256": "92c96e474a9f38a9d1eac1e9c147de1ab04bb239b5098438e198dda32c067696",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:33.632997+00:00",
+            "event": "operation-finished",
+            "previous_sha256": "92c96e474a9f38a9d1eac1e9c147de1ab04bb239b5098438e198dda32c067696",
+            "result_sha256": "f952b937353aa45bc1190814a48bc0bea5137439290ee912643fa91b0517da12",
+            "sha256": "38ae67425eac9067a6a2dc64162ec3db79ea9f2724f269a817cd326f1400a59f",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:33.667856+00:00",
+            "event": "observation",
+            "previous_sha256": "38ae67425eac9067a6a2dc64162ec3db79ea9f2724f269a817cd326f1400a59f",
+            "result_sha256": "ebdd608f13629047eacb430e53746585b971001b803abb3a10cf051ed24a19ad",
+            "sha256": "0653b9833d9cdd624798897f9d9fedc8692b264d1f32d8494b7b4b28c1f611d8",
+            "status": "running"
+          },
+          {
+            "at": "2026-09-07T08:26:33.669792+00:00",
+            "event": "finished",
+            "previous_sha256": "0653b9833d9cdd624798897f9d9fedc8692b264d1f32d8494b7b4b28c1f611d8",
+            "result_sha256": "d876c0647aa29a4413f0b67fd39260482fa484fcc87d12c71d065427e543ba2a",
+            "sha256": "0f508133dff87d35337b4dde7a792d1e31d25fb233b57fbaa1422e78a3e58ab0",
+            "status": "completed"
+          },
+          {
+            "at": "2026-09-07T08:26:41.251262+00:00",
+            "event": "manual-restore",
+            "previous_sha256": "0f508133dff87d35337b4dde7a792d1e31d25fb233b57fbaa1422e78a3e58ab0",
+            "result_sha256": "05224ae4d0706ffb17d2008ed6e065abab3706f60f629f614d405a775c1bc7b3",
+            "sha256": "3805b8d7c6fab14198208236e051f5e176745612b0d74fa7444b8786bd3381f0",
+            "status": "completed"
+          }
+        ],
+        "expected_config": {
+          "run_id": "ops-1135cd3c-a52eac07",
+          "running": true,
+          "scenario": "peak-arrivals"
+        },
+        "id": "lar-8f32afc5b5aa56bd9a3a6a69228ef305",
+        "observations": [
+          {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "peak-arrivals"
+            },
+            "metrics": {
+              "carbon_tons": 1.421,
+              "cost_myr": 1176.33,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2450.68,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.4,
+              "safety_risk_percent": 3.5,
+              "service_level_percent": 100.0,
+              "throughput_teu": 1989.0
+            },
+            "observed_at": "2026-09-07T08:26:33.665837+00:00",
+            "payload_sha256": "75454d38493e73cc0d3e5217fee73678db9ac6747d993ffba0c1d388400b6a13",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T14:15:00.000Z"
+          }
+        ],
+        "operation_receipt_sha256": "dcfc3fb503d39c4ac3161ae7f9f5e8bacddc264c02a7137a144f072f0b4e657e",
+        "plan": {
+          "action_id": "malacca.scenario",
+          "actor_id": "local-admin",
+          "actor_role": "admin",
+          "before": {
+            "config": {
+              "run_id": "ops-1135cd3c-a52eac07",
+              "running": true,
+              "scenario": "normal"
+            },
+            "metrics": {
+              "carbon_tons": 1.421,
+              "cost_myr": 1176.33,
+              "delay_minutes": 0.0,
+              "energy_kwh": 2450.68,
+              "peak_grid_kw": 11348.0,
+              "queue_vessels": 0.0,
+              "resilience_index": 98.4,
+              "safety_risk_percent": 3.5,
+              "service_level_percent": 100.0,
+              "throughput_teu": 1989.0
+            },
+            "observed_at": "2026-09-07T08:26:33.240883+00:00",
+            "payload_sha256": "1d9eec93206f6b900092fe43e7fd4266d936f77602e83f0eef63211727495dee",
+            "production_authority": false,
+            "quality": {
+              "completeness_percent": 100,
+              "consistency_checks": [
+                {
+                  "detail": "queue(t)=queue(t-1)+arrivals-diverted-serviced-control_relief",
+                  "id": "flow-conservation",
+                  "passed": true
+                },
+                {
+                  "detail": "0% ≤ yard occupancy ≤ 100%",
+                  "id": "yard-capacity",
+                  "passed": true
+                },
+                {
+                  "detail": "15% ≤ SOC ≤ 95%",
+                  "id": "battery-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "grid load ≤ 18 MW transformer capacity",
+                  "id": "transformer-envelope",
+                  "passed": true
+                },
+                {
+                  "detail": "positive throughput requires positive equipment and grid energy",
+                  "id": "causal-energy-link",
+                  "passed": true
+                }
+              ],
+              "degraded_fields": 0,
+              "derived_fields": 18,
+              "measured_fields": 0,
+              "normal_fields": 61,
+              "simulated_fields": 43,
+              "total_fields": 61
+            },
+            "source": "/api/operations/snapshot",
+            "source_time": "2026-01-04T14:15:00.000Z"
+          },
+          "created_at": "2026-09-07T08:26:33.243243+00:00",
+          "expires_at_epoch": 1788769893.243268,
+          "id": "lap-8d813d68fb7c4305b96d80082825a192",
+          "interval_seconds": 10.0,
+          "label": "调整马六甲模拟情景",
+          "mutates": true,
+          "parameters": {
+            "scenario": "peak-arrivals"
+          },
+          "plan_sha256": "6524f1c8a10196c038a9eed178626ad3625160d8ca426518e48f4e6055a8e311",
+          "production_authority": false,
+          "restore_after_observation": false,
+          "run_id": "lar-8f32afc5b5aa56bd9a3a6a69228ef305",
+          "samples": 1,
+          "target": "malacca-sandbox"
+        },
+        "production_authority": false,
+        "restore_receipt_sha256": "52809e25445225ef54752b3409284ad1dbe271236c0673f66049dd11fdc74f51",
+        "restored": true,
+        "status": "completed",
+        "updated_at": "2026-09-07T08:26:41.251262+00:00",
+        "write_attempted": true
+      }
+    }
+  ],
+  "final_ui_sha256": {
+    "web/app.js": "aadbc7cfce935d2479933e6ed0bfbc05aaeb453e3d49ad188addedd9aa6e81c0",
+    "web/linked_agent.js": "a348b4282250989acb56bf198e15db1fe59946292c0a7f08e59d2d35112c12f2",
+    "web/index.html": "e154daa6dea691be3ddc73c4827bcddeb735d5a182cb8bc0e8ccd2c85e8de41b",
+    "web/styles.css": "41b3545967a86c299231528cde9ddaafdbbc58efa0b075f05f2d0a42fbe83115"
+  }
+}
