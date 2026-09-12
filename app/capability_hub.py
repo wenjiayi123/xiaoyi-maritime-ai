@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import Any, Literal, Optional
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urljoin
-from urllib.request import Request, urlopen
+from urllib.request import Request as HttpRequest, urlopen
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Request
@@ -210,7 +210,11 @@ def invoke_capability(capability_id: str, payload: CapabilityInvokeRequest) -> C
         if not source_url:
             raise HTTPException(status_code=409, detail="目标系统未配置基础地址")
         try:
-            with urlopen(Request(source_url, method="GET", headers={"Accept": "application/json"}), timeout=3.0) as response:
+            performed = True
+            # This endpoint aggregates dataset, model and simulator readiness;
+            # allow its measured cold-start work without weakening fast probes.
+            timeout = 15.0 if capability.id == "energy_linkage_health" else 3.0
+            with urlopen(HttpRequest(source_url, method="GET", headers={"Accept": "application/json"}), timeout=timeout) as response:
                 raw = response.read(2_000_000)
                 content_type = response.headers.get("Content-Type", "")
                 parsed = json.loads(raw) if "json" in content_type or raw[:1] in {b"{", b"["} else {"text": raw.decode("utf-8", "replace")[:5000]}
@@ -230,7 +234,8 @@ def invoke_capability(capability_id: str, payload: CapabilityInvokeRequest) -> C
         evidence={
             "source_type": "system_result" if performed else "capability_contract",
             "system_id": system.id, "capability_id": capability.id,
-            "fetched_at": requested_at.isoformat(), "verification_status": "live_read" if performed else "preview_only",
+            "fetched_at": requested_at.isoformat(),
+            "verification_status": "live_read" if status == "success" else "failed" if status == "failed" else "preview_only",
         },
         notice=notice,
     )

@@ -193,6 +193,18 @@ def test_vague_parameter_or_question_does_not_invent_an_action():
     assert parse_command("不要暂停马六甲时钟") is None
 
 
+@pytest.mark.parametrize("text,expected", [
+    ("恢复马六甲模拟时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
+    ("马六甲时钟恢复", {"action_id": "malacca.observe", "parameters": {}}),
+    ("马六甲" + "恢复" * 10000, {"action_id": "malacca.observe", "parameters": {}}),
+    ("马六甲" + "恢复" * 10000 + "时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
+    ("暂停马六甲时钟后恢复时钟", {"action_id": "malacca.clock", "parameters": {"action": "stop"}}),
+    ("不要恢复马六甲时钟", None),
+])
+def test_clock_parser_handles_repeated_text_without_loosening_command_guards(text, expected):
+    assert parse_command(text) == expected
+
+
 def test_natural_scenario_plan_has_real_preview_and_confirmation():
     with TestClient(app) as client:
         plan=client.post("/api/automation/plans",json={"command":"马六甲切换集中到港并观测"}).json()

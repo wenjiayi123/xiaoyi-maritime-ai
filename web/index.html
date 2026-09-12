@@ -7,7 +7,7 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
   <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
   <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20260907-agent-v1">
+  <link rel="stylesheet" href="/web/styles.css?v=20260912-function-audit-v3">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -53,12 +53,12 @@
       </button>
 
       <nav class="top-nav" aria-label="主导航">
-        <button class="nav-item active" type="button" data-view-target="chat" data-agent-target="nav-chat"><svg><use href="#i-chat"/></svg><span>智能对话</span></button>
-        <button class="nav-item" type="button" data-view-target="decisions" data-agent-target="nav-decisions"><svg><use href="#i-bulb"/></svg><span>决策建议</span></button>
-        <button class="nav-item" type="button" data-view-target="analytics" data-agent-target="nav-analytics"><svg><use href="#i-chart"/></svg><span>数据分析</span></button>
-        <button class="nav-item" type="button" data-view-target="rl" data-agent-target="nav-rl"><svg><use href="#i-agv"/></svg><span>训练中心</span></button>
-        <button class="nav-item" type="button" data-view-target="knowledge" data-agent-target="nav-knowledge"><svg><use href="#i-book"/></svg><span>知识库</span></button>
-        <button class="nav-item" type="button" data-view-target="tasks" data-agent-target="nav-tasks"><svg><use href="#i-task"/></svg><span>任务中心</span><b id="taskNavBadge">0</b></button>
+        <button class="nav-item active" type="button" data-view-target="chat" data-agent-target="nav-chat" aria-label="智能对话"><svg><use href="#i-chat"/></svg><span>智能对话</span></button>
+        <button class="nav-item" type="button" data-view-target="decisions" data-agent-target="nav-decisions" aria-label="决策建议"><svg><use href="#i-bulb"/></svg><span>决策建议</span></button>
+        <button class="nav-item" type="button" data-view-target="analytics" data-agent-target="nav-analytics" aria-label="数据分析"><svg><use href="#i-chart"/></svg><span>数据分析</span></button>
+        <button class="nav-item" type="button" data-view-target="rl" data-agent-target="nav-rl" aria-label="训练中心"><svg><use href="#i-agv"/></svg><span>训练中心</span></button>
+        <button class="nav-item" type="button" data-view-target="knowledge" data-agent-target="nav-knowledge" aria-label="知识库"><svg><use href="#i-book"/></svg><span>知识库</span></button>
+        <button class="nav-item" type="button" data-view-target="tasks" data-agent-target="nav-tasks" aria-label="任务中心"><svg><use href="#i-task"/></svg><span>任务中心</span><b id="taskNavBadge">0</b></button>
       </nav>
 
       <div class="top-tools">
@@ -104,6 +104,12 @@
         </section>
 
         <div class="sidebar-bottom">
+          <div class="mobile-only-tools" aria-label="更多功能">
+            <button type="button" data-action="system-status"><svg><use href="#i-command"/></svg><span>系统状态</span></button>
+            <button type="button" data-action="notifications"><svg><use href="#i-bell"/></svg><span>通知</span><b id="mobileNotificationBadge">0</b></button>
+            <button type="button" data-action="settings"><svg><use href="#i-settings"/></svg><span>设置</span></button>
+            <button type="button" data-action="profile"><svg><use href="#i-user"/></svg><span>管理员</span></button>
+          </div>
           <button type="button" class="theme-switch" data-action="theme"><svg><use href="#i-moon"/></svg><span><strong>深海模式</strong><small>沉浸式港航驾驶舱</small></span><i></i></button>
           <div class="rl-mission-launcher" aria-label="RL智能调度入口">
             <button type="button" class="agent-demo-button" data-rl-mission-launch data-q="启动RL训练实验：使用真实公开能源时序数据，运行Q-learning、SARSA、Expected SARSA、Double Q-learning和PID控制基线；训练阶段不渲染，训练完成后再用保留测试集渲染并比较结果。" data-mode="ops"><svg><use href="#i-agv"/></svg><span>真实RL训练实验室</span></button>
@@ -159,7 +165,7 @@
                     <div class="response-kpis" id="responseKpis">
                       <div><span>总能耗</span><strong>-- <small>MWh</small></strong><em>等待数据</em></div>
                       <div><span>碳排放总量</span><strong>-- <small>tCO₂e</small></strong><em>等待数据</em></div>
-                      <div><span>单位吞吐能耗</span><strong>-- <small>kgCO₂e/TEU</small></strong><em>等待数据</em></div>
+                      <div><span>碳强度</span><strong>-- <small>kgCO₂e/TEU</small></strong><em>等待数据</em></div>
                       <div><span>岸电使用率</span><strong>--<small>%</small></strong><em>等待数据</em></div>
                     </div>
 
@@ -376,7 +382,7 @@
   <span id="kbChip" hidden></span>
 
   <script src="/web/runtime_contract.js?v=20260814-security-r1" defer></script>
-  <script src="/web/linked_agent.js?v=20260907-agent-v1" defer></script>
-  <script src="/web/app.js?v=20260907-agent-v1" defer></script>
+  <script src="/web/linked_agent.js?v=20260912-function-audit-v3" defer></script>
+  <script src="/web/app.js?v=20260912-function-audit-v3" defer></script>
 </body>
 </html>

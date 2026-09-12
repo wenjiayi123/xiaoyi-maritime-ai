@@ -1,4 +1,6 @@
 from pathlib import Path
+from urllib.error import URLError
+from urllib.request import Request as HttpRequest
 
 import pytest
 from fastapi.testclient import TestClient
@@ -41,6 +43,78 @@ def test_priority_1_capability_registry_is_isolated_and_read_only() -> None:
     payload = preview.json()
     assert payload["status"] == "preview"
     assert payload["external_request_performed"] is False
+
+
+def test_configured_read_only_capability_uses_http_request_and_returns_data(monkeypatch) -> None:
+    monkeypatch.setenv("XIAOYI_SYSTEM_ENERGY_COCKPIT_MODE", "live")
+
+    class Response:
+        status = 200
+        headers = {"Content-Type": "application/json"}
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def read(self, limit):
+            return b'{"status":"ok","production_authority":false}'
+
+    def fetch(request, **kwargs):
+        assert isinstance(request, HttpRequest)
+        assert request.get_method() == "GET"
+        assert request.full_url.split("?", 1)[0].endswith("/api/linkage/health")
+        assert kwargs["timeout"] == 15.0
+        return Response()
+
+    monkeypatch.setattr(capability_hub, "urlopen", fetch)
+    response = client.post("/api/hub/capabilities/energy_linkage_health/invoke", json={"dry_run": False})
+    assert response.status_code == 200
+    result = response.json()
+    assert result["status"] == "success"
+    assert result["external_request_performed"] is True
+    assert result["data"]["payload"]["production_authority"] is False
+    assert result["evidence"]["verification_status"] == "live_read"
+
+
+def test_failed_capability_read_records_attempt_without_verified_evidence(monkeypatch) -> None:
+    monkeypatch.setenv("XIAOYI_SYSTEM_ENERGY_COCKPIT_MODE", "live")
+
+    def fail(request, **kwargs):
+        raise URLError("local test service unavailable")
+
+    monkeypatch.setattr(capability_hub, "urlopen", fail)
+    response = client.post("/api/hub/capabilities/energy_linkage_health/invoke", json={"dry_run": False})
+    assert response.status_code == 200
+    result = response.json()
+    assert result["status"] == "failed"
+    assert result["external_request_performed"] is True
+    assert result["evidence"]["verification_status"] == "failed"
+
+
+def test_failed_orchestration_does_not_promote_attempt_to_live_evidence(monkeypatch) -> None:
+    monkeypatch.setenv("XIAOYI_SYSTEM_PORT_DT_MODE", "live")
+    fused = []
+    original_fuse = orchestrator.fuse_evidence
+
+    def capture_fusion(*args, **kwargs):
+        result = original_fuse(*args, **kwargs)
+        fused.append(result)
+        return result
+
+    def fail(request, **kwargs):
+        raise URLError("local test service unavailable")
+
+    monkeypatch.setattr(capability_hub, "urlopen", fail)
+    monkeypatch.setattr(orchestrator, "fuse_evidence", capture_fusion)
+    response = client.post("/api/orchestrator/run", json={"command": "查看守护栏", "execute_read_only": True})
+    assert response.status_code == 200
+    result = response.json()
+    assert "完成 0 项，未完成 1 项" in result["result_summary"]
+    assert any(step["status"] == "failed" for step in result["steps"])
+    external = [item for item in fused[0].evidence if item.capability_id == "ops_guard_health"]
+    assert external and all(item.verification_status != "live_read" for item in external)
 
 
 def test_priority_2_context_resolves_and_inherits_canonical_fields() -> None:

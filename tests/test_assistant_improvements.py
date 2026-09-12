@@ -243,7 +243,10 @@ def test_local_linkage_transport_builds_a_real_http_request(monkeypatch):
         assert request.full_url == "http://127.0.0.1:8000/test"
         assert json.loads(request.data) == {"dry_run": True}
         return io.BytesIO(b'{"ok":true}')
-    monkeypatch.setattr(system_linkage, "urlopen", open_request)
+    class LocalOpener:
+        open = staticmethod(open_request)
+
+    monkeypatch.setattr(system_linkage, "build_opener", lambda handler: LocalOpener())
     assert system_linkage._local_json("POST", "http://127.0.0.1:8000/test", payload={"dry_run": True}) == {"ok": True}
 
 

@@ -109,7 +109,8 @@ def parse_command(command: str) -> dict[str, Any] | None:
             return {"action_id": "energy.compare", "parameters": params}
         return {"action_id": "energy.observe", "parameters": {}}
     if "马六甲" in compact:
-        if re.search(r"暂停|恢复.*时钟", compact):
+        # Search once, without backtracking over repeated user-supplied words.
+        if "暂停" in compact or "时钟" in compact.partition("恢复")[2]:
             return {"action_id": "malacca.clock", "parameters": {"action": "stop" if "暂停" in compact else "start"}}
         if re.search(r"调节|调整|切换|设置", compact):
             matches = [key for key, label in SCENARIOS.items() if key in compact or label in compact]

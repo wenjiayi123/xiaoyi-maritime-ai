@@ -1,4 +1,7 @@
 from pathlib import Path
+import json
+
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -7,6 +10,55 @@ from app.main import app
 
 
 client = TestClient(app)
+
+
+@pytest.mark.parametrize("reply", [{"ok": False}, {"available": False}, []])
+def test_local_gateway_rejects_failed_or_missing_business_payload(monkeypatch, reply):
+    class Response:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            pass
+
+        def read(self, limit):
+            return json.dumps(reply).encode()
+
+    class Opener:
+        def open(self, *args, **kwargs):
+            return Response()
+
+    monkeypatch.setattr(system_linkage, "build_opener", lambda *a: Opener())
+    with pytest.raises(RuntimeError):
+        system_linkage._local_json("GET", "http://127.0.0.1:5174/api/public-data/snapshot")
+
+
+def test_local_gateway_uses_registered_token_and_blocks_redirects(monkeypatch):
+    monkeypatch.setenv("XIAOYI_ENERGY_API_TOKEN", "local-test-token")
+
+    class Opener:
+        def open(self, request, **kwargs):
+            assert request.get_header("Authorization") == "Bearer local-test-token"
+            raise TimeoutError("test target did not answer")
+
+    def opener(handler):
+        with pytest.raises(RuntimeError, match="重定向"):
+            handler().redirect_request(None, None, 302, "redirect", {}, "https://example.invalid")
+        return Opener()
+
+    monkeypatch.setattr(system_linkage, "build_opener", opener)
+    with pytest.raises(RuntimeError, match="请求失败"):
+        system_linkage._local_json("GET", system_linkage._ENERGY_API + "/api/health")
+
+
+@pytest.mark.parametrize("reply", [{}, {"rl_environment": {"dataset_id": "test", "dataset_sha256": "a" * 64}},
+                                      {"rl_environment": {"dataset_id": "test", "dataset_sha256": "a" * 64}, "governance": {"production_dispatch_enabled": True}}])
+def test_energy_linkage_cannot_complete_without_provenance_and_isolation(monkeypatch, reply):
+    monkeypatch.setattr(system_linkage, "_runtime", lambda target: {"running": True})
+    monkeypatch.setattr(system_linkage, "_local_json", lambda *a, **kw: reply)
+    request = system_linkage.LinkageCommandRequest(target="energy-cockpit", auto_start=False)
+    with pytest.raises(RuntimeError, match="数据来源或隔离权限"):
+        system_linkage._execute_target("energy-cockpit", request, "test-invalid-energy")
 
 
 def test_overview_aggregates_four_registered_systems(monkeypatch) -> None:

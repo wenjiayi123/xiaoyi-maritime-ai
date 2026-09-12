@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- Replaced the Malacca clock command's backtracking regex with an ordered string
+  search; repeated input no longer triggers quadratic scanning. Added command
+  guard regressions and reran all eight real local adapter acceptance cases.
+
 - Added eight local linked-agent actions with parameter previews, asynchronous
   observation, same-dataset energy comparisons, Malacca scenario/clock changes,
   verified configuration restoration, cancellation and persistent receipts.
