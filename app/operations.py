@@ -436,7 +436,7 @@ class _TaskStore:
                     id=f"{task_id}-step-{index}",
                     order=index,
                     title=title,
-                    description=f"小懿正在执行：{title}",
+                    description=f"步骤内容：{title}",
                     status="running" if index == 1 else "pending",
                     started_at=now if index == 1 else None,
                 )
@@ -508,9 +508,13 @@ class _TaskStore:
                     visual_cue="task-complete",
                 )
 
+            # A failed source read must leave this step runnable for a retry.
+            # Marking it completed first would leave no running step and make
+            # the next request incorrectly finish the whole task.
+            result = _execute_task_step(task, current)
             current.status = "completed"
             current.completed_at = now
-            current.result = _execute_task_step(task, current)
+            current.result = result
             next_step = next((step for step in task.steps if step.status == "pending"), None)
             completed_count = sum(step.status == "completed" for step in task.steps)
             task.progress_percent = round(completed_count / len(task.steps) * 100)

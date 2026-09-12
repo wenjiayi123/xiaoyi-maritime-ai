@@ -29,7 +29,7 @@ check: privacy-scan
 	node --check web/app.js
 	node --check web/linked_agent.js
 	node --check web/runtime_contract.js
-	pnpm test:fuzz
+	pnpm test
 
 release-check: check test
 

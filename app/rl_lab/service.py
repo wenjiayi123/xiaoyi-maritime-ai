@@ -109,7 +109,7 @@ class RLLabService:
             raise ValueError("at least one registered RL algorithm must be selected")
         episodes = int(config.get("episodes") or 160)
         horizon_steps = int(config.get("horizon_steps") or 72)
-        seed = int(config.get("seed") or 240520)
+        seed = int(config.get("seed", 240520))
         train_ratio = float(config.get("train_ratio") or 0.70)
         validation_ratio = float(config.get("validation_ratio") or 0.15)
         train, validation, test = chronological_split(
@@ -133,9 +133,9 @@ class RLLabService:
             "train_ratio": train_ratio,
             "validation_ratio": validation_ratio,
             "learning_rate": float(config.get("learning_rate") or 0.12),
-            "discount_factor": float(config.get("discount_factor") or 0.97),
+            "discount_factor": float(config.get("discount_factor", 0.97)),
             "epsilon_start": float(config.get("epsilon_start") or 1.0),
-            "epsilon_end": float(config.get("epsilon_end") or 0.05),
+            "epsilon_end": float(config.get("epsilon_end", 0.05)),
         }
         job = {
             "schema_version": RUN_SCHEMA_VERSION,
@@ -332,6 +332,8 @@ class RLLabService:
             winner = max(validation_results, key=lambda item: item["metrics"]["score"])["algorithm_id"]
 
             def complete(item: dict[str, Any]) -> None:
+                if cancel_event.is_set():
+                    raise InterruptedError("training cancelled")
                 item["status"] = "trained"
                 item["phase"] = "awaiting_test"
                 item["progress_percent"] = 100.0

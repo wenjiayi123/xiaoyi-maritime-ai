@@ -15,6 +15,8 @@ REQUIRED = (
     "app/linked_agent.py", "app/linked_agent_catalog.py", "web/linked_agent.js",
     "tests/test_linked_agent.py", "scripts/run_linked_agent_acceptance.py",
     "docs/LINKED_AGENT_OPERATIONS.md", "reports/linked_agent_acceptance_20260907_security_v1.json",
+    "reports/linked_agent_acceptance_20260912_full_function_v1.json",
+    "reports/linked_agent_acceptance_20260912_final_v1.json",
     "CODE_OF_CONDUCT.md", "GOVERNANCE.md", "SUPPORT.md", "CITATION.cff",
     ".github/workflows/ci.yml", ".github/workflows/dependency-review.yml",
     ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml",
@@ -198,7 +200,10 @@ def main() -> int:
             errors.append(f"缺少发布文件：{relative}")
 
     try:
-        report = json.loads((ROOT / "reports/linked_agent_acceptance_20260907_security_v1.json").read_text())
+        # Validate the newest source-fingerprinted acceptance report.  The older
+        # report remains a historical release artifact and is still required
+        # above, but its hashes intentionally describe the pre-audit source.
+        report = json.loads((ROOT / "reports/linked_agent_acceptance_20260912_final_v1.json").read_text())
         expected = {"port.observe", "port.evaluate", "energy.observe", "energy.compare", "malacca.observe", "malacca.scenario", "malacca.clock", "sailing.observe"}
         if report.get("passed") is not True or {row["action"] for row in report["rows"]} != expected or len(report["rows"]) != 8:
             errors.append("联动智能体八项真实适配器验收不完整")

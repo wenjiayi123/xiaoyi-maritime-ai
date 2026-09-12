@@ -299,6 +299,10 @@
     view: "chat",
     dashboard: fallbackDashboard,
     energy: fallbackDashboard.energy,
+    energyRange: "today",
+    energyRequest: 0,
+    dashboardRequest: 0,
+    taskAdvancing: new Set(),
     runtimeStatus: null,
     simulator: null,
     simulatorContract: null,
@@ -511,7 +515,7 @@
     if (view === "analytics") renderAnalytics(state.energy);
     if (view === "knowledge") renderKnowledge();
     if (view === "tasks") refreshTasks();
-    if (view === "rl") void loadRLCenter();
+    if (view === "rl") void loadRLCenter(true);
     if (!options.silent && view !== "chat") {
       $("#heroSpeechTitle").textContent = { decisions:"正在评估决策约束", analytics:"正在联动运营数据", knowledge:"正在检索港航知识", rl:"正在核验训练证据", tasks:"正在跟踪智能任务" }[view] || "您好！我是小懿AI";
     }
@@ -607,7 +611,7 @@
 
   function applyEnergySummary(energy) {
     if (energy?.public_open_source_waiting) {
-      $("#responseKpis").innerHTML = ["总能耗", "碳排放总量", "单位吞吐能耗", "岸电使用率"]
+      $("#responseKpis").innerHTML = ["总能耗", "碳排放总量", "碳强度", "岸电使用率"]
         .map((label) => `<div><span>${label}</span><strong>等待接入港口</strong><em class="down">未读取现场数据</em></div>`)
         .join("");
       return;
@@ -616,13 +620,17 @@
     const kpis = [
       ["总能耗", formatNumber(s.total_energy_mwh), "MWh", s.energy_change_percent],
       ["碳排放总量", formatNumber(s.carbon_emissions_tco2e), "tCO₂e", s.carbon_change_percent],
-      ["单位吞吐能耗", formatNumber(s.carbon_intensity_kgco2e_per_teu), "kgCO₂e/TEU", s.intensity_change_percent],
+      ["碳强度", formatNumber(s.carbon_intensity_kgco2e_per_teu), "kgCO₂e/TEU", s.intensity_change_percent],
       ["岸电使用率", formatNumber(s.shore_power_utilization_percent), "%", s.shore_power_change_percent]
     ];
     $("#responseKpis").innerHTML = kpis.map(([label, value, unit, trend]) => `<div><span>${label}</span><strong>${value} <small>${unit}</small></strong><em class="${Number(trend) <= 0 ? "down" : "up"}">${Number(trend) <= 0 ? "↓" : "↑"} ${Math.abs(Number(trend || 0)).toFixed(1)}%</em></div>`).join("");
   }
 
   function renderAnalytics(energy) {
+    const summary = energy?.summary || {};
+    if ($("#energyEvidenceMetrics")) $("#energyEvidenceMetrics").innerHTML = energy?.public_open_source_waiting
+      ? `<span>综合能耗<b>等待接入港口</b></span><span>碳排放<b>等待接入港口</b></span><span>碳强度<b>等待接入港口</b></span><span>岸电利用率<b>等待接入港口</b></span>`
+      : `<span>综合能耗<b>${formatNumber(summary.total_energy_mwh)} MWh</b></span><span>碳排放<b>${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e</b></span><span>碳强度<b>${formatNumber(summary.carbon_intensity_kgco2e_per_teu)} kg/TEU</b></span><span>岸电利用率<b>${formatNumber(summary.shore_power_utilization_percent)}%</b></span>`;
     if (energy?.public_open_source_waiting) {
       $("#analyticsKpis").innerHTML = ["综合能耗", "碳排放", "碳强度", "岸电利用率"]
         .map((label, index) => `<div class="analytics-kpi" style="color:${["#22d4ff","#4ee58c","#f5a733","#8b78ff"][index]}"><span>${label}</span><strong>—</strong><small>等待接入港口</small><em>未读取现场数据</em></div>`)
@@ -666,14 +674,18 @@
   }
 
   async function loadDashboard(silent = false) {
+    const requestId = ++state.dashboardRequest;
+    const energyRequest = state.energyRequest;
     try {
       const data = await api("/api/dashboard");
+      if (requestId !== state.dashboardRequest) return;
       state.dashboard = withoutUnverifiedOperationalValues(data);
-      state.energy = state.dashboard.energy;
+      if (state.energyRange === "today" && energyRequest === state.energyRequest) state.energy = state.dashboard.energy;
       syncRuntimeBadge(data.source_metadata);
     } catch (error) {
+      if (requestId !== state.dashboardRequest) return;
       state.dashboard = fallbackDashboard;
-      state.energy = fallbackDashboard.energy;
+      if (state.energyRange === "today" && energyRequest === state.energyRequest) state.energy = fallbackDashboard.energy;
       syncRuntimeBadge(null);
       if (!silent) toast("运营数据接口不可用", `${error.message}；界面不会回退为伪造现场数值。`, "warning", 4600);
     }
@@ -684,6 +696,7 @@
     renderAnalytics(state.energy);
     renderDecisions();
     renderQuickKnowledge();
+    if (state.energyRange !== "today" && energyRequest === state.energyRequest) await loadEnergy(state.energyRange, "refresh");
   }
 
   async function openRuntimeStatus() {
@@ -700,9 +713,12 @@
 
   async function loadEnergy(range, source = "rail") {
     range = runtimeContract.normalizeEnergyRange(range);
-    const controls = source === "analytics" ? "#analyticsRange [data-range]" : "#energyRange [data-range]";
+    const requestId = ++state.energyRequest;
+    state.energyRange = range;
+    const controls = "#analyticsRange [data-range], #energyRange [data-range]";
     try {
       const data = await api(`/api/energy?range=${encodeURIComponent(range)}`);
+      if (requestId !== state.energyRequest) return false;
       const safeData = (data?.source_metadata?.data_mode === "live" && data?.source_metadata?.live_data_verified === true) || data?.source_metadata?.source_type === "public_data_calibrated_simulation"
         ? data
         : { ...data, public_open_source_waiting:true, summary:fallbackDashboard.energy.summary, series:[], insights:["等待接入港口：当前未读取生产能耗数据。"] };
@@ -713,7 +729,9 @@
       $$(controls).forEach((button) => button.classList.toggle("active", button.dataset.range === range));
       return true;
     } catch (error) {
-      toast("趋势加载失败", error.message, "warning");
+      if (requestId !== state.energyRequest) return false;
+      state.energyRange = state.energy?.range || "today";
+      if (source !== "refresh") toast("趋势加载失败", error.message, "warning");
       return false;
     }
   }
@@ -817,7 +835,8 @@
   async function changeSimulatorScenario(scenarioId) {
     try {
       await api("/api/port-simulator/scenario", simulatorMutationOptions({scenario_id:scenarioId, reason:"用户在数据分析页启动本地闭环演练"}));
-      await loadSimulatorSnapshot();
+      const snapshot = await loadSimulatorSnapshot();
+      if (!snapshot) { toast("操作已提交，画面待核验", "回读模拟状态失败；请等待事件流重连后核对结果。", "warning"); return; }
       toast("模拟场景已切换", "所有数据沿同一port-realtime.v1链路重新计算；不是现场数据。", "success");
     } catch (error) { toast("场景切换失败", error.message, "warning"); }
   }
@@ -830,7 +849,8 @@
     const [approverId, reason] = roleMap[role] || roleMap.dispatcher;
     try {
       await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/approve`, simulatorMutationOptions({approver_id:approverId, approver_role:role, reason}));
-      await loadSimulatorSnapshot();
+      const snapshot = await loadSimulatorSnapshot();
+      if (!snapshot) { toast("操作已提交，画面待核验", "回读模拟状态失败；请等待事件流重连后核对结果。", "warning"); return; }
       toast("沙箱审批已记录", "审批仅对当前模拟动作有效，不构成生产授权。", "success");
     } catch (error) { toast("审批未记录", error.message, "warning"); }
   }
@@ -838,7 +858,8 @@
   async function executeSimulatorDecision(decisionId) {
     try {
       const result = await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/execute`, simulatorMutationOptions({reason:"双人审批后执行本地模拟闭环"}));
-      await loadSimulatorSnapshot();
+      const snapshot = await loadSimulatorSnapshot();
+      if (!snapshot) { toast("操作已提交，画面待核验", "回读模拟状态失败；请等待事件流重连后核对结果。", "warning"); return; }
       toast("模拟闭环已执行", `sandbox_state_updated=${result.sandbox_state_updated}；physical_dispatch_performed=${result.physical_dispatch_performed}`, "success", 5200);
     } catch (error) { toast("模拟动作被阻断", error.message, "warning"); }
   }
@@ -846,7 +867,8 @@
   async function rollbackSimulatorDecision(decisionId) {
     try {
       const result = await api(`/api/port-simulator/decisions/${encodeURIComponent(decisionId)}/rollback`, simulatorMutationOptions({reason:"本地验收回滚演练"}));
-      await loadSimulatorSnapshot();
+      const snapshot = await loadSimulatorSnapshot();
+      if (!snapshot) { toast("操作已提交，画面待核验", "回读模拟状态失败；请等待事件流重连后核对结果。", "warning"); return; }
       toast("模拟动作已回滚", `模拟状态已恢复；physical_dispatch_performed=${result.physical_dispatch_performed}`, "success");
     } catch (error) { toast("回滚未完成", error.message, "warning"); }
   }
@@ -890,10 +912,6 @@
     $("#riskLegend").innerHTML = waitingForPort
       ? `<span><i style="background:#f5a733"></i>待接入 TOS / EAM / VTS 告警</span>`
       : `<span><i style="background:#ff6268"></i>高 ${risk.critical}</span><span><i style="background:#f5a733"></i>中 ${risk.warning}</span><span><i style="background:#4ee58c"></i>提示 ${risk.info}</span>`;
-    const summary = state.energy?.summary || {};
-    if ($("#energyEvidenceMetrics")) $("#energyEvidenceMetrics").innerHTML = waitingForPort
-      ? `<span>综合能耗<b>等待接入港口</b></span><span>碳排放<b>等待接入港口</b></span><span>碳强度<b>等待接入港口</b></span><span>岸电利用率<b>等待接入港口</b></span>`
-      : `<span>综合能耗<b>${formatNumber(summary.total_energy_mwh)} MWh</b></span><span>碳排放<b>${formatNumber(summary.carbon_emissions_tco2e)} tCO₂e</b></span><span>碳强度<b>${formatNumber(summary.carbon_intensity_kgco2e_per_teu)} kg/TEU</b></span><span>岸电利用率<b>${formatNumber(summary.shore_power_utilization_percent)}%</b></span>`;
     if (!quick.length && alerts.length) $("#decisionCards").innerHTML = `<div class="task-empty">暂无可执行建议</div>`;
   }
 
@@ -908,7 +926,7 @@
       state.knowledge = knowledge;
       state.knowledgeStatus = status;
       $("#kbChip").textContent = `${knowledge.count} 份已索引资料`;
-      $("#topK").value = String(state.knowledge.default_top_k || 5);
+      if (!localStorage.getItem("xiaoyi_default_top_k")) $("#topK").value = String(state.knowledge.default_top_k || 5);
       if ($("#knowledgeCount")) $("#knowledgeCount").textContent = String(status.document_count);
       if ($("#knowledgeChunkCount")) $("#knowledgeChunkCount").textContent = String(status.chunk_count);
       if ($("#knowledgeOfficialCount")) $("#knowledgeOfficialCount").textContent = String(status.official_verified_documents);
@@ -1357,6 +1375,17 @@
     $("#currentQuestion").textContent = question;
     $("#userMessageTime").textContent = formatShortTime();
     $("#userBubbleRow").hidden = false;
+    state.currentAnswer = "";
+    state.currentEvidence = [];
+    state.currentVerification = null;
+    $("#responseKpis").hidden = true;
+    $("#evMetric").textContent = "0";
+    $("#confMetric").textContent = "待验证";
+    $("#intentTag").textContent = "分析中";
+    $("#answerCoverageMetric").textContent = "—";
+    $("#answerSourceQuality").textContent = "待验证";
+    $("#groundingBadge").textContent = "等待验证";
+    $("#groundingBadge").className = "grounding-badge pending";
     $("#analysisTitle").textContent = "正在分析您的问题";
     $("#responseStatus").textContent = "小懿正在协同知识库与运营引擎";
     $("#answer").textContent = "正在理解您的目标与业务语境...";
@@ -1587,6 +1616,8 @@
     persist(STORAGE.turns, state.conversationTurns);
     renderConversationTranscript();
     showWelcome();
+    const defaultMode = localStorage.getItem("xiaoyi_default_mode");
+    if (["expert", "ops", "sop", "brief"].includes(defaultMode)) { $("#mode").value = defaultMode; $("#modeShortLabel").textContent = modeShort(defaultMode); }
     toast("已新建连续对话", "后续消息会在当前窗口连续显示，并共享同一会话上下文。", "success");
   }
 
@@ -1835,6 +1866,7 @@
           answer:response.answer || "", mode:response.mode || "expert", intent:response.intent || "knowledge",
           confidence:response.confidence || "-", evidence:response.evidence || [], next_questions:response.next_questions || [],
           grounded:Boolean(response.grounded), coverage:Number(response.coverage || 0), source_quality:response.source_quality || "unverified",
+          decision_readiness:response.decision_readiness || null, evidence_health:response.evidence_health || null,
           refusal_reason:response.refusal_reason || null, strict_evidence:Boolean(response.strict_evidence),
           answer_verification:response.answer_verification || null, createdAt:item.created_at
         };
@@ -2164,15 +2196,17 @@
     }
     const url = safeUrl(runtime.url);
     if (!url) return;
-    const opened = window.open(url, "_blank", "noopener,noreferrer");
-    if (!opened) window.location.assign(url);
+    const link = document.createElement("a");
+    link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
+    document.body.append(link); link.click(); link.remove();
   }
 
   function favoriteCurrent() {
     if (!state.currentAnswer) { toast("当前没有可收藏内容", "先完成一次问答。", "warning"); return; }
     const id = `${state.currentQuestion}|${state.currentMode}`;
     if (state.favorites.some((item) => item.id === id)) { toast("这条回答已收藏", "可在左侧“我的收藏”中查看。", "info"); return; }
-    state.favorites = [{ id, title:topicTitle(state.currentQuestion), question:state.currentQuestion, answer:state.currentAnswer, evidence:state.currentEvidence, mode:state.currentMode, intent:state.currentIntent, confidence:state.currentConfidence, createdAt:new Date().toISOString() }, ...state.favorites].slice(0,50);
+    const source = state.topics.find((item) => item.question === state.currentQuestion && item.answer === state.currentAnswer);
+    state.favorites = [{ ...source, id, title:topicTitle(state.currentQuestion), question:state.currentQuestion, answer:state.currentAnswer, evidence:state.currentEvidence, mode:state.currentMode, intent:state.currentIntent, confidence:state.currentConfidence, createdAt:new Date().toISOString() }, ...state.favorites].slice(0,50);
     persist(STORAGE.favorites, state.favorites); updateCounts();
     toast("已收藏当前回答", "问题、回答和证据已保存到本机。", "success");
   }
@@ -2294,6 +2328,7 @@
       $("#modalSubtitle").textContent = `${response.total} 份 pending_review · indexed=false`;
       $("#modalBody").innerHTML = `<div class="drawer-note"><strong>隔离边界：</strong>${escapeHtml(response.notice)}</div><div class="source-audit-list">${response.items.length ? response.items.map((item) => `<article class="source-record unverified"><div class="source-record-header"><div class="source-record-title"><strong>${escapeHtml(item.original_filename)}</strong><span>${escapeHtml(item.id)}</span></div><span class="source-status unverified">待人工审核</span></div><div class="source-provenance"><span>提交机构<b>${escapeHtml(item.institution || "未填写")}</b></span><span>声明版本<b>${escapeHtml(item.version || "未填写")}</b></span><span>资料大小<b>${Number(item.content_bytes).toLocaleString()} B</b></span></div><div class="source-hash"><span>SHA-256</span><code title="${escapeHtml(item.sha256)}">${escapeHtml(item.sha256)}</code></div></article>`).join("") : `<div class="task-empty"><div>${icon("book")}<strong>暂无待审核资料</strong><span>使用输入框左侧附件按钮提交文本、Markdown 或 CSV</span></div></div>`}</div>`;
     } catch (error) {
+      if (state.modalKind !== "knowledge-intake") return;
       $("#modalBody").innerHTML = `<div class="drawer-note"><strong>待审核区读取失败：</strong>${escapeHtml(error.message)}</div>`;
     }
   }
@@ -2305,6 +2340,7 @@
       if (state.modalKind !== "connectors") return;
       renderConnectors();
     } catch (error) {
+      if (state.modalKind !== "connectors") return;
       $("#modalBody").innerHTML = `<div class="drawer-note"><strong>接口目录读取失败：</strong>${escapeHtml(error.message)}</div>`;
     }
   }
@@ -2336,7 +2372,7 @@
     try {
       const result = await api(`/api/connectors/${encodeURIComponent(id)}/health-check`, { method:"POST" });
       toast(result.live_data_verified ? "真实接口已验证在线" : "接口未验证为在线", result.detail, result.live_data_verified ? "success" : "warning", 5600);
-      await openConnectors();
+      if (["connectors", "connector-detail"].includes(state.modalKind)) await openConnectors();
     } catch (error) {
       toast("健康检查失败", error.message, "warning");
     }
@@ -2354,7 +2390,7 @@
 
   function openSettings() {
     const theme = document.body.dataset.theme;
-    openModal("系统设置", "界面偏好会保存在当前浏览器", `<div class="settings-grid"><div class="setting-row"><div><strong>视觉主题</strong><span>深海蓝或更高对比度的极夜模式</span></div><select id="settingsTheme"><option value="deep-sea" ${theme === "deep-sea" ? "selected" : ""}>深海模式</option><option value="midnight" ${theme === "midnight" ? "selected" : ""}>极夜模式</option></select></div><div class="setting-row"><div><strong>默认回答模式</strong><span>提问时仍可在输入框内单独调整</span></div><select id="settingsMode"><option value="expert">专业问答</option><option value="ops">运营问答</option><option value="sop">SOP 生成</option><option value="brief">简报摘要</option></select></div><div class="setting-row"><div><strong>检索证据数</strong><span>范围 1–10 条</span></div><select id="settingsTopK">${[3,5,8,10].map((n) => `<option value="${n}" ${Number($("#topK").value) === n ? "selected" : ""}>${n} 条</option>`).join("")}</select></div><div class="drawer-note"><strong>系统边界：</strong>无现场数据时显示“公开数据校准实时模拟”，每个值保留场景、seed、事件序号、数据哈希和 SIM 真值标签；真实 TOS / EMS / PCS 接入后沿用同一契约，生产写权限仍须独立准入。</div></div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button" data-modal-action="save-settings">保存设置</button>`, "settings");
+    openModal("系统设置", "界面偏好会保存在当前浏览器", `<div class="settings-grid"><div class="setting-row"><div><strong>视觉主题</strong><span>深海蓝或更高对比度的极夜模式</span></div><select id="settingsTheme"><option value="deep-sea" ${theme === "deep-sea" ? "selected" : ""}>深海模式</option><option value="midnight" ${theme === "midnight" ? "selected" : ""}>极夜模式</option></select></div><div class="setting-row"><div><strong>默认回答模式</strong><span>提问时仍可在输入框内单独调整</span></div><select id="settingsMode"><option value="expert">专业问答</option><option value="ops">运营问答</option><option value="sop">SOP 生成</option><option value="brief">简报摘要</option></select></div><div class="setting-row"><div><strong>检索证据数</strong><span>范围 1–10 条</span></div><select id="settingsTopK">${Array.from({length:10}, (_, i) => i + 1).map((n) => `<option value="${n}" ${Number($("#topK").value) === n ? "selected" : ""}>${n} 条</option>`).join("")}</select></div><div class="drawer-note"><strong>系统边界：</strong>无现场数据时显示“公开数据校准实时模拟”，每个值保留场景、seed、事件序号、数据哈希和 SIM 真值标签；真实 TOS / EMS / PCS 接入后沿用同一契约，生产写权限仍须独立准入。</div></div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button" data-modal-action="save-settings">保存设置</button>`, "settings");
     const tokenConfigured = Boolean(sessionStorage.getItem("xiaoyi_access_token"));
     $("#modalSubtitle").textContent = "界面偏好保存在浏览器；访问令牌只保存在当前标签会话";
     $("#modalBody .settings-grid").insertAdjacentHTML("beforeend", `<label class="intake-field"><span>生产访问令牌</span><input id="settingsAccessToken" type="password" autocomplete="off" placeholder="${tokenConfigured ? "当前标签已配置；留空保持不变" : "粘贴管理员签发的Bearer JWT"}"></label><label class="strict-evidence-option"><span><strong>清除当前访问令牌</strong><small>令牌不会写入localStorage或服务器</small></span><span class="evidence-switch"><input id="settingsClearToken" type="checkbox"><i></i></span></label>`);
@@ -2539,7 +2575,9 @@
   function renderActiveTask() {
     const task = state.activeTask;
     if (!task) return;
-    $("#drawerContent").innerHTML = `<div class="drawer-note"><strong>安全说明：</strong>${escapeHtml(task.data_notice || "当前为运营沙箱执行，不会下发生产指令。")}${task.requires_human_confirmation ? " 此任务涉及调度或处置建议，最后一步必须由授权人员确认。" : ""}</div><div class="drawer-progress"><b style="width:${Number(task.progress_percent || 0)}%"></b></div><div class="drawer-progress-label"><span>执行进度</span><strong>${task.progress_percent}%</strong></div><div class="task-steps">${task.steps.map((step) => `<div class="task-step ${escapeHtml(step.status)}" data-task-step="${escapeHtml(step.id)}"><i class="task-step-icon">${step.status === "completed" ? icon("check") : step.order}</i><div class="task-step-copy"><strong>${escapeHtml(step.title)}</strong><span>${escapeHtml(step.description || "等待小懿执行")}</span>${step.result ? `<em>${escapeHtml(step.result)}</em>` : ""}</div></div>`).join("")}</div>`;
+    const statusLabels = { completed:"已完成", pending:"等待执行", running:"当前待执行", skipped:"已跳过" };
+    const describeStep = (step) => `${statusLabels[step.status] || "状态待核验"}：${String(step.description || step.title || "").replace(/^(?:小懿正在执行|步骤内容)[：:]\s*/, "")}`;
+    $("#drawerContent").innerHTML = `<div class="drawer-note"><strong>安全说明：</strong>${escapeHtml(task.data_notice || "当前为运营沙箱执行，不会下发生产指令。")}${task.requires_human_confirmation ? " 此任务涉及调度或处置建议，最后一步必须由授权人员确认。" : ""}</div><div class="drawer-progress"><b style="width:${Number(task.progress_percent || 0)}%"></b></div><div class="drawer-progress-label"><span>执行进度</span><strong>${task.progress_percent}%</strong></div><div class="task-steps">${task.steps.map((step) => `<div class="task-step ${escapeHtml(step.status)}" data-task-step="${escapeHtml(step.id)}"><i class="task-step-icon">${step.status === "completed" ? icon("check") : step.order}</i><div class="task-step-copy"><strong>${escapeHtml(step.title)}</strong><span>${escapeHtml(describeStep(step))}</span>${step.result ? `<em>${escapeHtml(step.result)}</em>` : ""}</div></div>`).join("")}</div>`;
     const footer = $("#drawerFooter");
     if (task.status === "completed") {
       footer.innerHTML = `<button type="button" class="drawer-button secondary" data-action="close-drawer">关闭</button><button type="button" class="drawer-button" data-action="generate-report">${icon("report")}生成报告</button>`;
@@ -2554,37 +2592,45 @@
 
   async function advanceTask() {
     const task = state.activeTask;
-    if (!task || task.status !== "running") return false;
+    if (!task || task.status !== "running" || state.taskAdvancing.has(task.id)) return false;
     const currentIndex = task.steps.findIndex((step) => step.status === "running");
     if (task.requires_human_confirmation && currentIndex === task.steps.length - 1 && !state.confirmedTaskIds.has(task.id)) {
       setHeroState("confirm");
       openModal("需要人工确认", "高风险生产动作不会由小懿自动下发", `<div class="drawer-note"><strong>即将完成：</strong>${escapeHtml(task.steps.find((step) => step.status === "running")?.title || "最终确认步骤")}。当前为运营沙箱；确认只会推进沙箱任务并记录审计轨迹，不会连接或控制真实设备。</div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button warning" data-modal-action="confirm-task">确认沙箱执行</button>`, "task-confirm");
       return false;
     }
+    state.taskAdvancing.add(task.id);
+    try {
     const running = task.steps.find((step) => step.status === "running");
     if (running) await guidedFocus(`[data-task-step="${CSS.escape(running.id)}"]`, `执行第 ${running.order} 步`, false, 420);
+    if (state.activeTask?.id !== task.id) return false;
+    let updated;
     try {
       const response = await api(`/api/tasks/${encodeURIComponent(task.id)}/next`, { method:"POST" });
-      state.activeTask = response.task;
+      updated = response.task;
+      if (state.activeTask?.id === task.id) state.activeTask = updated;
       toast(response.visual_cue === "task-complete" ? "智能任务已完成" : "步骤执行完成", response.assistant_message, "success");
     } catch (error) {
       toast("步骤执行失败，自动执行已停止", error.message, "warning"); return false;
     }
-    state.tasks = [state.activeTask, ...state.tasks.filter((item) => item.id !== state.activeTask.id)];
-    renderActiveTask(); renderTaskList(); updateCounts();
+    state.tasks = [updated, ...state.tasks.filter((item) => item.id !== task.id)];
+    if (state.activeTask?.id === task.id && state.drawerMode === "task") renderActiveTask();
+    renderTaskList(); updateCounts();
     return true;
+    } finally { state.taskAdvancing.delete(task.id); }
   }
 
   async function autoRunTask() {
     if (state.autoRunning || !state.activeTask) return;
+    const taskId = state.activeTask.id;
     state.autoRunning = true;
-    while (state.autoRunning && state.activeTask?.status === "running") {
+    while (state.autoRunning && state.activeTask?.id === taskId && state.activeTask.status === "running") {
       const activeIndex = state.activeTask.steps.findIndex((step) => step.status === "running");
       if (state.activeTask.requires_human_confirmation && activeIndex === state.activeTask.steps.length - 1 && !state.confirmedTaskIds.has(state.activeTask.id)) {
         state.autoRunning = false; setHeroState("confirm"); toast("自动执行已暂停", "最后一步需要授权人员确认。", "warning", 5000); renderActiveTask(); break;
       }
       const advanced = await advanceTask();
-      if (!advanced) break;
+      if (!advanced || state.activeTask?.id !== taskId) break;
       await sleep(650);
     }
     state.autoRunning = false;
@@ -2622,6 +2668,7 @@
       toast("报告已生成", "可下载 Markdown 或 JSON 文件。", "success");
     } catch (error) {
       if (options.background) throw error;
+      if (state.modalKind !== "report-loading") return null;
       $("#modalBody").innerHTML = `<div class="drawer-note"><strong>生成失败：</strong>${escapeHtml(error.message)}</div>`;
       $("#modalFooter").innerHTML = `<button type="button" class="drawer-button secondary" data-action="close-modal">关闭</button>`;
       return null;
@@ -2662,7 +2709,7 @@
 
   async function submitKnowledgeIntake() {
     const attachment = state.pendingAttachment;
-    if (!attachment) return;
+    if (!attachment || state.intakeSubmitting) return;
     const sourceUrl = String($("#intakeSourceUrl")?.value || "").trim();
     const payload = {
       filename:attachment.filename,
@@ -2672,9 +2719,11 @@
       version:String($("#intakeVersion")?.value || "").trim() || null,
       official_claim:Boolean($("#intakeOfficialClaim")?.checked)
     };
+    state.intakeSubmitting = true;
     try {
       const item = await api("/api/knowledge/intake", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload) });
-      state.pendingAttachment = null;
+      if (state.pendingAttachment === attachment) state.pendingAttachment = null;
+      if (state.modalKind !== "knowledge-intake-submit") { toast("资料已安全暂存", `${item.original_filename} 已进入待审核区。`, "success"); return; }
       $("#modalTitle").textContent = "资料已进入待审核隔离区";
       $("#modalSubtitle").textContent = `${item.id} · indexed=false`;
       $("#modalBody").innerHTML = `<div class="source-record unverified"><div class="source-record-header"><div class="source-record-title"><strong>${escapeHtml(item.original_filename)}</strong><span>${escapeHtml(item.status)}</span></div><span class="source-status unverified">未进入索引</span></div><div class="source-provenance"><span>官方性核验<b>${item.official_claim_verified ? "已核验" : "未核验"}</b></span><span>可进入索引<b>${item.eligible_for_index ? "是" : "否"}</b></span><span>存储区域<b>${escapeHtml(item.storage_area)}</b></span></div><div class="source-hash"><span>SHA-256</span><code>${escapeHtml(item.sha256)}</code></div></div><div class="drawer-note"><strong>后续要求：</strong>${escapeHtml(item.review_notice)}</div>`;
@@ -2682,7 +2731,7 @@
       toast("资料已安全暂存", "没有加入正式索引，也不会影响当前专业回答。", "success", 5200);
     } catch (error) {
       toast("资料暂存失败", error.message, "warning", 5200);
-    }
+    } finally { state.intakeSubmitting = false; }
   }
 
   function showKnowledgeMap() {
@@ -3233,7 +3282,7 @@
         algorithms:mission.algorithms || ["q_learning","sarsa","expected_sarsa","double_q_learning","pid"],
         episodes:Number(mission.episodes || 160),
         horizon_steps:Number(mission.horizonSteps || 72),
-        seed:Number(mission.seed || 240520)
+        seed:Number(mission.seed ?? 240520)
       };
       if (action.kind === "open_rl_mission") {
         mission.health = await api("/api/rl-mission/health", { timeoutMs:15000 });
@@ -3268,7 +3317,7 @@
           renderAutomationPlan();
         }
         if (!['trained','evaluated'].includes(mission.training.status)) throw new Error(`训练任务${mission.training.status}：${mission.training.error || "未知错误"}`);
-        return `真实训练完成：4种RL算法共执行 ${mission.training.completed_training_episodes} 个episode，训练阶段rendering_performed=${mission.training.training?.rendering_performed}，模型已按算法落盘并计算哈希。`;
+        return `真实训练完成：${(mission.training.config?.algorithms || mission.algorithms || []).filter((id) => !["pid", "sop_rule"].includes(id)).length}种RL算法共执行 ${mission.training.completed_training_episodes} 个episode，训练阶段rendering_performed=${mission.training.training?.rendering_performed}，模型已按算法落盘并计算哈希。`;
       }
       if (action.kind === "run_rl_competition") {
         mission.simulation = await api("/api/rl-mission/simulate", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({...payload,run_id:mission.runId}), timeoutMs:60000 });
@@ -3485,6 +3534,7 @@
     const verification = mission.verification || {};
     const dispatch = mission.dispatch || {};
     const race = simulation.race || [];
+    const trainedLabels = race.filter((item) => !["pid", "sop_rule"].includes(item.algorithm_id || item.id)).map((item) => item.label);
     const portMission = dataset.environment_type === "port_operations" || simulation.environment_type === "port_operations";
     const raceLines = race.map((item) => portMission
       ? `• ${item.label}：评分 ${formatNumber(item.score)}，服务量 ${formatNumber(item.served_units)}，平均积压 ${formatNumber(item.average_backlog_units)}，等待代理 ${formatNumber(item.wait_proxy_hours)}小时，约束违例 ${formatNumber(item.constraint_violations)}`
@@ -3492,15 +3542,15 @@
     const answer = `可复现强化学习${portMission ? "港口作业协同" : "能源调度"}实验已完成。\n\n`+
       `数据：${dataset.label || "—"}，${dataset.row_count || 0}条真实观测，SHA-256 ${String(dataset.sha256 || "—")}。\n`+
       `数据划分：按时间顺序70%训练、15%验证、15%保留测试；${portMission ? "船舶交通字段为公开实测，作业指标为校准仿真输出，不是码头生产实绩" : "默认公开能源数据不是港口实绩"}。\n`+
-      `训练：Q-learning、SARSA、Expected SARSA、Double Q-learning共完成 ${training.completed_training_episodes || 0} 个episode；PID与现场SOP规则作为非学习强基线不训练。训练阶段rendering_performed=${Boolean(training.training?.rendering_performed)}。\n`+
+      `训练：${trainedLabels.join("、") || "所选RL算法"}共完成 ${training.completed_training_episodes || 0} 个episode；PID与现场SOP规则作为非学习强基线不训练。训练阶段rendering_performed=${Boolean(training.training?.rendering_performed)}。\n`+
       `测试：训练全部完成后才读取保留测试段并生成轨迹，领先算法 ${simulation.best_algorithm_id || "—"}。\n\n`+
-      `六种候选与基线结果：\n${raceLines || "• 测试结果未返回。"}\n\n`+
+      `本次 ${race.length} 种候选与基线结果：\n${raceLines || "• 测试结果未返回。"}\n\n`+
       `复现门禁：${verification.passed || 0}/${verification.total || 0}项通过；归档状态 ${dispatch.status || "未归档"}，production_executed=${Boolean(dispatch.production_executed)}。\n\n`+
       (portMission
         ? `接入站点方式：按港口交通观测字段契约提供时间、船舶数量、航速和船型数据，并登记码头能力参数；算法、时间划分、模型哈希和测试隔离保持不变。`
         : `接入站点方式：按统一能源时序数据契约提供时间与负荷数据；算法、时间划分、模型哈希和测试隔离保持不变。`);
     commitAutomationChat({ question:plan.command, answer, intent:"rl_energy_training_lab", mode:"ops", confidence:"高", sourceQuality:"public_dataset", grounded:true, nextQuestions:["解释六种候选与基线的更新规则", "查看数据和模型哈希", "如何替换为港口EMS与AGV数据"] });
-    return "真实训练、保留测试集评测、六种候选与基线结果、模型哈希与数据边界已回写智能对话。";
+    return `真实训练、保留测试集评测、${race.length}种候选与基线结果、模型哈希与数据边界已回写智能对话。`;
   }
 
   function deliverWeatherMissionResult() {
@@ -3826,7 +3876,8 @@
     const input = $("#rlAdvisorInput");
     if (input) input.value = "";
     state.rlAdvisorMessages.push({ role:"user", text:prompt });
-    state.rlAdvisorMessages.push({ role:"assistant", text:"正在核对当前数据、契约与运行记录…", loading:true });
+    const pending = { role:"assistant", text:"正在核对当前数据、契约与运行记录…", loading:true };
+    state.rlAdvisorMessages.push(pending);
     renderRLAdvisorFeed();
     const recent = latestCompletedRun(state.rlCenter?.runs?.items || []);
     try {
@@ -3836,11 +3887,9 @@
         body:JSON.stringify({ message:prompt, run_id:recent?.run_id || null }),
         timeoutMs:18000
       });
-      state.rlAdvisorMessages.pop();
-      state.rlAdvisorMessages.push({ role:"assistant", text:result.answer, evidence:result.evidence || [] });
+      Object.assign(pending, { text:result.answer, evidence:result.evidence || [], loading:false });
     } catch (error) {
-      state.rlAdvisorMessages.pop();
-      state.rlAdvisorMessages.push({ role:"assistant", text:`这次没有读取到训练证据：${error.message}` });
+      Object.assign(pending, { text:`这次没有读取到训练证据：${error.message}`, loading:false });
     }
     renderRLAdvisorFeed();
   }
@@ -3928,6 +3977,7 @@
   }
 
   function startConfiguredRLLab() {
+    if (["#rlEpisodes", "#rlHorizon", "#rlSeed"].some((selector) => { const input = $(selector); return !input || !input.value.trim() || !input.reportValidity(); })) return;
     const algorithms = $$('[data-rl-algorithm]:checked').map((item) => item.value);
     if (!algorithms.some((item) => !["pid", "sop_rule"].includes(item))) {
       toast("至少选择一种RL算法", "PID和SOP规则都是非学习强基线，不能单独作为强化学习训练任务。", "warning");
@@ -3941,7 +3991,7 @@
       seed:Number($("#rlSeed").value)
     };
     closeModal();
-    if (!state.agentMode) toggleAgentMode(false);
+    if (!state.agentMode) toggleAgentMode(true);
     setView("chat", { silent:true });
     const labels = algorithms.join("、");
     void askQuestion(`启动RL训练实验：数据集${state.pendingRLLabConfig.datasetId}，算法${labels}，每种RL训练${state.pendingRLLabConfig.episodes}回合；训练时不渲染，训练完成后再用保留测试集渲染。`, "ops");
@@ -3973,7 +4023,7 @@
       event.stopPropagation();
       void openRLLabConfig();
     }));
-    $("#modalBackdrop").addEventListener("click", closeModal);
+    $("#modalBackdrop").addEventListener("click", () => closeModal());
     $("#drawerBackdrop").addEventListener("click", closeDrawer);
 
     document.addEventListener("input", (event) => {
@@ -4021,7 +4071,10 @@
       const favoriteButton = event.target.closest("[data-favorite-id]");
       if (favoriteButton) {
         const item = state.favorites.find((entry) => entry.id === favoriteButton.dataset.favoriteId);
-        if (item) { state.topics.unshift({ ...item, id:`fav-${Date.now()}` }); restoreTopic(state.topics[0].id); }
+        if (item) {
+          const source = state.topics.find((topic) => topic.question === item.question && topic.answer === item.answer);
+          state.topics.unshift({ ...item, ...source, id:`fav-${Date.now()}` }); restoreTopic(state.topics[0].id);
+        }
         return;
       }
       const avatarButton = event.target.closest("[data-avatar]");
@@ -4116,14 +4169,25 @@
       openModal("确认清空历史？", "将清除浏览器缓存和当前身份可访问的服务端会话记录", `<div class="drawer-note"><strong>将删除 ${state.topics.length} 条浏览器记录，并请求清除会话 ${escapeHtml(state.sessionId)}。</strong>收藏内容不会受影响。</div>`, `<button type="button" class="drawer-button secondary" data-action="close-modal">取消</button><button type="button" class="drawer-button warning" data-modal-action="clear-history-confirmed">确认清空</button>`, "history-confirm");
     }
     if (action === "clear-history-confirmed") {
-      try { await api(`/api/conversations/${encodeURIComponent(state.sessionId)}`, {method:"DELETE"}); } catch { /* local cache still clears */ }
-      state.topics = []; persist(STORAGE.topics, state.topics); updateCounts(); closeModal(); toast("对话历史已清空", "浏览器缓存与当前会话服务端记录已清除；收藏仍保留。", "success");
+      try {
+        await api(`/api/conversations/${encodeURIComponent(state.sessionId)}`, {method:"DELETE"});
+      } catch (error) {
+        toast("对话历史未清空", `${error.message}；已保留历史，可稍后重试。`, "warning");
+        return;
+      }
+      state.sessionId = createSessionId();
+      localStorage.setItem(STORAGE.sessionId, state.sessionId);
+      state.topics = []; state.conversationTurns = [];
+      persist(STORAGE.topics, state.topics); persist(STORAGE.turns, state.conversationTurns);
+      renderConversationTranscript(); showWelcome(); updateCounts(); closeModal(); toast("对话历史已清空", "浏览器缓存与当前会话服务端记录已清除；收藏仍保留。", "success");
     }
     if (action === "save-settings") {
       toggleTheme($("#settingsTheme").value);
       $("#mode").value = $("#settingsMode").value;
       $("#modeShortLabel").textContent = modeShort($("#settingsMode").value);
       $("#topK").value = $("#settingsTopK").value;
+      localStorage.setItem("xiaoyi_default_mode", $("#mode").value);
+      localStorage.setItem("xiaoyi_default_top_k", $("#topK").value);
       if ($("#settingsClearToken")?.checked) sessionStorage.removeItem("xiaoyi_access_token");
       else if ($("#settingsAccessToken")?.value.trim()) sessionStorage.setItem("xiaoyi_access_token", $("#settingsAccessToken").value.trim());
       closeModal();
@@ -4146,6 +4210,10 @@
     $(".theme-switch strong").textContent = theme === "deep-sea" ? "深海模式" : "极夜模式";
     const avatar = localStorage.getItem(STORAGE.avatar) || "navigator";
     document.body.classList.toggle("avatar-analyst", avatar === "analyst");
+    const defaultMode = localStorage.getItem("xiaoyi_default_mode");
+    if (["expert", "ops", "sop", "brief"].includes(defaultMode)) { $("#mode").value = defaultMode; $("#modeShortLabel").textContent = modeShort(defaultMode); }
+    const defaultTopK = Number(localStorage.getItem("xiaoyi_default_top_k"));
+    if (Number.isInteger(defaultTopK) && defaultTopK >= 1 && defaultTopK <= 10) $("#topK").value = String(defaultTopK);
     const strict = localStorage.getItem(STORAGE.strictEvidence) !== "false";
     if ($("#strictEvidence")) $("#strictEvidence").checked = strict;
     toggleAgentMode(state.agentMode, false);
