@@ -33,6 +33,8 @@ REQUIRED = (
     "reports/dependency_audit_20260813_r2_dev.json",
     "reports/dependency_audit_20260814_r3_runtime.json",
     "reports/dependency_audit_20260814_r3_dev.json",
+    "reports/dependency_audit_20260912_runtime_v1.json",
+    "reports/dependency_audit_20260912_dev_v1.json",
     "reports/dependency_audit_admission_v3.json",
     "reports/dependency_audit_admission_v3.md",
     ".github/dependabot.yml", "docs/DEPLOYMENT.md", "docs/ARCHITECTURE.md",
