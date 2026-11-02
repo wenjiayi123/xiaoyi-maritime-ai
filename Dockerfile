@@ -19,7 +19,7 @@ RUN python scripts/build_index.py \
     && python scripts/restore_research_evidence.py \
     && mkdir -p data/rl_runs data/kb_pending runtime \
     && chown xiaoyi:xiaoyi data/xiaoyi_index.json \
-    && chown -R xiaoyi:xiaoyi data/rl_runs data/kb_pending runtime
+    && chown -R xiaoyi:xiaoyi data/rl_runs data/kb_pending runtime .runtime .codex_artifacts
 
 USER xiaoyi
 EXPOSE 8010
