@@ -126,6 +126,50 @@ def test_command_returns_trace_and_per_system_receipts(monkeypatch) -> None:
     assert payload["production_write_enabled"] is False
 
 
+def test_preview_command_is_fast_read_only_and_never_starts_targets(monkeypatch) -> None:
+    monkeypatch.setattr(
+        system_linkage,
+        "_runtime",
+        lambda target: {
+            "target": target,
+            "name": target,
+            "state": "offline",
+            "running": False,
+            "launchable": True,
+        },
+    )
+    monkeypatch.setattr(
+        system_linkage,
+        "_ensure_running",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            AssertionError("快速演示不得启动目标系统")
+        ),
+    )
+
+    response = client.post(
+        "/api/system-linkage/command",
+        json={
+            "target": "all",
+            "command": "快速联动演示",
+            "auto_start": False,
+            "wait_seconds": 1,
+            "parameters": {"preview_only": True},
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["all_succeeded"] is True
+    assert payload["succeeded"] == payload["total"] == 4
+    assert payload["production_write_enabled"] is False
+    assert all(item["status"] == "completed" for item in payload["results"])
+    assert all(
+        item.get("summary", {}).get("downstream_action_executed") is False
+        or item["target"] == "sailing-simulator"
+        for item in payload["results"]
+    )
+
+
 def test_command_failure_does_not_expose_internal_exception(monkeypatch) -> None:
     def fail_execute(target, request, trace_id):
         raise RuntimeError("secret-host.internal token=do-not-leak")

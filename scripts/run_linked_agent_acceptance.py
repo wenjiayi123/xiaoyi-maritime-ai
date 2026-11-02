@@ -41,7 +41,8 @@ def main():
     cases = [("port.observe", {}), ("port.evaluate", {"scenario":"high_density_berthing","horizon_min":60,"step_min":15}),
              ("energy.observe", {}), ("energy.compare", {"green_preference":.8,"carbon_price_cny_per_ton":100}),
              ("malacca.observe", {}), ("malacca.scenario", {"scenario":"peak-arrivals"}),
-             ("malacca.clock", {"action":"stop"}), ("sailing.observe", {})]
+             ("malacca.clock", {"action":"stop"}), ("sailing.observe", {}),
+             ("energy.clock", {"action":"stop"}), ("sailing.validate", {})]
     for action, params in cases:
         try:
             plan = request("/api/linked-agent/plans", {"action_id":action,"parameters":params,"samples":3,"interval_seconds":2,"restore_after_observation":True})
@@ -59,8 +60,8 @@ def main():
         except Exception as exc:
             rows.append({"action":action,"passed":False,"error":str(exc)})
             print(action,type(exc).__name__,flush=True)
-    report = {"generated_at":datetime.now(timezone.utc).isoformat(),"scope":"Eight local adapter actions, idempotency, observation and configuration restoration; no production control or field KPI claim.","passed":len(rows)==8 and all(r['passed'] for r in rows),"rows":rows,
-              "source_sha256":{file:hashlib.sha256((root/file).read_bytes()).hexdigest() for file in ["app/linked_agent.py","app/linked_agent_catalog.py","app/automation.py","app/access_control.py","web/linked_agent.js","web/app.js","web/index.html","web/styles.css"]}}
+    report = {"generated_at":datetime.now(timezone.utc).isoformat(),"scope":"Ten local adapter actions, idempotency, observation and configuration restoration; no production control or field KPI claim.","passed":len(rows)==len(cases) and all(r['passed'] for r in rows),"rows":rows,
+              "source_sha256":{file:hashlib.sha256((root/file).read_bytes()).hexdigest() for file in ["app/linked_agent.py","app/linked_agent_catalog.py","app/automation.py","app/access_control.py","app/harness/sailing.py","app/sailing_simulator_launcher.py","web/linked_agent.js","web/app.js","web/index.html","web/styles.css"]}}
     with output.open("x") as handle:
         json.dump(report,handle,ensure_ascii=False,indent=2)
         handle.write("\n")

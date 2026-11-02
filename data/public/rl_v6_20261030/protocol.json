@@ -1,0 +1,180 @@
+{
+  "schema": "xiaoyi-offline-control-protocol.v6",
+  "registered_at": "2026-10-30T13:02:18.316090+00:00",
+  "train_ports": [
+    "port101",
+    "port1045",
+    "port1065",
+    "port1114",
+    "port1160",
+    "port118",
+    "port1188",
+    "port1197",
+    "port1201",
+    "port1269",
+    "port1348",
+    "port1350",
+    "port1417",
+    "port220",
+    "port23",
+    "port254",
+    "port31",
+    "port311",
+    "port343",
+    "port387",
+    "port395",
+    "port434",
+    "port446",
+    "port514",
+    "port541",
+    "port57",
+    "port664",
+    "port694",
+    "port699",
+    "port729",
+    "port744",
+    "port746",
+    "port776",
+    "port777",
+    "port79",
+    "port824",
+    "port862",
+    "port908",
+    "port960",
+    "port985"
+  ],
+  "train_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "train_months": [
+    1,
+    4,
+    7,
+    10
+  ],
+  "validation_year": 2025,
+  "validation_months": [
+    1,
+    7
+  ],
+  "new_ports": [
+    {
+      "id": "port192",
+      "name": "Port Said",
+      "iso3": "EGY"
+    },
+    {
+      "id": "port518",
+      "name": "Jeddah",
+      "iso3": "SAU"
+    },
+    {
+      "id": "port275",
+      "name": "Dammam",
+      "iso3": "SAU"
+    },
+    {
+      "id": "port581",
+      "name": "Kobe",
+      "iso3": "JPN"
+    },
+    {
+      "id": "port241",
+      "name": "Chittagong",
+      "iso3": "BGD"
+    },
+    {
+      "id": "port543",
+      "name": "Karachi",
+      "iso3": "PAK"
+    },
+    {
+      "id": "port235",
+      "name": "Chennai (Madras)",
+      "iso3": "IND"
+    },
+    {
+      "id": "port278",
+      "name": "Dar Es Salaam",
+      "iso3": "TZA"
+    }
+  ],
+  "test_year": 2026,
+  "test_months": [
+    1,
+    4
+  ],
+  "scenarios": [
+    "normal",
+    "demand_surge",
+    "resource_outage",
+    "publication_delay"
+  ],
+  "seeds": [
+    632101,
+    632102,
+    632103,
+    632104,
+    632105
+  ],
+  "forecast_candidates": [
+    "lagged_persistence",
+    "weekday_mean",
+    "mean7",
+    "ridge_ar7"
+  ],
+  "shared_belief": {
+    "alpha": 0,
+    "phi": 0,
+    "chosen_on": "pilot.json safety-first: feasible violations then excess over max capacity then normal score",
+    "rejected_censored_beliefs_preserved": true
+  },
+  "shared_filter": {
+    "name": "old_reserve",
+    "sigma": 1.0,
+    "queue_budget": 0.0
+  },
+  "training": "Port-year block bootstrap, five fits, seven probability-mass bin centroids conditional on volatility; declared queue physics, fixed cost, empirical-model offline RL. No neural TD or evaluation MPC fallback. All exact remaining horizons1..90; conservative monotone threshold projection recorded. IID frozen-mean/volatility transitions and current availability persistence are approximation assumptions.",
+  "strong_baselines": "PID; original deterministic MPC14/28/90 with robust0/.5; mean-corrected MPC28/90 using same empirical uncertainty mean; stochastic MPC28 using same learned distribution and Bellman solver with no terminal cost outside final28steps. Shared solver is disclosed, not external independent implementation. Best cost and safety-valid baselines selected on2025 only.",
+  "independence": "All40previously seen ports are development only; eight new port IDs have no overlap. Initial42days public history allowed at stated lag; no new-port labels fit into models or selection. New ports drawn from same pinned official full export, not a new vintage. New2026Jan/Apr90daywindows scored once after selection freeze.",
+  "causal_scale_fix": "Capacity proxy equals last28 available initial public days, including14day lag; older implementations calibrated on unavailable first-week data in the delayed scenario. All new comparisons share corrected contract; cross-version totals not treated as pure RL causal gain.",
+  "admission_checks": [
+    "positive port-cluster95percent CI of normal relative cost improvement",
+    "no mean port regression",
+    "stress relative cost noninferiority",
+    "zero violations in feasible windows",
+    "no excess violations over maximum capacity",
+    "positive gain share no port above50percent",
+    "five-seed mean not treated as five independent ports"
+  ],
+  "metric": "Original proxy queue+service+switch+terminal cost, not currency, real waiting time or measured productivity. Compare same shared filter; show raw/filter ablations separately.",
+  "test_extraction_requires_frozen_selection": true,
+  "sources": [
+    {
+      "path": "data/public/portwatch_crossport_20261030/manifest.json",
+      "sha256": "5d3dfb69e0ea8d3cc196685b0d68ba8157e229953a787b2ab87a65df6f14ed65"
+    },
+    {
+      "path": "data/public/portwatch_v2_20261030/manifest.json",
+      "sha256": "e0ae598ec948ac0fc25b2d63fc3dfe85d7ffc52de8d226a8cc38847e970e03b9"
+    },
+    {
+      "path": "data/public/portwatch_v3_20261030/manifest.json",
+      "sha256": "f62f5563c326acea3de0192f49fc36378c393b4e4d6bcd7c907159013fee4c3d"
+    },
+    {
+      "path": "data/public/portwatch_v4_20261030/manifest.json",
+      "sha256": "2d2653ae79ac5f8905dfd800d82f18152e3649fa5b58adeb194176a49ff4dd6f"
+    },
+    {
+      "path": "data/public/operations_v5_20261030/manifest.json",
+      "sha256": "3ae85a1fbf998df0e6ef26b4653eb552f0b7de6b776153aa51a3b6156cba561c"
+    }
+  ],
+  "production_authority": false
+}

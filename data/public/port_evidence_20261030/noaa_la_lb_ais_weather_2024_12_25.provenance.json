@@ -1,0 +1,41 @@
+{
+  "id": "noaa_la_lb_ais_weather_2024_12_25",
+  "path": "data/public/port_evidence_20261030/noaa_la_lb_ais_weather_2024_12_25.csv",
+  "sha256": "d2cf76c3f17189a5e14715b5cf6ad2783cfdd62e9041c4e0485c5239ec7218ed",
+  "rows": 710,
+  "provider": "USCG / NOAA / BOEM; NOAA CO-OPS",
+  "site": "Los Angeles–Long Beach bbox; Angels Gate wind station 9410647",
+  "landing_url": "https://coast.noaa.gov/digitalcoast/tools/ais.html",
+  "time_start": "2024-12-25T00:00:00+00:00",
+  "time_end": "2024-12-25T12:01:00+00:00",
+  "evidence_class": "historical_ais_and_station_asof_join",
+  "unit": "AIS counts, knots; wind m/s; pressure hPa",
+  "temporal_resolution": "AIS observed one-minute buckets; last station record at most six minutes earlier",
+  "source_bindings": [
+    {
+      "path": "data/public/noaa_la_lb_ais_2024_12_25_1min.csv",
+      "sha256": "50c99d18514a20cdebeeeb09f16d004ade1a50ce4c8f7b96fc506141bb555cc6"
+    },
+    {
+      "path": "data/public/port_evidence_20261030/noaa_la_wind.csv",
+      "sha256": "1a2c88d453d94c26c80694e54fa2cf969a0437b64ae2b89e7f885719f27f2a62"
+    },
+    {
+      "path": "data/public/port_evidence_20261030/noaa_la_air_pressure.csv",
+      "sha256": "9150329fb10e0e000f73af6e5cb936e1f7998bf0b1bcfec12351e9248ff31c83"
+    }
+  ],
+  "joined_nonmissing_counts": {
+    "wind_speed_mps": 522,
+    "pressure_hpa": 710
+  },
+  "license": "U.S. Government material; free for public use under the NOAA MarineCadastre AIS terms, with U.S. Government material notice",
+  "transformations": [
+    "Latest station observation at or before each AIS timestamp; maximum lag 360s.",
+    "Reject flagged station observations; retain missing values, no interpolation or future joins."
+  ],
+  "limitations": "风速为附近单站；AIS状态仅为排队代理。设备、泊位、堆场、货物量和能源实绩仍未知；观测事件时间对齐不证明当时数据发布时间。",
+  "schema_version": "xiaoyi-public-dataset-provenance.v1",
+  "derived_csv_sha256": "d2cf76c3f17189a5e14715b5cf6ad2783cfdd62e9041c4e0485c5239ec7218ed",
+  "manifest_sha256": "af57a5b58755f9787e064bab051297786382e8a3a4fa08e33f4346f7058dfd0f"
+}

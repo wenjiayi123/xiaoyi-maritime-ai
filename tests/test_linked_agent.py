@@ -18,7 +18,15 @@ def local(monkeypatch, tmp_path):
     writes = []
 
     def observe(target):
-        return {"observed_at": agent.now(), "source_time": "engineering-clock", "config": copy.deepcopy(state), "metrics": {"queue": 10 if state["scenario"] == "normal" else 20}, "payload_sha256": agent.digest(state), "production_authority": False, "source": "test-contract"}
+        return {
+            "observed_at": agent.now(),
+            "source_time": "engineering-clock",
+            "config": copy.deepcopy(state),
+            "metrics": {"queue": 10 if state["scenario"] == "normal" else 20},
+            "payload_sha256": agent.digest(state),
+            "production_authority": False,
+            "source": "test-contract",
+        }
 
     def request(target, method, path, payload=None):
         writes.append((path, payload))
@@ -34,7 +42,7 @@ def local(monkeypatch, tmp_path):
         yield client, state, writes
     deadline = time.monotonic() + 5
     while agent._active and time.monotonic() < deadline:
-        time.sleep(.02)
+        time.sleep(0.02)
     assert not agent._active
 
 
@@ -44,7 +52,10 @@ def prepare(client, **overrides):
 
 
 def start(client, plan, request_id=None):
-    return client.post(f"/api/linked-agent/plans/{plan['id']}/execute", json={"plan_sha256": plan["plan_sha256"], "request_id": request_id or uuid4().hex})
+    return client.post(
+        f"/api/linked-agent/plans/{plan['id']}/execute",
+        json={"plan_sha256": plan["plan_sha256"], "request_id": request_id or uuid4().hex},
+    )
 
 
 def finish(client, run_id):
@@ -55,8 +66,8 @@ def finish(client, run_id):
             for _ in range(100):
                 if result["plan"]["target"] not in agent._active:
                     return result
-                time.sleep(.01)
-        time.sleep(.02)
+                time.sleep(0.01)
+        time.sleep(0.02)
     raise AssertionError("job did not terminate")
 
 
@@ -74,7 +85,7 @@ def test_scenario_adjust_observe_and_restore_are_real_calls(local):
     previous = "0" * 64
     for event in result["events"]:
         assert event["previous_sha256"] == previous
-        assert agent.digest({k:v for k,v in event.items() if k != "sha256"}) == event["sha256"]
+        assert agent.digest({k: v for k, v in event.items() if k != "sha256"}) == event["sha256"]
         previous = event["sha256"]
 
 
@@ -90,14 +101,22 @@ def test_repeated_requests_and_new_keys_cannot_repeat_prepared_plan(local):
     assert start(client, another, "request-12345678").status_code == 409
 
 
-@pytest.mark.parametrize("params", [{"scenario":"unknown"},{"scenario":"normal","shell":"anything"}])
+@pytest.mark.parametrize("params", [{"scenario": "unknown"}, {"scenario": "normal", "shell": "anything"}])
 def test_invalid_parameters_are_rejected_before_io(local, params):
     client, _, writes = local
     assert prepare(client, parameters=params).status_code == 422
     assert not writes
 
 
-@pytest.mark.parametrize("params", [{"green_preference":-1},{"green_preference":1.01},{"carbon_price_cny_per_ton":5001},{"base_url":"http://example.test"}])
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"green_preference": -1},
+        {"green_preference": 1.01},
+        {"carbon_price_cny_per_ton": 5001},
+        {"base_url": "http://example.test"},
+    ],
+)
 def test_energy_bounds_and_extra_fields(local, params):
     client, _, _ = local
     assert prepare(client, action_id="energy.compare", parameters=params).status_code == 422
@@ -117,10 +136,10 @@ def test_manual_restore_refuses_to_overwrite_another_change(local):
     result = finish(client, start(client, plan).json()["id"])
     assert result["applied"] and not result["restored"]
     state["scenario"] = "channel-closure"
-    assert client.post(f"/api/linked-agent/runs/{result['id']}/rollback",json={}).status_code == 409
+    assert client.post(f"/api/linked-agent/runs/{result['id']}/rollback", json={}).status_code == 409
     assert len(writes) == 1
     state["scenario"] = "peak-arrivals"
-    restored = client.post(f"/api/linked-agent/runs/{result['id']}/rollback",json={})
+    restored = client.post(f"/api/linked-agent/runs/{result['id']}/rollback", json={})
     assert restored.json()["restored"]
     assert state["scenario"] == "normal"
 
@@ -132,8 +151,8 @@ def test_cancel_observation_restores_applied_configuration(local):
     for _ in range(100):
         if state["scenario"] == "peak-arrivals":
             break
-        time.sleep(.01)
-    assert client.post(f"/api/linked-agent/runs/{run['id']}/cancel",json={}).json()["cancellation_requested"]
+        time.sleep(0.01)
+    assert client.post(f"/api/linked-agent/runs/{run['id']}/cancel", json={}).json()["cancellation_requested"]
     result = finish(client, run["id"])
     assert result["status"] == "cancelled" and result["restored"]
     assert len(result["observations"]) < 12
@@ -145,7 +164,7 @@ def test_target_busy_blocks_second_operation(local):
     second = prepare(client).json()
     run = start(client, first).json()
     assert start(client, second).status_code == 409
-    client.post(f"/api/linked-agent/runs/{run['id']}/cancel",json={})
+    client.post(f"/api/linked-agent/runs/{run['id']}/cancel", json={})
     finish(client, run["id"])
 
 
@@ -153,37 +172,53 @@ def test_expired_or_mismatched_plan_cannot_execute(local):
     client, _, writes = local
     plan = prepare(client).json()
     wrong = copy.deepcopy(plan)
-    wrong["plan_sha256"] = "0"*64
+    wrong["plan_sha256"] = "0" * 64
     assert start(client, wrong).status_code == 409
     plan["expires_at_epoch"] = 0
-    agent.runtime_store.save_artifact(agent._PLAN_KIND,plan["id"],plan)
+    agent.runtime_store.save_artifact(agent._PLAN_KIND, plan["id"], plan)
     assert start(client, plan).status_code == 409
     assert not writes
 
 
 def test_uncertain_write_is_not_retried_or_falsely_completed(local, monkeypatch):
     client, _, writes = local
+
     def timeout(*args, **kwargs):
         writes.append("attempt")
         raise TimeoutError("sensitive adapter details")
-    monkeypatch.setattr(agent,"_request",timeout)
-    plan=prepare(client).json()
-    result=finish(client,start(client,plan).json()["id"])
+
+    monkeypatch.setattr(agent, "_request", timeout)
+    plan = prepare(client).json()
+    result = finish(client, start(client, plan).json()["id"])
     assert result["status"] == "needs_review" and len(writes) == 1
     assert "sensitive" not in str(result)
 
 
 def test_viewer_cannot_operate_and_operator_cannot_read_another_user(local):
     client, _, _ = local
-    body={"action_id":"malacca.observe","samples":1}
-    assert client.post("/api/linked-agent/plans",json=body,headers={"X-Xiaoyi-Role":"viewer"}).status_code == 403
-    plan=client.post("/api/linked-agent/plans",json=body,headers={"X-Xiaoyi-Actor":"alice","X-Xiaoyi-Role":"operator"}).json()
-    response=client.post(f"/api/linked-agent/plans/{plan['id']}/execute",json={"plan_sha256":plan["plan_sha256"],"request_id":uuid4().hex},headers={"X-Xiaoyi-Actor":"bob","X-Xiaoyi-Role":"operator"})
+    body = {"action_id": "malacca.observe", "samples": 1}
+    assert client.post("/api/linked-agent/plans", json=body, headers={"X-Xiaoyi-Role": "viewer"}).status_code == 403
+    plan = client.post(
+        "/api/linked-agent/plans", json=body, headers={"X-Xiaoyi-Actor": "alice", "X-Xiaoyi-Role": "operator"}
+    ).json()
+    response = client.post(
+        f"/api/linked-agent/plans/{plan['id']}/execute",
+        json={"plan_sha256": plan["plan_sha256"], "request_id": uuid4().hex},
+        headers={"X-Xiaoyi-Actor": "bob", "X-Xiaoyi-Role": "operator"},
+    )
     assert response.status_code == 403
 
 
-@pytest.mark.parametrize("text,action", [("能碳绿色偏好调到80%，碳价100，进行对比试算","energy.compare"),("马六甲切换集中到港并观测","malacca.scenario"),("暂停马六甲模拟时钟并观测","malacca.clock"),("观测数字孪生","port.observe")])
-def test_natural_commands_map_only_to_registered_actions(text,action):
+@pytest.mark.parametrize(
+    "text,action",
+    [
+        ("能碳绿色偏好调到80%，碳价100，进行对比试算", "energy.compare"),
+        ("马六甲切换集中到港并观测", "malacca.scenario"),
+        ("暂停马六甲模拟时钟并观测", "malacca.clock"),
+        ("观测数字孪生", "port.observe"),
+    ],
+)
+def test_natural_commands_map_only_to_registered_actions(text, action):
     assert parse_command(text)["action_id"] == action
 
 
@@ -193,66 +228,140 @@ def test_vague_parameter_or_question_does_not_invent_an_action():
     assert parse_command("不要暂停马六甲时钟") is None
 
 
-@pytest.mark.parametrize("text,expected", [
-    ("恢复马六甲模拟时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
-    ("马六甲时钟恢复", {"action_id": "malacca.observe", "parameters": {}}),
-    ("马六甲" + "恢复" * 10000, {"action_id": "malacca.observe", "parameters": {}}),
-    ("马六甲" + "恢复" * 10000 + "时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
-    ("暂停马六甲时钟后恢复时钟", {"action_id": "malacca.clock", "parameters": {"action": "stop"}}),
-    ("不要恢复马六甲时钟", None),
-])
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("恢复马六甲模拟时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
+        ("马六甲时钟恢复", {"action_id": "malacca.observe", "parameters": {}}),
+        ("马六甲" + "恢复" * 10000, {"action_id": "malacca.observe", "parameters": {}}),
+        ("马六甲" + "恢复" * 10000 + "时钟", {"action_id": "malacca.clock", "parameters": {"action": "start"}}),
+        ("暂停马六甲时钟后恢复时钟", {"action_id": "malacca.clock", "parameters": {"action": "stop"}}),
+        ("不要恢复马六甲时钟", None),
+    ],
+)
 def test_clock_parser_handles_repeated_text_without_loosening_command_guards(text, expected):
     assert parse_command(text) == expected
 
 
 def test_natural_scenario_plan_has_real_preview_and_confirmation():
     with TestClient(app) as client:
-        plan=client.post("/api/automation/plans",json={"command":"马六甲切换集中到港并观测"}).json()
-    assert [step["kind"] for step in plan["actions"]] == ["prepare_linked_operation","run_linked_operation","present_linked_operation"]
+        plan = client.post("/api/automation/plans", json={"command": "马六甲切换集中到港并观测"}).json()
+    assert [step["kind"] for step in plan["actions"]] == [
+        "prepare_linked_operation",
+        "run_linked_operation",
+        "present_linked_operation",
+    ]
     assert plan["actions"][1]["requires_confirmation"] is True
 
 
-@pytest.mark.parametrize('invalid', ['dataset_changed', 'missing_provenance', 'dispatch_enabled', 'ignored_price'])
+@pytest.mark.parametrize("invalid", ["dataset_changed", "missing_provenance", "dispatch_enabled", "ignored_price"])
 def test_energy_compare_rejects_incomparable_or_unverified_results(local, monkeypatch, invalid):
     client, _, _ = local
     calls = []
+
     def reply(target, method, path, payload=None):
         calls.append(payload)
-        raw = {'green_preference': payload['green_preference'],
-               'carbon_market': {'carbon_price_cny_per_ton': payload['carbon_price_cny_per_ton']},
-               'rl_environment': {'dataset_id': 'public-hourly', 'dataset_sha256': 'a' * 64},
-               'governance': {'production_dispatch_enabled': False}}
-        if invalid == 'dataset_changed' and len(calls) == 2:
-            raw['rl_environment']['dataset_sha256'] = 'b' * 64
-        elif invalid == 'missing_provenance':
-            raw['rl_environment'].pop('dataset_sha256')
-        elif invalid == 'dispatch_enabled':
-            raw['governance']['production_dispatch_enabled'] = True
-        elif invalid == 'ignored_price':
-            raw['carbon_market']['carbon_price_cny_per_ton'] = 999
+        raw = {
+            "green_preference": payload["green_preference"],
+            "carbon_market": {"carbon_price_cny_per_ton": payload["carbon_price_cny_per_ton"]},
+            "rl_environment": {"dataset_id": "public-hourly", "dataset_sha256": "a" * 64},
+            "governance": {"production_dispatch_enabled": False},
+        }
+        if invalid == "dataset_changed" and len(calls) == 2:
+            raw["rl_environment"]["dataset_sha256"] = "b" * 64
+        elif invalid == "missing_provenance":
+            raw["rl_environment"].pop("dataset_sha256")
+        elif invalid == "dispatch_enabled":
+            raw["governance"]["production_dispatch_enabled"] = True
+        elif invalid == "ignored_price":
+            raw["carbon_market"]["carbon_price_cny_per_ton"] = 999
         return raw
-    monkeypatch.setattr(agent, '_request', reply)
-    plan = prepare(client, action_id='energy.compare', parameters={}).json()
-    result = finish(client, start(client, plan).json()['id'])
-    assert result['status'] == 'failed' and 'evaluation' not in result
-    assert not result.get('write_attempted')
+
+    monkeypatch.setattr(agent, "_request", reply)
+    plan = prepare(client, action_id="energy.compare", parameters={}).json()
+    result = finish(client, start(client, plan).json()["id"])
+    assert result["status"] == "failed" and "evaluation" not in result
+    assert not result.get("write_attempted")
 
 
-@pytest.mark.parametrize('target,reply', [
-    ('malacca-sandbox', {'authority': {'simulation_mode': True, 'production_authority': False}}),
-    ('energy-cockpit', {'production_authority': False, 'data_mode': 'live'}),
-    ('port-dt-multi', {'aggregate_kw': 10}),
-])
+@pytest.mark.parametrize(
+    "target,reply",
+    [
+        ("malacca-sandbox", {"authority": {"simulation_mode": True, "production_authority": False}}),
+        ("energy-cockpit", {"production_authority": False, "data_mode": "live"}),
+        ("port-dt-multi", {"aggregate_kw": 10}),
+    ],
+)
 def test_observation_refuses_missing_or_live_authority(monkeypatch, target, reply):
-    monkeypatch.setattr(agent, '_request', lambda *a, **kw: reply)
+    monkeypatch.setattr(agent, "_request", lambda *a, **kw: reply)
     with pytest.raises(ValueError):
         agent._observe(target)
 
 
 def test_unsupported_parameter_request_prompts_instead_of_pretending_to_observe():
-    assert parse_command('调整数字孪生设备速度').get('clarification')
-    assert parse_command('观测能碳和马六甲').get('clarification')
-    assert parse_command('能碳绿色偏好调整到80%，碳价-100，试算')['parameters']['carbon_price_cny_per_ton'] == -100
+    assert parse_command("调整数字孪生设备速度").get("clarification")
+    assert parse_command("观测能碳和马六甲").get("clarification")
+    assert parse_command("能碳绿色偏好调整到80%，碳价-100，试算")["parameters"]["carbon_price_cny_per_ton"] == -100
     with TestClient(app) as client:
-        plan = client.post('/api/automation/plans', json={'command': '能碳调节参数'}).json()
-    assert [a['kind'] for a in plan['actions']] == ['clarify_linked_operation']
+        plan = client.post("/api/automation/plans", json={"command": "能碳调节参数"}).json()
+    assert [a["kind"] for a in plan["actions"]] == ["clarify_linked_operation"]
+
+
+def test_another_process_cannot_recover_a_live_target_lease(monkeypatch, tmp_path):
+    import os
+    import subprocess
+    import sys
+
+    path = tmp_path / "shared-test.sqlite"
+    store = RuntimeStore(path)
+    monkeypatch.setattr(agent, "runtime_store", store)
+    run = {"id": "lar-live-fixture", "status": "running", "events": [], "plan": {"target": "port-dt-multi"}}
+    store.save_artifact(agent._KIND, run["id"], run)
+    lease = agent._target_lease("port-dt-multi").acquire()
+    try:
+        code = "from app import linked_agent as a; print(a.runtime_store.get_artifact(a._KIND,'lar-live-fixture')['status'])"
+        result = subprocess.run(
+            [sys.executable, "-c", code],
+            env={**os.environ, "XIAOYI_RUNTIME_DB": str(path)},
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        assert result.returncode == 0, result.stderr
+        assert result.stdout.strip().endswith("running")
+        assert store.get_artifact(agent._KIND, run["id"])["status"] == "running"
+    finally:
+        lease.release()
+    agent.recover_running()
+    assert store.get_artifact(agent._KIND, run["id"])["status"] == "needs_review"
+
+
+def test_live_target_lease_blocks_a_second_execution_before_any_write(local):
+    client, _, writes = local
+    plan = prepare(client).json()
+    lease = agent._target_lease(plan["target"]).acquire()
+    try:
+        result = start(client, plan)
+        assert result.status_code == 409
+        assert writes == []
+    finally:
+        lease.release()
+
+
+def test_completed_receipt_is_published_after_target_lease_release(local, monkeypatch):
+    client, _, _ = local
+    original = agent.runtime_store.save_artifact
+    checked = []
+
+    def save(kind, key, payload, **kwargs):
+        if kind == agent._KIND and payload.get("status") == "completed":
+            lease = agent._target_lease(payload["plan"]["target"]).acquire()
+            lease.release()
+            checked.append(key)
+        return original(kind, key, payload, **kwargs)
+
+    monkeypatch.setattr(agent.runtime_store, "save_artifact", save)
+    plan = prepare(client).json()
+    run = start(client, plan).json()
+    assert finish(client, run["id"])["status"] == "completed"
+    assert checked == [run["id"]]

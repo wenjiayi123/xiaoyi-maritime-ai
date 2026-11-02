@@ -27,7 +27,7 @@ from app.governance import router as governance_router
 from app.knowledge_api import get_knowledge_status, router as knowledge_router
 from app.knowledge_intake import router as knowledge_intake_router
 from app.linked_system_launcher import router as linked_system_launcher_router
-from app.models import AnswerTiming, ChatRequest, ChatResponse, QueryAnalysis
+from app.models import AnswerTiming, ChatRequest, ChatResponse, DemoTriadRequest, QueryAnalysis
 from app.model_gateway import model_gateway, router as model_router
 from app.observability import telemetry
 from app.operations import router as operations_router
@@ -45,13 +45,25 @@ from app.settings import settings
 from app.system_api import router as system_router
 from app.system_linkage import router as system_linkage_router
 from app.linked_agent import router as linked_agent_router
+from app.harness.api import router as harness_router, close_harness
+from app.harness.dual_api import router as dual_harness_router, recover as recover_dual_harness
+from app.harness.proof_api import router as proof_router
+from app.harness.capability_review_v8 import router as capability_review_router
+from app.harness.priority_v9 import router as priority_v9_router
+from app.harness.root_cause_v10 import router as root_cause_v10_router
+from app.harness.shanghai_lab import router as shanghai_lab_router
+from app.agent_training.api import router as agent_rl_router
 from app.xiaoyi import XiaoyiAI
 
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings.validate_startup()
-    yield
+    recover_dual_harness()
+    try:
+        yield
+    finally:
+        close_harness()
 
 
 app = FastAPI(
@@ -102,6 +114,14 @@ app.include_router(model_router)
 app.include_router(system_router)
 app.include_router(system_linkage_router)
 app.include_router(linked_agent_router)
+app.include_router(harness_router)
+app.include_router(dual_harness_router)
+app.include_router(proof_router)
+app.include_router(capability_review_router)
+app.include_router(priority_v9_router)
+app.include_router(root_cause_v10_router)
+app.include_router(shanghai_lab_router)
+app.include_router(agent_rl_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -293,6 +313,73 @@ def _answer(payload: ChatRequest, request: Request) -> ChatResponse:
 @app.post("/api/chat", response_model=ChatResponse)
 def chat(payload: ChatRequest, request: Request) -> ChatResponse:
     return _answer(payload, request)
+
+
+@app.post("/api/chat/demo-triad")
+def chat_demo_triad(payload: DemoTriadRequest, request: Request) -> dict[str, Any]:
+    """Run three fixed, evidence-grounded answer forms without model warm-up latency."""
+    started_at = time.monotonic()
+    prompts = [
+        {
+            "category": "general",
+            "label": "一般问答",
+            "tone": "blue",
+            "format": "概念解释 · 关系对比 · 来源引用",
+            "mode": "expert",
+            "question": "港口 TOS 和 PCS 分别负责什么？二者如何协同？",
+        },
+        {
+            "category": "daily",
+            "label": "日常问答",
+            "tone": "green",
+            "format": "现象判断 · 排查顺序 · 岗位交接",
+            "mode": "ops",
+            "question": "岸桥单位作业能耗偏高，值班人员今天应按什么顺序排查？",
+        },
+        {
+            "category": "emergency",
+            "label": "紧急问答",
+            "tone": "red",
+            "format": "立即停止 · 人员安全 · 通报升级 · 恢复门禁",
+            "mode": "sop",
+            "question": "堆场冷藏箱区域冒烟怎么办？",
+        },
+    ]
+    items: list[dict[str, Any]] = []
+    for item in prompts:
+        chat_payload = ChatRequest(
+            question=item["question"],
+            mode=item["mode"],
+            top_k=6,
+            strict_evidence=True,
+            session_id=f"{payload.session_id}:{item['category']}",
+        )
+        identity, history, query_analysis, response = _prepare_answer(chat_payload, request)
+        response = response.model_copy(
+            update={
+                "generation_provider": "local_rules",
+                "generation_model": None,
+                "generation_fallback": False,
+                "generation_notice": "三类问答演示使用本地检索与确定性回答结构，不等待生成模型预热。",
+                "timing": response.timing.model_copy(update={"generation_ms": 0.0}),
+            }
+        )
+        final = _finalize_answer(
+            chat_payload,
+            request,
+            identity,
+            query_analysis,
+            response,
+        )
+        items.append({**item, "response": final.model_dump(mode="json")})
+    return {
+        "schema_version": "xiaoyi-demo-answer-triad.v1",
+        "items": items,
+        "completed": len(items) == 3,
+        "elapsed_ms": round((time.monotonic() - started_at) * 1000, 3),
+        "production_authority": False,
+        "notice": "三类回答均完成本地知识检索、来源标记、回答校验和审计留痕；紧急处置不替代现场授权岗位。",
+    }
 
 
 @app.post("/api/chat/stream")

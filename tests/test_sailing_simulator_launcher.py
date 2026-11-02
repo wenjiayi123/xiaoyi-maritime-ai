@@ -65,6 +65,7 @@ def test_launcher_starts_registered_godot_project(monkeypatch, tmp_path: Path) -
     def fake_popen(args, **kwargs):
         captured["args"] = args
         captured["cwd"] = kwargs["cwd"]
+        captured["env"] = kwargs["env"]
         return FakeProcess()
 
     monkeypatch.setattr(sailing_simulator_launcher.subprocess, "Popen", fake_popen)
@@ -81,6 +82,9 @@ def test_launcher_starts_registered_godot_project(monkeypatch, tmp_path: Path) -
     assert payload["pid"] == 4242
     assert captured["args"] == [str(godot_binary), "--path", str(project_root)]
     assert captured["cwd"] == str(project_root)
+    assert captured["env"]["XIAOYI_RETURN_URL"] == (
+        "http://127.0.0.1:8010/?xiaoyi_resume=system-linkage"
+    )
 
 
 def test_launcher_reuses_external_sailing_simulator(monkeypatch, tmp_path: Path) -> None:

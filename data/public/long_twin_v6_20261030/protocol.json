@@ -1,0 +1,130 @@
+{
+  "schema": "xiaoyi-long-openloop-protocol.v6",
+  "registered_at": "2026-10-30T12:43:45.852310+00:00",
+  "development_noaa": {
+    "9410660": "Los Angeles",
+    "8518750": "The Battery, New York",
+    "9447130": "Seattle",
+    "1612340": "Honolulu"
+  },
+  "new_noaa": {
+    "8443970": "Boston",
+    "9410170": "San Diego",
+    "1630000": "Apra Harbor, Guam",
+    "8418150": "Portland, Maine"
+  },
+  "new_uhslc": {
+    "294": "Newlyn, United Kingdom",
+    "825": "Cuxhaven, Germany",
+    "81": "Valparaiso, Chile",
+    "103": "Port Louis, Mauritius",
+    "402": "Lautoka, Fiji",
+    "71": "Wellington, New Zealand",
+    "19": "Noumea, New Caledonia",
+    "353": "Kushimoto, Japan"
+  },
+  "history_noaa_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024,
+    2025
+  ],
+  "history_uhslc_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "new_station_annual_test": {
+    "year": 2025,
+    "forecast_origin": "2025-01-01T00:00:00Z",
+    "selection_years": [
+      2022,
+      2023
+    ],
+    "interval_calibration_year": 2024,
+    "final_fit_years": [
+      2022,
+      2023,
+      2024
+    ]
+  },
+  "new_period_noaa_test": {
+    "periods": [
+      [
+        "2026-08-08",
+        "2026-08-31"
+      ],
+      [
+        "2026-09-08",
+        "2026-09-30"
+      ]
+    ],
+    "forecast_origin": "2026-01-01T00:00:00Z",
+    "selection_years": [
+      2023,
+      2024
+    ],
+    "interval_calibration_year": 2025,
+    "final_fit_years": [
+      2023,
+      2024,
+      2025
+    ]
+  },
+  "excluded_probe_station": {
+    "9755371": "San Juan only used for metadata/availability probes; October returned no hourly observations. It is not credited as a fresh validation station."
+  },
+  "model_candidates": {
+    "constituents": [
+      8,
+      20
+    ],
+    "trend": [
+      false,
+      true
+    ],
+    "latest_year_level_correction_weights": [
+      0.0,
+      0.5
+    ],
+    "blend_with_cv_selected_physical_baseline": [
+      0.0,
+      0.5,
+      1.0
+    ]
+  },
+  "selection_rule": "Baseline chosen by two rolling-origin full-year MAEs. Additional complexity admitted only if mean rolling-quarter MAE improves>=0.003m and no rolling-quarter MAE regresses; otherwise use the actual physical baseline. Select/refit/calibrate only history before each forecast origin.",
+  "interval": {
+    "absolute_residual_quantile": 0.9,
+    "margin": 1.1,
+    "minimum_radius_m": 0.02,
+    "season": "calendar month of target; values learned from the disjoint preceding calibration year",
+    "no_test_width_clipping": true,
+    "notice": "Empirical rolling-origin calibration, not an exchangeability or operational availability guarantee."
+  },
+  "research_limits": {
+    "mae_m": 0.2,
+    "coverage": 0.8,
+    "width_m": 0.75,
+    "availability": 0.95,
+    "baseline_noninferiority_epsilon_m": 1e-09
+  },
+  "quality": "NOAA hourly_height verified product, all flags zero and q=v when present; UHSLC finite mm converted to m, quality>=3 with3/4counts and FD/RQ provenance retained. Reject conflicting duplicates and changing datum/record. No interpolation.",
+  "test_download_requires_frozen_selection": true,
+  "assumptions": [
+    "Same local vertical datum within each station; never pool station zero with NOAA MLLW.",
+    "Public archive retrieval does not verify that the final historical data were available at the forecast origin. This is retrospective event-time calibration, not live-port or as-published qualification.",
+    "The annual2025UHSLC evidence is a new-station spatial/time backtest; previously viewed outcomes elsewhere can inform engineering design, so it is not a globally untouched historical2025world.",
+    "New2026Aug8+/Sep8+NOAAperiods exclude previously viewed first-week blocks. No test-period water initialization, assimilation, stitched later forecasts or reanalysis inputs.",
+    "Year-long mode predicts every expected hour over the full365days, with annual and each-quarter gates. New late2026periods have one fixed originJan1and no subsequent observations as inputs.",
+    "Missing sources and availability failures remain in denominators; no neighbor/monthly-mean/forecast substitution for gauge truth.",
+    "Existing V2/V3/V4 failures stay immutable and remain visible. These tests do not establish bathymetry, UKC, equipment physics, institutional signoff or production authority."
+  ],
+  "production_authority": false
+}

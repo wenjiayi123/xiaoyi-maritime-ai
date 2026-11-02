@@ -174,16 +174,26 @@ class PlatformMiddleware(BaseHTTPMiddleware):
     def _error(status: int, detail: str, request_id: str, headers: dict[str, str] | None = None) -> JSONResponse:
         return JSONResponse(status_code=status, content={"detail": detail, "request_id": request_id}, headers=headers)
 
-    def _secure_headers(self, response: Response, request_id: str, duration: float) -> None:
+    def _secure_headers(self, response: Response, request_id: str, duration: float, path: str = "") -> None:
         response.headers["X-Request-ID"] = request_id
         response.headers["X-Content-Type-Options"] = "nosniff"
-        response.headers["X-Frame-Options"] = "DENY"
+        # Only these read-only evidence pages can be hosted by our own guide.
+        # Other origins remain blocked; APIs, errors and all other pages keep DENY.
+        same_origin_evidence = (
+            path in {"/web/shanghai-lab.html", "/web/priority-v9.html", "/web/root-cause-v10.html"}
+            and response.status_code in {200, 304}
+            and (response.status_code == 304 or response.headers.get("content-type", "").startswith("text/html"))
+        )
+        response.headers["X-Frame-Options"] = "SAMEORIGIN" if same_origin_evidence else "DENY"
+        ancestors = "'self'" if same_origin_evidence else "'none'"
+        if same_origin_evidence:
+            response.headers["Cache-Control"] = "no-cache"
         response.headers["Referrer-Policy"] = "no-referrer"
         response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=(), payment=()"
         response.headers["Content-Security-Policy"] = (
             "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
             "img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; "
-            "base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+            f"base-uri 'self'; frame-ancestors {ancestors}; form-action 'self'"
         )
         response.headers["Server-Timing"] = f"app;dur={duration * 1000:.2f}"
         if self.settings.production:
@@ -233,7 +243,7 @@ class PlatformMiddleware(BaseHTTPMiddleware):
             response = self._error(500, "服务内部错误", request_id)
         duration = time.perf_counter() - started
         route = getattr(request.scope.get("route"), "path", request.url.path)
-        self._secure_headers(response, request_id, duration)
+        self._secure_headers(response, request_id, duration, request.url.path)
         if request.url.path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
         self.telemetry.finish(request.method, route, response.status_code, duration)

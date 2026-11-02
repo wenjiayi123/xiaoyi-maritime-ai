@@ -1,0 +1,159 @@
+{
+  "scope": "first chronological training update where argmax changes to an action with higher enumerated two-step return; illustrative training example, not held-out evidence or overall success claim",
+  "step": 30,
+  "case_id": "v2-train-write_recovery-005",
+  "family": "write_recovery",
+  "state": {
+    "state_id": "cc2542c2cf1f919eae1a3d539326856d9decf788164500da392008607388f780",
+    "origin": "reference_path_state",
+    "task": {
+      "case_id": "v2-train-write_recovery-005",
+      "split": "train",
+      "family": "write_recovery",
+      "seed": 517005,
+      "green": 0.31,
+      "carbon": 104,
+      "baseline": 0.35,
+      "scenario": "equipment_degradation",
+      "fault": "lost_response",
+      "max_steps": 14
+    },
+    "history": [
+      "B"
+    ],
+    "prompt": "请处理以下请求：读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.31，碳价=104。\n已完成：能源读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:energy。剩余步数13。\n任务缺项：能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(equipment_degradation);E=能碳比较(偏好0.44,碳价104);F=能碳比较(偏好0.31,碳价104);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.31,碳价85);M=询问用户\n下一步只输出一个字母：",
+    "rewards": [
+      -0.066667,
+      -0.266667,
+      -0.066667,
+      -0.466667,
+      -0.466667,
+      0.933333,
+      -0.466667,
+      -0.466667,
+      -0.466667,
+      -0.466667,
+      -0.266667,
+      -0.466667,
+      -0.266667
+    ],
+    "immediate_rewards": [
+      -0.1,
+      -0.3,
+      -0.1,
+      -0.5,
+      -0.5,
+      0.033333,
+      -0.5,
+      -0.5,
+      -0.5,
+      -0.5,
+      -0.3,
+      -0.5,
+      -0.3
+    ],
+    "sft_target": "F",
+    "counterfactual_file": "counterfactuals/cc2542c2cf1f919eae1a3d539326856d9decf788164500da392008607388f780.json",
+    "counterfactual_sha256": "97ce3b70d59b872ca637b409ad65905830b37427f7763595a0540ae57f9c7e3b"
+  },
+  "actual_update": {
+    "stage": "D_rl",
+    "step": 30,
+    "state_id": "cc2542c2cf1f919eae1a3d539326856d9decf788164500da392008607388f780",
+    "case_id": "v2-train-write_recovery-005",
+    "family": "write_recovery",
+    "state_origin": "reference_path_state",
+    "loss": -0.6948779821395874,
+    "entropy": 1.41732919216156,
+    "gradient_norm_before_clip": 11.185962677001953,
+    "learning_rate": 0.0002,
+    "seconds": 6.690176332999954,
+    "probabilities_before": [
+      0.0018788130255416036,
+      0.3409630060195923,
+      0.01724294014275074,
+      0.010761868208646774,
+      0.28479236364364624,
+      0.2857750654220581,
+      0.00024184408539440483,
+      0.00304436101578176,
+      0.04992571100592613,
+      0.0014158498961478472,
+      0.00040319751133210957,
+      0.0016774632968008518,
+      0.001877414295449853
+    ],
+    "probabilities_after": [
+      0.0017308044480159879,
+      0.29306140542030334,
+      0.017986305058002472,
+      0.010858716443181038,
+      0.27701178193092346,
+      0.3264687657356262,
+      0.0002541029825806618,
+      0.003422410460188985,
+      0.06321779638528824,
+      0.0016640047542750835,
+      0.0004448567924555391,
+      0.0018055178225040436,
+      0.0020734979771077633
+    ],
+    "choice_before": "B",
+    "choice_after": "F",
+    "cache": {
+      "memory_hits": 62,
+      "disk_hits": 1,
+      "misses": 182,
+      "writes": 182,
+      "capacity_skips": 0
+    },
+    "parameter_sha256": "3838c3c4ef85068db5531a8df5f827c479759e563bb89cf20a010b06bfcc918b",
+    "expected_two_step_return_before": 0.009715561755001545,
+    "kl_to_frozen_sft": 0.42751771211624146,
+    "action_returns": [
+      -0.066667,
+      -0.266667,
+      -0.066667,
+      -0.466667,
+      -0.466667,
+      0.933333,
+      -0.466667,
+      -0.466667,
+      -0.466667,
+      -0.466667,
+      -0.266667,
+      -0.466667,
+      -0.266667
+    ],
+    "advantage": [
+      0.49656349420547485,
+      -0.041380371898412704,
+      0.49656349420547485,
+      -0.5793241858482361,
+      -0.5793241858482361,
+      3.1862826347351074,
+      -0.5793241858482361,
+      -0.5793241858482361,
+      -0.5793241858482361,
+      -0.5793241858482361,
+      -0.041380371898412704,
+      -0.5793241858482361,
+      -0.041380371898412704
+    ],
+    "expected_two_step_return_after": 0.05739207565784454
+  },
+  "before_action": {
+    "tool": "energy.read",
+    "arguments": {}
+  },
+  "after_action": {
+    "tool": "energy.compare",
+    "arguments": {
+      "baseline_green_preference": 0.35,
+      "green_preference": 0.31,
+      "carbon_price_cny_per_ton": 104
+    }
+  },
+  "before_return": -0.266667,
+  "after_return": 0.933333
+}

@@ -496,6 +496,41 @@ def _execute_target(
         _last_results[target] = result
         return result
 
+    if request.parameters.get("preview_only") is True:
+        runtime = _runtime(target)
+        payload = {
+            "target": target,
+            "runtime_state": runtime.get("state"),
+            "running": bool(runtime.get("running")),
+            "capability_preview": True,
+            "auto_start": False,
+            "downstream_action_executed": False,
+            "production_write_enabled": False,
+        }
+        result = {
+            "trace_id": trace_id,
+            "target": target,
+            "name": runtime.get("name") or target,
+            "status": "completed",
+            "action": "能力登记与运行状态快速核验",
+            "runtime": runtime,
+            "summary": {
+                "preview_only": True,
+                "runtime_state": runtime.get("state"),
+                "running": bool(runtime.get("running")),
+                "adapter_registered": True,
+                "downstream_action_executed": False,
+                "production_write_enabled": False,
+            },
+            "payload_sha256": _sha256(payload),
+            "duration_ms": round((time.monotonic() - started_at) * 1000),
+            "completed_at": _utc_now(),
+            "boundary": "快速演示只核验适配器登记与运行状态；不自动启动目标系统，不执行下游业务动作，不写入生产系统。",
+            "production_write_enabled": False,
+        }
+        _last_results[target] = result
+        return result
+
     runtime = (
         _ensure_running(target, request.wait_seconds)
         if request.auto_start

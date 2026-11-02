@@ -4,19 +4,22 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
     XIAOYI_HOST=0.0.0.0 \
-    XIAOYI_PORT=8010
+    XIAOYI_PORT=8010 \
+    XIAOYI_RUNTIME_DB=/app/runtime/xiaoyi_runtime.db
 
 WORKDIR /app
 
 RUN groupadd --system xiaoyi && useradd --system --gid xiaoyi --home-dir /app xiaoyi
 
-COPY requirements.lock ./
-RUN python -m pip install --require-hashes --no-cache-dir -r requirements.lock
+COPY requirements.lock requirements-research.lock ./
+RUN python -m pip install --require-hashes --no-cache-dir -r requirements.lock -r requirements-research.lock
 
 COPY --chown=xiaoyi:xiaoyi . .
 RUN python scripts/build_index.py \
+    && python scripts/restore_research_evidence.py \
     && mkdir -p data/rl_runs data/kb_pending runtime \
-    && chown -R xiaoyi:xiaoyi data runtime
+    && chown xiaoyi:xiaoyi data/xiaoyi_index.json \
+    && chown -R xiaoyi:xiaoyi data/rl_runs data/kb_pending runtime
 
 USER xiaoyi
 EXPOSE 8010

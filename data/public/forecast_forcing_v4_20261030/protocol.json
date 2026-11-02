@@ -1,0 +1,158 @@
+{
+  "schema": "xiaoyi-weather-forced-tide-protocol.v4",
+  "declared_at": "2026-10-30T07:02:14.014556+00:00",
+  "stations": {
+    "9410660": {
+      "name": "Los Angeles",
+      "lat": 33.72,
+      "lon": -118.27
+    },
+    "8518750": {
+      "name": "The Battery, New York",
+      "lat": 40.7,
+      "lon": -74.01
+    },
+    "9447130": {
+      "name": "Seattle",
+      "lat": 47.6,
+      "lon": -122.34
+    },
+    "1612340": {
+      "name": "Honolulu",
+      "lat": 21.3,
+      "lon": -157.87
+    },
+    "175": {
+      "name": "Fremantle",
+      "lat": -32.07,
+      "lon": 115.73
+    },
+    "115": {
+      "name": "Colombo",
+      "lat": 6.93,
+      "lon": 79.85
+    },
+    "101": {
+      "name": "Mombasa",
+      "lat": -4.07,
+      "lon": 39.68
+    }
+  },
+  "weather_provider": "Open-Meteo Single Runs ECMWF IFS, preserved initialization structure",
+  "weather_endpoint": "https://single-runs-api.open-meteo.com/v1/forecast",
+  "weather_model": "ecmwf_ifs",
+  "weather_variables": [
+    "pressure_msl",
+    "wind_speed_10m",
+    "wind_direction_10m"
+  ],
+  "initialization_utc": "00:00",
+  "assumed_available_after_hours": 8,
+  "forecast_days": 8,
+  "fit_runs": [
+    "2025-01-01",
+    "2025-02-01",
+    "2025-03-01",
+    "2025-04-01",
+    "2025-05-01",
+    "2025-06-01",
+    "2025-07-01",
+    "2025-08-01",
+    "2025-09-01",
+    "2025-10-01",
+    "2025-11-01",
+    "2025-12-01"
+  ],
+  "selection_runs": [
+    "2025-01-11",
+    "2025-02-11",
+    "2025-03-11",
+    "2025-04-11",
+    "2025-05-11",
+    "2025-06-11",
+    "2025-07-11",
+    "2025-08-11",
+    "2025-09-11",
+    "2025-10-11",
+    "2025-11-11",
+    "2025-12-11"
+  ],
+  "calibration_runs": [
+    "2025-01-21",
+    "2025-02-21",
+    "2025-03-21",
+    "2025-04-21",
+    "2025-05-21",
+    "2025-06-21",
+    "2025-07-21",
+    "2025-08-21",
+    "2025-09-21",
+    "2025-10-21",
+    "2025-11-21",
+    "2025-12-21"
+  ],
+  "fresh_test_runs": [
+    "2026-07-01",
+    "2026-07-08",
+    "2026-07-15",
+    "2026-07-22"
+  ],
+  "tide_basis": "v3 two-year2023-2024 coefficients; all candidates and old failures retained",
+  "surge_features": [
+    "intercept",
+    "annual_sin",
+    "annual_cos",
+    "pressure_anomaly/100hPa",
+    "u_absu/100",
+    "v_absv/100"
+  ],
+  "ridge_penalties": [
+    0.1,
+    1.0,
+    10.0
+  ],
+  "initialization_decay_hours": [
+    0,
+    24,
+    72,
+    168
+  ],
+  "report_modes": [
+    "no_test_water_initialization",
+    "causal_initial_water_then_open_loop_7d"
+  ],
+  "interval_nominal": 0.95,
+  "research_limits": {
+    "long_open_loop": {
+      "mae_m": 0.2,
+      "coverage": 0.8,
+      "width_m": 0.75
+    },
+    "6": {
+      "mae_m": 0.05,
+      "coverage": 0.8,
+      "width_m": 0.2
+    },
+    "60": {
+      "mae_m": 0.1,
+      "coverage": 0.8,
+      "width_m": 0.5
+    },
+    "360": {
+      "mae_m": 0.2,
+      "coverage": 0.8,
+      "width_m": 0.75
+    }
+  },
+  "availability_floor": 0.95,
+  "missing_data_policy": "Do not fill or replace absent station observations with forecasts or neighboring gauges. Official current-year access restrictions retained.",
+  "assumptions": [
+    "Model initialization is not release time;8hdelay conservatively assumed from provider typical4-6h global computation, not a verified historical publication SLA.",
+    "ECMWF2025archive may be IFS49R1hindcasts;2026July50R1operational-run archive is distinct. This is retrospective archive research, not proof every2025run was then publicly available.",
+    "No stitched latest-run series or reanalysis substitutes for a frozen initialization.",
+    "Weather is model output, water level is gauge observation. Units, station datums and grid coordinate displacement are retained.",
+    "Optional initial water atissue is a hypothetical local event-time sensor; no further water updates during7day forecast. It is separately reported and does not erase annual open-loop failures.",
+    "2026Julytargets have not previously been scored; no model selection or interval fitting on them."
+  ],
+  "production_authority": false
+}

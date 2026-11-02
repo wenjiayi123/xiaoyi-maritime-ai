@@ -1,0 +1,56 @@
+{
+  "vmType": "vz",
+  "arch": "x86_64",
+  "cpus": 2,
+  "memory": "2GiB",
+  "disk": "8GiB",
+  "images": [
+    {
+      "location": "__PROJECT_ROOT__/.runtime/policy-images/ubuntu-24.04-minimal-amd64.img",
+      "arch": "x86_64",
+      "digest": "sha256:a8eb6570f87a941f3de2e000c046b9367f8ab1423756a94830d454fae8ad80ff"
+    }
+  ],
+  "mounts": [
+    {
+      "location": "__PROJECT_ROOT__/.runtime/open-source",
+      "mountPoint": "/opt/xiaoyi/upstream",
+      "writable": false
+    },
+    {
+      "location": "__PROJECT_ROOT__/.runtime/open-models/routefinder",
+      "mountPoint": "/opt/xiaoyi/models/routefinder",
+      "writable": false
+    },
+    {
+      "location": "__PROJECT_ROOT__/.runtime/open-models/parco",
+      "mountPoint": "/opt/xiaoyi/models/parco",
+      "writable": false
+    },
+    {
+      "location": "__PROJECT_ROOT__/integrations/policy_runtime",
+      "mountPoint": "/opt/xiaoyi/runtime",
+      "writable": false
+    }
+  ],
+  "containerd": {
+    "system": false,
+    "user": false
+  },
+  "portForwards": [
+    {
+      "guestPort": 11839,
+      "hostPort": 11839,
+      "hostIP": "127.0.0.1"
+    },
+    {
+      "guestIP": "0.0.0.0",
+      "proto": "any",
+      "guestPortRange": [
+        1,
+        65535
+      ],
+      "ignore": true
+    }
+  ]
+}

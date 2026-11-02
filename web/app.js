@@ -349,17 +349,43 @@
     pendingRLLabConfig: null,
     rlCenter: null,
     rlCenterLoading: false,
+    rlLabHealthPromise: null,
     rlAdvisorMessages: [],
     linkedStartup: null,
     systemLinkage: null,
     systemLinkageBusy: null,
+    systemLinkageOpenBusy: null,
+    linkageVisibleResultTraceIds: new Set(),
+    linkageVisibleCorrelationIds: new Set(),
+    linkageReturnReceipt: null,
     lastFocused: null,
     sessionId: persistentSessionId,
     conversationTurns: loadArray(STORAGE.turns).filter(
       (item) => item.sessionId === persistentSessionId
     )
   };
-  const linkedAgent = window.createLinkedAgent({api, openModal, escapeHtml, toast, isOpen:()=>state.modalKind === "linked-agent"});
+  const linkedAgent = window.createLinkedAgent({api, openModal, escapeHtml, toast, isOpen:()=>state.modalKind === "linked-agent", openSystem:openLinkedSystem});
+  const harnessConsole = window.createHarnessConsole({api, openModal, escapeHtml, toast, isOpen:()=>state.modalKind === "harness"});
+  const harnessChat = window.createHarnessChat({api, escapeHtml, onUpdate:task=>{
+    if (state.currentQuestion !== task.goal) return;
+    const stopped = ["blocked","failed","cancelled","budget_exceeded","needs_review"].includes(task.status);
+    $("#responseStatus").textContent = task.final ? (task.status === "completed" ? "自主任务已完成核验" : "自主任务部分完成")
+      : task.status === "waiting_approval" ? "等待本次操作审批" : stopped ? "任务已停止，请查看具体回执" : "自主任务执行中";
+    if (task.final) {
+      state.currentAnswer = task.final.text; $("#answer").textContent = task.final.text;
+      $("#groundingBadge").textContent = task.status === "completed" ? "任务核验通过" : "部分结果已核验";
+      $("#groundingBadge").className = "grounding-badge";
+      $("#confMetric").textContent = "未评分";
+      $("#evMetric").textContent = String(task.final.evidence_ids.length);
+      $("#answerSourceQuality").textContent = "工具原始回执";
+    } else if (stopped) {
+      $("#answer").textContent = task.stop_reason || "任务未完成，详见下方执行回执。";
+      $("#groundingBadge").textContent = "尚未完成核验";
+    }
+  }});
+  void harnessChat.restore();
+  const jointHarness = window.createJointHarness({api, openModal, escapeHtml, isOpen:()=>state.modalKind === "joint-harness"});
+  let proofConsole = null;
 
   function loadArray(key) {
     try {
@@ -492,6 +518,14 @@
     }
   }
 
+  function currentXiaoyiReturnUrl() {
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = "";
+    url.searchParams.set("xiaoyi_resume", "system-linkage");
+    return url.href;
+  }
+
   function toast(title, message = "", type = "info", timeout = 3200) {
     const stack = $("#toastStack");
     const node = document.createElement("div");
@@ -509,6 +543,7 @@
 
   function setView(view, options = {}) {
     if (!$( `.workspace-view[data-view="${view}"]`)) return;
+    $("#leftSidebar")?.classList.remove("open");
     state.view = view;
     $$(".workspace-view").forEach((node) => node.classList.toggle("active", node.dataset.view === view));
     $$(".top-nav .nav-item").forEach((node) => node.classList.toggle("active", node.dataset.viewTarget === view));
@@ -1356,6 +1391,7 @@
     if (state.activeController) { stopGeneration(true); return; }
     if (state.automationRunning) stopAutomation("已由新指令终止上一条操作计划");
     const question = $("#question").value.trim();
+    const demoCategory = demoCategoryForQuestion(question);
     const mode = $("#mode").value;
     const topK = Math.min(10, Math.max(1, Number($("#topK").value || 5)));
     const strictEvidence = $("#strictEvidence") ? $("#strictEvidence").checked : localStorage.getItem(STORAGE.strictEvidence) !== "false";
@@ -1372,6 +1408,8 @@
     state.activeGenerationId = serverGenerationId;
     state.currentQuestion = question;
     state.currentMode = mode;
+    setDemoComposerState(demoCategory);
+    applyDemoAnswerTone(demoCategory, false);
     $("#currentQuestion").textContent = question;
     $("#userMessageTime").textContent = formatShortTime();
     $("#userBubbleRow").hidden = false;
@@ -1397,7 +1435,16 @@
 
     const stopThinking = startThinkingTicker(runId);
     try {
-      if (state.agentMode) {
+      if (state.agentMode && !demoCategory && await harnessChat.start(question, controller.signal)) {
+        stopThinking();
+        $("#analysisTitle").textContent = "Harness 自主任务";
+        $("#answer").textContent = "任务已交给模型逐步决策。下方显示实际工具调用、审批、结果核验和补充入口；刷新页面后可以继续。";
+        $("#intentTag").textContent = "模型自主选工具";
+        $("#answerSourceQuality").textContent = "任务回执";
+        state.activeController = null;
+        return;
+      }
+      if (state.agentMode && !demoCategory) {
         try {
           const plan = await api("/api/automation/plans", {
             method:"POST", headers:{"Content-Type":"application/json"}, signal:controller.signal,
@@ -1501,6 +1548,7 @@
       updateGroundingState(data);
       renderNextQuestions(data.next_questions || [], data.mode, data.question);
       saveTopic({ ...data, answer });
+      applyDemoAnswerTone(demoCategory, true);
       scrollConversationToLatestAnswer({ settle:true });
       setHeroState("complete");
       setTimeout(() => { if (!state.activeController) setHeroState("idle"); }, 2300);
@@ -1509,6 +1557,7 @@
       if (error.name !== "AbortError" && runId === state.generationId) {
         $("#answer").classList.add("error");
         $("#answer").textContent = `连接受限：${error.message}\n\n当前问题与已显示内容已保留，请检查服务后重试。`;
+        if (demoCategory && $("#demoAnswerType")) $("#demoAnswerType").textContent = `${demoPromptConfig(demoCategory).label} · 回答中断`;
         $("#responseStatus").textContent = "连接受限，已保留当前进度";
         $("#next").innerHTML = `<button type="button" data-q="${escapeHtml(question)}" data-mode="${escapeHtml(mode)}">重试当前问题</button>`;
         scrollConversationToLatestAnswer({ settle:true });
@@ -1574,18 +1623,21 @@
     const turns = excludeLatest
       ? state.conversationTurns.slice(0, -1)
       : state.conversationTurns;
-    transcript.innerHTML = turns.map((item) => `
-      <section class="transcript-turn" data-transcript-turn="${escapeHtml(item.id)}">
+    transcript.innerHTML = turns.map((item) => {
+      const demoCategory = item.demoChatCategory || demoCategoryForQuestion(item.question);
+      const demoConfig = demoPromptConfig(demoCategory);
+      return `
+      <section class="transcript-turn${demoCategory ? ` demo-chat-${escapeHtml(demoCategory)}` : ""}" data-transcript-turn="${escapeHtml(item.id)}"${demoCategory ? ` data-demo-chat-history="${escapeHtml(demoCategory)}"` : ""}>
         <div class="user-bubble-row">
           <div class="user-bubble"><span>${escapeHtml(item.question)}</span><time>${escapeHtml(formatShortTime(item.createdAt))}</time></div>
         </div>
         <div class="transcript-assistant-row">
           <div class="mini-assistant-avatar"><span class="bot-face"><i></i><b></b></span></div>
-          <div class="transcript-assistant-bubble">${escapeHtml(displayEvidenceMarkers(item.answer))}<footer><span>小懿AI · ${escapeHtml(modeShort(item.mode))}</span><span>${escapeHtml(item.intent || "knowledge")}</span></footer></div>
+          <div class="transcript-assistant-bubble">${escapeHtml(displayEvidenceMarkers(item.answer))}<footer><span>小懿AI · ${escapeHtml(modeShort(item.mode))}</span>${demoConfig ? `<span class="transcript-answer-kind">${escapeHtml(demoConfig.label)}</span>` : ""}<span>${escapeHtml(item.intent || "knowledge")}</span></footer></div>
         </div>
         <div class="transcript-divider"></div>
-      </section>
-    `).join("");
+      </section>`;
+    }).join("");
   }
 
   function saveTopic(data) {
@@ -1599,6 +1651,7 @@
       decision_readiness:data.decision_readiness || null,
       evidence_health:data.evidence_health || null,
       answer_verification:data.answer_verification || null,
+      demoChatCategory:demoCategoryForQuestion(data.question),
       createdAt:new Date().toISOString()
     };
     state.topics = [item, ...state.topics.filter((old) => old.id !== item.id)].slice(0,200);
@@ -1624,6 +1677,8 @@
   function showWelcome() {
     stopGeneration(false);
     $("#question").value = "";
+    setDemoComposerState("");
+    applyDemoAnswerTone("", false);
     const energy = state.dashboard.energy || fallbackDashboard.energy;
     const summary = energy.summary;
     const metadata = state.dashboard.source_metadata || null;
@@ -1682,6 +1737,11 @@
     state.currentIntent = item.intent || "knowledge";
     state.currentConfidence = item.confidence || "-";
     $("#question").value = item.question || "";
+    if (typeof setDemoComposerState === "function" && typeof applyDemoAnswerTone === "function") {
+      const demoCategory = item.demoChatCategory || demoCategoryForQuestion(item.question);
+      setDemoComposerState(demoCategory);
+      applyDemoAnswerTone(demoCategory, true);
+    }
     $("#mode").value = item.mode || "expert";
     $("#modeShortLabel").textContent = modeShort(item.mode);
     $("#currentQuestion").textContent = item.question || "";
@@ -2020,7 +2080,12 @@
     }
     const summary = result.summary || {};
     const facts = [];
-    if (result.target === "port-dt-multi") {
+    if (summary.preview_only === true) {
+      facts.push(["适配器", summary.adapter_registered ? "已登记" : "未登记"]);
+      facts.push(["运行状态", summary.running ? "在线" : escapeHtml(String(summary.runtime_state || "离线")).toUpperCase()]);
+      facts.push(["下游动作", summary.downstream_action_executed ? "已执行" : "未执行"]);
+      facts.push(["生产写入", summary.production_write_enabled ? "开启" : "关闭"]);
+    } else if (result.target === "port-dt-multi") {
       facts.push(["动作", summary.action_label || summary.action_id || "已映射"]);
       facts.push(["执行", summary.execution_status || "dry-run"]);
       facts.push(["人工确认", summary.requires_human_confirm ? "需要" : "不需要"]);
@@ -2084,21 +2149,25 @@
         <button type="button" class="outline-button" data-linkage-refresh>${icon("command")}刷新状态</button>
       </section>
       <div class="system-linkage-boundary">${icon("alert")}<span>${escapeHtml(payload.execution_boundary || "联动仅面向本机仿真与离线数据，不下发生产指令。")}</span></div>
-      ${linkageBatchMarkup(payload.last_command)}
+      ${linkageBatchMarkup(payload.last_command?.all_succeeded || state.linkageVisibleCorrelationIds.has(payload.last_command?.correlation_id) ? payload.last_command : null)}
       <section class="system-linkage-grid">${SYSTEM_LINKAGE_CATALOG.map((item) => {
         const node = systems[item.target] || {};
         const runtime = node.runtime || {};
         const online = Boolean(runtime.running);
-        const busy = state.systemLinkageBusy === item.target || state.systemLinkageBusy === "all";
+        const busy = state.systemLinkageBusy === item.target || state.systemLinkageBusy === "all" || state.systemLinkageOpenBusy === item.target;
         const stateLabel = linkageStateLabel(runtime);
+        const lastResult = node.last_result;
+        const visibleResult = lastResult?.status === "completed" || state.linkageVisibleResultTraceIds.has(lastResult?.trace_id)
+          ? lastResult
+          : null;
         return `<article class="system-linkage-card ${online ? "online" : ""}" data-system-linkage-card="${item.target}">
           <header><span class="system-linkage-icon">${icon(item.icon)}</span><div><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(item.english)}</small></div><em class="linkage-state ${escapeHtml(String(runtime.state || "offline"))}"><i></i>${escapeHtml(stateLabel)}</em></header>
           <p>${escapeHtml(item.detail)}</p>
           <div class="system-linkage-action"><span>适配器联动能力</span><strong>${escapeHtml(item.action)}</strong></div>
-          ${busy ? `<div class="system-linkage-running"><i></i><span>正在启动并执行，等待目标系统回写…</span></div>` : linkageResultMarkup(node.last_result)}
+          ${busy ? `<div class="system-linkage-running"><i></i><span>正在执行有界核验，等待目标系统回写…</span></div>` : linkageResultMarkup(visibleResult)}
           <footer>
-            <button type="button" class="drawer-button" data-linkage-run="${item.target}" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}${item.target === "sailing-simulator" ? "只读核验" : online ? "执行联动" : "启动并联动"}</button>
-            <button type="button" class="drawer-button secondary" data-linkage-open="${item.target}" ${online ? "" : "disabled"}>${icon(item.target === "sailing-simulator" ? "ship" : "play")}${item.target === "sailing-simulator" ? "切换窗口" : "打开系统"}</button>
+            ${item.target === "sailing-simulator" ? `<button type="button" class="drawer-button" data-linkage-run="${item.target}" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("spark")}只读核验</button>` : `<button type="button" class="drawer-button" data-linkage-start="${item.target}" ${state.systemLinkageBusy ? "disabled" : ""}>${icon("play")}${online ? "确认系统在线" : "启动目标系统"}</button>`}
+            <button type="button" class="drawer-button secondary" data-linkage-open="${item.target}" ${busy ? "disabled" : ""}>${icon(item.target === "sailing-simulator" ? "ship" : "play")}${state.systemLinkageOpenBusy === item.target ? "正在确认…" : item.target === "sailing-simulator" ? online ? "切换窗口" : "启动并切换" : online ? "打开系统" : "启动并打开"}</button>
           </footer>
           <small class="system-linkage-message">${escapeHtml(runtime.message || "等待读取运行状态")}</small>
         </article>`;
@@ -2139,6 +2208,11 @@
         method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ targets }), timeoutMs:180000
       });
+      Object.entries(result.systems || {}).forEach(([resultTarget, runtime]) => {
+        if (!runtime?.running) return;
+        const previousTrace = state.systemLinkage?.systems?.[resultTarget]?.last_result?.trace_id;
+        if (previousTrace) state.linkageVisibleResultTraceIds.delete(previousTrace);
+      });
       toast(result.all_ready ? "业务系统已就绪" : "部分业务系统未就绪", `${Object.values(result.systems || {}).filter((item) => item.running).length}/${targets.length} 个目标在线；模拟器保持隔离`, result.all_ready ? "success" : "warning", 5200);
     } catch (error) {
       toast("系统启动失败", error.message, "warning", 6000);
@@ -2155,18 +2229,21 @@
     state.systemLinkageDraft = command;
     state.systemLinkageBusy = target;
     if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
+    const quickPreview = target === "all";
     try {
       const response = await api("/api/system-linkage/command", {
         method:"POST", headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ target, command, session_id:state.sessionId, auto_start:true, wait_seconds:30 }),
-        timeoutMs:240000
+        body:JSON.stringify({ target, command, session_id:state.sessionId, auto_start:!quickPreview, wait_seconds:quickPreview ? 1 : 30, parameters:quickPreview ? { preview_only:true } : {} }),
+        timeoutMs:quickPreview ? 15000 : 240000
       });
       const current = state.systemLinkage || { systems:{} };
       const systems = { ...current.systems };
       (response.results || []).forEach((result) => {
+        if (result.trace_id) state.linkageVisibleResultTraceIds.add(result.trace_id);
         systems[result.target] = { ...systems[result.target], last_result:result,
           runtime:result.runtime || systems[result.target]?.runtime || {} };
       });
+      if (response.correlation_id) state.linkageVisibleCorrelationIds.add(response.correlation_id);
       state.systemLinkage = { ...current, systems, last_command:{ ...response,
         failed_targets:(response.results || []).filter((result) => result.status !== "completed").map((result) => result.target) } };
       toast(response.all_succeeded ? "跨系统联动完成" : response.succeeded ? "跨系统联动部分完成" : "联动尚未完成，请查看回执", `${response.succeeded}/${response.total} 项成功 · ${response.correlation_id}`, response.all_succeeded ? "success" : "warning", 6500);
@@ -2179,26 +2256,147 @@
     }
   }
 
-  async function openLinkedSystem(target) {
-    const node = state.systemLinkage?.systems?.[target];
-    const runtime = node?.runtime || {};
-    if (!runtime.running) {
-      toast("目标系统尚未在线", runtime.message || "请先启动目标系统。", "warning");
-      return;
-    }
-    if (target === "sailing-simulator") {
-      try {
-        await api("/api/sailing-simulator/focus", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target}), timeoutMs:8000 });
-      } catch (error) {
-        toast("无法切换模拟器窗口", error.message, "warning");
+  async function openLinkedSystem(target, options = {}) {
+    if (state.systemLinkageOpenBusy) return;
+    state.systemLinkageOpenBusy = target;
+    if (state.systemLinkage) renderSystemLinkage(state.systemLinkage);
+    try {
+      const node = state.systemLinkage?.systems?.[target];
+      let runtime = node?.runtime || {};
+      if (!runtime.running && target !== "sailing-simulator") {
+        toast("正在准备目标系统", "只启动当前要打开的一个系统。", "info", 2400);
+        await api("/api/system-linkage/start", {
+          method:"POST", headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({ targets:[target] }), timeoutMs:60000
+        }).catch(() => null);
+        const latest = await api(`/api/linked-systems/status?targets=${encodeURIComponent(target)}`, { timeoutMs:8000 }).catch(() => null);
+        runtime = latest?.systems?.[target] || runtime;
+        if (state.systemLinkage?.systems?.[target]) state.systemLinkage.systems[target].runtime = runtime;
       }
-      return;
+      if (target === "sailing-simulator") {
+        if (!runtime.running) {
+          toast("正在启动航行模拟器", "启动原生 Godot 窗口；不注入航线或控制指令。", "info", 2200);
+          runtime = await api("/api/sailing-simulator/launch", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body:JSON.stringify({target}), timeoutMs:10000
+          });
+          if (!runtime.running) {
+            toast("航行模拟器正在加载", "原生窗口就绪后可从右上角一键返回小懿。", "success", 2600);
+            return;
+          }
+        }
+        await api("/api/sailing-simulator/focus", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({target}), timeoutMs:8000 });
+        toast("已切换到航行模拟器", "右上角可返回小懿；模拟器保持隔离，只读核验。", "success", 2200);
+        return;
+      }
+      const baseUrl = safeUrl(runtime.url);
+      if (!baseUrl) throw new Error(runtime.message || "目标系统未返回可用地址");
+      if (!runtime.running) throw new Error(runtime.message || "目标系统启动后未通过健康检查");
+      const url = new URL(baseUrl);
+      const trace = globalThis.crypto?.randomUUID?.() || `trace-${Date.now()}`;
+      url.searchParams.set("xiaoyi_return", currentXiaoyiReturnUrl());
+      url.searchParams.set("xiaoyi_trace", trace);
+      url.searchParams.set("xiaoyi_source", "system-linkage");
+      if (options.surface === "rl-config") {
+        if (target === "port-dt-multi") {
+          url.pathname = "/rl-panel";
+          url.searchParams.set("action", "start_rl_training");
+          url.searchParams.set("from", "xiaoyi");
+          url.searchParams.set("confirm", "prompt");
+        } else {
+          url.searchParams.set("xiaoyi_surface", "rl-config");
+          url.searchParams.set("xiaoyi_objective", target === "energy-cockpit" ? "carbon_min" : "resilience");
+        }
+        url.searchParams.set("xiaoyi_action", String(options.actionId || "capability-matrix"));
+        sessionStorage.setItem("xiaoyi_demo_resume", "energy-roundtrip");
+        toast("跨系统 RL 配置已定位", `正在打开${target === "energy-cockpit" ? "能碳" : target === "malacca-sandbox" ? "马六甲" : "数字孪生"}原生训练面板`, "success", 1800);
+      } else {
+        toast("目标系统已就绪", "同页打开，目标页可一键回到小懿。", "success", 1600);
+      }
+      window.location.assign(url.href);
+    } catch (error) {
+      toast(target === "sailing-simulator" ? "无法切换模拟器窗口" : "目标系统打开失败", error.message, "warning", 6000);
+    } finally {
+      state.systemLinkageOpenBusy = null;
+      if (state.systemLinkage && document.visibilityState === "visible") renderSystemLinkage(state.systemLinkage);
     }
-    const url = safeUrl(runtime.url);
-    if (!url) return;
-    const link = document.createElement("a");
-    link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer";
-    document.body.append(link); link.click(); link.remove();
+  }
+
+  const DEMO_CHAT_PROMPTS = Object.freeze({
+    general:{category:"general", label:"一般问答", mode:"expert", question:"港口 TOS 和 PCS 分别负责什么？二者如何协同？"},
+    daily:{category:"daily", label:"日常问答", mode:"ops", question:"岸桥单位作业能耗偏高，值班人员今天应按什么顺序排查？"},
+    emergency:{category:"emergency", label:"紧急问答", mode:"sop", question:"堆场冷藏箱区域冒烟怎么办？"}
+  });
+
+  function demoCategoryForQuestion(question) {
+    const normalized = String(question || "").replace(/\s+/g, " ").trim();
+    return Object.values(DEMO_CHAT_PROMPTS).find((item) => item.question === normalized)?.category || "";
+  }
+
+  function demoPromptConfig(category) {
+    return DEMO_CHAT_PROMPTS[String(category || "")] || null;
+  }
+
+  function setDemoComposerState(category = "") {
+    const input = $("#question");
+    const composer = $("#composerForm");
+    ["general", "daily", "emergency"].forEach((item) => composer?.classList.remove(`demo-chat-ready-${item}`));
+    if (!input || !composer) return;
+    if (category) {
+      input.dataset.demoChatCategory = category;
+      document.documentElement.dataset.demoChatCategory = category;
+      composer.classList.add(`demo-chat-ready-${category}`);
+    } else {
+      delete input.dataset.demoChatCategory;
+      delete document.documentElement.dataset.demoChatCategory;
+    }
+  }
+
+  function syncDemoPromptFromInput() {
+    const input = $("#question");
+    const category = demoCategoryForQuestion(input?.value);
+    const config = demoPromptConfig(category);
+    setDemoComposerState(category);
+    if (config) {
+      $("#mode").value = config.mode;
+      $("#modeShortLabel").textContent = modeShort(config.mode);
+    }
+    return category;
+  }
+
+  function prepareDemoChatPrompt(category) {
+    const config = demoPromptConfig(category);
+    if (!config) return;
+    setView("chat", {silent:true});
+    const input = $("#question");
+    input.value = config.question;
+    $("#mode").value = config.mode;
+    $("#modeShortLabel").textContent = modeShort(config.mode);
+    setDemoComposerState(config.category);
+    autoGrowQuestion();
+    input.focus({preventScroll:true});
+    input.setSelectionRange(input.value.length, input.value.length);
+    $("#composerForm")?.scrollIntoView({block:"nearest", behavior:"smooth"});
+  }
+
+  function applyDemoAnswerTone(category = "", completed = false) {
+    const message = $("#assistantMessage");
+    const card = message?.querySelector(".assistant-response-card");
+    const badge = $("#demoAnswerType");
+    ["general", "daily", "emergency"].forEach((item) => card?.classList.remove(`demo-chat-${item}`));
+    if (!message || !card || !badge) return;
+    delete message.dataset.demoChatCategory;
+    delete message.dataset.demoChatComplete;
+    badge.hidden = true;
+    badge.className = "demo-answer-type";
+    const config = demoPromptConfig(category);
+    if (!config) return;
+    card.classList.add(`demo-chat-${category}`);
+    message.dataset.demoChatCategory = category;
+    if (completed) message.dataset.demoChatComplete = "true";
+    badge.hidden = false;
+    badge.classList.add(category);
+    badge.textContent = `${config.label} · ${completed ? "回答完成" : "检索生成中"}`;
   }
 
   function favoriteCurrent() {
@@ -3721,7 +3919,7 @@
       const label = $("span", button);
       if (label) label.textContent = state.agentMode ? "智能操作已开启" : "智能操作已关闭";
     }
-    if (announce) toast(state.agentMode ? "智能操作已开启" : "智能操作已关闭", state.agentMode ? "操作型指令会先生成白名单计划，再逐步执行。" : "输入内容将直接进入严格证据问答。", state.agentMode ? "success" : "warning");
+    if (announce) toast(state.agentMode ? "智能操作已开启" : "智能操作已关闭", state.agentMode ? "跨系统任务由Harness模型逐步选择工具；原有界面操作与问答继续可用。" : "输入内容将直接进入严格证据问答。", state.agentMode ? "success" : "warning");
   }
 
   async function loadConnectorSummary() {
@@ -3853,7 +4051,7 @@
     if (gate) gate.textContent = "VERIFYING";
     try {
       const [health, runs, evidence] = await Promise.all([
-        api("/api/rl-lab/health", { timeoutMs:30000 }),
+        preloadRLLabHealth(force),
         api("/api/rl-lab/runs?limit=10", { timeoutMs:18000 }),
         api("/api/rl-lab/evidence", { timeoutMs:18000 }),
       ]);
@@ -3868,6 +4066,21 @@
     } finally {
       state.rlCenterLoading = false;
     }
+  }
+
+  function preloadRLLabHealth(force = false) {
+    if (!force && state.rlCenter?.health) return Promise.resolve(state.rlCenter.health);
+    if (!force && state.rlLabHealthPromise) return state.rlLabHealthPromise;
+    const promise = api("/api/rl-lab/health", { timeoutMs:20000 })
+      .then((health) => {
+        state.rlCenter = { ...(state.rlCenter || {}), health };
+        return health;
+      })
+      .finally(() => {
+        if (state.rlLabHealthPromise === promise) state.rlLabHealthPromise = null;
+      });
+    state.rlLabHealthPromise = promise;
+    return promise;
   }
 
   async function askRLAdvisor(message) {
@@ -3892,6 +4105,38 @@
       Object.assign(pending, { text:`这次没有读取到训练证据：${error.message}`, loading:false });
     }
     renderRLAdvisorFeed();
+  }
+
+  async function showRLDatasets() {
+    let datasets = state.rlCenter?.health?.datasets || [];
+    if (!datasets.length) {
+      openModal("训练数据集与官方来源", "正在读取已登记数据血缘", `<div class="task-empty"><div>${icon("book")}<strong>正在核验来源、许可与哈希</strong><span>只读取训练目录，不启动训练任务</span></div></div>`, "", "rl-datasets");
+      try {
+        const health = await preloadRLLabHealth();
+        state.rlCenter = { ...(state.rlCenter || {}), health };
+        datasets = health.datasets || [];
+      } catch (error) {
+        if (state.modalKind === "rl-datasets") $("#modalBody").innerHTML = `<div class="drawer-note"><strong>数据血缘读取失败：</strong>${escapeHtml(error.message)}。可关闭后点击“重置本步”再次读取。</div>`;
+        return;
+      }
+    }
+    const rows = datasets.map((item) => {
+      const sourceUrl = safeUrl(item.source_url);
+      const fields = [...(item.required_fields || []), ...(item.optional_fields || []).slice(0, 6)];
+      return `<article class="source-record ${item.available ? "official" : "unverified"}">
+        <div class="source-record-header"><div class="source-record-title"><strong>${escapeHtml(item.label)}</strong><span>${escapeHtml(item.id)} · ${formatNumber(item.row_count || 0, 0)} 行</span></div><span class="source-status ${item.available ? "official" : "unverified"}">${item.available ? "LOCAL VERIFIED" : "NOT INSTALLED"}</span></div>
+        <div class="source-provenance"><span>发布机构 / 来源<b>${escapeHtml(item.citation || item.source_type || "—")}</b></span><span>许可<b>${escapeHtml(item.license || "—")}</b></span><span>数据 SHA-256<b>${compactHash(item.sha256)}</b></span><span>证据层级<b>${escapeHtml(item.evidence_level || "—")}</b></span></div>
+        <div class="drawer-note"><strong>训练字段：</strong>${fields.length ? fields.map((field) => `<code>${escapeHtml(field)}</code>`).join(" · ") : "未登记"}<br><strong>适用边界：</strong>${escapeHtml(item.description || "未登记")}</div>
+        ${sourceUrl ? `<a class="source-link" href="${escapeHtml(sourceUrl)}" target="_blank" rel="noopener noreferrer">打开官方来源 ↗</a>` : `<span class="source-link disabled">站点数据需部署方登记来源与授权</span>`}
+      </article>`;
+    }).join("");
+    openModal(
+      "训练数据集与官方来源",
+      `${datasets.filter((item) => item.available).length}/${datasets.length} 套本机可用 · 来源、许可、字段、哈希同屏核验`,
+      `<div class="drawer-note"><strong>口径：</strong>公开基准、公开 AIS 实测与校准运营代理分层展示；公开数据不等于现场 KPI。训练、验证、保留测试按时间顺序隔离，不随机打乱。</div><div class="source-record-list">${rows}</div>`,
+      `<button type="button" class="drawer-button" data-action="close-modal">已核对数据血缘</button>`,
+      "rl-datasets"
+    );
   }
 
   function showRLContract() {
@@ -3945,6 +4190,7 @@
       toast("证据已刷新", "数据哈希、运行记录、算法和环境契约已重新读取。", "success");
     }
     if (action === "start-training") await openRLLabConfig();
+    if (action === "show-datasets") await showRLDatasets();
     if (action === "show-contract") showRLContract();
     if (action === "show-evidence") showRLEvidence();
     if (action === "ask-advisor") {
@@ -3955,7 +4201,19 @@
 
   async function openRLLabConfig() {
     try {
-      const health = await api("/api/rl-lab/health", { timeoutMs:18000 });
+      const cachedHealth = state.rlCenter?.health;
+      if (!cachedHealth) {
+        openModal(
+          "真实RL训练实验室",
+          "正在读取训练目录与算法契约",
+          `<div class="task-empty"><div>${icon("chart")}<strong>正在准备训练配置</strong><span>只读取本机训练目录，不启动任务</span></div></div>`,
+          "",
+          "rl-lab-config-loading"
+        );
+      }
+      const health = cachedHealth || await preloadRLLabHealth();
+      if (!cachedHealth && state.modalKind !== "rl-lab-config-loading") return;
+      state.rlCenter = { ...(state.rlCenter || {}), health };
       const algorithms = health.algorithms || [];
       const datasets = (health.datasets || []).filter((item) => item.available);
       if (!datasets.length) throw new Error("没有可用数据集，请先运行 scripts/fetch_public_rl_dataset.py");
@@ -3972,7 +4230,14 @@
         "rl-lab-config"
       );
     } catch (error) {
-      toast("RL训练实验室不可用", error.message, "warning", 6000);
+      openModal(
+        "真实RL训练实验室",
+        "训练目录未就绪，当前页面未卡死",
+        `<div class="rl-lab-recovery"><div>${icon("alert")}</div><strong>首次数据目录读取未完成</strong><p>${escapeHtml(error.message)}</p><span>可立即重试；后台预热成功后，后续打开会直接使用缓存契约。</span></div>`,
+        `<button type="button" class="drawer-button secondary" data-action="close-modal">暂不打开</button><button type="button" class="drawer-button" data-modal-action="retry-rl-lab">重试训练实验室</button>`,
+        "rl-lab-recovery"
+      );
+      toast("RL训练实验室未就绪", "已提供重试入口，不再停留在无反馈加载态。", "warning", 4200);
     }
   }
 
@@ -3999,7 +4264,7 @@
 
   function bindEvents() {
     $("#composerForm").addEventListener("submit", (event) => { event.preventDefault(); ask(); });
-    $("#question").addEventListener("input", () => {state.composerTouched=true;autoGrowQuestion();});
+    $("#question").addEventListener("input", () => {state.composerTouched=true;syncDemoPromptFromInput();autoGrowQuestion();});
     $("#question").addEventListener("keydown", (event) => {
       if (event.key === "Enter" && !event.shiftKey && !event.isComposing) { event.preventDefault(); ask(); }
     });
@@ -4048,6 +4313,8 @@
       if (rlCenterAction) { await handleRLCenterAction(rlCenterAction.dataset.rlCenterAction); return; }
       const rlAdvisorPrompt = event.target.closest("[data-rl-advisor-prompt]");
       if (rlAdvisorPrompt) { await askRLAdvisor(rlAdvisorPrompt.dataset.rlAdvisorPrompt); return; }
+      const demoChatPrompt = event.target.closest("[data-chat-demo-prompt]");
+      if (demoChatPrompt) { prepareDemoChatPrompt(demoChatPrompt.dataset.chatDemoPrompt); return; }
       const promptButton = event.target.closest("[data-q]");
       if (promptButton) { closeModal(); setView("chat", { silent:true }); askQuestion(promptButton.dataset.q, promptButton.dataset.mode || "expert"); return; }
       const taskButton = event.target.closest("[data-task-template]");
@@ -4125,6 +4392,15 @@
       "intelligence-hub":openIntelligenceHub,
       "system-linkage":openSystemLinkage,
       "linked-agent":()=>linkedAgent.open(),
+      harness:()=>harnessConsole.open(),
+      "joint-harness":()=>jointHarness.open(),
+      "priority-v9":()=>openModal("V9 专项实证","预测区间 · 同等强基线 · 年度孪生",'<iframe id="researchReviewFrame" title="V9专项实证" src="/web/priority-v9.html?v=20261031-guide" style="width:100%;height:70vh;border:0"></iframe>',"","research-review"),
+      "root-cause-v10":()=>openModal("V10 根因与独立复验","收益上界 · 新站点复验 · 37项限制归因",'<iframe id="researchReviewFrame" title="V10根因与独立复验" src="/web/root-cause-v10.html?v=20261031-guide" style="width:100%;height:70vh;border:0"></iframe>',"","research-review"),
+      "shanghai-lab":()=>openModal("上海港统一联动试验","公开数据校准 · 统一作业链 · 移动端签收",'<iframe id="shanghaiLabFrame" title="上海港统一联动试验工作台" src="/web/shanghai-lab.html?v=20261031-guide" style="width:100%;height:70vh;border:0"></iframe>',"","shanghai-lab"),
+      "proof-console":()=>{
+        proofConsole ||= window.createProofConsole({api,openModal,escapeHtml,isOpen:()=>state.modalKind === "proof-console"});
+        return proofConsole.open();
+      },
       "rag-evaluation":() => openIntelligenceHub("evaluation"),
       "hub-run-demo":runHubDemo,
       "hub-run-evaluation":runHubEvaluation,
@@ -4155,6 +4431,7 @@
       "toggle-sidebar":() => $("#leftSidebar").classList.toggle("open"),
       "toggle-rail":() => $("#rightRail").classList.toggle("open"),
       "close-modal":closeModal,
+      "ack-roundtrip-receipt":ackRoundtripReceipt,
       "close-drawer":closeDrawer,
       "confirm-automation":requestAutomationConfirmation,
       "resume-automation":resumeAutomation,
@@ -4202,6 +4479,49 @@
     if (action === "reject-linked-systems-startup") rejectLinkedSystemsStartup();
     if (action === "submit-knowledge-intake") await submitKnowledgeIntake();
     if (action === "start-rl-lab") startConfiguredRLLab();
+    if (action === "retry-rl-lab") {
+      state.rlCenter = state.rlCenter ? { ...state.rlCenter, health:null } : null;
+      state.rlLabHealthPromise = null;
+      await openRLLabConfig();
+    }
+  }
+
+  function showLinkageReturnReceipt(receipt = state.linkageReturnReceipt) {
+    if (!receipt) return;
+    openModal(
+      "小懿·能碳驾驶舱双向闭环已完成",
+      "XIAOYI ROUNDTRIP RECEIPT · 目标系统已返回可审计配置证据",
+      `<section class="xiaoyi-roundtrip-receipt" data-xiaoyi-roundtrip-receipt="ready"><div class="roundtrip-flow"><span class="done"><i>1</i><b>小懿识别目标</b><small>${escapeHtml(receipt.objective)}</small></span><em></em><span class="done"><i>2</i><b>能碳打开配置</b><small>${escapeHtml(receipt.dataset)}</small></span><em></em><span class="done"><i>3</i><b>策略与边界核验</b><small>${escapeHtml(receipt.algorithm)}</small></span><em></em><span class="done"><i>4</i><b>证据回传小懿</b><small>${escapeHtml(receipt.stage)}</small></span></div><div class="roundtrip-proof"><span><small>TRACE ID</small><b>${escapeHtml(receipt.trace)}</b></span><span><small>生产写入</small><b>${receipt.productionAuthority ? "异常开启" : "关闭 · SAFE"}</b></span></div><p>小懿不只负责“打开页面”，而是把业务目标、数据集、算法、安全边界和 trace 从目标系统带回，形成可追溯的人在回路闭环。</p></section>`,
+      `<button type="button" class="drawer-button" data-action="ack-roundtrip-receipt">完成闭环核验</button>`,
+      "roundtrip-receipt"
+    );
+  }
+
+  function ackRoundtripReceipt() {
+    state.linkageReturnReceipt = null;
+    closeModal();
+  }
+
+  function consumeLinkageReturn() {
+    const url = new URL(window.location.href);
+    const resumeSurface = url.searchParams.get("xiaoyi_resume") || "";
+    const handoff = url.searchParams.get("xiaoyi_handoff") || "";
+    if (handoff === "energy-rl") {
+      const receipt = {
+        trace:url.searchParams.get("xiaoyi_trace") || "trace-missing",
+        objective:url.searchParams.get("xiaoyi_objective") || "carbon_min",
+        algorithm:url.searchParams.get("xiaoyi_algorithm") || "registered-policy",
+        dataset:url.searchParams.get("xiaoyi_dataset") || "registered-dataset",
+        stage:url.searchParams.get("xiaoyi_stage") || "configured",
+        productionAuthority:url.searchParams.get("xiaoyi_production_authority") === "true"
+      };
+      state.linkageReturnReceipt = receipt;
+      sessionStorage.setItem("xiaoyi_demo_resume", "roundtrip-ready");
+      showLinkageReturnReceipt(receipt);
+    }
+    ["xiaoyi_resume","xiaoyi_handoff","xiaoyi_trace","xiaoyi_objective","xiaoyi_algorithm","xiaoyi_dataset","xiaoyi_stage","xiaoyi_production_authority","production_authority"].forEach((key) => url.searchParams.delete(key));
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+    return resumeSurface;
   }
 
   function restorePreferences() {
@@ -4221,10 +4541,12 @@
 
   async function init() {
     initBilingualLayer(); restorePreferences(); updateGreeting(); bindEvents(); updateCounts();
+    const resumeSurface = consumeLinkageReturn();
+    void preloadRLLabHealth().catch(() => {});
     await Promise.allSettled([loadDashboard(), loadSimulatorSnapshot(), loadKnowledge(), loadTasksAndTemplates(), loadConnectorSummary(), loadServerConversation()]);
     connectSimulatorStream();
     void loadSystemLinkage({ render:false }).catch(() => {});
-    if (!state.composerTouched && !state.automationPlan && !state.activeController) {
+    if (state.view === "chat" && !state.composerTouched && !state.automationPlan && !state.activeController && !state.modalKind) {
       showWelcome();
       if (state.conversationTurns.length) {
         const latest = state.conversationTurns[state.conversationTurns.length - 1];
@@ -4232,6 +4554,8 @@
         if (stored) restoreTopic(stored.id);
       }
     }
+    if (state.linkageReturnReceipt && $("#genericModal").hidden) showLinkageReturnReceipt();
+    else if (resumeSurface === "system-linkage" && $("#genericModal").hidden) await openSystemLinkage();
     setInterval(() => { if (!document.hidden) void loadDashboard(true); }, 15000);
   }
 

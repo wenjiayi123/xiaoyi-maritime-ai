@@ -1,7 +1,8 @@
 /* Local adapter jobs are executed and verified by the backend, never by DOM claims. */
-window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, toast, isOpen}) {
+window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, toast, isOpen, openSystem}) {
   const api = (path, options={}) => callApi(path,{...options,headers:{"Content-Type":"application/json",...(options.headers || {})}});
   let actions = [], selected = "energy.compare", plan = null, run = null, busy = false;
+  let capabilityAudit = null, auditBusy = false;
   let openVersion = 0, draftVersion = 0, requestVersion = 0;
   let draft = {command:"", parameters:{}, samples:"3", interval:"2", restore:true};
   const executionRequests = new Map();
@@ -9,6 +10,12 @@ window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, 
   const visible = version => isOpen() && (version == null || version === openVersion);
   const labels = {aggregate_kw:"聚合功率 kW", queue_vessels:"排队船舶数", delay_minutes:"延误分钟", throughput_teu:"吞吐 TEU", energy_kwh:"能耗 kWh", peak_grid_kw:"电网峰值 kW", cost_myr:"成本 MYR", carbon_tons:"碳排放 t", service_level_percent:"服务率 %", safety_risk_percent:"安全风险 %", resilience_index:"韧性指标", carbon_kg:"碳排放 kg", cost_cny:"成本 CNY", grid_peak_kw:"电网峰值 kW", service_fulfilment_pct:"服务完成率 %", total_cost_saving_cny:"试算成本节省 CNY", abatement_ton:"试算减排 t", green_preference:"绿色偏好", energy_mwh:"能耗 MWh"};
   const statuses = {running:"执行与观测中", completed:"已完成", failed:"失败，未确认变更", needs_review:"需要核查目标状态", cancelled:"已停止观测"};
+  const targetMeta = {
+    "port-dt-multi": {label:"港口数字孪生", short:"数字孪生", rl:true},
+    "energy-cockpit": {label:"能碳驾驶舱", short:"能碳", rl:true},
+    "malacca-sandbox": {label:"马六甲推演", short:"马六甲", rl:true},
+    "sailing-simulator": {label:"航行模拟器", short:"航行", rl:false}
+  };
   Object.assign(labels,{equipment_life_cost_cny:"设备寿命成本 CNY",safety_violations:"安全约束违规次数"});
   const fmt = v => typeof v === "number" ? Number(v.toFixed(3)).toLocaleString("zh-CN") : String(v ?? "—");
   function summarize(result) {
@@ -42,7 +49,7 @@ window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, 
   }
   function syncControls() {
     if(!visible()) return;
-    document.querySelectorAll("[data-la-preview],[data-la-parse],[data-la-execute],[data-la-history],#laAction,[data-la-param],#laSamples,#laInterval,#laRestore,#laCommand").forEach(control=>control.disabled=working());
+    document.querySelectorAll("[data-la-preview],[data-la-parse],[data-la-execute],[data-la-history],[data-la-demo-energy],[data-la-check-capabilities],[data-la-capability],#laAction,[data-la-param],#laSamples,#laInterval,#laRestore,#laCommand").forEach(control=>control.disabled=working() || (control.hasAttribute("data-la-check-capabilities") && auditBusy));
   }
   const table = rows => `<div class="la-table-wrap"><table class="la-table"><thead><tr><th>指标</th><th>之前</th><th>之后</th><th>变化</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(labels[r.metric] || r.metric)}</td><td>${esc(fmt(r.before))}</td><td>${esc(fmt(r.after))}</td><td>${esc(fmt(r.change))}</td></tr>`).join("")}</tbody></table></div>`;
   function fields() {
@@ -61,19 +68,23 @@ window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, 
     if (!run) return "";
     const evaluation = run.evaluation;
     const samples = run.observations || [];
-    return `<section class="la-receipt"><header><strong>${esc(statuses[run.status] || run.status)}</strong><span>${samples.length}/${run.plan.samples} 次采样</span></header><p>${esc(run.plan.label)} · ${esc(run.id)}</p>
+    return `<section class="la-receipt" data-la-status="${esc(run.status)}" data-la-action="${esc(run.plan.action_id)}"><header><strong>${esc(statuses[run.status] || run.status)}</strong><span>${samples.length}/${run.plan.samples} 次采样</span></header><p>${esc(run.plan.label)} · ${esc(run.id)}</p>
       ${run.error ? `<p class="la-warning">${esc(run.error)}</p>` : ""}
       ${run.restore_error ? `<p class="la-warning">${esc(run.restore_error)}</p>` : ""}
       ${run.plan.mutates ? `<p>目标配置：${run.restored ? "已恢复并回读核验" : run.applied ? "已调整并回读核验" : run.write_attempted ? "请求已发出，结果需核查" : "尚未变更"}</p>` : ""}
       ${evaluation ? `<h4>计算结果</h4><p>${esc(evaluation.scope)}</p>${evaluation.changes ? table(evaluation.changes) : `<p>评估点 ${evaluation.points?.length || 0} · 平均功率 ${esc(fmt(evaluation.average_kw))} kW · 峰值 ${esc(fmt(evaluation.peak_kw))} kW</p>`}` : ""}
       <h4>运行状态观测</h4><p>${esc(run.comparison_notice)}</p>${chart(samples)}${table(run.changes || [])}
       <details><summary>参数、前后快照与哈希回执</summary><pre>${esc(JSON.stringify(run,null,2))}</pre></details>
-      <div class="la-buttons">${run.status === "running" ? `<button type="button" class="outline-button" data-la-cancel="${esc(run.id)}">停止观测</button>` : ""}${run.applied && !run.restored && run.status !== "running" ? `<button type="button" class="outline-button" data-la-rollback="${esc(run.id)}">恢复本轮配置</button>` : ""}<button type="button" class="outline-button" data-la-refresh="${esc(run.id)}">刷新回执</button><button type="button" class="outline-button" data-la-export>导出完整回执</button></div></section>`;
+      <div class="la-buttons">${run.status === "running" ? `<button type="button" class="outline-button" data-la-cancel="${esc(run.id)}">停止观测</button>` : ""}${run.applied && !run.restored && run.status !== "running" ? `<button type="button" class="outline-button" data-la-rollback="${esc(run.id)}">恢复本轮配置</button>` : ""}${run.status === "completed" && run.plan.target !== "sailing-simulator" ? `<button type="button" class="primary-button" data-la-open-target="${esc(run.plan.target)}">打开目标系统看反馈</button>` : ""}<button type="button" class="outline-button" data-la-refresh="${esc(run.id)}">刷新回执</button><button type="button" class="outline-button" data-la-export>导出完整回执</button></div></section>`;
   }
   function render() {
     if (!isOpen()) return;
     const root = document.querySelector("#modalBody");
+    const auditedSystems=capabilityAudit?.systems || {};
     root.innerHTML = `<div class="linked-agent-console"><p class="la-intro">先读取目标状态，再执行登记操作并观测。参数试算作用于本次计算；模拟配置调整会改变目标沙盘。默认观测后恢复本轮配置。</p>
+      <section class="la-capability-overview" data-la-capability-audit="${esc(capabilityAudit?.status || "idle")}"><header><div><strong>小懿联动能力实操矩阵</strong><small>每项对应真实白名单动作、目标系统和接口边界</small></div><span>${actions.length} 项已登记</span></header><div>${actions.map((action,index)=>{const target=targetMeta[action.target] || {label:action.target,short:action.target};const runtime=auditedSystems[action.target];const runtimeLabel=!capabilityAudit ? "待体检" : runtime?.running ? "接口在线" : action.target === "sailing-simulator" ? "隔离核验" : "当前离线";return `<button type="button" data-la-capability="${esc(action.id)}" class="${selected === action.id ? "active" : ""}"><i>${String(index+1).padStart(2,"0")}</i><span><b>${esc(action.label)}</b><small>${esc(target.label)} · ${action.mutates ? "模拟调整，默认恢复" : "只读观测/试算"}</small></span><em class="${runtime?.running ? "online" : ""}">${esc(runtimeLabel)}</em></button>`;}).join("")}</div><footer><button type="button" class="primary-button" data-la-check-capabilities>${auditBusy ? "正在核对登记接口…" : capabilityAudit ? "重新核对登记接口" : "▶ 联动能力体检"}</button><span>${capabilityAudit?.status === "complete" ? `已核对 ${actions.length} 项登记能力 · ${Object.values(auditedSystems).filter(item=>item?.running).length} 个目标在线 · 未执行写操作` : "一次读取四个目标状态，不启动系统、不执行写操作"}</span></footer></section>
+      <section class="la-rl-launchpad"><header><div><strong>跨系统 RL 训练配置</strong><small>从小懿跳转到目标系统原生训练面板，继续核对数据、算法、State / Action / Reward 与训练参数</small></div><span>3 个真实入口</span></header><div>${["port-dt-multi","energy-cockpit","malacca-sandbox"].map(target=>`<button type="button" class="outline-button" data-la-open-rl="${target}"><b>${esc(targetMeta[target].short)} RL</b><small>${auditedSystems[target]?.running ? "接口在线 · 可打开" : "目标在线后可打开"}</small></button>`).join("")}</div><p>航行模拟器保持桌面进程隔离，只做状态核验，不伪装成 Web 训练配置入口。</p></section>
+      <div class="la-demo-callout"><div><strong>现场保底闭环</strong><span>小懿使用同一公开数据集对比绿色偏好 0.50 → 0.82，生成真实回执，能碳端同步显示联动反馈。</span></div><button type="button" class="primary-button" data-la-demo-energy>▶ 一键执行能碳试算</button></div>
       <div class="la-command"><input id="laCommand" value="${esc(draft.command)}" placeholder="例如：能碳绿色偏好调到0.8，碳价100，进行对比试算"><button class="outline-button" type="button" data-la-parse>解析指令</button></div>
       <label>操作能力<select id="laAction" ${busy ? "disabled" : ""}>${actions.map(a=>`<option value="${esc(a.id)}" ${selected===a.id ? "selected" : ""}>${esc(a.label)}${a.mutates ? " · 调整模拟配置" : " · 读取/试算"}</option>`).join("")}</select></label>
       <div class="la-fields">${fields()}<label>观测次数<input id="laSamples" type="number" min="1" max="12" value="${esc(draft.samples)}"></label><label>间隔（秒）<input id="laInterval" type="number" min="1" max="10" step="1" value="${esc(draft.interval)}"></label></div>
@@ -179,12 +190,35 @@ window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, 
   document.addEventListener("input",trackDraft);
   document.addEventListener("change",trackDraft);
   document.addEventListener("click",async event=>{
-    const button=event.target.closest?.("[data-la-preview],[data-la-parse],[data-la-execute],[data-la-cancel],[data-la-rollback],[data-la-history],[data-la-run],[data-la-export],[data-la-refresh],[data-la-reload]");
+    const button=event.target.closest?.("[data-la-preview],[data-la-parse],[data-la-execute],[data-la-cancel],[data-la-rollback],[data-la-history],[data-la-run],[data-la-export],[data-la-refresh],[data-la-reload],[data-la-demo-energy],[data-la-check-capabilities],[data-la-capability],[data-la-open-target],[data-la-open-rl]");
     if(!button || button.disabled || !visible()) return;
     const version=openVersion;
     button.disabled=true;
     try {
       if(button.hasAttribute("data-la-reload")) await open();
+      if(button.dataset.laCapability) {
+        selected=button.dataset.laCapability; draft.parameters=defaultParameters(); invalidatePlan(); render();
+      }
+      if(button.hasAttribute("data-la-check-capabilities")) {
+        auditBusy=true; capabilityAudit={status:"running",systems:{}}; render();
+        const [linked,sailing]=await Promise.all([
+          api("/api/linked-systems/status?targets=port-dt-multi,energy-cockpit,malacca-sandbox",{timeoutMs:5000}).catch(error=>({systems:{},error:error.message})),
+          api("/api/sailing-simulator/status",{timeoutMs:5000}).catch(error=>({target:"sailing-simulator",running:false,state:"unavailable",message:error.message}))
+        ]);
+        if(visible(version)) {
+          capabilityAudit={status:"complete",checkedAt:new Date().toISOString(),systems:{...(linked.systems || {}),"sailing-simulator":sailing}};
+          auditBusy=false; render();
+        }
+      }
+      if(button.hasAttribute("data-la-demo-energy")) {
+        selected="energy.compare";
+        draft={command:"能碳绿色偏好调到 0.82，碳价 100，进行对比试算",parameters:{baseline_green_preference:.5,green_preference:.82,carbon_price_cny_per_ton:100},samples:"1",interval:"1",restore:true};
+        plan=null; render();
+        const prepared=await prepare({action_id:selected,parameters:{...draft.parameters},samples:1,interval_seconds:1,restore_after_observation:true});
+        await runPlan(prepared);
+      }
+      if(button.dataset.laOpenTarget && typeof openSystem === "function") await openSystem(button.dataset.laOpenTarget);
+      if(button.dataset.laOpenRl && typeof openSystem === "function") await openSystem(button.dataset.laOpenRl,{surface:"rl-config",actionId:selected});
       if(button.hasAttribute("data-la-parse")) await parse(document.querySelector("#laCommand").value);
       if(button.hasAttribute("data-la-preview")) {
         const inputs=[...document.querySelectorAll("[data-la-param],#laSamples,#laInterval")];
@@ -217,7 +251,7 @@ window.createLinkedAgent = function ({api: callApi, openModal, escapeHtml: esc, 
     } catch(error) {
       if(visible(version) && button.hasAttribute("data-la-preview") && !plan && document.querySelector("#laPlan")) document.querySelector("#laPlan").textContent=`方案读取未完成：${error.message}。请重新预览。`;
       toast("联动操作未完成",error.message,"warning",6500);
-    } finally {button.disabled=false;syncControls();}
+    } finally {auditBusy=false;button.disabled=false;syncControls();}
   });
   return {open,prepare,runPlan,summarize,showRun: result=>{run=result;updateRun();}};
 };

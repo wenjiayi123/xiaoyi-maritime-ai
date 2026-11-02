@@ -1,0 +1,228 @@
+{
+  "schema": "xiaoyi-rl-protocol.v7",
+  "registered_at": "2026-10-31T00:25:11.206148+00:00",
+  "train_ports": [
+    "port101",
+    "port1045",
+    "port1065",
+    "port1114",
+    "port1160",
+    "port118",
+    "port1188",
+    "port1197",
+    "port1201",
+    "port1269",
+    "port1348",
+    "port1350",
+    "port1417",
+    "port192",
+    "port220",
+    "port23",
+    "port235",
+    "port241",
+    "port254",
+    "port275",
+    "port278",
+    "port31",
+    "port311",
+    "port343",
+    "port387",
+    "port395",
+    "port434",
+    "port446",
+    "port514",
+    "port518",
+    "port541",
+    "port543",
+    "port57",
+    "port581",
+    "port664",
+    "port694",
+    "port699",
+    "port729",
+    "port744",
+    "port746",
+    "port776",
+    "port777",
+    "port79",
+    "port824",
+    "port862",
+    "port908",
+    "port960",
+    "port985"
+  ],
+  "train_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "train_months": [
+    1,
+    4,
+    7,
+    10
+  ],
+  "validation_year": 2025,
+  "validation_months": [
+    1,
+    7
+  ],
+  "new_ports": [
+    {
+      "id": "port310",
+      "name": "Dunkirk",
+      "country": "France",
+      "iso3": "FRA"
+    },
+    {
+      "id": "port174",
+      "name": "Brisbane",
+      "country": "Australia",
+      "iso3": "AUS"
+    },
+    {
+      "id": "port929",
+      "name": "Port Adelaide",
+      "country": "Australia",
+      "iso3": "AUS"
+    },
+    {
+      "id": "port1200",
+      "name": "Sines",
+      "country": "Portugal",
+      "iso3": "PRT"
+    },
+    {
+      "id": "port1424",
+      "name": "Zeebrugge",
+      "country": "Belgium",
+      "iso3": "BEL"
+    },
+    {
+      "id": "port766",
+      "name": "Montreal",
+      "country": "Canada",
+      "iso3": "CAN"
+    },
+    {
+      "id": "port380",
+      "name": "Gdansk",
+      "country": "Poland",
+      "iso3": "POL"
+    },
+    {
+      "id": "port1252",
+      "name": "Taichung",
+      "country": "Taiwan Province of China",
+      "iso3": "TWN"
+    }
+  ],
+  "test_year": 2026,
+  "test_months": [
+    1,
+    4
+  ],
+  "seeds": [
+    732101,
+    732102,
+    732103,
+    732104,
+    732105
+  ],
+  "configs": [
+    {
+      "name": "mixed0",
+      "composition": "mixed",
+      "penalty": 0
+    },
+    {
+      "name": "pooled0",
+      "composition": "normal_pooled",
+      "penalty": 0
+    },
+    {
+      "name": "normal0",
+      "composition": "normal_lag",
+      "penalty": 0
+    },
+    {
+      "name": "normal4",
+      "composition": "normal_lag",
+      "penalty": 4
+    }
+  ],
+  "single_factor_ablation": [
+    "mixed0 vs normal0: synthetic-surge contamination only, same lag conditioning and grid",
+    "pooled0 vs normal0: public7/14day lag conditioning only, same deduplicated normal transitions",
+    "normal0 vs normal4: learned overflow penalty only, external evaluation cost unchanged"
+  ],
+  "primary_shared_filter": {
+    "name": "reserve",
+    "sigma": 1.0,
+    "queue_budget": 0.0
+  },
+  "raw_filter": {
+    "name": "none",
+    "sigma": 0.0,
+    "queue_budget": 4.0
+  },
+  "grid": {
+    "mean": "0..4 step0.1",
+    "volatility": [
+      0.025,
+      0.1,
+      0.3,
+      0.6,
+      1.2,
+      2.4
+    ],
+    "queue": "0..16 step0.05",
+    "remaining": "every1..90, plus28step no-terminal stochasticMPC",
+    "outside": "above mean/queue upper bound -> max allowed action; volatility clipping and threshold projection counted"
+  },
+  "training": "Empirical-model offline Bellman RL, same declared physical queue and cost. Five port-year block bootstrap fits for chosen candidate, not five independent field trials or neural gradient seeds. Normal/delay residuals deduplicated; synthetic surge only included in explicitly named contamination ablation.",
+  "baselines": "Same information and safety filter: PID, deterministic MPC28/90 risk0/.5, mean-corrected MPC28/90 using same learned conditional error mean, stochasticMPC28 using same learned distribution/solver. Exact deterministic envelope is independently checked against original V3cost interpolation, not a weakened baseline.",
+  "selection": "Development2025safety-first: minimize feasible-window violations, then excess over max-capacity, then maximize normal score. Guarded and raw selections separate; raw-to-raw main test comparisons pre-registered. No test tuning.",
+  "admission_checks": [
+    "positive eight-port-cluster95percent CI of normal relative cost gain",
+    "no mean port regression",
+    "stress noninferiority",
+    "zero feasible-window violations",
+    "zero excess violations over maximum-capacity baseline",
+    "no port above50percent of positive gains"
+  ],
+  "independence": "48seen ports development only, eight new IDs extracted after model/source freeze; fixed2026Jan/Apr90daywindows. Same pinned IMFexport, not newer vintage. All V6cohorts now viewed; comparisons on them are diagnostic only.",
+  "safety_limits_notice": "Unannounced demand/outage under fixed proxy capacity can be intrinsically infeasible. Finite data zero extra violations is not a universal safety guarantee. No field authority.",
+  "metric": "Original normalized queue/resource/switch/overflow/terminal proxy cost; neither money nor measured terminal productivity.",
+  "sources": [
+    {
+      "path": "data/public/portwatch_crossport_20261030/manifest.json",
+      "sha256": "5d3dfb69e0ea8d3cc196685b0d68ba8157e229953a787b2ab87a65df6f14ed65"
+    },
+    {
+      "path": "data/public/portwatch_v2_20261030/manifest.json",
+      "sha256": "e0ae598ec948ac0fc25b2d63fc3dfe85d7ffc52de8d226a8cc38847e970e03b9"
+    },
+    {
+      "path": "data/public/portwatch_v3_20261030/manifest.json",
+      "sha256": "f62f5563c326acea3de0192f49fc36378c393b4e4d6bcd7c907159013fee4c3d"
+    },
+    {
+      "path": "data/public/portwatch_v4_20261030/manifest.json",
+      "sha256": "2d2653ae79ac5f8905dfd800d82f18152e3649fa5b58adeb194176a49ff4dd6f"
+    },
+    {
+      "path": "data/public/operations_v5_20261030/manifest.json",
+      "sha256": "3ae85a1fbf998df0e6ef26b4653eb552f0b7de6b776153aa51a3b6156cba561c"
+    },
+    {
+      "path": "data/public/rl_v6_20261030/manifest.json",
+      "sha256": "6aa45da2ea46a1949ad125b18b51a2244f72aefcb0b0827a2aa8d8749136ecdb"
+    }
+  ],
+  "test_extraction_requires_frozen_selection": true,
+  "production_authority": false
+}

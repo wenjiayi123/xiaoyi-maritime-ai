@@ -6,7 +6,7 @@ from typing import Any
 
 ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
     "id": "energy_storage",
-    "version": "xiaoyi-energy-env.v2",
+    "version": "xiaoyi-energy-env.v3-causal",
     "label": "港口能源与储能调度",
     "decision_scope": "在给定负荷、电价、碳强度和储能约束下选择充放电功率档位。",
     "observation": [
@@ -14,7 +14,7 @@ ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
         {"id": "load_bin", "source": "load_kw", "evidence": "measured"},
         {"id": "soc_bin", "source": "environment_state", "evidence": "simulated_state"},
         {"id": "tariff_bin", "source": "price_per_kwh", "evidence": "measured_or_documented_default"},
-        {"id": "load_trend_bin", "source": "load_kw(t+1)-load_kw(t)", "evidence": "derived"},
+        {"id": "load_trend_bin", "source": "load_kw(t)-load_kw(t-1)", "evidence": "past_and_current_only"},
     ],
     "actions": [
         {"index": 0, "id": "full_discharge", "label": "全功率放电", "factor": -1.0},
@@ -47,7 +47,7 @@ ENERGY_STORAGE_CONTRACT: dict[str, Any] = {
 
 PORT_OPERATIONS_CONTRACT: dict[str, Any] = {
     "id": "port_operations",
-    "version": "xiaoyi-port-operations-env.v1",
+    "version": "xiaoyi-port-operations-env.v2-causal",
     "label": "AIS驱动的港口交通—服务能力协同",
     "decision_scope": "依据真实交通观测和站点约束选择服务能力档位；输出只作为规划沙箱建议。",
     "observation": [
@@ -61,7 +61,7 @@ PORT_OPERATIONS_CONTRACT: dict[str, Any] = {
         {"id": "equipment_bin", "source": "equipment_availability_ratio", "evidence": "site_or_default"},
         {"id": "weather_risk_bin", "source": "wind_speed_mps+visibility_km", "evidence": "site_or_default"},
         {"id": "tide_window", "source": "tide_window_open", "evidence": "site_or_default"},
-        {"id": "traffic_trend_bin", "source": "vessel_count(t+1)-vessel_count(t)", "evidence": "derived"},
+        {"id": "traffic_trend_bin", "source": "vessel_count(t)-vessel_count(t-1)", "evidence": "past_and_current_only"},
     ],
     "actions": [
         {"index": 0, "id": "safety_downshift", "label": "安全降载", "capacity_factor": 0.65},

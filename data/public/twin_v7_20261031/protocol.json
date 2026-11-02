@@ -1,0 +1,157 @@
+{
+  "schema": "xiaoyi-twin-protocol.v7",
+  "registered_at": "2026-10-31T00:14:02.929735+00:00",
+  "noaa": {
+    "9410660": "Los Angeles",
+    "8518750": "The Battery, New York",
+    "9447130": "Seattle",
+    "1612340": "Honolulu",
+    "8443970": "Boston",
+    "9410170": "San Diego",
+    "1630000": "Apra Harbor, Guam",
+    "8418150": "Portland, Maine"
+  },
+  "previous_uhslc": {
+    "294": "Newlyn, United Kingdom",
+    "825": "Cuxhaven, Germany",
+    "81": "Valparaiso, Chile",
+    "103": "Port Louis, Mauritius",
+    "402": "Lautoka, Fiji",
+    "71": "Wellington, New Zealand",
+    "19": "Noumea, New Caledonia",
+    "353": "Kushimoto, Japan"
+  },
+  "new_annual_stations": {
+    "7": "Malakal, Palau",
+    "15": "Papeete, French Polynesia",
+    "18": "Suva, Fiji",
+    "56": "Pago Pago, American Samoa",
+    "151": "Zanzibar, Tanzania",
+    "172": "Aden, Yemen"
+  },
+  "annual2025": {
+    "station_group": "new_annual_stations",
+    "selection_years": [
+      2021,
+      2022
+    ],
+    "calibration_years": [
+      2023,
+      2024
+    ],
+    "fit_years": [
+      2022,
+      2023,
+      2024
+    ],
+    "origin": "2025-01-01T00:00:00Z",
+    "test_year": 2025
+  },
+  "july2026": {
+    "station_groups": [
+      "noaa",
+      "previous_uhslc"
+    ],
+    "selection_years": [
+      2022,
+      2023
+    ],
+    "calibration_years": [
+      2024,
+      2025
+    ],
+    "fit_years": [
+      2023,
+      2024,
+      2025
+    ],
+    "origin": "2026-01-01T00:00:00Z",
+    "context_begin": "2026-07-01",
+    "test_begin": "2026-07-09",
+    "test_end": "2026-07-31"
+  },
+  "history_new_uhslc": "2018-01-01..2024-12-31",
+  "fit": {
+    "minimum_total_hours": 10000,
+    "minimum_span_days": 730,
+    "minimum_quarter_hours": 400,
+    "no_interpolation": true,
+    "notice": "Irregular observations fit directly; no arbitrary requirement that every historic month be almost complete. Rank/conditioning and coverage retained. Test availability gate unchanged."
+  },
+  "candidates": {
+    "constituents": [
+      8,
+      20
+    ],
+    "residual_level_weight": [
+      0,
+      0.5,
+      1
+    ],
+    "residual_trend_weight": [
+      0,
+      0.5,
+      1
+    ],
+    "trend_years": [
+      3
+    ],
+    "trend_estimator": "TheilSen annual mean residuals; slope shrinkage, latest-year intercept correction. No test-level update."
+  },
+  "selection": "Fixed two rolling-origin years; objective mean quarter MAE+0.25*worst-quarter MAE. Complexity must improve objective>=0.001m and no quarter may regress more than0.005m in development. This development rule does not relax any test gate. Baseline is independently CV-selected8/20constant astronomical model.",
+  "interval": {
+    "quantile": 0.9,
+    "margin": 1.1,
+    "radius_floor_m": 0.02,
+    "season": "calendar quarter",
+    "calibration": "maximum per-quarter absolute-error quantile over two disjoint calibration years, plus annual-bias spread; never clip width after test",
+    "notice": "Empirical interannual envelope, not a future surge forecast or formal coverage guarantee."
+  },
+  "short": {
+    "horizons_hours": [
+      1,
+      6
+    ],
+    "memory_hours": [
+      1,
+      3,
+      6,
+      12
+    ],
+    "selection": "2025NOAA/previousUHSLC odd months development; no new annual2025station short model",
+    "interval": "fixed preceding-year radius plus causal past14day residual quantile, matured no later than forecast input cutoff",
+    "event_time_sensor_access_assumed": true,
+    "expected_resolution": "hourly; does not qualify6minute mode"
+  },
+  "limits": {
+    "mae_m": 0.2,
+    "coverage": 0.8,
+    "width_m": 0.75,
+    "availability": 0.95,
+    "baseline_noninferiority_epsilon_m": 1e-09
+  },
+  "short_limits": {
+    "1": {
+      "mae_m": 0.1,
+      "coverage": 0.8,
+      "width_m": 0.5,
+      "availability": 0.95,
+      "baseline_noninferiority_epsilon_m": 1e-09
+    },
+    "6": {
+      "mae_m": 0.2,
+      "coverage": 0.8,
+      "width_m": 0.75,
+      "availability": 0.95,
+      "baseline_noninferiority_epsilon_m": 1e-09
+    }
+  },
+  "independence": [
+    "Six new UHSLC stations: no2025test truth fetched until all coefficients/intervals/source hashes freeze. Prior station metadata only is allowed.",
+    "NOAA8+previousUHSLC8 July9..31are genuinely new periods. July1..8is short-horizon context only; no July observations initialize or update long-open-loop forecasts.",
+    "All previous V2..V6results and failures immutable. Any rescore on a previously viewed cohort is diagnostic, never new independent validation.",
+    "Archive event time does not establish as-published timing or local sensor access. FD/RQ and local datums kept distinct. Missing truth remains missing and in test denominators."
+  ],
+  "test_download_requires_frozen_selection": true,
+  "production_authority": false
+}

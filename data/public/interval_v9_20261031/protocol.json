@@ -1,0 +1,74 @@
+{
+  "schema": "xiaoyi-interval-priority-protocol.v9",
+  "registered_at": "2026-10-31T01:18:00.894187+00:00",
+  "point_model": "frozen V8 weekday84, no point forecast tuning",
+  "development_ports": "eight previously viewed V5 operational cohort",
+  "selection_year": 2025,
+  "new_ports": [
+    {
+      "id": "port1318",
+      "name": "Trieste",
+      "country": "Italy"
+    },
+    {
+      "id": "port141",
+      "name": "Belfast",
+      "country": "United Kingdom"
+    },
+    {
+      "id": "port1038",
+      "name": "Bilbao",
+      "country": "Spain"
+    },
+    {
+      "id": "port1170",
+      "name": "Savannah",
+      "country": "United States"
+    },
+    {
+      "id": "port1277",
+      "name": "Tarragona",
+      "country": "Spain"
+    },
+    {
+      "id": "port481",
+      "name": "Houston (US-TX)",
+      "country": "United States"
+    },
+    {
+      "id": "port168",
+      "name": "Bremerhaven",
+      "country": "Germany"
+    }
+  ],
+  "test_year": 2026,
+  "test_targets": "2026-01-22..2026-07-24 daily",
+  "earliest_origin": "2026-01-08 after full2025 development and assumed7day publication lag",
+  "methods": [
+    "global_v8",
+    "local_frozen",
+    "rolling90",
+    "rolling180",
+    "rolling365",
+    "aci90",
+    "aci180"
+  ],
+  "aci": {
+    "gamma": 0.01,
+    "alpha_bounds": [
+      0.02,
+      0.25
+    ],
+    "updates": "only once when previously issued forecast target truth is published at target+7days; no future residuals"
+  },
+  "local_calibration": "per-port past residuals with at least60 observed points; prior year for frozen; causal moving90/180/365day windows for others",
+  "selection": "minimize development port-horizon full-year plus quarter failures of original coverage>=.8 and mean normalized width<=2; then mean normalized WIS; then width. All candidates and failures retained.",
+  "limits": {
+    "coverage_floor": 0.8,
+    "mean_normalized_width_max": 2,
+    "availability_floor": 0.95
+  },
+  "new_port_gate": "no test-based tuning; all observed scores and hold rates published; WIS must not worsen vs global V8 on mean port/horizon; individual failures retained",
+  "independence": "seven unused ports selected by metadata only; extracted after candidate/source freeze. Same pinned IMF export. Per-port historical calibration is allowed, not zero-shot. No historic publication SLA proof. Bounded delayed ACI not claimed to retain unrestricted theoretical guarantees.",
+  "production_authority": false
+}

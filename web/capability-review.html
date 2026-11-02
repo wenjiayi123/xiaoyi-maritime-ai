@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>小懿 · 能力评估与提升</title>
+  <link rel="stylesheet" href="/web/capability-review.css">
+  <script src="/web/capability-review.js" defer></script>
+</head>
+<body>
+<main>
+  <header><a href="/">← 返回小懿</a><span>2026.10.31 · V8</span></header>
+  <section class="hero"><p class="eyebrow">港航预测与决策 / 能力实证</p>
+    <h1>知道能做什么，也知道何时暂停。</h1>
+    <p>37项能力逐项评估，沿着数据、预测、计划、协同和运行逐步提升。分数表示证据成熟度；本机研究、算法收益与现场资格分别核验。</p>
+  </section>
+  <div id="status" role="status" aria-live="polite">正在读取登记证据…</div>
+  <div id="metrics" class="metrics"></div>
+  <nav class="tabs"><a href="#assessment">逐项评分</a><a href="#forecast">预测可信度</a><a href="#planning">稳健联合计划</a><a href="#references">对标依据</a><button id="export" disabled>导出评估与本次回执</button></nav>
+  <section id="assessment"><div class="section-head"><div><p class="eyebrow">01 / 全能力清单</p><h2>逐项查看依据、短板和下一步</h2></div><span id="count"></span></div>
+    <p class="muted">五维各0–4分，相加乘5。历史证据存在不等于本轮重新运行；展开可见本轮状态和具体验收条件。</p>
+    <div class="controls"><label>搜索能力<input id="search" type="search" placeholder="预测、问答、泊位、能耗…"></label><label>优先级<select id="priority"><option value="">全部</option><option>P0</option><option>P1</option><option>P2</option></select></label></div>
+    <div id="components" class="components"></div>
+  </section>
+  <section id="forecast"><p class="eyebrow">02 / 预测可信度</p><h2>先看区间是否可信，再看预测数字</h2>
+    <p>八港历史公开AIS活动指标，假设7天发布延迟；2023年选型、2024年校准，2025–2026年作已看过归档的回放。不是实际到港船期，也不是新的独立盲测。WIS同时惩罚过宽区间和漏覆盖，越低越好。</p>
+    <div class="controls"><label>港口<select id="port"></select></label><label>决策日期<input id="origin" type="date" min="2025-01-08" max="2026-07-24" value="2026-06-01"></label><label>提前量<select id="horizon"><option value="1">1天</option><option value="7" selected>7天</option><option value="14">14天</option></select></label><label>输入副本演练<select id="fault"><option value="none">原始归档</option><option value="source_gap">缺失最新观测</option><option value="demand_shift">最近14天需求突变</option></select></label><button id="run-forecast" data-compute disabled>运行预测检查</button></div>
+    <div id="forecast-result" class="result" aria-live="polite">选择港口、日期和提前量，生成一次实际计算回执。</div>
+    <div class="table-scroll"><table><caption>所选港口与提前量：所有回放样本，不隐藏暂停的预测</caption><thead><tr><th>年份</th><th>样本</th><th>MAE</th><th>强基线MAE</th><th>WIS</th><th>90%区间覆盖</th><th>允许研究使用比例</th></tr></thead><tbody id="forecast-cells"></tbody></table></div>
+    <p class="muted">名义90%区间的研究最低覆盖门槛为80%，宽度上限为近期规模的2倍；这不是行业安全标准。已公布真值的滚动28点用于监控，未公布数据不进入决策。暂停后的好看子集不能替代全样本表现。</p>
+  </section>
+  <section id="planning"><p class="eyebrow">03 / 联合决策</p><h2>同一份计划，同时经受五种情景</h2>
+    <p>在名义、到港延迟1小时、作业延长1小时、供电降低20%并减少一台岸桥、综合压力下共同求解。工单与资源参数为工程假设；模型最小化最差情景的代理成本，同时保留等待、迟交、用能和暂缓代价。</p>
+    <div class="controls"><label>港口<select id="schedule-port"></select></label><label>历史指标日期<input id="source-day" type="date" value="2026-06-15"></label><label>负载情景<select id="scenario"><option value="normal">常态</option><option value="arrival_peak">到港高峰</option><option value="crane_outage">岸桥故障</option><option value="grid_derating">电网降额</option></select></label><label>名义可靠供电 / kW<input id="grid" type="number" min="1200" max="5000" value="2600" step="100"></label><button id="run-schedule" data-compute disabled>重算五情景共享计划</button></div>
+    <div id="schedule-result" class="result" aria-live="polite">等待计算。完整暂缓也可能是可行结果，不会被显示为完成全部工单。</div>
+  </section>
+  <section id="references"><p class="eyebrow">04 / 公开对标</p><h2>标准、公开实践和研究目标分开</h2><div id="sources" class="sources"></div><p class="muted">未来路线：持续感知与概率预测 → 可解释的滚动联合计划 → 多机构协同与故障恢复 → 经真实数据、影子运行和授权验收的现场闭环。路线图不是已具备能力。</p></section>
+  <footer>生产调度权限保持关闭 · 不把合成工单、公开归档或本机测试解释为现场业绩</footer>
+</main>
+</body></html>

@@ -95,6 +95,42 @@ test("energy range: newest click wins even when an older response arrives last",
   assert.ok(controls.filter((button) => button.active).every((button) => button.dataset.range === "30d"));
 });
 
+test("system linkage opens an offline sailing simulator without waiting for focus", async () => {
+  const requested = [];
+  const { context, notices } = harness(["openLinkedSystem"], {
+    api: async (url) => {
+      requested.push(url);
+      if (url === "/api/sailing-simulator/launch") return { running:false, state:"starting" };
+      throw new Error(`unexpected API request: ${url}`);
+    },
+    renderSystemLinkage: () => {},
+    document: { visibilityState:"visible" },
+  });
+  context.state.systemLinkage = { systems:{ "sailing-simulator":{ runtime:{ running:false } } } };
+
+  await context.openLinkedSystem("sailing-simulator");
+
+  assert.deepEqual(requested, ["/api/sailing-simulator/launch"]);
+  assert.equal(context.state.systemLinkageOpenBusy, null);
+  assert.equal(notices.at(-1)[0], "航行模拟器正在加载");
+});
+
+test("system linkage focuses an already running sailing simulator", async () => {
+  const requested = [];
+  const { context, notices } = harness(["openLinkedSystem"], {
+    api: async (url) => { requested.push(url); return { running:true, state:"running" }; },
+    renderSystemLinkage: () => {},
+    document: { visibilityState:"visible" },
+  });
+  context.state.systemLinkage = { systems:{ "sailing-simulator":{ runtime:{ running:true } } } };
+
+  await context.openLinkedSystem("sailing-simulator");
+
+  assert.deepEqual(requested, ["/api/sailing-simulator/focus"]);
+  assert.equal(context.state.systemLinkageOpenBusy, null);
+  assert.equal(notices.at(-1)[0], "已切换到航行模拟器");
+});
+
 test("energy range: a stale failure cannot roll back the current range or display an error", async () => {
   const older = deferred();
   const { context, notices } = harness(["loadEnergy"], {
@@ -527,7 +563,7 @@ test("training result names its environment and actual candidate count", () => {
 test("returning to the training center reloads completed runs instead of reusing its cached list", async () => {
   const requests = [];
   const rendered = [];
-  const { context } = harness(["setView", "loadRLCenter"], {
+  const { context } = harness(["setView", "loadRLCenter", "preloadRLLabHealth"], {
     api: async (url) => {
       requests.push(url);
       return url.includes("/runs?") ? { items: [{ run_id: "newly-completed-run", status: "evaluated" }] } : {};
@@ -604,4 +640,33 @@ test("a submitted simulator rollback with no state readback is reported as await
   assert.equal(notices.length, 1);
   assert.equal(notices[0][0], "操作已提交，画面待核验");
   assert.equal(notices[0][2], "warning");
+});
+
+test("delayed startup restore preserves the user's workbench or main navigation", async () => {
+  for (const [workbench, view] of [["joint-harness", "chat"], [null, "knowledge"], [null, "rl"], [null, "chat"]]) {
+    const ready = deferred();
+    let welcomed = 0;
+    let restored = 0;
+    const noop = () => {};
+    const asyncNoop = async () => {};
+    const { context } = harness(["init"], {
+      initBilingualLayer: noop, restorePreferences: noop, updateGreeting: noop, bindEvents: noop,
+      consumeLinkageReturn: () => "", preloadRLLabHealth: asyncNoop,
+      loadDashboard: () => ready.promise, loadSimulatorSnapshot: asyncNoop, loadKnowledge: asyncNoop,
+      loadTasksAndTemplates: asyncNoop, loadConnectorSummary: asyncNoop, loadServerConversation: asyncNoop,
+      connectSimulatorStream: noop, loadSystemLinkage: asyncNoop, setInterval: noop,
+      showWelcome: () => welcomed++, restoreTopic: () => restored++,
+    });
+    context.state.conversationTurns = [{ id: "old-topic" }];
+    context.state.topics = [{ id: "old-topic" }];
+    const initialization = context.init();
+    context.state.modalKind = workbench;
+    context.state.view = view;
+    ready.resolve();
+    await initialization;
+    assert.equal(welcomed, workbench || view !== "chat" ? 0 : 1);
+    assert.equal(restored, workbench || view !== "chat" ? 0 : 1);
+    assert.equal(context.state.modalKind, workbench);
+    assert.equal(context.state.view, view);
+  }
 });

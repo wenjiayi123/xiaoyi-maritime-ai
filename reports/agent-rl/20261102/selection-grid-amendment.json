@@ -1,0 +1,29 @@
+{
+  "schema": "development-selection-amendment.v1",
+  "at": "2026-11-02T09:49:08+0800",
+  "reason": "512-step RL improves validation task success but fails the predeclared retention gate; examine saved intermediate checkpoints before final test",
+  "grid": [
+    64,
+    128,
+    192,
+    256,
+    320,
+    384,
+    448,
+    512
+  ],
+  "groups": [
+    "D_rl",
+    "E_more_sft"
+  ],
+  "eligibility": "at least frozen-C accuracy on the same fixed 8 regression probes",
+  "selection": "validation successes, then fewer errors, fewer calls, earlier step",
+  "missing_checkpoints": "skip only checkpoints never produced because of original early-stop rule",
+  "retention_screen": "screen every available grid checkpoint; full task validation only for eligible new checkpoints; retain existing scores including ineligible points",
+  "test_opened": false,
+  "config_sha256": "5e93776b61b31b2dd6a6ade616a67c2faf3fd9b6b4dd0dbdaf3ee5fa1d69af0f",
+  "task_manifest_sha256": "1b2220ebc32ac713d6d3f14e5f8612188a52d76b4516f8d24bd722e46d9fed02",
+  "data_reward_environment_weights_unchanged": true,
+  "new_training_steps": 0,
+  "initial_protocol_deviation": "additional development validation grid; original three-checkpoint results remain intact"
+}

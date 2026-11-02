@@ -1,0 +1,116 @@
+{
+  "schema": "xiaoyi-annual-root-cause.v10",
+  "registered_at": "2026-10-31T01:47:08.253849+00:00",
+  "stations": {
+    "9419750": "Crescent City",
+    "9432780": "Charleston Oregon",
+    "9444900": "Port Townsend",
+    "8449130": "Nantucket Island",
+    "8510560": "Montauk",
+    "8656483": "Beaufort Duke Marine Lab",
+    "8775870": "Bob Hall Pier Corpus Christi",
+    "8726520": "St Petersburg"
+  },
+  "history_years": [
+    2016,
+    2017,
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "selection_years": [
+    2021,
+    2022
+  ],
+  "calibration_years": [
+    2023,
+    2024
+  ],
+  "test_year": 2025,
+  "fit_windows_years": [
+    3,
+    5
+  ],
+  "constituents": [
+    8,
+    20
+  ],
+  "level_weights": [
+    0,
+    0.5,
+    1
+  ],
+  "trend_weights": [
+    0,
+    0.25,
+    0.5
+  ],
+  "selection": "mean quarter MAE + .25 worst quarter MAE; candidate must improve objective >=.001 m and no development quarter regress >.002 m against strongest CV-selected constant harmonic baseline; otherwise use baseline",
+  "interval": "Select seasonal signed residual interval rule only on viewed V9 sites/2025. Point-model selection and strong physical baseline unchanged. Freeze rule before new-site model selection. Each new-site coefficients and 2023/24 residual calibration frozen before new 2025 truth acquisition.",
+  "limits": {
+    "mae_m": 0.2,
+    "coverage": 0.8,
+    "width_m": 0.75,
+    "availability": 0.95,
+    "baseline_noninferiority_epsilon_m": 1e-09
+  },
+  "fit": {
+    "minimum_total_hours": 10000,
+    "minimum_span_days": 730,
+    "minimum_quarter_hours": 400
+  },
+  "independence": "Eight previously unused NOAA station IDs; per-station past observations are legitimate calibration inputs, not zero-shot. New station full 2025 truth downloaded only after all model/source freeze. Same world years observed elsewhere; archive event-time hindcast, not historical as-published validation. Old failures remain.",
+  "production_authority": false,
+  "interval_candidates": [
+    "v9_global",
+    "quarter_symmetric",
+    "quarter_signed",
+    "quarter_signed_union",
+    "seasonal_signed90",
+    "seasonal_signed120"
+  ],
+  "method_selection": "Minimize development failed year/quarter cells under all unchanged gates; then WIS; then width. Do not clip intervals to 0.75m. Per-station parameters use pre-2025 history only.",
+  "constituent_capacity_ablation": [
+    "M2",
+    "S2",
+    "N2",
+    "K1",
+    "M4",
+    "O1",
+    "M6",
+    "MK3",
+    "S4",
+    "MN4",
+    "NU2",
+    "S6",
+    "MU2",
+    "2N2",
+    "OO1",
+    "LAM2",
+    "S1",
+    "M1",
+    "J1",
+    "MM",
+    "SSA",
+    "SA",
+    "MSF",
+    "MF",
+    "RHO1",
+    "Q1",
+    "T2",
+    "R2",
+    "2Q1",
+    "P1",
+    "2SM2",
+    "M3",
+    "L2",
+    "2MK3",
+    "K2",
+    "M8",
+    "MS4"
+  ]
+}

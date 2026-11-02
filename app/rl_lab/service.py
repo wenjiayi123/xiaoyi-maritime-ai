@@ -426,6 +426,9 @@ class RLLabService:
             job = deepcopy(self._jobs[run_id])
         if job["status"] not in {"trained", "evaluated"}:
             raise RunConflict("test rendering is available only after all training algorithms finish")
+        environment_id = job["config"].get("environment_type", "energy_storage")
+        if job["config"].get("environment_contract_version") != environment_contract(environment_id)["version"]:
+            raise RunConflict("environment contract changed; historical results remain readable, retraining is required")
         selected = list(dict.fromkeys(algorithms or job["config"]["algorithms"]))
         invalid = sorted(set(selected) - set(job["config"]["algorithms"]))
         if invalid:
@@ -490,6 +493,8 @@ class RLLabService:
             "render_mode": "trace",
             "results": results,
             "best_algorithm_id": winner,
+            "selected_algorithm_id": job.get("validation", {}).get("best_algorithm_id"),
+            "selection_basis": "validation_only; best_algorithm_id is descriptive test ranking",
             "production_execution": False,
             "environment_type": environment_type,
             "notice": "测试轨迹仅在全部训练完成后由未参与训练的时间后段数据生成；未连接生产控制接口。",

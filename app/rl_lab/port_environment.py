@@ -142,7 +142,7 @@ class PortOperationsEnvironment:
 
     def state(self) -> tuple[int, ...]:
         current = self.records[self.index]
-        following = self.records[min(self.index + 1, len(self.records) - 1)]
+        previous = self.records[max(0, self.index - 1)]
         queue = max(0.0, current.anchored_vessels or 0.0) + max(0.0, current.slow_vessels or 0.0)
         traffic = max(0.0, current.vessel_count or 0.0)
         speed = max(0.0, current.avg_sog_knots or 0.0)
@@ -150,7 +150,7 @@ class PortOperationsEnvironment:
         berth = _present(current.berth_occupancy_ratio, min(1.0, queue / max(1.0, traffic)))
         yard = _present(current.yard_occupancy_ratio, 0.65)
         tide_open = 1 if _present(current.tide_window_open, 1.0) >= 0.5 else 0
-        trend = max(0.0, following.vessel_count or 0.0) - traffic
+        trend = traffic - max(0.0, previous.vessel_count or 0.0)
         tolerance = max(1.0, percentile(list(self.parameters.traffic_bins), 0.5) * 0.04)
         trend_bin = 0 if trend < -tolerance else 2 if trend > tolerance else 1
         return (

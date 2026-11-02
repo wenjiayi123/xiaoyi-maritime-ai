@@ -104,7 +104,7 @@ class Settings:
             jwt_issuer=os.getenv("XIAOYI_JWT_ISSUER", "xiaoyi-ai"),
             jwt_audience=os.getenv("XIAOYI_JWT_AUDIENCE", "xiaoyi-api"),
             jwt_clock_skew_seconds=_integer("XIAOYI_JWT_CLOCK_SKEW_SECONDS", 30),
-            cors_origins=_csv("XIAOYI_CORS_ORIGINS", "http://127.0.0.1:8010,http://localhost:8010"),
+            cors_origins=_csv("XIAOYI_CORS_ORIGINS", "http://127.0.0.1:8010,http://localhost:8010,http://127.0.0.1:7357,http://localhost:7357"),
             allowed_hosts=_csv("XIAOYI_ALLOWED_HOSTS", "127.0.0.1,localhost,testserver"),
             docs_enabled=_boolean("XIAOYI_DOCS_ENABLED", environment != "production"),
             rate_limit_requests=_integer("XIAOYI_RATE_LIMIT_REQUESTS", 120 if environment == "production" else 600, minimum=1),
