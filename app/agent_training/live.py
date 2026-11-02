@@ -241,10 +241,10 @@ def parse_goal(goal, *, inject_read_fault=False):
         return float(found.group(1)) if found else default
 
     green = number(
-        r"(?:候选绿色偏好|候选偏好|(?<!基准)绿色偏好)\s*(?:为|是|=|：|调到|设为)?\s*([-+]?\d+(?:\.\d+)?)", 0.82
+        r"(?:候选绿色偏好|候选偏好|(?<!基准)绿色偏好)\s*(?:(?:为|是|=|：|调到|设为)\s*)?([-+]?\d+(?:\.\d+)?)", 0.82
     )
-    baseline = number(r"基准(?:绿色偏好)?\s*(?:为|是|=|：)?\s*([-+]?\d+(?:\.\d+)?)", 0.5)
-    carbon = number(r"碳价\s*(?:为|是|=|：|设为)?\s*([-+]?\d+(?:\.\d+)?)", 85)
+    baseline = number(r"基准(?:绿色偏好)?\s*(?:(?:为|是|=|：)\s*)?([-+]?\d+(?:\.\d+)?)", 0.5)
+    carbon = number(r"碳价\s*(?:(?:为|是|=|：|设为)\s*)?([-+]?\d+(?:\.\d+)?)", 85)
     if not (0 <= green <= 1 and 0 <= baseline <= 1 and 0 <= carbon <= 5000):
         raise ValueError("绿色偏好需在0—1，碳价需在0—5000元/吨")
     scenario = (

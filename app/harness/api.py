@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import threading
 import time
 from uuid import uuid4
@@ -68,11 +69,14 @@ def perform(fn):
     try:
         return fn()
     except Conflict as exc:
-        raise HTTPException(409, str(exc)) from exc
+        logging.getLogger(__name__).warning("Harness request rejected", exc_info=True)
+        raise HTTPException(409, "任务状态或证据已变化，请刷新后重试") from exc
     except PermissionError as exc:
-        raise HTTPException(403, str(exc)) from exc
+        logging.getLogger(__name__).warning("Harness request rejected", exc_info=True)
+        raise HTTPException(403, "当前身份无权执行此操作") from exc
     except ValueError as exc:
-        raise HTTPException(422, str(exc)[:500]) from exc
+        logging.getLogger(__name__).warning("Harness request rejected", exc_info=True)
+        raise HTTPException(422, "请求参数或证据无效，请检查输入与任务状态") from exc
 
 
 @router.get("/capabilities")

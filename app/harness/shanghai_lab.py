@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -224,10 +225,11 @@ def run_trial(payload: TrialRequest, request: APIRequest):
                 "total_cny": energy["totals"]["total_cny"],
                 "notice": "公开统计、AIS派生指标、再分析气象与工程补足共同驱动的模拟结果；未使用现场工单和计量。",
             }
-        except (ValueError, KeyError, TypeError, OSError, HTTPError, URLError) as exc:
+        except (ValueError, KeyError, TypeError, OSError, HTTPError, URLError):
+            logging.getLogger(__name__).warning("Shanghai trial blocked", exc_info=True)
             result["status"] = "blocked"
-            result["error"] = str(exc)
-            result["steps"].append({"step": "failure", "status": "blocked", "reason": str(exc)})
+            result["error"] = "本机试验未通过输入、服务响应或证据核验"
+            result["steps"].append({"step": "failure", "status": "blocked", "reason": result["error"]})
         result["elapsed_seconds"] = time.monotonic() - start
         result["completed_at"] = datetime.now(timezone.utc).isoformat()
         result["result_sha256"] = digest({k: v for k, v in result.items() if k not in {"result_sha256", "mobile_ack"}})

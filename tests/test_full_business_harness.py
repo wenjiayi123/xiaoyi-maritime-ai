@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import json
 import time
 from pathlib import Path
@@ -18,6 +19,13 @@ SAFETY = IdentityContext("phase-two-safety", "admin", True, "jwt_hs256_verified"
 @pytest.fixture
 def isolated(tmp_path, monkeypatch):
     monkeypatch.setattr(joint, "runtime_store", RuntimeStore(tmp_path / "store.db"))
+    # Approval/state-machine tests use a local native-source fixture. Actual
+    # cross-repository execution is covered separately by adapter acceptance.
+    native_source = tmp_path / "native-source.txt"
+    native_source.write_text("isolated test native implementation")
+    monkeypatch.setattr(joint, "implementation", lambda: {
+        "test-native-source": hashlib.sha256(native_source.read_bytes()).hexdigest()
+    })
 
     class Thread:
         def __init__(self, *a, **k):
@@ -257,6 +265,8 @@ def event_service():
     import importlib.util
 
     path = Path("/Users/apple/Desktop/模拟器/port-dt-multi/app/services/harness_event_execution.py")
+    if not path.is_file():
+        pytest.skip("external port event-execution implementation is not installed")
     spec = importlib.util.spec_from_file_location("harness_events_unit", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)

@@ -52,6 +52,30 @@ def test_viewer_cannot_create_executing_task(client):
     assert response.status_code == 403
 
 
+def test_figures_are_allowlisted_and_cannot_follow_external_symlinks(client, tmp_path):
+    figures = api.EXPERIMENT / "figures"
+    figures.mkdir()
+    image = figures / "four-group-comparison.png"
+    image.write_bytes(b"published-figure")
+    assert client.get("/api/harness/agent-rl/figures/four-group-comparison.png").content == b"published-figure"
+    assert client.get("/api/harness/agent-rl/figures/unregistered.png").status_code == 404
+    outside = tmp_path / "private.png"
+    outside.write_bytes(b"private")
+    image.unlink()
+    image.symlink_to(outside)
+    assert client.get("/api/harness/agent-rl/figures/four-group-comparison.png").status_code == 404
+
+
+def test_model_health_hides_internal_exception_details(client, monkeypatch):
+    def unavailable(*args, **kwargs):
+        raise OSError("internal/private/model-path and sensitive transport details")
+
+    monkeypatch.setattr(api, "local_request", unavailable)
+    result = client.get("/api/harness/agent-rl/model-health")
+    assert result.status_code == 200 and result.json()["available"] is False
+    assert "private" not in result.text and "transport" not in result.text
+
+
 def test_repeated_request_returns_same_task_and_changed_payload_conflicts(client):
     payload = {"goal": ACCEPTANCE_GOAL, "request_id": "request001"}
     first = client.post("/api/harness/agent-rl/tasks", json=payload)

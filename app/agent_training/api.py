@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict
 import json
+import logging
 import os
 from pathlib import Path
 import re
@@ -122,8 +123,9 @@ def model_health(request: Request):
     actor(request)
     try:
         return local_request(os.getenv("AGENT_RL_MODEL_URL", "http://127.0.0.1:18781"), "/health", timeout=3)
-    except Exception as exc:
-        return {"available": False, "error": str(exc)[:250]}
+    except Exception:
+        logging.getLogger(__name__).warning("Experiment model unavailable", exc_info=True)
+        return {"available": False, "error": "实验模型服务不可用，请检查本机服务日志"}
 
 
 class NewJob(BaseModel):
@@ -214,9 +216,17 @@ def job_file(job_id: str, filename: str, request: Request):
 @router.get("/figures/{filename}")
 def figure(filename: str, request: Request):
     actor(request)
-    if not re.fullmatch(r"[a-z0-9-]+\.(?:svg|png|pdf)", filename):
+    files = {
+        name + "." + extension: EXPERIMENT / "figures" / (name + "." + extension)
+        for name in ("four-group-comparison", "reward-trajectories", "training-and-retention",
+                     "optimization-details", "retention-checks")
+        for extension in ("svg", "png", "pdf")
+    }
+    if filename not in files:
         raise HTTPException(404, "图表不存在")
-    path = EXPERIMENT / "figures" / filename
+    path = files[filename].resolve()
+    if not path.is_relative_to((EXPERIMENT / "figures").resolve()):
+        raise HTTPException(404, "图表不存在")
     if not path.is_file():
         raise HTTPException(404, "实测图表尚未生成")
     return FileResponse(path)

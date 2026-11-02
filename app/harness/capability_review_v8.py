@@ -3,6 +3,7 @@
 import csv
 import hashlib
 import json
+import logging
 import threading
 from datetime import date, timedelta
 from pathlib import Path
@@ -61,7 +62,8 @@ def invoke(fn):
     try:
         return fn()
     except (OSError, ValueError, KeyError) as exc:
-        raise HTTPException(503, "评估证据不可用：" + str(exc)[:240]) from exc
+        logging.getLogger(__name__).warning("Capability evidence unavailable", exc_info=True)
+        raise HTTPException(503, "评估证据不可用，请检查本机服务日志与登记文件") from exc
 
 
 def require_current():

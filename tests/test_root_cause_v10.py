@@ -66,9 +66,12 @@ def test_rollout_future_invariance_and_no_language_model_or_network(monkeypatch)
         raise AssertionError("a numeric policy must not request a language model or network")
 
     monkeypatch.setattr(socket, "create_connection", forbidden)
-    import requests
-
-    monkeypatch.setattr(requests.sessions.Session, "request", forbidden)
+    try:
+        import requests
+    except ImportError:
+        pass  # requests is optional; the socket guard covers every HTTP client.
+    else:
+        monkeypatch.setattr(requests.sessions.Session, "request", forbidden)
     from app.model_gateway import ModelGateway
 
     for name, value in vars(ModelGateway).items():
