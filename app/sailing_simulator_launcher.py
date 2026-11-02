@@ -17,11 +17,19 @@ router = APIRouter(prefix="/api/sailing-simulator", tags=["航行模拟器启动
 SailingSimulatorState = Literal["offline", "starting", "online", "error", "unavailable"]
 
 _XIAOYI_ROOT = Path(__file__).resolve().parents[1]
+def _registered_default(candidates, fallback):
+    return str(next((p for p in candidates if p.exists()), fallback))
+
+
 _SAILING_ROOT = Path(
-    os.getenv("XIAOYI_SAILING_SIMULATOR_ROOT", str(_XIAOYI_ROOT / ".integrations/sailing-simulator"))
+    os.getenv("XIAOYI_SAILING_SIMULATOR_ROOT", _registered_default(
+        [_XIAOYI_ROOT / ".integrations/sailing-simulator", _XIAOYI_ROOT.parent / "航行模拟器"],
+        _XIAOYI_ROOT / ".integrations/sailing-simulator"))
 ).expanduser()
 _GODOT_BINARY = Path(
-    os.getenv("XIAOYI_GODOT_BINARY", shutil.which("godot") or str(_XIAOYI_ROOT / ".integrations/bin/godot"))
+    os.getenv("XIAOYI_GODOT_BINARY", shutil.which("godot") or _registered_default(
+        [_XIAOYI_ROOT / ".runtime/tools/godot-4.7.1/Godot.app/Contents/MacOS/Godot", _XIAOYI_ROOT / ".integrations/bin/godot", Path("/Applications/Godot.app/Contents/MacOS/Godot")],
+        _XIAOYI_ROOT / ".integrations/bin/godot"))
 ).expanduser()
 _PROJECT_CONFIG = _SAILING_ROOT / "project.godot"
 _LOG_PATH = _XIAOYI_ROOT / ".runtime" / "sailing-simulator.log"
@@ -213,6 +221,10 @@ def launch_sailing_simulator(
             with _LOG_PATH.open("ab", buffering=0) as log_file:
                 env = os.environ.copy()
                 env["XIAOYI_SIM_BRIDGE_DIR"] = str(_BRIDGE_DIR)
+                env["XIAOYI_RETURN_URL"] = os.getenv(
+                    "XIAOYI_RETURN_URL",
+                    "http://127.0.0.1:8010/?xiaoyi_resume=system-linkage",
+                )
                 _sailing_process = subprocess.Popen(
                     [str(_GODOT_BINARY), "--path", str(_SAILING_ROOT)],
                     cwd=str(_SAILING_ROOT),

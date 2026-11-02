@@ -114,7 +114,7 @@ def run_orchestration(payload: OrchestrationRequest) -> OrchestrationResponse:
                     source_id=invocation.invocation_id, system_id=system.id, capability_id=capability.id,
                     title=f"{system.name} · {capability.name}", payload=invocation.data,
                     fetched_at=invocation.requested_at,
-                    verification_status="live_read" if invocation.external_request_performed else "preview_only",
+                    verification_status=str(invocation.evidence.get("verification_status", "preview_only")),
                     correlation_id=correlation_id,
                 )
             )
@@ -145,7 +145,8 @@ def run_orchestration(payload: OrchestrationRequest) -> OrchestrationResponse:
         ]
     )
     if selected:
-        result_summary = f"已选择 {len(selected)} 项外部系统能力并完成{('只读调用' if payload.execute_read_only else '隔离预览')}；融合 {fusion.evidence_summary}。"
+        completed = sum(step.status == "completed" for step in steps if step.capability_id)
+        result_summary = f"已选择 {len(selected)} 项外部系统能力；{('只读调用' if payload.execute_read_only else '隔离预览')}完成 {completed} 项，未完成 {len(selected) - completed} 项；融合 {fusion.evidence_summary}。"
     else:
         result_summary = f"当前问题无需调用其他系统，已完成知识检索；融合 {fusion.evidence_summary}。"
     result = OrchestrationResponse(

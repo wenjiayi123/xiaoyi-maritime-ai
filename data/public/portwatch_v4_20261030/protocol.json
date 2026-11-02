@@ -1,0 +1,169 @@
+{
+  "schema": "xiaoyi-risk-and-generalization-protocol.v4",
+  "declared_at": "2026-10-30T07:01:42.504171+00:00",
+  "train_ports": [
+    "port1201",
+    "port1114",
+    "port1188",
+    "port664",
+    "port729",
+    "port699",
+    "port343",
+    "port1350",
+    "port1348",
+    "port311",
+    "port1065",
+    "port1269",
+    "port1160",
+    "port985",
+    "port1417",
+    "port541",
+    "port746",
+    "port395",
+    "port79",
+    "port1045"
+  ],
+  "fresh_ports": {
+    "port23": {
+      "name": "Alexandria",
+      "ISO3": "EGY"
+    },
+    "port220": {
+      "name": "Casablanca",
+      "ISO3": "MAR"
+    },
+    "port1197": {
+      "name": "Laem Chabang",
+      "ISO3": "THA"
+    },
+    "port908": {
+      "name": "Piraeus",
+      "ISO3": "GRC"
+    },
+    "port514": {
+      "name": "Tanjung Priok",
+      "ISO3": "IDN"
+    },
+    "port101": {
+      "name": "Balboa",
+      "ISO3": "PAN"
+    },
+    "port776": {
+      "name": "Mumbai",
+      "ISO3": "IND"
+    },
+    "port960": {
+      "name": "Port Klang",
+      "ISO3": "MYS"
+    }
+  },
+  "fit_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "validation_year": 2025,
+  "test_year": 2026,
+  "test_months": [
+    1,
+    4
+  ],
+  "nowcast_alpha_candidates": [
+    0,
+    0.5,
+    1
+  ],
+  "learned_risk_penalties": [
+    0,
+    5
+  ],
+  "safety_filters": [
+    {
+      "name": "none",
+      "sigma": null,
+      "queue_budget": null
+    },
+    {
+      "name": "headroom",
+      "sigma": 0.5,
+      "queue_budget": 0.25
+    },
+    {
+      "name": "reserve",
+      "sigma": 1.0,
+      "queue_budget": 0.0
+    }
+  ],
+  "selection": "MPC cost-strong and safe-strong baselines separately retained. Shared nowcast selected on2025 cost-strong MPC. RL selection prioritizes zero avoidable violations, then worst-port gain, then port-balanced mean; all candidates retained. Baseline receives same queue innovations and filters.",
+  "empirical_model": "training20ports across four scenarios; normalized forecast innovation distribution, known surrogate queue dynamics and reward, offline stochastic Bellman backups; direct frozen policy thresholds, no online MPC fallback",
+  "policy_grid": {
+    "queue": [
+      0,
+      12,
+      0.025
+    ],
+    "demand": [
+      0.4,
+      3,
+      0.05
+    ],
+    "volatility": [
+      0.025,
+      0.05,
+      0.1,
+      0.2,
+      0.3,
+      0.5,
+      0.8,
+      1.2
+    ],
+    "horizons": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      28,
+      90
+    ]
+  },
+  "safety": "Minimum capacity needed by a causal forecast+sigma headroom bound; if none admissible use max feasible. It is an explicitly disclosed research filter, not a guarantee under unbounded unseen arrivals. Override fraction and raw decisions retained.",
+  "gates": {
+    "new_port_cluster_ci95_lower_positive": true,
+    "no_new_port_mean_regression": true,
+    "stress_noninferiority": true,
+    "avoidable_violations_zero": true,
+    "comparison_includes_cost_and_safe_strong_mpc": true,
+    "absolute_and_port_relative_ci_positive": true,
+    "largest_positive_port_gain_share_at_most": 0.5,
+    "positive_mean_without_best_port": true
+  },
+  "historical_shadow": "Previously viewed Yokohama/GioiaTauro2026Jan demand-surge windows diagnose the4steps; not new independent validation.",
+  "assumptions": [
+    "All20previously viewed ports are now development/historical evidence, not independent test.",
+    "At decision time only current/past queue and own capacity are known. Queue innovation can recover prior arrival only if previous service was saturated; empty queue yields a censored bound, never read the current/future target.",
+    "Public source availability7/14d, capacity, synthetic shocks and queue measurements remain engineering assumptions; no live-port sensors.",
+    "Five transition bootstraps, if used, are computational uncertainty checks, not independent port trials.",
+    "New eight ports may provide lagged context but no fit/selection outcomes. Same pinned official source vintage, no fabricated new supplier.",
+    "Mean proxy benefit does not establish robust RL admission or physical authority."
+  ],
+  "production_authority": false,
+  "protocol_addendum": "Concentration and equal-port relative-gain gates explicitly frozen before any v4 development or new-port scoring; original absolute costs retained.",
+  "development_revision": {
+    "at": "2026-10-30T07:11:11.120887+00:00",
+    "reason": "Only2025development scores inspected. Empty queue treated as censored bound, not point measurement; estimate resets to public forecast when queue empty and only upwards innovations override public. Select shared alpha by equal-weight four-scenario validation, retaining normal score. Prior source and unfavorable normal-only results retained.",
+    "test_labels_used": false
+  }
+}

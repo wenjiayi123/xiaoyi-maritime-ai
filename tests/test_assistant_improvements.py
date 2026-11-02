@@ -71,6 +71,35 @@ def test_explicit_new_subject_does_not_inherit_previous_topic(question):
     assert plan.standalone_question == question
 
 
+def test_demo_triad_runs_three_grounded_answer_forms_without_model_warmup():
+    with TestClient(main.app) as client:
+        response = client.post(
+            "/api/chat/demo-triad",
+            json={"session_id": "test-demo-triad"},
+        )
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["completed"] is True
+    assert payload["production_authority"] is False
+    assert [item["category"] for item in payload["items"]] == [
+        "general",
+        "daily",
+        "emergency",
+    ]
+    assert [item["tone"] for item in payload["items"]] == ["blue", "green", "red"]
+    for item in payload["items"]:
+        answer = item["response"]
+        assert answer["answer"]
+        assert answer["generation_provider"] == "local_rules"
+        assert answer["timing"]["generation_ms"] == 0
+        assert answer["answer_id"].startswith("answer-")
+    emergency = payload["items"][2]["response"]
+    assert emergency["grounded"] is True
+    assert emergency["decision_readiness"]["status"] == "ready_with_review"
+    assert "立即暂停该箱区周边作业" in emergency["answer"]
+    assert "禁止盲目开箱" in emergency["answer"]
+
+
 @pytest.mark.parametrize("path", ["/api/chat", "/api/chat/stream"])
 def test_missing_context_skips_retrieval_and_generation_and_reports_timing(monkeypatch, path):
     def unexpected(*args, **kwargs):
@@ -243,7 +272,10 @@ def test_local_linkage_transport_builds_a_real_http_request(monkeypatch):
         assert request.full_url == "http://127.0.0.1:8000/test"
         assert json.loads(request.data) == {"dry_run": True}
         return io.BytesIO(b'{"ok":true}')
-    monkeypatch.setattr(system_linkage, "urlopen", open_request)
+    class LocalOpener:
+        open = staticmethod(open_request)
+
+    monkeypatch.setattr(system_linkage, "build_opener", lambda handler: LocalOpener())
     assert system_linkage._local_json("POST", "http://127.0.0.1:8000/test", payload={"dry_run": True}) == {"ok": True}
 
 

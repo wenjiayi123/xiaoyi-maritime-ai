@@ -1,0 +1,61 @@
+{
+  "at": "2026-11-02T10:02:17.580312+08:00",
+  "groups": [
+    "C_sft",
+    "D_rl"
+  ],
+  "tasks": [
+    {
+      "id": "joint",
+      "goal": "读取港口、能碳和马六甲系统的当前状态；比较基准绿色偏好0.50、候选绿色偏好0.82、碳价85元/吨的能碳方案；评估港口高密度靠泊情景。遇到可恢复的读取故障请处理后继续，最后给我带来源、参数、结果和实际执行记录的联合报告。只在本机工程模拟中操作。",
+      "inject_read_fault": true,
+      "normalized_contract": {
+        "split": "acceptance",
+        "family": "joint",
+        "seed": 440001,
+        "green": 0.82,
+        "carbon": 85.0,
+        "baseline": 0.5,
+        "scenario": "high_density_berthing",
+        "fault": "transient_read",
+        "max_steps": 18
+      }
+    },
+    {
+      "id": "port_scenario",
+      "goal": "读取港口当前状态，评估高密度靠泊情景，核验结果后交付带来源和执行记录的报告。只在本机工程模拟中操作。",
+      "inject_read_fault": false,
+      "normalized_contract": {
+        "split": "acceptance",
+        "family": "port_scenario",
+        "seed": 440001,
+        "green": 0.82,
+        "carbon": 85,
+        "baseline": 0.5,
+        "scenario": "high_density_berthing",
+        "fault": "none",
+        "max_steps": 18
+      }
+    },
+    {
+      "id": "energy_recovery",
+      "goal": "读取能碳系统当前状态，比较基准绿色偏好0.50、候选绿色偏好0.82、碳价85元/吨的方案；遇到读取超时请处理后继续，核验后交付报告。只在本机工程模拟中操作。",
+      "inject_read_fault": true,
+      "normalized_contract": {
+        "split": "acceptance",
+        "family": "energy_compare",
+        "seed": 440001,
+        "green": 0.82,
+        "carbon": 85.0,
+        "baseline": 0.5,
+        "scenario": "high_density_berthing",
+        "fault": "transient_read",
+        "max_steps": 18
+      }
+    }
+  ],
+  "attempts_per_group_task": 1,
+  "model_checkpoint": "final validation-selected checkpoint; no native result used to choose it",
+  "scope": "actual localhost APIs with public/calibrated engineering simulation; outside held-out synthetic score",
+  "success_criterion": "at least one complete model-led D task, report and trace verified; joint outcome reported separately; all failures retained"
+}

@@ -1,0 +1,549 @@
+{
+  "id": "arj-ae158a2de29e4d14b84e649086be6b0d",
+  "actor_id": "local-admin",
+  "request_id": "arl_9ab0d7c34b4348368414973a0deeacf7",
+  "request_sha256": "4c052bc068194d34e5769c52c82a7f56dbcbdf44826fe747f4271ac407c322e7",
+  "goal": "读取能碳系统当前状态，比较基准绿色偏好0.50、候选绿色偏好0.82、碳价85元/吨的方案；遇到读取超时请处理后继续，核验后交付报告。只在本机工程模拟中操作。",
+  "task": {
+    "case_id": "acceptance-d3438df6b28f4a18b015db2ec0d489a7",
+    "split": "acceptance",
+    "family": "energy_compare",
+    "seed": 440001,
+    "green": 0.82,
+    "carbon": 85.0,
+    "baseline": 0.5,
+    "scenario": "high_density_berthing",
+    "fault": "transient_read",
+    "max_steps": 18
+  },
+  "group": "C_sft",
+  "status": "completed",
+  "success": true,
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 18
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": false,
+      "result": {},
+      "feedback": "read_timeout: safe to retry read; diagnose also available",
+      "reward": -0.5,
+      "after": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_timeout: safe to retry read; diagnose also available",
+        "remaining_steps": 17
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.0,
+        "step_cost": -0.1,
+        "invalid_action": -0.2,
+        "no_progress": -0.2,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.0,
+      "potential_before": 0.0,
+      "potential_after": 0.0,
+      "native_executed": false,
+      "backend_executed": false,
+      "fault_injection": true,
+      "decision_input": "任务：读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数18。\n任务缺项：能源状态尚未读取；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "B",
+        "log_probability": -8.344653679159819e-07,
+        "probabilities": [
+          2.822586964157381e-08,
+          0.9999991655349731,
+          1.2420863981787988e-07,
+          7.14897794296121e-08,
+          3.538530108926352e-07,
+          7.901930132447887e-08,
+          1.0059632016279352e-09,
+          3.01782669964723e-08,
+          7.650258027069867e-08,
+          1.510836256102266e-08,
+          4.317808333098583e-09,
+          1.2181847530712275e-08,
+          1.3121042030661556e-08
+        ],
+        "seconds": 0.7153,
+        "input_tokens": 306,
+        "exact_logit_cache_hit": false,
+        "group": "C_sft",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_timeout: safe to retry read; diagnose also available",
+        "remaining_steps": 17
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-001.json",
+        "sha256": "eee5ba510ebdee1f21d2273f222208a984118484bdba1c4c332b981928e72174"
+      },
+      "feedback": "read_ok:energy",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 16
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.3333333333333333,
+      "potential_before": 0.0,
+      "potential_after": 0.3333333333333333,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-001.json",
+        "sha256": "eee5ba510ebdee1f21d2273f222208a984118484bdba1c4c332b981928e72174",
+        "tool": "energy.read"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_timeout: safe to retry read; diagnose also available。剩余步数17。\n任务缺项：能源状态尚未读取；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "B",
+        "log_probability": -8.344653679159819e-07,
+        "probabilities": [
+          2.3180884767270982e-08,
+          0.9999991655349731,
+          1.1252070208911391e-07,
+          1.2861227105531725e-07,
+          3.328296713789314e-07,
+          6.921801087855783e-08,
+          1.1375945740965676e-09,
+          3.089521882770896e-08,
+          8.222570357929726e-08,
+          1.8269512125357323e-08,
+          4.8925494766649535e-09,
+          1.3592398317996413e-08,
+          1.66132085865911e-08
+        ],
+        "seconds": 0.7092,
+        "input_tokens": 316,
+        "exact_logit_cache_hit": false,
+        "group": "C_sft",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 16
+      },
+      "choice": "E",
+      "action": {
+        "tool": "energy.compare",
+        "arguments": {
+          "baseline_green_preference": 0.5,
+          "green_preference": 0.82,
+          "carbon_price_cny_per_ton": 85.0
+        }
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-002.json",
+        "sha256": "2a7598bb939b16cd9f54b13a96dcf03724d7086e98d882ebf88bd76cecdfe8ae"
+      },
+      "feedback": "energy_compare_ok",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "energy_compare_ok",
+        "remaining_steps": 15
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.3333333333333333,
+      "progress_after": 0.6666666666666666,
+      "potential_before": 0.3333333333333333,
+      "potential_after": 0.6666666666666666,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-002.json",
+        "sha256": "2a7598bb939b16cd9f54b13a96dcf03724d7086e98d882ebf88bd76cecdfe8ae",
+        "tool": "energy.compare"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。\n已完成：能源读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:energy。剩余步数16。\n任务缺项：能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "E",
+        "log_probability": -0.6359334588050842,
+        "probabilities": [
+          5.750821583205834e-05,
+          0.38342800736427307,
+          0.008827480487525463,
+          0.0025347659830003977,
+          0.5294410586357117,
+          0.03140520676970482,
+          5.230872193351388e-05,
+          0.0015799354296177626,
+          0.03950788080692291,
+          0.00244702841155231,
+          0.000136994945933111,
+          0.00022904996876604855,
+          0.00035268525243736804
+        ],
+        "seconds": 0.6504,
+        "input_tokens": 305,
+        "exact_logit_cache_hit": false,
+        "group": "C_sft",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "energy_compare_ok",
+        "remaining_steps": 15
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "local_runtime_tool",
+        "evidence_file": "evidence-003.json",
+        "sha256": "f1c79763a449f16bbb7c83afb3e9dee92418c2bfa4029c7fb5238847132b2c98"
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 14
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666667,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.6666666666666666,
+      "progress_after": 1.0,
+      "potential_before": 0.6666666666666666,
+      "potential_after": 1.0,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "local_runtime_tool",
+      "native_evidence": {
+        "file": "evidence-003.json",
+        "sha256": "f1c79763a449f16bbb7c83afb3e9dee92418c2bfa4029c7fb5238847132b2c98",
+        "tool": "execution.verify"
+      },
+      "source": "local_runtime_tool",
+      "decision_input": "任务：读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。\n已完成：能源读取、能碳参数比较。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：energy_compare_ok。剩余步数15。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "I",
+        "log_probability": -0.31535398960113525,
+        "probabilities": [
+          5.399717792897718e-07,
+          7.487902166758431e-06,
+          6.975941505515948e-05,
+          6.933949771337211e-05,
+          0.00159815966617316,
+          0.00019004415662493557,
+          1.3787708667223342e-05,
+          0.0005427775904536247,
+          0.7295305728912354,
+          0.2677963674068451,
+          6.838171248091385e-05,
+          3.956565706175752e-05,
+          7.32151820557192e-05
+        ],
+        "seconds": 0.6876,
+        "input_tokens": 300,
+        "exact_logit_cache_hit": false,
+        "group": "C_sft",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 5,
+      "observation": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 14
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "local_runtime_tool",
+        "evidence_file": "evidence-004.json",
+        "sha256": "9c685a581f5d3b49d56fab31e4cff064f66bd74492b1207c3e1a1f1cf2ba7892"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "local_runtime_tool",
+      "native_evidence": {
+        "file": "evidence-004.json",
+        "sha256": "9c685a581f5d3b49d56fab31e4cff064f66bd74492b1207c3e1a1f1cf2ba7892",
+        "tool": "artifact.report"
+      },
+      "source": "local_runtime_tool",
+      "decision_input": "任务：读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。\n已完成：能源读取、能碳参数比较、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数14。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "J",
+        "log_probability": -0.0077337888069450855,
+        "probabilities": [
+          8.28021118337574e-09,
+          3.3223867035303556e-07,
+          1.2048567441524938e-06,
+          1.3664630387211218e-06,
+          2.360546750423964e-05,
+          5.031049113313202e-06,
+          4.447384185368719e-07,
+          9.114402928389609e-05,
+          0.007556199561804533,
+          0.992296040058136,
+          1.19611859190627e-05,
+          5.808068635815289e-06,
+          6.672288691333961e-06
+        ],
+        "seconds": 0.6414,
+        "input_tokens": 300,
+        "exact_logit_cache_hit": false,
+        "group": "C_sft",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    }
+  ],
+  "experiment": "experiment-004",
+  "fault_injection_requested": true,
+  "production_authority": false,
+  "expected_adapter_sha256": "8ca7fb320dcf8ec8a20abe11a6d7223f2e0955008e81b59b2eb220a3a35cb74e",
+  "environment": "xiaoyi-agent-env.v3-dense-progress",
+  "runtime_source_sha256": "a3c266856a0d744cecb18ef5947c1e04eac1e009763b3a4faf1874c57c106df1",
+  "environment_source_sha256": {
+    "environment.py": "e582b6cd4f17c1d8ecfeec1a7850c7122acec5499e0feca3a127767ff845e13f",
+    "environment_v2.py": "5b4dd76f0b637855b99403058c59b71e63fbe8dea85fbc2924e27d198ed29525"
+  },
+  "elapsed_seconds": 4.02,
+  "outcome": {
+    "case_id": "acceptance-d3438df6b28f4a18b015db2ec0d489a7",
+    "family": "energy_compare",
+    "split": "acceptance",
+    "success": true,
+    "steps": 5,
+    "reward": 1.900001,
+    "parameter_attempts": 1,
+    "parameter_correct": 1,
+    "errors": 1,
+    "fault_injected": true,
+    "recovered": true,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "c08ade274baabf149d990f1ef0f137ba1ad242e5a2b9bb4bf38da3b8e20433cd",
+    "source": "synthetic_training_environment"
+  },
+  "evidence": [
+    {
+      "file": "evidence-001.json",
+      "sha256": "eee5ba510ebdee1f21d2273f222208a984118484bdba1c4c332b981928e72174",
+      "tool": "energy.read"
+    },
+    {
+      "file": "evidence-002.json",
+      "sha256": "2a7598bb939b16cd9f54b13a96dcf03724d7086e98d882ebf88bd76cecdfe8ae",
+      "tool": "energy.compare"
+    },
+    {
+      "file": "evidence-003.json",
+      "sha256": "f1c79763a449f16bbb7c83afb3e9dee92418c2bfa4029c7fb5238847132b2c98",
+      "tool": "execution.verify"
+    },
+    {
+      "file": "evidence-004.json",
+      "sha256": "9c685a581f5d3b49d56fab31e4cff064f66bd74492b1207c3e1a1f1cf2ba7892",
+      "tool": "artifact.report"
+    }
+  ],
+  "report": "report.html"
+}

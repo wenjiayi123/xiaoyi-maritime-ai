@@ -1,0 +1,159 @@
+{
+  "action": {
+    "tool": "port.read",
+    "arguments": {}
+  },
+  "response": {
+    "available": true,
+    "generated_at": "2026-11-02T04:10:04.377108+00:00",
+    "aggregate_kw": 24563.223094,
+    "assets": {
+      "qc-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 4229.65635
+      },
+      "qc-02": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 4281.409075
+      },
+      "yard-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 3374.064255
+      },
+      "agv-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 2201.607602
+      },
+      "bess-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 282.322855
+      },
+      "hvac-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 1375.528006
+      },
+      "reefer-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 2110.162266
+      },
+      "shore-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 3668.982865
+      },
+      "gate-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 1146.744692
+      },
+      "lighting-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 1178.726236
+      },
+      "aux-01": {
+        "ts": "2026-11-02T04:10:04.377108+00:00",
+        "kW": 714.018893
+      }
+    },
+    "public_conditions": {
+      "source_timestamp": "2024-12-13T11:09:55.662985+00:00",
+      "ambient_c": 9.666907611946225,
+      "wind_speed_mps": 10.820072283583867,
+      "wave_height_m": 1.1066184776107548,
+      "current_speed_mps": 0.944444,
+      "tide_m": 0.5094940149129252,
+      "visibility_km": null,
+      "closure_flag": 0.0
+    },
+    "decision": {
+      "ts": "2026-11-02T04:10:04.377108+00:00",
+      "source_ts": "2024-12-13T12:09:54.802989+00:00",
+      "raw_action": [
+        -0.11443620920181274,
+        0.8976297378540039,
+        0.26071202754974365,
+        0.8162500858306885,
+        -0.5133154988288879
+      ],
+      "decoded_control": {
+        "bess_kw": -457.744837,
+        "service_factor": 1.197479,
+        "flexible_load_command": 0.057357,
+        "projected_soc": 0.54046365,
+        "projection_applied": false,
+        "requested_bess_kw": -457.744837,
+        "projection_correction_kw": 0.0,
+        "projection_severity": 0.0,
+        "projection_reasons": [],
+        "berth_priority": 0.285688,
+        "yard_flow_command": -0.153995
+      },
+      "safety": {
+        "status": "pass",
+        "within_software_envelope": true,
+        "dispatch_allowed": false,
+        "human_review_eligible": true,
+        "site_claim_eligible": false,
+        "port_profile_id": "cn_sha_public_benchmark_v3",
+        "profile_calibration_status": "official_aggregate_and_public_reanalysis_not_terminal_calibrated",
+        "missing_site_claim_factors": [
+          "visibility_km"
+        ],
+        "violations": [],
+        "warnings": [],
+        "estimates": {
+          "net_load_kw": 22392.476762000002,
+          "bess_ramp_limit_kw": 4000.0
+        },
+        "authority": "recommendation_only_no_actuator_authority",
+        "required_next_step": "site adapter, operator-approved calibrated port profile, complete site factors, operator approval, and independent hardware interlocks"
+      }
+    },
+    "policy": {
+      "schema": "port-dt-v3-runtime-policy.v1",
+      "exported_at": "2026-08-13T06:47:57.002005Z",
+      "job_id": "rl-20260813T063524662Z",
+      "algorithm": "sac",
+      "implementation": "stable_baselines3.SAC",
+      "seed": 42,
+      "dataset_id": "public_cn_sha_hourly_v3",
+      "dataset_sha256": "803214ea0202abde241f75a28d7bf46b9c7ad801d40605a0916ec14ef7906a01",
+      "environment_version": "port_ops_v3",
+      "model_artifact": "selected_sac_v3.zip",
+      "model_sha256": "7160a1959e42e95523e83348f448d01b5e363b047eeed8bcdbcc4e17915f88da",
+      "config_artifact": "selected_sac_v3.config.json",
+      "config_sha256": "82c3bde7c4611e31b56b8fa30b543afd784774262ed0e158a0c76645aec6e7b2",
+      "selection_protocol": {
+        "algorithm_selection": "chronological_validation_only",
+        "final_advantage_report": "chronological_blind_test_only",
+        "blind_test_used_for_selection": false,
+        "expected_seeds": [
+          42,
+          142,
+          242
+        ],
+        "validation_episode_windows": 10
+      },
+      "production_authority": false,
+      "purpose": "clone-safe deterministic dashboard inference; not production dispatch",
+      "loaded_model_path": "evidence/public_models/legacy_v3_v6_20260912/7160a1959e42e95523e83348f448d01b5e363b047eeed8bcdbcc4e17915f88da.zip",
+      "loaded_model_sha256": "4adc3365ab482495c784189c1818c301f1575bbb55cbec1867dbedc2d22deb9f"
+    },
+    "telemetry": {
+      "mode": "calibrated_public_replay_simulator",
+      "artifact_id": "public_cn_sha_hourly_v3.csv",
+      "sha256": "803214ea0202abde241f75a28d7bf46b9c7ad801d40605a0916ec14ef7906a01",
+      "rows": 17544,
+      "assets": 11,
+      "continuous": true,
+      "time_warp": "1 wall-clock second = 1 public-dataset minute",
+      "asset_decomposition": "deterministic_factor_conditioned_mass_conserving",
+      "measured": false,
+      "production": false,
+      "replacement_contract": "list_assets/get_recent_power/current_port_state; replace with authorized TOS/EMS/PLC adapter",
+      "note": "Shanghai public aggregate plus public reanalysis and declared engineering derivatives; not terminal telemetry."
+    },
+    "production_authority": false
+  },
+  "recorded_at": "2026-11-02T11:10:04+0800",
+  "source": "actual_local_system_api",
+  "production_authority": false
+}

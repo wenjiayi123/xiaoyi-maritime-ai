@@ -1,0 +1,383 @@
+{
+  "task": {
+    "case_id": "v2-validation-port_scenario-000",
+    "split": "validation",
+    "family": "port_scenario",
+    "seed": 624000,
+    "green": 0.37,
+    "carbon": 108,
+    "baseline": 0.65,
+    "scenario": "channel_congestion",
+    "fault": "none",
+    "max_steps": 14
+  },
+  "outcome": {
+    "case_id": "v2-validation-port_scenario-000",
+    "family": "port_scenario",
+    "split": "validation",
+    "success": true,
+    "steps": 4,
+    "reward": 2.400001,
+    "parameter_attempts": 0,
+    "parameter_correct": 0,
+    "errors": 0,
+    "fault_injected": false,
+    "recovered": false,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "c9dad2d5ad4644246b409244453bacb3e4ff9acaa6f8ddda2668f9a3aa9de3f5",
+    "source": "synthetic_training_environment",
+    "parameter_matches": 0,
+    "elapsed_seconds": 2.8453
+  },
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 14
+      },
+      "choice": "A",
+      "action": {
+        "tool": "port.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "synthetic_resettable_environment",
+        "target": "port",
+        "case": "v2-validation-port_scenario-000",
+        "production_authority": false,
+        "source_hash": "16efbff1c8b70e0ef65ea81d9559c5106ca4b2c161ccae5d194b60c9069e1b4c"
+      },
+      "feedback": "read_ok:port",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.3333333333333333,
+      "potential_before": 0.0,
+      "potential_after": 0.3333333333333333
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "choice": "D",
+      "action": {
+        "tool": "port.evaluate",
+        "arguments": {
+          "scenario": "channel_congestion",
+          "horizon_min": 60,
+          "step_min": 15
+        }
+      },
+      "ok": true,
+      "result": {
+        "scenario": "channel_congestion",
+        "source": "synthetic_parameter_receipt"
+      },
+      "feedback": "port_evaluate_ok",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.3333333333333333,
+      "progress_after": 0.6666666666666666,
+      "potential_before": 0.3333333333333333,
+      "potential_after": 0.6666666666666666
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 12
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "checks": {
+          "required_observations": true,
+          "energy_parameters": true,
+          "port_scenario": true,
+          "restoration": true,
+          "no_uncertain_write": true,
+          "verified": true
+        }
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666667,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.6666666666666666,
+      "progress_after": 1.0,
+      "potential_before": 0.6666666666666666,
+      "potential_after": 1.0
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "report_sha256": "02e8d5ca80d6f30f5d4191a12c8d0e37495f7bfe439f593f08f7b5cd2b5e50de"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 10
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0
+    }
+  ],
+  "decisions": [
+    {
+      "prompt": "现在需要你完成：读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数14。\n任务缺项：港口状态尚未读取；港口情景尚无评估结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.24,碳价108);F=能碳比较(偏好0.37,碳价108);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.37,碳价127);M=询问用户\n下一步只输出一个字母：",
+      "label": "A",
+      "log_probability": 0.0,
+      "probabilities": [
+        1.0,
+        2.9694439181854326e-12,
+        1.0868095486060714e-11,
+        1.2254110226539439e-10,
+        3.094219672150622e-11,
+        3.948374613371719e-12,
+        4.3623026875884777e-14,
+        4.793577644199298e-13,
+        1.5286925371393867e-13,
+        1.08487607189834e-13,
+        6.705000324489646e-14,
+        5.328582627223133e-13,
+        1.307263216947241e-13
+      ],
+      "seconds": 0.741,
+      "input_tokens": 296,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "现在需要你完成：读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。\n已完成：港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:port。剩余步数13。\n任务缺项：港口情景尚无评估结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.24,碳价108);F=能碳比较(偏好0.37,碳价108);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.37,碳价127);M=询问用户\n下一步只输出一个字母：",
+      "label": "D",
+      "log_probability": -0.0011344427475705743,
+      "probabilities": [
+        1.8983104382641613e-05,
+        4.216366505715996e-06,
+        1.3553784810937941e-05,
+        0.9988662004470825,
+        4.307301787775941e-05,
+        9.044866601470858e-06,
+        2.7646249733948025e-08,
+        6.118075361882802e-07,
+        0.0010421276092529297,
+        7.95865105374105e-07,
+        3.2388204118660724e-08,
+        5.65846733024955e-07,
+        7.049064834063756e-07
+      ],
+      "seconds": 0.7056,
+      "input_tokens": 295,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "现在需要你完成：读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。\n已完成：港口读取、港口情景评估。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：port_evaluate_ok。剩余步数12。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.24,碳价108);F=能碳比较(偏好0.37,碳价108);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.37,碳价127);M=询问用户\n下一步只输出一个字母：",
+      "label": "I",
+      "log_probability": -0.00012851586507167667,
+      "probabilities": [
+        1.315529818413097e-08,
+        1.7855256828624988e-08,
+        1.8624812980760908e-07,
+        0.00011598954006331041,
+        3.122112275377731e-06,
+        2.1179158693485078e-07,
+        2.666586507160673e-09,
+        1.6670927038830996e-07,
+        0.9998714923858643,
+        8.642489774501882e-06,
+        1.0404275663233875e-08,
+        3.0380345350522475e-08,
+        5.869875963071536e-08
+      ],
+      "seconds": 0.6988,
+      "input_tokens": 292,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "现在需要你完成：读取港口状态并评估靠泊情景，核验后交付报告。 情景=channel_congestion。\n已完成：港口读取、港口情景评估、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数11。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.24,碳价108);F=能碳比较(偏好0.37,碳价108);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.37,碳价127);M=询问用户\n下一步只输出一个字母：",
+      "label": "J",
+      "log_probability": 0.0,
+      "probabilities": [
+        6.76732272175966e-15,
+        1.94486896205881e-13,
+        2.653889261128306e-12,
+        9.865996020153034e-09,
+        8.688226804665078e-10,
+        2.4994556771518184e-11,
+        4.4374630380795976e-13,
+        1.4565729733462263e-09,
+        6.348497283426013e-09,
+        1.0,
+        2.2977409905311497e-11,
+        2.5733233252611676e-11,
+        1.9040951107496262e-11
+      ],
+      "seconds": 0.6985,
+      "input_tokens": 291,
+      "exact_logit_cache_hit": false
+    }
+  ]
+}

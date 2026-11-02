@@ -1,0 +1,169 @@
+{
+  "goal": "读取能源状态并比较能碳方案，核验后交付报告。 基准=0.5，绿色偏好=0.82，碳价=85。",
+  "scope": "本机三个系统原生API；公开数据与工程模拟，非现场生产",
+  "summaries": {
+    "energy": {
+      "site_id": "USLAX-PUBLIC-SIM",
+      "observed_at": "2026-11-02T03:16:09.334071Z",
+      "event_time": "2026-11-08T16:17:00Z",
+      "source_mode": "public_data_calibrated_realtime_simulation",
+      "metrics": [
+        {
+          "label": "购电功率",
+          "field": "signals.grid.import_power_kw.value",
+          "unit": "kW",
+          "value": 11402.719851
+        },
+        {
+          "label": "当前服务满足率",
+          "field": "kpis.current.service_fulfilment_pct",
+          "unit": "%",
+          "value": 100.0
+        },
+        {
+          "label": "当前安全违规数",
+          "field": "kpis.current.safety_violations",
+          "unit": "次",
+          "value": 0
+        }
+      ],
+      "raw_sha256": "1e5a877254f34df30be88571f882b0c885fc7980dcf8b993a56f92a6861d54d0"
+    },
+    "energy_comparison": [
+      {
+        "parameters": {
+          "green": 0.5,
+          "carbon": 85.0
+        },
+        "summary": {
+          "scenario_id": "port_la_2025_public_benchmark",
+          "green_preference": 0.5,
+          "kpis": [
+            {
+              "label": "测试轨迹碳排放",
+              "value": 118385.208,
+              "unit": "kgCO2e",
+              "delta": -49560.186
+            },
+            {
+              "label": "单箱碳强度",
+              "value": 3.970745,
+              "unit": "kg/TEU",
+              "delta": -1.662293
+            },
+            {
+              "label": "岸电使用率",
+              "value": 100.0,
+              "unit": "%",
+              "delta": 75.0
+            },
+            {
+              "label": "综合调度成本",
+              "value": 573070.362,
+              "unit": "CNY",
+              "delta": -67882.89000000001
+            }
+          ],
+          "strategies": [
+            "Reference:FixedRule",
+            "MPC"
+          ],
+          "total_cost_saving_cny": 67882.89,
+          "abatement_ton": 49.56,
+          "dataset_id": "port_la_2020_2025_hourly",
+          "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+          "production_dispatch_enabled": false
+        }
+      },
+      {
+        "parameters": {
+          "green": 0.82,
+          "carbon": 85.0
+        },
+        "summary": {
+          "scenario_id": "port_la_2025_public_benchmark",
+          "green_preference": 0.82,
+          "kpis": [
+            {
+              "label": "测试轨迹碳排放",
+              "value": 118686.451,
+              "unit": "kgCO2e",
+              "delta": -49258.943
+            },
+            {
+              "label": "单箱碳强度",
+              "value": 3.980849,
+              "unit": "kg/TEU",
+              "delta": -1.652189
+            },
+            {
+              "label": "岸电使用率",
+              "value": 100.0,
+              "unit": "%",
+              "delta": 75.0
+            },
+            {
+              "label": "综合调度成本",
+              "value": 569296.944,
+              "unit": "CNY",
+              "delta": -71656.30799999996
+            }
+          ],
+          "strategies": [
+            "Reference:FixedRule",
+            "MPC"
+          ],
+          "total_cost_saving_cny": 71656.31,
+          "abatement_ton": 49.26,
+          "dataset_id": "port_la_2020_2025_hourly",
+          "dataset_sha256": "c26b38eaa39a428bee24ca0e8fbd829de895cd84233c9f10310e16e64dd925e6",
+          "production_dispatch_enabled": false
+        }
+      }
+    ]
+  },
+  "verification": {
+    "checks": {
+      "evidence-001.json": true,
+      "evidence-002.json": true,
+      "evidence-003.json": true,
+      "native_tools_present": true
+    },
+    "evidence": [
+      {
+        "file": "evidence-001.json",
+        "sha256": "dccd6f2f856b343ae60d9112f8874aaf200b62b83ddafc57eb2f497908fbedf6",
+        "tool": "energy.read"
+      },
+      {
+        "file": "evidence-002.json",
+        "sha256": "216646c3b97b88a68504c27d71b308fc8c8d7ceebcd02788bea704c9db29ca2f",
+        "tool": "energy.compare"
+      },
+      {
+        "file": "evidence-003.json",
+        "sha256": "d52d8ec3147dc3cbba754a0711765922d3705445bc0ecadfd92c0a294334c5ab",
+        "tool": "execution.verify"
+      }
+    ],
+    "scope": "local persisted raw-response consistency; not third-party attestation"
+  },
+  "evidence": [
+    {
+      "file": "evidence-001.json",
+      "sha256": "dccd6f2f856b343ae60d9112f8874aaf200b62b83ddafc57eb2f497908fbedf6",
+      "tool": "energy.read"
+    },
+    {
+      "file": "evidence-002.json",
+      "sha256": "216646c3b97b88a68504c27d71b308fc8c8d7ceebcd02788bea704c9db29ca2f",
+      "tool": "energy.compare"
+    },
+    {
+      "file": "evidence-003.json",
+      "sha256": "d52d8ec3147dc3cbba754a0711765922d3705445bc0ecadfd92c0a294334c5ab",
+      "tool": "execution.verify"
+    }
+  ],
+  "summary_producer": "deterministic renderer of verified tool facts; not free-form LLM writing"
+}

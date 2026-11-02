@@ -1,0 +1,382 @@
+{
+  "task": {
+    "case_id": "v2-test-write_recovery-001",
+    "split": "test",
+    "family": "write_recovery",
+    "seed": 739001,
+    "green": 0.47,
+    "carbon": 111,
+    "baseline": 0.35,
+    "scenario": "high_density_berthing",
+    "fault": "lost_response",
+    "max_steps": 14
+  },
+  "outcome": {
+    "case_id": "v2-test-write_recovery-001",
+    "family": "write_recovery",
+    "split": "test",
+    "success": true,
+    "steps": 4,
+    "reward": 2.2,
+    "parameter_attempts": 1,
+    "parameter_correct": 1,
+    "errors": 1,
+    "fault_injected": true,
+    "recovered": true,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "9989cb2df29c7a60b7c8a341a83d2382044ed585e6b9a60e447cce651042208b",
+    "source": "synthetic_training_environment",
+    "parameter_matches": 1,
+    "elapsed_seconds": 2.7983
+  },
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 14
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "synthetic_resettable_environment",
+        "target": "energy",
+        "case": "v2-test-write_recovery-001",
+        "production_authority": false,
+        "source_hash": "ed3dbbfe068908849909f3058665a1981af20e0a2d6be7fde6cc0cfba9c41222"
+      },
+      "feedback": "read_ok:energy",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.3333333333333333,
+      "potential_before": 0.0,
+      "potential_after": 0.3333333333333333
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 13
+      },
+      "choice": "F",
+      "action": {
+        "tool": "energy.compare",
+        "arguments": {
+          "baseline_green_preference": 0.35,
+          "green_preference": 0.47,
+          "carbon_price_cny_per_ton": 111
+        }
+      },
+      "ok": false,
+      "result": {
+        "response_received": false
+      },
+      "feedback": "response_lost: result unknown; read back receipt with execution.verify",
+      "reward": 0.033333,
+      "after": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": true,
+        "last": "response_lost: result unknown; read back receipt with execution.verify",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.33333333333333337,
+        "step_cost": -0.1,
+        "invalid_action": -0.2,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.3333333333333333,
+      "progress_after": 0.5,
+      "potential_before": 0.3333333333333333,
+      "potential_after": 0.5
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": true,
+        "last": "response_lost: result unknown; read back receipt with execution.verify",
+        "remaining_steps": 12
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "checks": {
+          "required_observations": true,
+          "energy_parameters": true,
+          "port_scenario": true,
+          "restoration": true,
+          "no_uncertain_write": true,
+          "verified": true
+        }
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.9,
+      "after": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 1.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.5,
+      "progress_after": 1.0,
+      "potential_before": 0.5,
+      "potential_after": 1.0
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "report_sha256": "101d5030ae9390904fc7e9aa85a419868efef6b8ee1b23b7bb5dd1fc34856d79"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [
+          "energy"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 10
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0
+    }
+  ],
+  "decisions": [
+    {
+      "prompt": "本轮需要交付：读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数14。\n任务缺项：能源状态尚未读取；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.34,碳价111);F=能碳比较(偏好0.47,碳价111);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.47,碳价130);M=询问用户\n下一步只输出一个字母：",
+      "label": "B",
+      "log_probability": -1.1920928955078125e-07,
+      "probabilities": [
+        5.078492293364434e-09,
+        0.9999998807907104,
+        4.217483695612145e-09,
+        1.1911273389841881e-07,
+        7.763281573147651e-09,
+        4.611855786151864e-09,
+        5.534735430384741e-12,
+        1.05137711037262e-10,
+        9.859645738741207e-11,
+        2.7458740142760618e-11,
+        2.7766363860926013e-11,
+        3.366152634409758e-10,
+        1.0698304464540342e-09
+      ],
+      "seconds": 0.6893,
+      "input_tokens": 320,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本轮需要交付：读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。\n已完成：能源读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:energy。剩余步数13。\n任务缺项：能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.34,碳价111);F=能碳比较(偏好0.47,碳价111);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.47,碳价130);M=询问用户\n下一步只输出一个字母：",
+      "label": "F",
+      "log_probability": -0.8874388933181763,
+      "probabilities": [
+        0.0005249542300589383,
+        0.001031113089993596,
+        0.0028874410782009363,
+        0.2612103521823883,
+        0.20132556557655334,
+        0.4117088317871094,
+        1.986664028663654e-05,
+        0.0010009667603299022,
+        0.11892569810152054,
+        0.00032369510154239833,
+        9.606590901967138e-05,
+        0.0003939359448850155,
+        0.0005516393575817347
+      ],
+      "seconds": 0.6857,
+      "input_tokens": 319,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本轮需要交付：读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。\n已完成：能源读取、能碳参数比较。当前时钟：运行。结果核验：尚未通过。执行结果不明：是，需读回回执。最近反馈：response_lost: result unknown; read back receipt with execution.verify。剩余步数12。\n任务缺项：已有写入结果尚未确认；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.34,碳价111);F=能碳比较(偏好0.47,碳价111);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.47,碳价130);M=询问用户\n下一步只输出一个字母：",
+      "label": "I",
+      "log_probability": -0.00016237623640336096,
+      "probabilities": [
+        7.984256811255364e-09,
+        4.517653362512419e-09,
+        2.3125663517475914e-07,
+        6.262924580369145e-05,
+        2.0399864297360182e-05,
+        6.422350998036563e-05,
+        3.718263030805247e-08,
+        3.4969882563018473e-06,
+        0.9998376369476318,
+        9.763871275936253e-06,
+        2.86983492969739e-07,
+        6.773353220523859e-07,
+        7.541593163296056e-07
+      ],
+      "seconds": 0.7114,
+      "input_tokens": 336,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本轮需要交付：读取能源并完成能碳比较；响应丢失时先读回回执，核验后交付报告。 基准=0.35，绿色偏好=0.47，碳价=111。\n已完成：能源读取、能碳参数比较、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数11。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.34,碳价111);F=能碳比较(偏好0.47,碳价111);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.47,碳价130);M=询问用户\n下一步只输出一个字母：",
+      "label": "J",
+      "log_probability": -0.023702489212155342,
+      "probabilities": [
+        2.1885467396676184e-11,
+        7.895045173178517e-10,
+        2.8111939442965195e-08,
+        0.0005146010080352426,
+        2.0398238120833412e-05,
+        0.00015598052414134145,
+        3.2518165937744925e-09,
+        4.735932179755764e-06,
+        0.022727372124791145,
+        0.9765762090682983,
+        8.37380653706532e-08,
+        1.6381490297590062e-07,
+        3.311980663056602e-07
+      ],
+      "seconds": 0.7097,
+      "input_tokens": 314,
+      "exact_logit_cache_hit": false
+    }
+  ]
+}

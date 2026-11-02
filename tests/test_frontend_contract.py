@@ -228,6 +228,7 @@ def test_four_system_linkage_has_visible_entry_and_execution_controls() -> None:
     assert "linkageBatchMarkup" in javascript
     assert "最近一次联动失败" in javascript
     assert "重试当前系统" in javascript
+    assert 'online ? "切换窗口" : "启动并切换"' in javascript
 
 
 def test_literal_button_actions_are_all_registered() -> None:
@@ -273,12 +274,91 @@ def test_literal_button_actions_are_all_registered() -> None:
 def test_frontend_asset_revision_and_responsive_profile_label_are_current() -> None:
     html, _ = _read_frontend()
 
-    assert "/web/styles.css?v=20260907-agent-v1" in html
-    assert "/web/app.js?v=20260907-agent-v1" in html
+    assert "/web/styles.css?v=20261031-full-demo-layout-v1" in html
+    assert "/web/linked_agent.js?v=20261101-v13" in html
+    assert "/web/app.js?v=20261101-v13" in html
+    assert "/web/demo_guide.js?v=20261031-full-demo-audit-v8" in html
     assert re.search(
         r'<button class="profile-button"[^>]*aria-label="打开管理员工作台"',
         html,
     )
+
+
+def test_demo_guide_exposes_sync_and_recovery_controls() -> None:
+    html, _ = _read_frontend()
+    guide = (ROOT / "web" / "demo_guide.js").read_text(encoding="utf-8")
+
+    assert 'data-demo-guide-launch' in html
+    for control_id in (
+        "demoGuidePrimary",
+        "demoGuideRetry",
+        "demoGuideResetStep",
+        "demoGuideFallback",
+        "demoGuideResetAll",
+    ):
+        assert f'id="{control_id}"' in html
+    assert 'document.addEventListener("click", (event) => {' in guide
+    assert "steps.findIndex" in guide
+    assert "markExecuted" in guide
+    assert "下一步并演示" in guide
+    assert "MutationObserver" not in guide
+    assert "setInterval" not in guide
+    javascript = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    assert 'data-chat-demo-prompt="general"' in html
+    assert 'data-chat-demo-prompt="daily"' in html
+    assert 'data-chat-demo-prompt="emergency"' in html
+    assert 'demoCategoryForQuestion' in javascript
+    assert 'applyDemoAnswerTone(demoCategory, true)' in javascript
+    assert 'data-demo-chat-complete="true"' in guide
+    assert 'html[data-demo-chat-category="general"] #askBtn' in guide
+    assert 'html[data-demo-chat-category="daily"] #askBtn' in guide
+    assert 'html[data-demo-chat-category="emergency"] #askBtn' in guide
+    assert 'data-linkage-start="energy-cockpit"' in guide
+
+
+def test_cross_system_navigation_is_same_tab_returnable_and_resumable() -> None:
+    javascript = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    guide = (ROOT / "web" / "demo_guide.js").read_text(encoding="utf-8")
+
+    assert 'url.searchParams.set("xiaoyi_return", currentXiaoyiReturnUrl())' in javascript
+    assert 'url.searchParams.set("xiaoyi_resume", "system-linkage")' in javascript
+    assert 'window.location.assign(url.href)' in javascript
+    assert 'target = "_blank"' not in javascript
+    assert 'data-xiaoyi-roundtrip-receipt="ready"' in javascript
+    assert 'xiaoyi_handoff' in javascript
+    assert 'sessionStorage.setItem("xiaoyi_demo_resume", "energy-roundtrip")' in javascript
+    assert 'resumeState === "roundtrip-ready"' in guide
+    assert 'data-action="ack-roundtrip-receipt"' in guide
+
+
+def test_stale_linkage_failures_are_not_replayed_as_current_session_errors() -> None:
+    javascript = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+
+    assert "linkageVisibleResultTraceIds: new Set()" in javascript
+    assert "linkageVisibleCorrelationIds: new Set()" in javascript
+    assert "state.linkageVisibleResultTraceIds.has(lastResult?.trace_id)" in javascript
+    assert "state.linkageVisibleResultTraceIds.add(result.trace_id)" in javascript
+    assert "state.linkageVisibleCorrelationIds.add(response.correlation_id)" in javascript
+
+
+def test_rl_lab_cold_start_has_shared_prewarm_and_visible_recovery() -> None:
+    javascript = (ROOT / "web" / "app.js").read_text(encoding="utf-8")
+    guide = (ROOT / "web" / "demo_guide.js").read_text(encoding="utf-8")
+
+    assert 'function preloadRLLabHealth(force = false)' in javascript
+    assert 'timeoutMs:20000' in javascript
+    assert 'data-modal-action="retry-rl-lab"' in javascript
+    assert 'action === "retry-rl-lab"' in javascript
+    assert '"rl-lab-recovery"' in javascript
+    assert 'data-la-demo-energy' in (ROOT / "web" / "linked_agent.js").read_text(encoding="utf-8")
+    linked_agent = (ROOT / "web" / "linked_agent.js").read_text(encoding="utf-8")
+    assert 'data-la-check-capabilities' in guide
+    assert 'data-la-capability-audit="complete"' in guide
+    assert 'data-la-open-rl="energy-cockpit"' in guide
+    assert '"port-dt-multi","energy-cockpit","malacca-sandbox"' in linked_agent
+    assert 'surface:"rl-config"' in linked_agent
+    assert "逐题输入、逐题等待、逐题形成真实对话记录" in guide
+    assert "八项能力实操矩阵" in guide
 
 
 def test_professional_catalog_has_visible_entry_and_interactive_filters() -> None:

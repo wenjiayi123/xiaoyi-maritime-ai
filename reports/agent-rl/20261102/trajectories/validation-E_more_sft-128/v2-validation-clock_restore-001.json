@@ -1,0 +1,443 @@
+{
+  "task": {
+    "case_id": "v2-validation-clock_restore-001",
+    "split": "validation",
+    "family": "clock_restore",
+    "seed": 629001,
+    "green": 0.53,
+    "carbon": 55,
+    "baseline": 0.65,
+    "scenario": "high_density_berthing",
+    "fault": "none",
+    "max_steps": 14
+  },
+  "outcome": {
+    "case_id": "v2-validation-clock_restore-001",
+    "family": "clock_restore",
+    "split": "validation",
+    "success": true,
+    "steps": 5,
+    "reward": 2.3,
+    "parameter_attempts": 0,
+    "parameter_correct": 0,
+    "errors": 0,
+    "fault_injected": false,
+    "recovered": false,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "e0fe8b4b90ab58b9ddec60a9d3f41cf3e1d9c2a1ec0abc93f594eba433406a07",
+    "source": "synthetic_training_environment",
+    "parameter_matches": 0,
+    "elapsed_seconds": 3.1585
+  },
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 14
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "synthetic_resettable_environment",
+        "target": "energy",
+        "case": "v2-validation-clock_restore-001",
+        "production_authority": false,
+        "source_hash": "df3548f922480c560cd7a73e61da02913c73ce9f4c4cfbd4621b9f6cd1045f53"
+      },
+      "feedback": "read_ok:energy",
+      "reward": 0.4,
+      "after": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.5,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.25,
+      "potential_before": 0.0,
+      "potential_after": 0.25
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 13
+      },
+      "choice": "G",
+      "action": {
+        "tool": "energy.pause",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {},
+      "feedback": "paused_restore_required",
+      "reward": 0.4,
+      "after": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "paused",
+        "ever_paused": true,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "paused_restore_required",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.5,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.25,
+      "progress_after": 0.5,
+      "potential_before": 0.25,
+      "potential_after": 0.5
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "paused",
+        "ever_paused": true,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "paused_restore_required",
+        "remaining_steps": 12
+      },
+      "choice": "H",
+      "action": {
+        "tool": "energy.restore",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {},
+      "feedback": "restored_readback_required",
+      "reward": 0.4,
+      "after": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": true,
+        "restored": true,
+        "uncertain_write": false,
+        "last": "restored_readback_required",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.5,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.5,
+      "progress_after": 0.75,
+      "potential_before": 0.5,
+      "potential_after": 0.75
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": true,
+        "restored": true,
+        "uncertain_write": false,
+        "last": "restored_readback_required",
+        "remaining_steps": 11
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "checks": {
+          "required_observations": true,
+          "energy_parameters": true,
+          "port_scenario": true,
+          "restoration": true,
+          "no_uncertain_write": true,
+          "verified": true
+        }
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.4,
+      "after": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": true,
+        "restored": true,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 10
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.5,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.75,
+      "progress_after": 1.0,
+      "potential_before": 0.75,
+      "potential_after": 1.0
+    },
+    {
+      "step": 5,
+      "observation": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": true,
+        "restored": true,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 10
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "report_sha256": "9b62d5931616595423a350cdff2092afbce2043dc3af160494269e910f737c87"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。",
+        "reads": [
+          "energy"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": true,
+        "restored": true,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 9
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0
+    }
+  ],
+  "decisions": [
+    {
+      "prompt": "本次工作要求：读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数14。\n任务缺项：能源状态尚未读取；暂停实验尚未完成；原状态尚未恢复；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.53,碳价55);F=能碳比较(偏好0.66,碳价55);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.53,碳价74);M=询问用户\n下一步只输出一个字母：",
+      "label": "B",
+      "log_probability": 0.0,
+      "probabilities": [
+        1.2779120872608019e-08,
+        1.0,
+        8.373258530980365e-09,
+        2.7145766523517523e-08,
+        7.2155432739862135e-09,
+        5.28275112543497e-09,
+        6.631265848933143e-12,
+        4.634189143537526e-10,
+        1.7338579183512337e-10,
+        5.784149548215822e-11,
+        1.1913324493573185e-10,
+        3.8810010760670366e-10,
+        1.54745305458448e-09
+      ],
+      "seconds": 0.6399,
+      "input_tokens": 288,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。\n已完成：能源读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:energy。剩余步数13。\n任务缺项：暂停实验尚未完成；原状态尚未恢复；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.53,碳价55);F=能碳比较(偏好0.66,碳价55);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.53,碳价74);M=询问用户\n下一步只输出一个字母：",
+      "label": "G",
+      "log_probability": -5.1260126383567695e-06,
+      "probabilities": [
+        3.8942111757478415e-09,
+        4.228481120804872e-09,
+        1.9827359665214317e-07,
+        7.083123136908398e-07,
+        2.4088865302474005e-07,
+        2.808175622703857e-06,
+        0.9999948740005493,
+        9.069341331269243e-07,
+        1.4253701330346757e-08,
+        1.3737835047322733e-07,
+        4.83215671920334e-08,
+        3.8260449031213284e-08,
+        6.537343555379493e-09
+      ],
+      "seconds": 0.6413,
+      "input_tokens": 287,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。\n已完成：能源读取、暂停模拟时钟。当前时钟：暂停。结果核验：尚未通过。执行结果不明：否。最近反馈：paused_restore_required。剩余步数12。\n任务缺项：原状态尚未恢复；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.53,碳价55);F=能碳比较(偏好0.66,碳价55);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.53,碳价74);M=询问用户\n下一步只输出一个字母：",
+      "label": "H",
+      "log_probability": -5.4837775678606704e-05,
+      "probabilities": [
+        4.87620333000649e-10,
+        4.320513391498082e-10,
+        5.2970737129953704e-08,
+        7.15706789833348e-07,
+        2.5781986323636374e-07,
+        2.7083231088909088e-06,
+        1.448510289492333e-07,
+        0.9999451637268066,
+        3.283867772552185e-05,
+        1.3631849469675217e-05,
+        3.7928430174360983e-06,
+        4.995333142687741e-07,
+        1.6772914079865586e-07
+      ],
+      "seconds": 0.6198,
+      "input_tokens": 286,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。\n已完成：能源读取、暂停模拟时钟、恢复原时钟。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：restored_readback_required。剩余步数11。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.53,碳价55);F=能碳比较(偏好0.66,碳价55);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.53,碳价74);M=询问用户\n下一步只输出一个字母：",
+      "label": "I",
+      "log_probability": -1.1920928955078125e-07,
+      "probabilities": [
+        8.366491527356246e-12,
+        9.03112914313331e-12,
+        5.805849134787877e-10,
+        7.880739616439314e-09,
+        3.827908656717227e-09,
+        5.694816174184325e-09,
+        2.2355327658485358e-11,
+        1.4072000453779765e-08,
+        0.9999998807907104,
+        1.73186080587584e-07,
+        4.994388791423887e-10,
+        3.374149015744621e-10,
+        1.4638503742503417e-09
+      ],
+      "seconds": 0.6355,
+      "input_tokens": 288,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取能源，暂停模拟时钟，恢复原状态，核验后交付报告。\n已完成：能源读取、暂停模拟时钟、恢复原时钟、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数10。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.53,碳价55);F=能碳比较(偏好0.66,碳价55);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.53,碳价74);M=询问用户\n下一步只输出一个字母：",
+      "label": "J",
+      "log_probability": -7.951575389597565e-05,
+      "probabilities": [
+        3.1228855222262264e-13,
+        2.280764769754806e-12,
+        1.8014739699978577e-10,
+        2.994230197117531e-09,
+        2.7224269505410348e-09,
+        4.9079805108931396e-08,
+        3.366164946783101e-08,
+        4.50769039161969e-05,
+        3.4332755603827536e-05,
+        0.9999204874038696,
+        1.4132969283764396e-07,
+        1.3621953343090354e-08,
+        2.501535689702905e-08
+      ],
+      "seconds": 0.6198,
+      "input_tokens": 286,
+      "exact_logit_cache_hit": false
+    }
+  ]
+}

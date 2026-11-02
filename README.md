@@ -1,7 +1,7 @@
 <table>
   <tr>
     <td width="64%" valign="middle">
-      <p><code>OPEN-WEIGHT LLM · RAG · LORA · SOURCE-AWARE ANSWERS</code></p>
+      <p><code>OPEN-WEIGHT LLM · HARNESS · TOOL-USE RL · RAG · LORA</code></p>
       <h1>小懿 AI · 港航垂直行业生成式大模型研发项目</h1>
       <h3>Xiaoyi AI · Open-Weight Maritime LLM with RAG, LoRA &amp; Source-Aware Answers</h3>
       <p><strong>项目作者：</strong>温家懿 · <strong>Project Author:</strong> Wen Jiayi</p>
@@ -20,7 +20,7 @@
   <a href="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/codeql.yml"><img alt="CodeQL" src="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/codeql.yml/badge.svg" /></a>
   <a href="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/dependency-audit.yml"><img alt="Dependency audit" src="https://github.com/wenjiayi123/xiaoyi-maritime-ai/actions/workflows/dependency-audit.yml/badge.svg" /></a>
   <a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-22c55e.svg" /></a>
-  <img alt="Version" src="https://img.shields.io/badge/release-v0.4.0-7057ff.svg" />
+  <img alt="Version" src="https://img.shields.io/badge/update-Harness_V13_%2B_RL_V2-7057ff.svg" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3.12-3776ab?logo=python&logoColor=white" />
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-RAG%20gateway-009688?logo=fastapi&logoColor=white" />
   <img alt="RAG benchmark" src="https://img.shields.io/badge/Hybrid%20MRR-1.0000-0ea5e9.svg" />
@@ -47,11 +47,43 @@
 
 ---
 
+## 2026-11-02 更新：Harness V13 与语言模型 RL 对照实验
+
+小懿现已加入可持久化、可暂停恢复、带执行核验的 **Harness 任务工作台**，并完成 **1.7B 语言模型的 LoRA 强化训练与五组对照**。4B 日常助手和 1.7B 实验模型分别运行；全部业务执行仍限公开数据回放与本机工程模拟。
+
+[本次发布与复核方法](docs/GITHUB_RELEASE_20261102.md) · [Harness V13](docs/XIAOYI_HARNESS_V13_20261101.md) · [RL 完整验收](docs/AGENT_RL_V2_ACCEPTANCE_20261102.md) · [RL 方法](docs/AGENT_RL_V2_METHODS_20261102.md) · [结果与图表](reports/agent-rl/20261102/README.md) · [下载完整证据包](https://github.com/wenjiayi123/xiaoyi-maritime-ai/releases/tag/harness-rl-20261102)
+
+| 同一环境与 Harness | A 固定规则 | B 原始模型 | C 冻结 SFT | D SFT＋RL | E 继续 SFT |
+|---|---:|---:|---:|---:|---:|
+| 留出案例完成数 | 24/24 | 9/24 | 14/24 | **19/24** | 22/24 |
+| 完成率 | 100.0% | 37.5% | 58.3% | **79.2%** | 91.7% |
+| 平均工具调用（含失败） | 4.38 | 10.50 | 8.54 | 6.29 | 5.58 |
+
+RL 相对冻结 SFT 提高 **20.8 个百分点**，低于继续 SFT **12.5 个百分点**。D/E 同起点、同 512 次状态更新预算，开发验证后均选择第 384 步；实际更新 229,376 个 LoRA 参数。规则结果与早期 C=11/24、D=10/24 的负结果均保留。
+
+![语言模型 RL 五组对照](reports/agent-rl/20261102/figures/four-group-comparison.png)
+
+**结论范围：**单种子、24 个合成留出案例、已知任务族和 13 个动作候选；两步模拟器前瞻 actor 优化，不是 PPO/GRPO。不能据此声称统计显著、未知任务泛化或 RL 全面优于 SFT/规则。三条本机系统指令中 C/D 均完成 2/3；独立 20 题能力保持检查均为 15/20。后续课程训练正在开发，尚未打开最终测试，未纳入上表。
+
+公开证据包含 120 条最终测试轨迹、训练曲线、选择修订、六次本机 API 执行及成功/失败记录。执行 `python3 scripts/verify_published_agent_rl.py` 可离线复核最终轨迹；完整检查点和分支审计材料在 Release ZIP。
+
+---
+
 2026-09-07 本地改进与验收：[功能、回答速度、智能性与联动全面审视](docs/ASSISTANT_REVIEW_20260907.md)。包含修改前后真实耗时、412 项回归、版本化固定基准、联动回执及仍待补齐的知识和现场条件。
 
 同日新增[联动智能体操作台](docs/LINKED_AGENT_OPERATIONS.md)：8 项登记动作，覆盖能碳参数对比试算、数字孪生情景评估、马六甲模拟情景与时钟调整，以及连续观测、差值、配置恢复和持久化回执。入口为“四系统联动 → 参数调整与观测”，也支持在智能操作模式下输入自然语言指令。
 
 ## 系统运行入口与工程边界 / Runtime entry and engineering boundary
+
+2026-10-28至29日新增 **Harness 任务工作台**：模型/规则工具循环、持久检查点、租约、审批、追问与运行中补充约束、暂停/取消/恢复、技能与显式记忆、虚拟工件、只读并行研究、MCP只读工具服务、任务轨迹和结果核验。沿用原问答与联动入口，生产权限继续关闭。见[运行说明](docs/HARNESS_RUNTIME.md)、[实施步骤](docs/HARNESS_IMPLEMENTATION_PLAN_20261028.md)和[最新验收记录](docs/HARNESS_ACCEPTANCE_20261029.md)。能力实现与模型实测分别记录，不以功能清单宣称国际性能排名。
+
+2026-10-31新增[Harness V12语义与时效复验](docs/XIAOYI_HARNESS_V12_20261031.md)：原4B权重下补齐来源字段、核验缺项与关键告警、约束情景参数，记录真实推理耗时。120秒快照门槛保留，失败轮次与新任务回执分别保存；本地工程模拟验收不等于真实港口生产验证。
+
+后续港航补强新增结构化问数、时效与风险检查、同基线隔离情景对比和交接草稿；工作台可直接选择三个业务模板。见[港航业务评审与最新验收](docs/HARNESS_MARITIME_REVIEW_20261029.md)。
+
+新增“双模式港航联合系统”：企业受控联合评估与RL策略研究共用任务、审批、预算和回执；连接沙盘、原生Godot样本、港区、能碳和Flutter签收。保留原模型，开源候选独立测试；不合格策略不自动晋级。见[实际交付与启动说明](docs/HARNESS_DUAL_MODE_DELIVERY_20261029.md)及[联合验收](docs/HARNESS_DUAL_MODE_ACCEPTANCE_20261029.md)。启动入口为 `.venv/bin/python scripts/run_joint_demo.py`。
+
+2026-10-29后续验收已补齐完整原生航次、真实预训练运输策略、原生业务执行核验补偿和客户端签收；原网页演示122步、14轮完整后台业务循环及九服务两小时4329次健康探测已完成。原生桌面窗口按用户要求跳过，早期配额拒绝和修复记录保留。见[三期验收报告](docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md)、[演示使用说明](docs/HARNESS_PHASE3_DELIVERY_20261029.md)及[模型分工说明](docs/HARNESS_MODELS_EXPLAINED_20261029.md)。
 
 小懿 AI 面向港航问答、运营研判与任务副驾，解决“回答可以生成，但来源、辖区、日期、实时性和执行权限不可审计”的问题。系统由两个可独立运行与核验的平面组成：
 
@@ -66,7 +98,9 @@
 git clone https://github.com/wenjiayi123/xiaoyi-maritime-ai.git
 cd xiaoyi-maritime-ai
 python3.12 -m venv .venv
-.venv/bin/python -m pip install --require-hashes -r requirements.lock
+.venv/bin/python -m pip install --require-hashes -r requirements.lock -r requirements-research.lock
+.venv/bin/python scripts/build_index.py
+.venv/bin/python scripts/restore_research_evidence.py
 XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 ```
 
@@ -544,3 +578,40 @@ The fixed questions, [current JSON evidence report](reports/maritime_rag_benchma
 
 系统能力、指标含义与禁止超范围声明见 [工程能力与指标边界](docs/VERIFIED_CAPABILITIES.md)。<br>
 See [verified capabilities and metric boundaries](docs/VERIFIED_CAPABILITIES.md) for supported claims and explicit limits.
+
+### 2026-10-30：公开港口历史复盘与策略保障
+
+“双模式港航联合系统”已增加国际港口公开来源、历史JIT资源对照、NOAA水位留出预测验证和证据导出；RL研究增加验证集固定基线、配对区间、最差种子与三类压力门禁。实测字段、代理量、工程假设和仿真输出分别标注，保留基线胜出及未准入的RL结果。趋势依据、逐项差距、使用方法和未验证范围见[本轮评审与改进](docs/HARNESS_FUTURE_PORT_REVIEW_20261030.md)。
+
+### 2026-10-30 跨港研究补充验收
+
+新增入口：**双模式港航联合系统 → 跨港与跨时段研究**。包含八港2019—2025公开指标、真实五种子Double DQN、MPC/PID对照、跨港/未来期留出、旧RL诊断、三站跨季物理标定、2025因果状态同化、失败导出及顶级港口对标矩阵。
+
+完整证据和边界见[跨港训练与孪生复验](docs/HARNESS_CROSSPORT_ACCEPTANCE_20261030.md)。当前结论为**功能链路可核验，完整顶级港口验收未通过，未准入RL或现场控制**；保留压力容量不可行、标定失败及全仓发布阻断。可选研究依赖：`requirements-research.lock`。
+
+### 2026-10-30：八项整改与2026独立留出
+
+新增“**查看8项整改与2026新留出**”及“**八项整改与2026独立留出审阅**”模板。新国际港口、三类真实RL、强MPC、六站年度天文模型、多业务与恢复合同均已实测；需求预测区间及本机发布两项解除阻断，当前对标为**5/11**。RL仍未胜过MPC，物理与现场缺项继续阻断。全仓744项Python、47项Node及静态检查通过，容器构建未验证。完整结果见[本轮整改与验收](docs/HARNESS_REMEDIATION_V2_ACCEPTANCE_20261030.md)。
+
+
+### 2026-10-30：六项续改、单因素消融与Docker实建
+
+最新证据入口为“**查看6项续改与单因素消融**”。固定回放七条件×五种子定位了价值学习退化；经验模型离线RL新八港平均成本比验证选定MPC低2.70%，但收益集中、逐港退化与安全门禁未通过。新时期长期开环5/21、短期46/54通过，缺测与负面结果完整保留。新八港冻结需求预测8/8补验通过；新增资源—供电联合排程与DCSA PC2.0.0规范子集演练。Docker已在独立Linux虚拟机内实建、按非root只读约束运行并做重启/持久化与健康检查；不含主机4B权重的容器推理验收。全仓751项Python、47项Node通过；完整港口资格仍为**5/11**，生产权限关闭。详见[最新报告与操作指南](docs/HARNESS_REMEDIATION_V3_ACCEPTANCE_20261030.md)。
+
+### 2026-10-30：最新风险复验与37项功能评分
+
+新增“**最新安全复验、孪生与评分**”及“**小懿逐项功能评分**”。20港开发后另八港独立留出；原4步可避免违规回放降为0，新留出可避免违规也为0，但安全RL与安全MPC全部动作相同，收益未准入。逐次初始化天气预报强迫的两个七日模式均15/28通过，旧年度/短期及真实缺测继续保留。完整对标仍为**5/11**。新全仓757项Python、47项Node及工程检查通过；37项评分逐项说明功能、研究和现场成熟度，属于本次证据粗评。见[最新验收与操作](docs/HARNESS_REMEDIATION_V4_ACCEPTANCE_20261030.md)及[完整功能评分](docs/XIAOYI_CAPABILITY_SCORECARD_20261030.md)。
+
+
+## 2026-10-30 V5 可执行实证演示
+
+小懿主机入口8010新增“**小懿能力实证演示**”：真实公开来源下载和摘要核验、同快照问数/风险/推演、可改参数的资源—供电整数联合优化、RL与水位原始轨迹、故障阻断恢复，以及受约束4B工具调用。八个新港22,096条公开记录；5月和新6月各32个合成工单情景保留全部零收益与较小收益。严格港口验收仍5/11，生产权限关闭。
+
+完整[操作指南、37项提升和评分](docs/XIAOYI_CAPABILITY_UPGRADE_V5_20261030.md)；最新评分另存，原始V4评分和科学失败保持可查。
+
+
+最新离线研究：[V6操作、数据与失败解释](docs/XIAOYI_RESEARCH_V6_GUIDE_20261030.md) · [37项能力评分](docs/XIAOYI_V6_SCORECARD_20261030.md)。本轮工程验收与RL收益、全季孪生和现场资格分别报告。
+
+## 2026-10-31：37项能力评估与预测/稳健计划提升
+
+左侧“能力评估与提升 · 37项”进入逐项评分、目标与验收条件页面。新增1/7/14天概率预测的时效、缺测、漂移与区间质量检查，以及五种压力情景下的共享联合排程。最终回放1,872次、预测覆盖门槛26/48通过；16个合成工单案例的80次情景约束核验全部通过，但名义成本增加，不代表现场经济收益。完整边界、失败、时钟修正与逐项提升见[本轮评估](docs/XIAOYI_CAPABILITY_REVIEW_V8_20261031.md)。本轮未改变真实港口生产权限，也没有覆盖V6/V7研究证据。

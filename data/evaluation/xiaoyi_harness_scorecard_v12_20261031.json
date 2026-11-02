@@ -1,0 +1,212 @@
+{
+  "schema": "xiaoyi-harness-evidence-maturity.v1",
+  "assessed_at": "2026-10-31T04:23:43.525891+00:00",
+  "scale": {
+    "0": "未接入/未证实",
+    "1": "实现或合同",
+    "2": "隔离机制测试",
+    "3": "真实本地集成",
+    "4": "真实站点影子运行",
+    "5": "长期生产验证"
+  },
+  "aggregate_score": null,
+  "notice": "证据成熟度，不是模型准确率、国际排名或科学算法评分；不与既有百分制混算。",
+  "dimensions": [
+    {
+      "id": "model_tool_execution",
+      "score": 3,
+      "max_score": 5,
+      "basis": "真实4B新任务2/2通过预登记合同；不是开放任务准确率"
+    },
+    {
+      "id": "task_lifecycle",
+      "score": 3,
+      "max_score": 5,
+      "basis": "实际暂停安全边界与继续；其余有隔离回归"
+    },
+    {
+      "id": "tool_contract",
+      "score": 3,
+      "max_score": 5,
+      "basis": "当前管理员24项登记工具；无任意Shell"
+    },
+    {
+      "id": "maritime_handover",
+      "score": 3,
+      "max_score": 5,
+      "basis": "最新真实4B五工具任务：四项指标、三个情景、同快照完整，82.600秒完成、交付快照68.36秒；报告明确工件编译且待人工签收"
+    },
+    {
+      "id": "local_integrations",
+      "score": 3,
+      "max_score": 5,
+      "basis": "8项实际联动验收"
+    },
+    {
+      "id": "joint_business",
+      "score": 3,
+      "max_score": 5,
+      "basis": "15步联合任务和实际Flutter本机签收"
+    },
+    {
+      "id": "delivery_checks",
+      "score": 3,
+      "max_score": 5,
+      "basis": "920项回归；真实新交付保持120秒时效、指标和情景覆盖；曾超出1.35秒仍判失败；有限语义检查，非完整正确性证明"
+    },
+    {
+      "id": "crash_recovery",
+      "score": 2,
+      "max_score": 5,
+      "basis": "隔离测试证据；未在本轮对完整业务实施进程故障注入"
+    },
+    {
+      "id": "audit_and_evaluation",
+      "score": 3,
+      "max_score": 5,
+      "basis": "冻结协议、各阶段新数据、失败回执、原始模型重复数组复现、独立时钟/工件/事件链核验；非外部盲测或不可篡改存证"
+    },
+    {
+      "id": "free_text_semantics",
+      "score": 3,
+      "max_score": 5,
+      "basis": "指定身份/时间/零空值/主要告警的5个最新真实4B摘要最终交付通过（4个隔离新数据+1个实际API）；其中1个需2轮纠错；有限字段检查，不是开放语义准确率",
+      "previous_score": 2
+    },
+    {
+      "id": "general_multiagent",
+      "score": 1,
+      "max_score": 5,
+      "basis": "仅受控只读并行分支"
+    },
+    {
+      "id": "production_integration",
+      "score": 0,
+      "max_score": 5,
+      "basis": "8类合同、0真实在线；生产权限关闭"
+    }
+  ],
+  "scientific_scores_unchanged": {
+    "prediction_interval": 70,
+    "rl_gain_over_strong_mpc": 30,
+    "annual_twin": 50
+  },
+  "report": "docs/XIAOYI_HARNESS_V12_20261031.md",
+  "existing_rubric_review": {
+    "baseline": "data/evaluation/xiaoyi_capability_scorecard_v10_20261031.json",
+    "harness_previous": 75,
+    "harness_current": 75,
+    "max_score": 100,
+    "dimensions": {
+      "功能覆盖": 4,
+      "验证深度": 4,
+      "陌生场景泛化": 2,
+      "港航业务闭合": 3,
+      "运行成熟度": 2
+    },
+    "reason": "语义与时效工程缺陷有新的本地修复证据；原百分制的陌生场景泛化、跨站点和生产成熟度未跨越门槛，Harness总分仍75；专项证据成熟度单独更新，不混算"
+  },
+  "previous_assessment": {
+    "path": "data/evaluation/xiaoyi_harness_scorecard_v11_20261031.json",
+    "sha256": "ad5e68a78ac66003cad040baca0e08cf53c48940a25e8be2f85ed18dcdc2849f"
+  },
+  "score_changes": {
+    "free_text_semantics_evidence_maturity": {
+      "before": 2,
+      "after": 3,
+      "out_of": 5
+    },
+    "harness_existing_rubric": {
+      "before": 75,
+      "after": 75,
+      "out_of": 100
+    }
+  },
+  "latest_targeted_trials": [
+    {
+      "case": "risk",
+      "task_id": "ht-03afa84e6f5243d3a9fae10d83404818",
+      "elapsed_seconds": 57.224,
+      "snapshot_age_seconds": 40.02,
+      "passed": true,
+      "business_repairs": 0,
+      "evidence_stage": "R4 isolated controlled simulation"
+    },
+    {
+      "case": "nullable",
+      "task_id": "ht-beddfc893ac341af933c0244664e0dcc",
+      "elapsed_seconds": 52.819,
+      "snapshot_age_seconds": 39.71,
+      "passed": true,
+      "business_repairs": 0,
+      "evidence_stage": "R4 isolated controlled simulation"
+    },
+    {
+      "case": "source_gap",
+      "task_id": "ht-d95c6c34220d452ab651a1215a470fa5",
+      "elapsed_seconds": 110.766,
+      "snapshot_age_seconds": 101.83,
+      "passed": true,
+      "business_repairs": 2,
+      "evidence_stage": "R4 isolated controlled simulation"
+    },
+    {
+      "case": "rag_risk",
+      "task_id": "ht-680e6358e669439e9ffbbea4ec7cdbd7",
+      "elapsed_seconds": 75.173,
+      "snapshot_age_seconds": 39.64,
+      "passed": true,
+      "business_repairs": 0,
+      "evidence_stage": "R4 isolated controlled simulation"
+    },
+    {
+      "case": "live-free-summary",
+      "task_id": "ht-ca682fc3df4241dfbd6fb43edd90709c",
+      "elapsed_seconds": 85.086,
+      "snapshot_age_seconds": 51.79,
+      "passed": true,
+      "business_repairs": 0,
+      "evidence_stage": "R5 actual application engineering simulation"
+    },
+    {
+      "case": "live-next-shift",
+      "task_id": "ht-f1857cff50144b19bcfd166cae57201c",
+      "elapsed_seconds": 82.6,
+      "snapshot_age_seconds": 68.36,
+      "passed": true,
+      "business_repairs": 0,
+      "evidence_stage": "R7 actual application engineering simulation"
+    }
+  ],
+  "validation": {
+    "python_tests": 920,
+    "node_tests": 47,
+    "ruff_passed": true,
+    "release_check_passed": true,
+    "logs": [
+      ".codex_artifacts/harness-v12-20261031/full-pytest-r7.log",
+      ".codex_artifacts/harness-v12-20261031/node-tests.log",
+      ".codex_artifacts/harness-v12-20261031/ruff-r7-final.log",
+      ".codex_artifacts/harness-v12-20261031/release-check-r7.log"
+    ]
+  },
+  "unchanged_gates": {
+    "freshness_seconds": 120,
+    "future_tolerance_seconds": 5,
+    "repair_rounds": 2,
+    "required_tools_success": true,
+    "production_authority": false,
+    "no_rule_fallback": true,
+    "semantic_errors_allowed": 0,
+    "required_fact_omissions_allowed": 0,
+    "zero_null_confusion_allowed": 0
+  },
+  "scope_notice": "各修复路径的最新6个针对性案例均最终通过：自由摘要路径保留R4/R5证据，后续R6/R7只修改比较合同/固定业务中间阶段；不是同一轮盲测，不构成总体准确率或稳定延迟分布。数据是受控工程模拟与应用新模拟快照，不是新真实港口生产数据。",
+  "limitations": [
+    "真实缺项案例首稿及第一次纠错仍有错误，最终在第二次纠错后通过",
+    "有限字段/告警/中文肯定式情景名称检查，不证明任意自然语言、因果、日期或实体关系正确",
+    "运行中变更和否定/排除意图不使用简单情景名称推断；复杂/长任务或并发仍可能过期",
+    "本机CPU4B生成仍慢；未做跨模型体量对照、真实站点或长期生产验收"
+  ],
+  "evidence_root": ".codex_artifacts/harness-v12-20261031"
+}

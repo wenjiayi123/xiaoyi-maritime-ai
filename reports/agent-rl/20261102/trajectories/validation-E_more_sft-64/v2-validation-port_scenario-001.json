@@ -1,0 +1,383 @@
+{
+  "task": {
+    "case_id": "v2-validation-port_scenario-001",
+    "split": "validation",
+    "family": "port_scenario",
+    "seed": 624001,
+    "green": 0.79,
+    "carbon": 133,
+    "baseline": 0.35,
+    "scenario": "high_density_berthing",
+    "fault": "none",
+    "max_steps": 14
+  },
+  "outcome": {
+    "case_id": "v2-validation-port_scenario-001",
+    "family": "port_scenario",
+    "split": "validation",
+    "success": true,
+    "steps": 4,
+    "reward": 2.400001,
+    "parameter_attempts": 0,
+    "parameter_correct": 0,
+    "errors": 0,
+    "fault_injected": false,
+    "recovered": false,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "bdf1d371d87c9daf094189b53193be0ce75d542c80cffb5456e7b2b6b1c83728",
+    "source": "synthetic_training_environment",
+    "parameter_matches": 0,
+    "elapsed_seconds": 3.0002
+  },
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 14
+      },
+      "choice": "A",
+      "action": {
+        "tool": "port.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "synthetic_resettable_environment",
+        "target": "port",
+        "case": "v2-validation-port_scenario-001",
+        "production_authority": false,
+        "source_hash": "acb24c009a0c4dc2ff537af9b201958e588d29708bb100755fdb806edf78d14c"
+      },
+      "feedback": "read_ok:port",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.3333333333333333,
+      "potential_before": 0.0,
+      "potential_after": 0.3333333333333333
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "choice": "D",
+      "action": {
+        "tool": "port.evaluate",
+        "arguments": {
+          "scenario": "high_density_berthing",
+          "horizon_min": 60,
+          "step_min": 15
+        }
+      },
+      "ok": true,
+      "result": {
+        "scenario": "high_density_berthing",
+        "source": "synthetic_parameter_receipt"
+      },
+      "feedback": "port_evaluate_ok",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666666,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.3333333333333333,
+      "progress_after": 0.6666666666666666,
+      "potential_before": 0.3333333333333333,
+      "potential_after": 0.6666666666666666
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 12
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "checks": {
+          "required_observations": true,
+          "energy_parameters": true,
+          "port_scenario": true,
+          "restoration": true,
+          "no_uncertain_write": true,
+          "verified": true
+        }
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.566667,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.6666666666666667,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.6666666666666666,
+      "progress_after": 1.0,
+      "potential_before": 0.6666666666666666,
+      "potential_after": 1.0
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "report_sha256": "5964b0baf80ad268fbb3cd84dec0584baec8ca71c9033e064f8dff3f499cf386"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 10
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0
+    }
+  ],
+  "decisions": [
+    {
+      "prompt": "本次工作要求：读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数14。\n任务缺项：港口状态尚未读取；港口情景尚无评估结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.79,碳价133);F=能碳比较(偏好0.92,碳价133);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.79,碳价152);M=询问用户\n下一步只输出一个字母：",
+      "label": "A",
+      "log_probability": 0.0,
+      "probabilities": [
+        1.0,
+        1.991561950076548e-11,
+        2.026138146149492e-10,
+        7.348652797389832e-10,
+        7.127342049884078e-10,
+        2.1822242624036647e-10,
+        1.8223656091109763e-12,
+        3.87661187872812e-11,
+        5.82570242046998e-11,
+        6.127037245617917e-12,
+        2.6435526944562637e-12,
+        1.4358259373126181e-11,
+        4.988024750185449e-12
+      ],
+      "seconds": 0.7228,
+      "input_tokens": 295,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。\n已完成：港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:port。剩余步数13。\n任务缺项：港口情景尚无评估结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.79,碳价133);F=能碳比较(偏好0.92,碳价133);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.79,碳价152);M=询问用户\n下一步只输出一个字母：",
+      "label": "D",
+      "log_probability": -0.5273438692092896,
+      "probabilities": [
+        5.908652747166343e-05,
+        1.769125447026454e-05,
+        0.00034737648093141615,
+        0.5901704430580139,
+        0.0010028615361079574,
+        0.0004960672231391072,
+        2.644215783220716e-06,
+        0.00013205788854975253,
+        0.4074718654155731,
+        0.00018806442676577717,
+        1.0312763151887339e-05,
+        3.069195008720271e-05,
+        7.083219679770991e-05
+      ],
+      "seconds": 0.75,
+      "input_tokens": 294,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。\n已完成：港口读取、港口情景评估。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：port_evaluate_ok。剩余步数12。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.79,碳价133);F=能碳比较(偏好0.92,碳价133);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.79,碳价152);M=询问用户\n下一步只输出一个字母：",
+      "label": "I",
+      "log_probability": -1.3709161976294126e-05,
+      "probabilities": [
+        6.352198211878601e-10,
+        4.518305452005933e-10,
+        2.2371223096229187e-08,
+        6.512565278171678e-07,
+        2.116911019811596e-07,
+        9.102028997176603e-08,
+        1.2563076134952667e-09,
+        1.768279815905771e-07,
+        0.9999862909317017,
+        1.2519182746473234e-05,
+        1.630239410133072e-08,
+        9.42202849074647e-09,
+        2.825006539808328e-08
+      ],
+      "seconds": 0.765,
+      "input_tokens": 291,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "本次工作要求：读取港口状态并评估靠泊情景，核验后交付报告。 情景=high_density_berthing。\n已完成：港口读取、港口情景评估、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数11。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.79,碳价133);F=能碳比较(偏好0.92,碳价133);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.79,碳价152);M=询问用户\n下一步只输出一个字母：",
+      "label": "J",
+      "log_probability": -8.547671313863248e-05,
+      "probabilities": [
+        7.077994874232774e-13,
+        5.681378978383833e-12,
+        1.7842524679956284e-10,
+        1.8617756225580706e-08,
+        1.0086354862437474e-08,
+        3.690059813266089e-09,
+        2.5392531827206355e-11,
+        2.3940728510751796e-07,
+        8.521343261236325e-05,
+        0.9999145269393921,
+        1.2145645378325298e-08,
+        3.6227274513578323e-09,
+        7.662982248746175e-09
+      ],
+      "seconds": 0.7609,
+      "input_tokens": 290,
+      "exact_logit_cache_hit": false
+    }
+  ]
+}

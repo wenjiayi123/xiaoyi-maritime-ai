@@ -1,0 +1,165 @@
+<!DOCTYPE html><html lang="en"> <head><meta charset="UTF-8"><meta name="description" content="DCSA Reference Documentation"><meta name="viewport" content="width=device-width"><link rel="icon" type="image/x-icon" href="/favicon.ico"><meta name="generator" content="Astro v5.17.3"><link rel="canonical" href="https://reference.dcsa.org/content/standards/releases/port-call/v2/pc-v2-purpose-and-scope"><title>DCSA PC 2.0.0 - Purpose &amp; Scope</title><script>
+      var _paq = window._paq = window._paq || [];
+      _paq.push(['trackPageView']);
+      _paq.push(['enableLinkTracking']);
+      (function() {
+        _paq.push(['setTrackerUrl', 'https://dcsa.matomo.cloud/matomo.php']);
+        _paq.push(['setSiteId', '10']);
+        var documentElement = document;
+        var script = documentElement.createElement('script');
+        script.async = true;
+        script.src = 'https://cdn.matomo.cloud/dcsa.matomo.cloud/matomo.js';
+        documentElement.head.appendChild(script);
+      })();
+    </script><link rel="stylesheet" href="/_astro/index.DDlUGeup.css">
+<link rel="stylesheet" href="/_astro/index.CXRMQLBz.css"></head> <body>  <header class="site-header" data-astro-cid-zzbsltwi> <nav class="navigation" aria-label="Primary navigation" data-astro-cid-zzbsltwi> <div class="nav-inner" data-astro-cid-zzbsltwi> <a href="/" class="logo-link" aria-label="DCSA Reference home" data-astro-cid-zzbsltwi> <img src="/images/dcsa-standards-public-reference-logo.png" alt="DCSA Standards — Public Reference" class="h-10" style="height: 3rem; width: auto; display: block;"> </a> </div> </nav> <p id="environment-notice" class="environment-notice" hidden role="status" data-astro-cid-zzbsltwi></p> </header> <script>
+  var hostname = window.location.hostname;
+  var environment = hostname.endsWith('.labs.dcsa.org')
+    ? 'labs'
+    : hostname === 'staging.reference.dcsa.org' || hostname === 'snapshots-staging.reference.dcsa.org'
+      ? 'staging'
+      : undefined;
+
+  if (environment) {
+    var notice = document.querySelector('#environment-notice');
+    if (notice) {
+      document.documentElement.dataset.environment = environment;
+      notice.textContent = (environment === 'labs' ? '🚫' : '⚠️') + ' Do not use this non-production environment for official DCSA reference information.';
+      notice.hidden = false;
+    }
+  }
+</script>  <main data-astro-cid-z46shtqs> <article class="markdown-content" data-astro-cid-z46shtqs> <div class="container" data-astro-cid-z46shtqs> <div class="content-wrapper" data-astro-cid-z46shtqs> <aside class="snapshot-notice latest-snapshot-notice" aria-label="Latest release" data-astro-cid-z46shtqs>
+You are viewing the latest available release of this standard.
+</aside>     <p><a href="/content">DCSA Standards Public Reference</a> / <a href="/content/standards">Standards</a> / <a href="/content/standards/releases">Releases</a> / <a href="/content/standards/releases/port-call">Port Call</a> / <a href="/content/standards/releases/port-call/v2">Port Call v2</a></p>
+<h1 id="dcsa-pc-200---purpose--scope">DCSA PC 2.0.0 - Purpose &#x26; Scope</h1>
+<h3 id="contents">Contents</h3>
+<ul>
+<li><a href="#introduction">Introduction</a>
+<ul>
+<li><a href="#preface">Preface</a></li>
+<li><a href="#purpose">Purpose</a></li>
+<li><a href="#scope">Scope</a>
+<ul>
+<li><a href="#process">Process</a></li>
+<li><a href="#actors--roles">Actors &#x26; Roles</a></li>
+</ul>
+</li>
+<li><a href="#supporting-publications">Supporting publications</a></li>
+<li><a href="#external-references">External references</a></li>
+</ul>
+</li>
+<li><a href="#change-history">Change history</a></li>
+<li><a href="#legal-disclaimer">Legal disclaimer</a></li>
+</ul>
+<h1 id="introduction">Introduction</h1>
+<h2 id="preface">Preface</h2>
+<p>DCSA envisions a digitally interconnected container shipping industry. Our mission is to be the de facto standards body for the industry, setting the technological foundation for interoperable IT solutions. Together with our member carriers, DCSA creates vendor-neutral standards for IT and non-competitive business practices. By working towards the widespread adoption of these standards, we aim to move the industry forward in terms of customer experience, efficiency, collaboration, innovation, and respect for the environment.</p>
+<p>The objective of the DCSA Port Call Standard is to enable a digital port call planning process, which will facilitate vessel speed optimization, reduce CO2 emissions, improve schedule reliability, and increase operational efficiency overall. To provide a global industry framework that builds on existing standards, DCSA port call data definitions align with IMO terminology<a href="#external-references">*</a>.</p>
+<p>Apart from the reliance on a small set of widely used open-source technologies and standards (e.g. JSON, REST, OpenAPI), the standards published by DCSA are technology agnostic.</p>
+<p>DCSA does not point to specific vendors’ technologies or systems and relies on open-source, shared requirements for the industry that can be used by all parties.</p>
+<p>This chapter describes the purpose, scope, and supporting publications of this document.</p>
+<h2 id="purpose">Purpose</h2>
+<p>The DCSA Port Call Interface Standard aims to simplify and standardize the exchange of operational information between carriers, terminals, port authorities, and service providers, to orchestrate and optimize port calls.</p>
+<p>This publication aims to ensure agreement on the shared requirements and standards that must be followed to streamline interoperational functionality and data sharing across relevant industry participants.</p>
+<p>Agreement on standards will ensure that data exchange interfaces, including their functionality and data provided, adhere to the same definitions and design. The aim is to ensure that the end-user experience remains consistent across all industry participants who use these standards.</p>
+<h2 id="scope">Scope</h2>
+<p>The DCSA Port Call Interface Standard focuses on the process beginning with the communicated operational estimated time of arrival at a Berth of a port before reaching the Pilot Boarding Place and Berth.</p>
+<p>The <a href="https://dcsa.org/standards/operational-vessel-schedules">operational vessel schedules</a> and communications regarding cargo operations are running as separate processes in parallel. These processes are included in the DCSA Industry Blueprint and not addressed in this document.</p>
+<p>The detailed port call process maps (weekly berth planning, port call, nautical services, and other services) are available in the DCSA Industry blueprint. The process maps are key to understanding how to use the use cases, especially in the case of non-happy flows.</p>
+<h3 id="process">Process</h3>
+<h4 id="industry-blueprint">Industry Blueprint</h4>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-industry-blueprint.png" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-industry-blueprint.png" alt="dcsa-pc-v200-release-industry-blueprint.png"></a></p>
+<h5 id="weekly-berth-planning">Weekly berth planning</h5>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-weekly-berth-planning.jpg" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-weekly-berth-planning.jpg" alt="dcsa-pc-v200-release-weekly-berth-planning.jpg"></a></p>
+<h5 id="port-call-nautical-services">Port call nautical services</h5>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-nautical-services.jpg" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-nautical-services.jpg" alt="dcsa-pc-v200-release-port-call-nautical-services.jpg"></a></p>
+<h5 id="port-call-process">Port call process</h5>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-process.jpg" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-process.jpg" alt="dcsa-pc-v200-release-port-call-process.jpg"></a></p>
+<h5 id="port-call-services">Port call services</h5>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-services.jpg" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-port-call-services.jpg" alt="dcsa-pc-v200-release-port-call-services.jpg"></a></p>
+<h4 id="high-level-port-call-process">High-level port call process</h4>
+<p>The foundation for creating operational transparency is to express event timestamps using a common language and definitions. The definitions for the timestamps of the events and their negotiation process, where applicable, outlined in this document are aligned with IMO terminology (<em>Please refer to the External References section below for further information</em>).</p>
+<h5 id="port-call-services-negotiation-e-r-p-a-pattern-of-events">Port call services negotiation: E-R-P-A pattern of events</h5>
+<p>The planning and execution of many events follow the same pattern, in which several instances of the estimated, requested, and planned times can occur.</p>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-erpa-pattern.png" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-erpa-pattern.png" alt="dcsa-pc-v200-release-erpa-pattern.png"></a></p>
+<ul>
+<li>
+<p><strong>Estimated:</strong> When an entity estimates to arrive, depart, start, or complete a service. <em>For example, a carrier provides the terminal operator with an estimate of when it will arrive at berth.</em></p>
+</li>
+<li>
+<p><strong>Requested:</strong> When the receiving party requests a service to occur at a specific time. <em>For example, a terminal operator requests a carrier to change its arrival time at berth due to a delay.</em></p>
+</li>
+<li>
+<p><strong>Planned:</strong> The confirmation of the requested time by the entity providing the service. A planned time is always equal to a requested time. <em>For example, when a carrier confirms the Requested Time of Arrival at berth from the terminal with a Planned Time of Arrival at Berth. In case the vessel is unable to meet the Requested Time of Arrival, then the vessel will send a new Estimated Time of Arrival, which will be followed by a new Requested Time of Arrival, and so on, until the vessel agrees with the RTA and confirms it with a Planned Time of Arrival equal to the Requested Time of Arrival.</em> </p>
+</li>
+<li>
+<p><strong>Actual:</strong> The actual execution of the planned event. <em>For example, Actual Time of Arrival at Berth.</em></p>
+</li>
+</ul>
+<p>Some events, specified in this document, do not need to follow the E-R-P-A pattern, as they are informative and reflect actuals only (e.g., vessel readiness for cargo operations).</p>
+<h5 id="example-of-port-call-process-with-e-r-p-a-pattern-of-events">Example of port call process with E-R-P-A pattern of events</h5>
+<p>The process involves a series of sequential events: Arrival at Pilot Boarding Place, Arrival at Berth, Start of Cargo Operations and other services, Completion of Cargo Operations, and Departure from Berth. Each of these follows the E-R-P-A pattern. However, certain events, such as End of Sea Passage (EOSP in the image), do not follow this pattern.</p>
+<p>The process begins with arrival at berth negotiations between the carrier and the terminal. The carrier initiates by sending an Estimated Time of Arrival at Berth (ETA Berth), and the terminal responds with a Requested Time of Arrival at Berth (RTA Berth). If adjustments are needed, the carrier sends an updated ETA, and the terminal replies with a revised RTA, repeating the pattern until both parties reach an agreement. Once agreed, the carrier confirms the Planned Time of Arrival at Berth (PTA Berth). After the vessel arrives, the carrier shares the Actual Time of Arrival at Berth.</p>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-arrival-planning-and-execution.png" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-arrival-planning-and-execution.png" alt="dcsa-pc-v200-release-arrival-planning-and-execution.png"></a></p>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-departure-planning-and-execution.png" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-departure-planning-and-execution.png" alt="dcsa-pc-v200-release-departure-planning-and-execution.png"></a></p>
+<h3 id="actors--roles">Actors &#x26; Roles</h3>
+<p>The interface standard defines all information exchanges among the relevant parties. For port call planning and execution, the key parties include:</p>
+<ul>
+<li>
+<p>Carrier</p>
+</li>
+<li>
+<p>Port (incl. nautical service providers)</p>
+</li>
+<li>
+<p>Terminal</p>
+</li>
+<li>
+<p>Service Provider</p>
+</li>
+</ul>
+<p>In this interface standard, carriers and ports may be represented by multiple entities, each distinguished by a specific role. These roles help identify data origin and ownership, ensuring clarity in data flow and responsibility. The roles are:</p>
+<ul>
+<li>
+<p><strong>Carrier:</strong> Carrier, Carrier local agent, Vessel.</p>
+</li>
+<li>
+<p><strong>Port (incl. nautical service providers):</strong> (Port) Authorities, Pilotage service provider, Towage service provider, Mooring service provider.</p>
+</li>
+<li>
+<p><strong>Terminal:</strong> Terminal.</p>
+</li>
+<li>
+<p><strong>Service Provider:</strong> Lashing service provider, Bunker service provider, Sludge service provider, Other service provider</p>
+</li>
+</ul>
+<p>Due to differences in carrier organizations, internal processes, and variations in operations across ports and terminals, any party representing an actor may send and receive messages on that actor’s behalf.</p>
+<p><a href="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-information-exchange.png" target="_blank" rel="noopener noreferrer"><img src="/images/content/standards/releases/port-call/v2/pc-v2-0-0-purpose-and-scope/dcsa-pc-v200-release-information-exchange.png" alt="dcsa-pc-v200-release-information-exchange.png"></a></p>
+<h2 id="supporting-publications">Supporting publications</h2>
+<p>This Interface Standard document is supported by a range of supplementary DCSA publications. The supporting publications are listed in the table below and can be found on the <a href="https://dcsa.org/">DCSA website</a>. </p>
+<table><tbody><tr><th><strong>Publication</strong></th><th><strong>Descriptions</strong></th></tr><tr><td>DCSA Port Call 2.0.0 Data overview</td><td>This document contains the complete list of data attributes relevant to the DCSA Port Call 2.0.0 use cases, specifying whether each attribute is mandatory, conditionally mandatory, or optional.</td></tr><tr><td>DCSA Glossary of Terms</td><td>This document explains international container shipping terminology used within the industry, fostering communication and promoting standardisation among stakeholders.</td></tr><tr><td>DCSA Industry Blueprint</td><td>This document consists of a compilation of business processes that are considered critical for industry digitalization and standardisation efforts, and that are not considered commercially sensitive or of competitive advantage. It offers an accessible way to understand the container shipping industry by providing industry-approved processes and data definitions. Additionally, it visually demonstrates the domains where DCSA's standards are applied.</td></tr></tbody></table>
+<h2 id="external-references">External references</h2>
+<ul>
+<li>
+<p><a href="https://greenvoyage2050.imo.org/wp-content/uploads/2021/01/GIA-just-in-time-hires.pdf">GEF-UNDP-IMO GloMEEP Project and members of the GIA, 2020: Just In Time Arrival Guide - Barriers and Potential Solutions</a></p>
+</li>
+<li>
+<p><a href="https://wwwcdn.imo.org/localresources/en/OurWork/Facilitation/FAL%20related%20nonmandatory%20documents/FAL.5-Circ.52.pdf">GUIDELINES FOR HARMONIZED COMMUNICATION AND ELECTRONIC EXCHANGE OF OPERATIONAL DATA FOR PORT CALLS - FAL.5/Circ.52 - 31 March 2023</a></p>
+</li>
+</ul>
+<hr>
+<h1 id="change-history">Change history</h1>
+<table><tbody><tr><th><strong>Version</strong></th><th><strong>Date</strong></th><th><strong>Description</strong></th></tr><tr><td>1.0</td><td>November 2021</td><td>- DCSA Interface Standard JIT Port Call - 17 timestamps<br>- Detailed info in: <a href="https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1" data-card-appearance="inline">https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1</a></td></tr><tr><td>1.1</td><td>November 2021</td><td>- DCSA Interface Standard JIT Port Call - completed to 50 timestamps<br>- Detailed info in: <a href="https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1" data-card-appearance="inline">https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1</a></td></tr><tr><td>1.2 Beta</td><td>July 2022</td><td>- DCSA Interface Standard JIT Port Call - completed to 110 timestamps<br>- Detailed info in: <a href="https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1" data-card-appearance="inline">https://github.com/dcsaorg/DCSA-OpenAPI/tree/master/jit/v1</a></td></tr><tr><td>2.0</td><td>2025-12-18</td><td>- Renamed to DCSA Port Call Standard<br>- API specifications redesign and enhancements based on beta implementations and testing<br>- Detailed info in: <a href="https://dcsa.org/standards/port-call/documentation-port-call">https://dcsa.org/standards/port-call/documentation-port-call</a></td></tr></tbody></table>
+<h1 id="legal-disclaimer">Legal disclaimer</h1>
+<p>Copyright 2025 Digital Container Shipping Association (DCSA) Licensed under the Apache License, Version 2.0 (the “License”); you may not use this file except in compliance with the License. You may obtain a copy of the License here: LicenseUnless required by applicable law or agreed to in writing, software distributed under the License is distributed on an “AS IS” BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.</p>  </div> </div> </article> </main> <footer class="footer" data-astro-cid-z46shtqs> <div class="container" data-astro-cid-z46shtqs> <div class="footer-content" data-astro-cid-z46shtqs> <div class="footer-logo" data-astro-cid-z46shtqs> <img src="/images/dcsa-standards-public-reference-logo.png" alt="DCSA Standards — Public Reference" style="height: 3rem; width: auto; display: block;"> </div> <div class="footer-bottom" data-astro-cid-z46shtqs> <p class="copyright" data-astro-cid-z46shtqs>
+Copyright 2026 Digital Container Shipping Association (DCSA)
+</p> <p class="copyright" data-astro-cid-z46shtqs>
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use this
+            file except in compliance with the License. You may obtain a copy of the License at  <a href="https://www.apache.org/licenses/LICENSE-2.0" target="_blank" rel="noopener noreferrer" data-astro-cid-z46shtqs>
+https://www.apache.org/licenses/LICENSE-2.0
+</a> </p> <p class="copyright" data-astro-cid-z46shtqs>
+Unless required by applicable law or agreed to in writing, software distributed under
+            the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+            KIND, either express or implied. See the License for the specific language governing
+            permissions and limitations under the License.
+</p> </div> </div> </div> </footer>  </body></html> 

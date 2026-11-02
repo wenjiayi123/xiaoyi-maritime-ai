@@ -7,18 +7,56 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def current_evidence(name, fallback):
+    """Select immutable rerun evidence, retaining historical release artifacts."""
+    registry_path = ROOT / "config/release_evidence_registry.json"
+    if not registry_path.exists():
+        return ROOT / fallback
+    registry = json.loads(registry_path.read_text())
+    if registry.get("schema") != "xiaoyi-release-evidence.v1":
+        raise ValueError("unsupported release evidence registry")
+    path = (ROOT / registry["reports"].get(name, fallback)).resolve()
+    if not path.is_relative_to((ROOT / "reports").resolve()) or path.suffix != ".json":
+        raise ValueError("release evidence must be a registered reports JSON")
+    return path
+
+
 REQUIRED = (
-    "README.md", "LICENSE", "SECURITY.md", "CONTRIBUTING.md", "THIRD_PARTY_NOTICES.md",
-    "CHANGELOG.md", "Dockerfile", "compose.yaml", "requirements.lock", "pyproject.toml",
-    "package.json", "pnpm-lock.yaml", "web/runtime_contract.js",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CONTRIBUTING.md",
+    "THIRD_PARTY_NOTICES.md",
+    "CHANGELOG.md",
+    "Dockerfile",
+    "compose.yaml",
+    "requirements.lock",
+    "pyproject.toml",
+    "package.json",
+    "pnpm-lock.yaml",
+    "web/runtime_contract.js",
     "tests/frontend_security.fuzz.test.js",
-    "app/linked_agent.py", "app/linked_agent_catalog.py", "web/linked_agent.js",
-    "tests/test_linked_agent.py", "scripts/run_linked_agent_acceptance.py",
-    "docs/LINKED_AGENT_OPERATIONS.md", "reports/linked_agent_acceptance_20260907_v3.json",
-    "CODE_OF_CONDUCT.md", "GOVERNANCE.md", "SUPPORT.md", "CITATION.cff",
-    ".github/workflows/ci.yml", ".github/workflows/dependency-review.yml",
-    ".github/workflows/codeql.yml", ".github/workflows/scorecard.yml",
-    ".github/workflows/sbom.yml", "scripts/build_sbom.py",
+    "app/linked_agent.py",
+    "app/linked_agent_catalog.py",
+    "web/linked_agent.js",
+    "tests/test_linked_agent.py",
+    "scripts/run_linked_agent_acceptance.py",
+    "docs/LINKED_AGENT_OPERATIONS.md",
+    "reports/linked_agent_acceptance_20260907_security_v1.json",
+    "reports/linked_agent_acceptance_20260912_full_function_v1.json",
+    "reports/linked_agent_acceptance_20260912_final_v1.json",
+    "CODE_OF_CONDUCT.md",
+    "GOVERNANCE.md",
+    "SUPPORT.md",
+    "CITATION.cff",
+    ".github/workflows/ci.yml",
+    ".github/workflows/dependency-review.yml",
+    ".github/workflows/codeql.yml",
+    ".github/workflows/scorecard.yml",
+    ".github/workflows/sbom.yml",
+    "scripts/build_sbom.py",
     ".github/workflows/dependency-audit.yml",
     "scripts/build_dependency_audit_admission.py",
     "reports/sbom/xiaoyi-python-lock-snapshot.cdx.json",
@@ -31,23 +69,34 @@ REQUIRED = (
     "reports/dependency_audit_20260813_r2_dev.json",
     "reports/dependency_audit_20260814_r3_runtime.json",
     "reports/dependency_audit_20260814_r3_dev.json",
+    "reports/dependency_audit_20260912_runtime_v1.json",
+    "reports/dependency_audit_20260912_dev_v1.json",
     "reports/dependency_audit_admission_v3.json",
     "reports/dependency_audit_admission_v3.md",
-    ".github/dependabot.yml", "docs/DEPLOYMENT.md", "docs/ARCHITECTURE.md",
-    "docs/VERIFIED_CAPABILITIES.md", "data/evaluation/maritime_qa_benchmark_v1.json",
-    "docs/GENERATIVE_MODEL_STACK.md", "data/model_registry.json",
-    "scripts/local_model.py", "scripts/build_lora_dataset.py",
-    "scripts/build_vector_index.py", "app/vector_retrieval.py",
-    "scripts/train_lora.py", "scripts/export_lora_gguf.py",
+    ".github/dependabot.yml",
+    "docs/DEPLOYMENT.md",
+    "docs/ARCHITECTURE.md",
+    "docs/VERIFIED_CAPABILITIES.md",
+    "data/evaluation/maritime_qa_benchmark_v1.json",
+    "docs/GENERATIVE_MODEL_STACK.md",
+    "data/model_registry.json",
+    "scripts/local_model.py",
+    "scripts/build_lora_dataset.py",
+    "scripts/build_vector_index.py",
+    "app/vector_retrieval.py",
+    "scripts/train_lora.py",
+    "scripts/export_lora_gguf.py",
     "scripts/run_local_generation_probe.py",
     "scripts/run_rag_lora_probe.py",
     "scripts/run_dense_retrieval_probe.py",
-    "requirements-lora.txt", "requirements-lora-intel-mac.lock",
+    "requirements-lora.txt",
+    "requirements-lora-intel-mac.lock",
     "data/finetuning/README.md",
     "reports/local_lora_inference_v2.json",
     "reports/local_rag_lora_e2e_v2.json",
     "reports/local_dense_retrieval_v1.json",
-    "scripts/run_rag_benchmark.py", "reports/maritime_rag_benchmark_v1.json",
+    "scripts/run_rag_benchmark.py",
+    "reports/maritime_rag_benchmark_v1.json",
     "reports/maritime_rag_benchmark_v1.md",
     "reports/maritime_rag_benchmark_v1_20260813.json",
     "reports/maritime_rag_benchmark_v1_20260813.md",
@@ -137,16 +186,23 @@ REQUIRED = (
     "reports/maritime_question_universe_benchmark_v6_20260814_r3.json",
     "reports/maritime_question_universe_benchmark_v6_20260814_r3.md",
     "docs/TOP_TIER_MARITIME_ASSISTANT_ROADMAP.md",
-    "web/index.html", "web/app.js",
-    "docs/PORT_RL_DATA_CONTRACT.md", "docs/PORT_RL_LANDING_PLAN.md",
-    "scripts/run_rl_dataset_benchmark.py", "reports/rl_dataset_benchmark_v1.json",
-    "reports/rl_dataset_benchmark_v1.md", "reports/rl_dataset_benchmark_v2.json",
-    "reports/rl_dataset_benchmark_v2.md", "app/prompt_security.py",
-    "scripts/build_lora_admission_report.py", "reports/lora_admission_v1.json",
+    "web/index.html",
+    "web/app.js",
+    "docs/PORT_RL_DATA_CONTRACT.md",
+    "docs/PORT_RL_LANDING_PLAN.md",
+    "scripts/run_rl_dataset_benchmark.py",
+    "reports/rl_dataset_benchmark_v1.json",
+    "reports/rl_dataset_benchmark_v1.md",
+    "reports/rl_dataset_benchmark_v2.json",
+    "reports/rl_dataset_benchmark_v2.md",
+    "app/prompt_security.py",
+    "scripts/build_lora_admission_report.py",
+    "reports/lora_admission_v1.json",
     "reports/lora_admission_v1.md",
     "data/competitive/hi_dolphin_public_gap_v1.json",
     "docs/COSCO_HIDOLPHIN_PUBLIC_GAP_MATRIX.md",
-    "data/contracts/port_site_admission_v1.json", "app/site_admission.py",
+    "data/contracts/port_site_admission_v1.json",
+    "app/site_admission.py",
     "data/evaluation/prompt_injection_benchmark_v1.json",
     "scripts/run_prompt_security_benchmark.py",
     "reports/prompt_injection_benchmark_v1_20260813.json",
@@ -170,8 +226,14 @@ REQUIRED = (
     "docs/screenshots/xiaoyi-grounded-conversation.png",
 )
 EXCLUDED_PARTS = {
-    ".git", ".venv", ".venv-lora", ".runtime", ".pytest_cache", "__pycache__",
-    "软著申请材料工作区", "rl_runs",
+    ".git",
+    ".venv",
+    ".venv-lora",
+    ".runtime",
+    ".pytest_cache",
+    "__pycache__",
+    "软著申请材料工作区",
+    "rl_runs",
 }
 SECRET_PATTERNS = (
     re.compile(rb"AKIA[0-9A-Z]{16}"),
@@ -198,12 +260,36 @@ def main() -> int:
             errors.append(f"缺少发布文件：{relative}")
 
     try:
-        report = json.loads((ROOT / "reports/linked_agent_acceptance_20260907_v3.json").read_text())
-        expected = {"port.observe", "port.evaluate", "energy.observe", "energy.compare", "malacca.observe", "malacca.scenario", "malacca.clock", "sailing.observe"}
-        if report.get("passed") is not True or {row["action"] for row in report["rows"]} != expected or len(report["rows"]) != 8:
-            errors.append("联动智能体八项真实适配器验收不完整")
+        # Validate the newest source-fingerprinted acceptance report.  The older
+        # report remains a historical release artifact and is still required
+        # above, but its hashes intentionally describe the pre-audit source.
+        report = json.loads(
+            current_evidence("linked_agent", "reports/linked_agent_acceptance_20260912_final_v1.json").read_text()
+        )
+        expected = {
+            "port.observe",
+            "port.evaluate",
+            "energy.observe",
+            "energy.compare",
+            "malacca.observe",
+            "malacca.scenario",
+            "malacca.clock",
+            "sailing.observe",
+            "energy.clock",
+            "sailing.validate",
+        }
+        if (
+            report.get("passed") is not True
+            or {row["action"] for row in report["rows"]} != expected
+            or len(report["rows"]) != len(expected)
+        ):
+            errors.append("联动智能体十项真实适配器验收不完整")
         for row in report["rows"]:
-            if row.get("passed") is not True or not all(row["checks"].values()) or row["run"]["production_authority"] is not False:
+            if (
+                row.get("passed") is not True
+                or not all(row["checks"].values())
+                or row["run"]["production_authority"] is not False
+            ):
                 errors.append(f"联动动作未通过验收：{row['action']}")
         for relative, expected_digest in report["source_sha256"].items():
             if hashlib.sha256((ROOT / relative).read_bytes()).hexdigest() != expected_digest:
@@ -212,13 +298,8 @@ def main() -> int:
         errors.append(f"联动智能体验收不可验证：{exc}")
 
     try:
-        model_registry = json.loads(
-            (ROOT / "data/model_registry.json").read_text(encoding="utf-8")
-        )
-        model_ids = {
-            str(item.get("model_id")): item
-            for item in model_registry.get("models", [])
-        }
+        model_registry = json.loads((ROOT / "data/model_registry.json").read_text(encoding="utf-8"))
+        model_ids = {str(item.get("model_id")): item for item in model_registry.get("models", [])}
         selected_model = model_ids[model_registry["default_model_id"]]
         if selected_model.get("revision") in {None, "", "main"}:
             errors.append("本地生成模型未固定上游revision")
@@ -234,17 +315,11 @@ def main() -> int:
             errors.append("本地生成模型字节数清单无效")
         adapter_contract = model_registry["adapter_contract"]
         training_model = model_ids[model_registry["local_training_model_id"]]
-        if adapter_contract.get("training_base") != training_model.get(
-            "upstream_model"
-        ):
+        if adapter_contract.get("training_base") != training_model.get("upstream_model"):
             errors.append("LoRA训练基座与本地生成模型族不一致")
         if training_model.get("model_id") == selected_model.get("model_id"):
             errors.append("本机LoRA证明模型未与默认高质量生成模型明确分层")
-        embedding_models = [
-            item
-            for item in model_ids.values()
-            if item.get("role") == "local_dense_embedding"
-        ]
+        embedding_models = [item for item in model_ids.values() if item.get("role") == "local_dense_embedding"]
         if len(embedding_models) != 1:
             errors.append("本地稠密向量模型清单不是1个")
         elif int(embedding_models[0].get("embedding_dimensions", 0)) != 1024:
@@ -256,15 +331,9 @@ def main() -> int:
         errors.append(f"本地生成模型清单不可验证：{exc}")
 
     try:
-        lora_report = json.loads(
-            (ROOT / "reports/local_lora_inference_v2.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        lora_report = json.loads((ROOT / "reports/local_lora_inference_v2.json").read_text(encoding="utf-8"))
         training = lora_report["training_summary"]
-        if lora_report.get("status") != "completed" or lora_report.get(
-            "profile"
-        ) != "lora":
+        if lora_report.get("status") != "completed" or lora_report.get("profile") != "lora":
             errors.append("本机LoRA推理探针未完成")
         if training.get("status") != "completed":
             errors.append("本机LoRA训练报告未完成")
@@ -276,13 +345,11 @@ def main() -> int:
             errors.append("本机LoRA固定Rank不是16")
         if training["training"].get("max_steps") != 64:
             errors.append("本机LoRA固定工程步数不是64")
-        if training["training"].get("final_validation_loss", 999) >= training[
-            "training"
-        ].get("initial_validation_loss", 0):
+        if training["training"].get("final_validation_loss", 999) >= training["training"].get(
+            "initial_validation_loss", 0
+        ):
             errors.append("本机LoRA隔离验证loss未改善")
-        if training["training"].get("final_test_loss", 999) >= training[
-            "training"
-        ].get("initial_test_loss", 0):
+        if training["training"].get("final_test_loss", 999) >= training["training"].get("initial_test_loss", 0):
             errors.append("本机LoRA隔离测试loss未改善")
         if not lora_report["evidence"].get("lora_gguf"):
             errors.append("本机LoRA探针缺少GGUF适配器证据")
@@ -290,11 +357,7 @@ def main() -> int:
         errors.append(f"本机LoRA推理证据不可验证：{exc}")
 
     try:
-        e2e_report = json.loads(
-            (ROOT / "reports/local_rag_lora_e2e_v2.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        e2e_report = json.loads((ROOT / "reports/local_rag_lora_e2e_v2.json").read_text(encoding="utf-8"))
         response = e2e_report["response"]
         verification = response["answer_verification"]
         if e2e_report.get("status") != "completed":
@@ -303,19 +366,13 @@ def main() -> int:
             errors.append("RAG+LoRA端到端探针发生生成回退")
         if response.get("generation_model") != "xiaoyi-maritime-1.7b-lora":
             errors.append("RAG+LoRA端到端探针模型身份不一致")
-        if response.get("grounded") is not True or verification.get(
-            "status"
-        ) != "passed":
+        if response.get("grounded") is not True or verification.get("status") != "passed":
             errors.append("RAG+LoRA端到端回答后门禁未通过")
     except (KeyError, OSError, TypeError, json.JSONDecodeError) as exc:
         errors.append(f"RAG+LoRA端到端证据不可验证：{exc}")
 
     try:
-        dense_report = json.loads(
-            (ROOT / "reports/local_dense_retrieval_v1.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        dense_report = json.loads((ROOT / "reports/local_dense_retrieval_v1.json").read_text(encoding="utf-8"))
         dense_status = dense_report["index_status"]
         if dense_report.get("status") != "completed":
             errors.append("本机稠密向量探针未完成")
@@ -349,13 +406,9 @@ def main() -> int:
         except (OSError, json.JSONDecodeError) as exc:
             errors.append(f"公开RL数据血缘不可验证：{dataset_id}: {exc}")
 
-    benchmark_report_path = (
-        ROOT / "reports/maritime_rag_benchmark_v1_20260907_review.json"
-    )
+    benchmark_report_path = ROOT / "reports/maritime_rag_benchmark_v1_20260907_review.json"
     try:
-        benchmark_report = json.loads(
-            benchmark_report_path.read_text(encoding="utf-8")
-        )
+        benchmark_report = json.loads(benchmark_report_path.read_text(encoding="utf-8"))
         evidence_hashes = benchmark_report["evidence_sha256"]
         for relative, expected_digest in evidence_hashes.items():
             evidence_path = ROOT / relative
@@ -388,13 +441,9 @@ def main() -> int:
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"RAG基准报告不可验证：{exc}")
 
-    assistant_report_path = (
-        ROOT / "reports/maritime_assistant_benchmark_v2_20260907_review_r2.json"
-    )
+    assistant_report_path = ROOT / "reports/maritime_assistant_benchmark_v2_20260907_review_r2.json"
     try:
-        assistant_report = json.loads(
-            assistant_report_path.read_text(encoding="utf-8")
-        )
+        assistant_report = json.loads(assistant_report_path.read_text(encoding="utf-8"))
         for relative, expected_digest in assistant_report["evidence_sha256"].items():
             evidence_path = ROOT / relative
             if not evidence_path.is_file():
@@ -416,13 +465,11 @@ def main() -> int:
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"助手困难基准报告不可验证：{exc}")
 
-    decision_report_path = (
-        ROOT / "reports/maritime_decision_readiness_benchmark_v3_20260907_review_r2.json"
+    decision_report_path = current_evidence(
+        "decision", "reports/maritime_decision_readiness_benchmark_v3_20260907_review_r2.json"
     )
     try:
-        decision_report = json.loads(
-            decision_report_path.read_text(encoding="utf-8")
-        )
+        decision_report = json.loads(decision_report_path.read_text(encoding="utf-8"))
         for relative, expected_digest in decision_report["evidence_sha256"].items():
             evidence_path = ROOT / relative
             if not evidence_path.is_file():
@@ -437,34 +484,25 @@ def main() -> int:
             errors.append("v1、v2与v3固定基准合计题数不是150")
         for category, expected_count in (("query", 14), ("assurance", 16)):
             summary = decision_benchmark[category]["summary"]
-            if (
-                summary.get("case_count") != expected_count
-                or summary.get("pass_rate") != 1.0
-            ):
+            if summary.get("case_count") != expected_count or summary.get("pass_rate") != 1.0:
                 errors.append(f"决策保障基准分类门禁未通过：{category}")
         if not decision_benchmark.get("passed"):
             errors.append("决策保障固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"决策保障基准报告不可验证：{exc}")
 
-    alignment_report_path = (
-        ROOT / "reports/maritime_claim_alignment_benchmark_v4_20260907_review_r2.json"
+    alignment_report_path = current_evidence(
+        "alignment", "reports/maritime_claim_alignment_benchmark_v4_20260907_review_r2.json"
     )
     try:
-        alignment_report = json.loads(
-            alignment_report_path.read_text(encoding="utf-8")
-        )
-        for relative, expected_digest in alignment_report[
-            "evidence_sha256"
-        ].items():
+        alignment_report = json.loads(alignment_report_path.read_text(encoding="utf-8"))
+        for relative, expected_digest in alignment_report["evidence_sha256"].items():
             evidence_path = ROOT / relative
             if not evidence_path.is_file():
                 errors.append(f"主张证据对齐基准文件缺失：{relative}")
                 continue
             if hashlib.sha256(evidence_path.read_bytes()).hexdigest() != expected_digest:
-                errors.append(
-                    f"主张证据对齐基准哈希已变化，请重新运行benchmark：{relative}"
-                )
+                errors.append(f"主张证据对齐基准哈希已变化，请重新运行benchmark：{relative}")
         alignment_benchmark = alignment_report["benchmark"]
         if alignment_benchmark.get("case_count") != 20:
             errors.append("主张证据对齐基准题数不是20")
@@ -476,19 +514,14 @@ def main() -> int:
             ("numeric", 8),
         ):
             summary = alignment_benchmark["categories"][category]["summary"]
-            if (
-                summary.get("case_count") != expected_count
-                or summary.get("pass_rate") != 1.0
-            ):
+            if summary.get("case_count") != expected_count or summary.get("pass_rate") != 1.0:
                 errors.append(f"主张证据对齐分类门禁未通过：{category}")
         if not alignment_benchmark.get("passed"):
             errors.append("回答与来源对齐固定基准未通过")
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"主张证据对齐基准报告不可验证：{exc}")
 
-    daily_report_path = (
-        ROOT / "reports/maritime_daily_operations_benchmark_v5_20260907_review.json"
-    )
+    daily_report_path = ROOT / "reports/maritime_daily_operations_benchmark_v5_20260907_review.json"
     try:
         daily_report = json.loads(daily_report_path.read_text(encoding="utf-8"))
         for relative, expected_digest in daily_report["evidence_sha256"].items():
@@ -497,9 +530,7 @@ def main() -> int:
                 errors.append(f"日常问答基准文件缺失：{relative}")
                 continue
             if hashlib.sha256(evidence_path.read_bytes()).hexdigest() != expected_digest:
-                errors.append(
-                    f"日常问答基准哈希已变化，请重新运行benchmark：{relative}"
-                )
+                errors.append(f"日常问答基准哈希已变化，请重新运行benchmark：{relative}")
         daily_benchmark = daily_report["benchmark"]
         if daily_benchmark.get("operational_case_count") != 60:
             errors.append("日常问答固定基准题数不是60")
@@ -523,24 +554,16 @@ def main() -> int:
     except (KeyError, OSError, json.JSONDecodeError) as exc:
         errors.append(f"日常问答基准报告不可验证：{exc}")
 
-    universe_report_path = (
-        ROOT / "reports/maritime_question_universe_benchmark_v6_20260907_review.json"
-    )
+    universe_report_path = ROOT / "reports/maritime_question_universe_benchmark_v6_20260907_review.json"
     try:
-        universe_report = json.loads(
-            universe_report_path.read_text(encoding="utf-8")
-        )
-        for relative, expected_digest in universe_report[
-            "evidence_sha256"
-        ].items():
+        universe_report = json.loads(universe_report_path.read_text(encoding="utf-8"))
+        for relative, expected_digest in universe_report["evidence_sha256"].items():
             evidence_path = ROOT / relative
             if not evidence_path.is_file():
                 errors.append(f"港口问题全集基准文件缺失：{relative}")
                 continue
             if hashlib.sha256(evidence_path.read_bytes()).hexdigest() != expected_digest:
-                errors.append(
-                    f"港口问题全集基准哈希已变化，请重新运行benchmark：{relative}"
-                )
+                errors.append(f"港口问题全集基准哈希已变化，请重新运行benchmark：{relative}")
         universe_benchmark = universe_report["benchmark"]
         if universe_benchmark.get("operational_case_count") != 30:
             errors.append("港口问题全集固定基准题数不是30")
@@ -634,27 +657,31 @@ def main() -> int:
 
     try:
         realtime_contract_path = ROOT / "data/contracts/port_realtime_telemetry_v1.json"
-        realtime_report_path = ROOT / "reports/port_realtime_simulator_evidence_v1_20260813.json"
+        realtime_report_path = current_evidence("realtime", "reports/port_realtime_simulator_evidence_v1_20260813.json")
         realtime_code_path = ROOT / "app/realtime_port_simulator.py"
         realtime_contract = json.loads(realtime_contract_path.read_text(encoding="utf-8"))
         realtime_report = json.loads(realtime_report_path.read_text(encoding="utf-8"))
         canonical_fields = sum(
-            len(domain.get("required_fields", []))
-            for domain in realtime_contract.get("domains", [])
+            len(domain.get("required_fields", [])) for domain in realtime_contract.get("domains", [])
         )
-        if realtime_contract.get("contract_id") != "xiaoyi-port-realtime-telemetry.v1" or realtime_contract.get("telemetry_schema") != "port-realtime.v1":
+        if (
+            realtime_contract.get("contract_id") != "xiaoyi-port-realtime-telemetry.v1"
+            or realtime_contract.get("telemetry_schema") != "port-realtime.v1"
+        ):
             errors.append("港口实时模拟器契约ID或telemetry schema不一致")
         if len(realtime_contract.get("domains", [])) != 10 or canonical_fields < 140:
             errors.append("港口实时模拟器未覆盖10域或至少140个规范字段")
         if realtime_contract.get("production_authority") is not False:
             errors.append("港口实时模拟器契约错误开启生产权限")
-        if realtime_report.get("contract", {}).get("sha256") != hashlib.sha256(
-            realtime_contract_path.read_bytes()
-        ).hexdigest():
+        if (
+            realtime_report.get("contract", {}).get("sha256")
+            != hashlib.sha256(realtime_contract_path.read_bytes()).hexdigest()
+        ):
             errors.append("港口实时模拟器证据中的契约SHA-256已变化")
-        if realtime_report.get("implementation", {}).get("sha256") != hashlib.sha256(
-            realtime_code_path.read_bytes()
-        ).hexdigest():
+        if (
+            realtime_report.get("implementation", {}).get("sha256")
+            != hashlib.sha256(realtime_code_path.read_bytes()).hexdigest()
+        ):
             errors.append("港口实时模拟器证据中的实现SHA-256已变化")
         if realtime_report.get("admission", {}).get("result") != "PASS_LOCAL_SIMULATION_ONLY":
             errors.append("港口实时模拟器本地闭环证据未通过")
@@ -702,20 +729,12 @@ def main() -> int:
         errors.append(f"公开界面数据状态无法验证：{exc}")
 
     try:
-        sbom = json.loads(
-            (ROOT / "reports/sbom/xiaoyi-python-lock-snapshot.cdx.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        sbom = json.loads((ROOT / "reports/sbom/xiaoyi-python-lock-snapshot.cdx.json").read_text(encoding="utf-8"))
         if sbom.get("bomFormat") != "CycloneDX" or sbom.get("specVersion") != "1.6":
             errors.append("提交的Python SBOM不是CycloneDX 1.6")
-        properties = {
-            item["name"]: item["value"] for item in sbom["metadata"]["properties"]
-        }
+        properties = {item["name"]: item["value"] for item in sbom["metadata"]["properties"]}
         expected_lock_hashes = {
-            "xiaoyi:requirements-lock-sha256": hashlib.sha256(
-                (ROOT / "requirements.lock").read_bytes()
-            ).hexdigest(),
+            "xiaoyi:requirements-lock-sha256": hashlib.sha256((ROOT / "requirements.lock").read_bytes()).hexdigest(),
             "xiaoyi:requirements-dev-lock-sha256": hashlib.sha256(
                 (ROOT / "requirements-dev.lock").read_bytes()
             ).hexdigest(),
@@ -735,18 +754,12 @@ def main() -> int:
             workflow = workflow_path.read_text(encoding="utf-8")
             for ref in action_refs.findall(workflow):
                 if not re.fullmatch(r"[0-9a-f]{40}", ref):
-                    errors.append(
-                        f"GitHub Action未锁定40位提交SHA：{workflow_path.name}@{ref}"
-                    )
+                    errors.append(f"GitHub Action未锁定40位提交SHA：{workflow_path.name}@{ref}")
     except OSError as exc:
         errors.append(f"GitHub Actions供应链门禁不可验证：{exc}")
 
     try:
-        site_contract = json.loads(
-            (ROOT / "data/contracts/port_site_admission_v1.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        site_contract = json.loads((ROOT / "data/contracts/port_site_admission_v1.json").read_text(encoding="utf-8"))
         if site_contract.get("production_authority") is not False:
             errors.append("现场准入契约错误开启了生产权限")
         if site_contract.get("dispatch_allowed") is not False:
@@ -759,11 +772,7 @@ def main() -> int:
         errors.append(f"现场准入契约不可验证：{exc}")
 
     try:
-        asset_registry = json.loads(
-            (ROOT / "data/assets/asset_registry_v1.json").read_text(
-                encoding="utf-8"
-            )
-        )
+        asset_registry = json.loads((ROOT / "data/assets/asset_registry_v1.json").read_text(encoding="utf-8"))
         for asset in asset_registry.get("assets", []):
             relative = str(asset["path"])
             path = ROOT / relative
@@ -776,17 +785,13 @@ def main() -> int:
             if status != "cleared":
                 if asset.get("release_blocking") is not True:
                     errors.append(f"未清权视觉资产没有失败关闭：{relative}")
-                public_release_blockers.append(
-                    f"{relative}: {status or 'rights_status_missing'}"
-                )
+                public_release_blockers.append(f"{relative}: {status or 'rights_status_missing'}")
     except (KeyError, OSError, TypeError, json.JSONDecodeError) as exc:
         errors.append(f"视觉资产来源登记不可验证：{exc}")
 
     try:
         prompt_security = json.loads(
-            (ROOT / "reports/prompt_injection_benchmark_v1_20260813.json").read_text(
-                encoding="utf-8"
-            )
+            (ROOT / "reports/prompt_injection_benchmark_v1_20260813.json").read_text(encoding="utf-8")
         )
         metrics = prompt_security["metrics"]
         for relative, expected_digest in prompt_security["evidence_sha256"].items():
@@ -807,9 +812,7 @@ def main() -> int:
 
     try:
         dependency_admission = json.loads(
-            (ROOT / "reports/dependency_audit_admission_v3.json").read_text(
-                encoding="utf-8"
-            )
+            (ROOT / "reports/dependency_audit_admission_v3.json").read_text(encoding="utf-8")
         )
         for relative, expected_digest in dependency_admission["evidence_sha256"].items():
             path = ROOT / relative

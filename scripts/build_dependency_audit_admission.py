@@ -16,8 +16,8 @@ RAW_REPORTS = {
     "fixed_dev_v2": ROOT / "reports/dependency_audit_20260813_fixed_dev_v2.json",
     "current_runtime_r2": ROOT / "reports/dependency_audit_20260813_r2_runtime.json",
     "current_dev_r2": ROOT / "reports/dependency_audit_20260813_r2_dev.json",
-    "current_runtime_r3": ROOT / "reports/dependency_audit_20260814_r3_runtime.json",
-    "current_dev_r3": ROOT / "reports/dependency_audit_20260814_r3_dev.json",
+    "current_runtime_r3": ROOT / "reports/dependency_audit_20260912_runtime_v1.json",
+    "current_dev_r3": ROOT / "reports/dependency_audit_20260912_dev_v1.json",
 }
 OUTPUT = ROOT / "reports/dependency_audit_admission_v3.json"
 MARKDOWN = ROOT / "reports/dependency_audit_admission_v3.md"

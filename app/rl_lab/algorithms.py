@@ -85,6 +85,7 @@ ALGORITHM_SPECS: tuple[dict[str, Any], ...] = (
 
 RL_ALGORITHM_IDS = tuple(item["id"] for item in ALGORITHM_SPECS if item["trainable"])
 ALL_ALGORITHM_IDS = tuple(item["id"] for item in ALGORITHM_SPECS)
+TABULAR_IMPLEMENTATION_VERSION = "tabular.v2-combined-doubleq-behavior"
 
 
 def algorithm_catalog() -> list[dict[str, Any]]:
@@ -133,6 +134,7 @@ class TrainedPolicy:
     secondary_q_table: Optional[dict[str, list[float]]]
     seed: int
     hyperparameters: dict[str, float]
+    implementation_version: str = TABULAR_IMPLEMENTATION_VERSION
 
     def action(self, state: tuple[int, ...], valid_mask: tuple[bool, ...], rng: random.Random) -> int:
         primary = self.q_table.get(_state_key(state), _new_values())
@@ -146,6 +148,7 @@ class TrainedPolicy:
     def public_dict(self) -> dict[str, Any]:
         payload = {
             "algorithm_id": self.algorithm_id,
+            "implementation_version": self.implementation_version,
             "seed": self.seed,
             "hyperparameters": self.hyperparameters,
             "state_count": len(set(self.q_table) | set(self.secondary_q_table or {})),
@@ -164,6 +167,7 @@ class TrainedPolicy:
             secondary_q_table={str(key): [float(value) for value in values] for key, values in payload.get("secondary_q_table", {}).items()} or None,
             seed=int(payload["seed"]),
             hyperparameters={str(key): float(value) for key, value in payload.get("hyperparameters", {}).items()},
+            implementation_version=str(payload.get("implementation_version", "tabular.v1-primary-doubleq-behavior")),
         )
 
 
@@ -201,6 +205,11 @@ def _episode_epsilon(episode: int, episodes: int, start: float, end: float) -> f
         return end
     fraction = episode / (episodes - 1)
     return start * math.pow(end / start, fraction)
+
+
+def _behavior_values(primary, secondary, state):
+    left = _values(primary, state)
+    return left if secondary is None else [a + b for a, b in zip(left, _values(secondary, state))]
 
 
 def train_tabular_policy(
@@ -253,14 +262,14 @@ def train_tabular_policy(
             raise InterruptedError("training cancelled")
         state = environment.reset()
         epsilon = _episode_epsilon(episode, episodes, epsilon_start, epsilon_end)
-        action = epsilon_greedy(_values(q_table, state), environment.valid_action_mask(), epsilon, rng)
+        action = epsilon_greedy(_behavior_values(q_table, secondary, state), environment.valid_action_mask(), epsilon, rng)
         total_reward = 0.0
         done = False
         while not done:
             next_state, reward, done, _ = environment.step(action)
             total_reward += reward
             next_mask = environment.valid_action_mask() if not done else tuple(True for _ in ACTIONS)
-            next_action = 0 if done else epsilon_greedy(_values(q_table, next_state), next_mask, epsilon, rng)
+            next_action = 0 if done else epsilon_greedy(_behavior_values(q_table, secondary, next_state), next_mask, epsilon, rng)
             values = _values(q_table, state)
             if algorithm_id == "q_learning":
                 target = reward if done else reward + discount_factor * max(
@@ -454,6 +463,8 @@ def evaluate_policy(
         previous_error = 0.0
         done = False
         while not done:
+            observed_state = state
+            observed_mask = environment.valid_action_mask()
             if algorithm_id == "pid":
                 assert isinstance(policy, PIDPolicy)
                 if isinstance(environment, PortOperationsEnvironment):
@@ -483,7 +494,11 @@ def evaluate_policy(
             else:
                 assert isinstance(policy, TrainedPolicy)
                 action = policy.action(state, environment.valid_action_mask(), rng)
-            state, reward, done, _ = environment.step(action)
+            state, reward, done, frame = environment.step(action)
+            if render:
+                frame["state"] = list(observed_state)
+                frame["valid_action_mask"] = list(observed_mask)
+                frame["policy_algorithm"] = algorithm_id
             total_reward += reward
         metrics = environment.episode_metrics(total_reward)
         metrics["evaluation_episode"] = evaluation_index + 1

@@ -71,10 +71,12 @@ ACTIONS: dict[str, dict[str, Any]] = {
     "port.evaluate": {"target": "port-dt-multi", "label": "数字孪生情景评估", "model": PortParameters},
     "energy.observe": {"target": "energy-cockpit", "label": "观测能碳运行状态", "model": EmptyParameters},
     "energy.compare": {"target": "energy-cockpit", "label": "能碳参数对比试算", "model": EnergyParameters},
+    "energy.clock": {"target": "energy-cockpit", "label": "运行或暂停能碳模拟时钟", "model": ControlParameters, "mutates": True},
     "malacca.observe": {"target": "malacca-sandbox", "label": "观测马六甲运行状态", "model": EmptyParameters},
     "malacca.scenario": {"target": "malacca-sandbox", "label": "调整马六甲模拟情景", "model": ScenarioParameters, "mutates": True},
     "malacca.clock": {"target": "malacca-sandbox", "label": "运行或暂停马六甲模拟时钟", "model": ControlParameters, "mutates": True},
     "sailing.observe": {"target": "sailing-simulator", "label": "核验航行模拟器隔离状态", "model": EmptyParameters},
+    "sailing.validate": {"target": "sailing-simulator", "label": "独立原生航行样本验证", "model": EmptyParameters},
 }
 
 
@@ -109,7 +111,8 @@ def parse_command(command: str) -> dict[str, Any] | None:
             return {"action_id": "energy.compare", "parameters": params}
         return {"action_id": "energy.observe", "parameters": {}}
     if "马六甲" in compact:
-        if re.search(r"暂停|恢复.*时钟", compact):
+        # Search once, without backtracking over repeated user-supplied words.
+        if "暂停" in compact or "时钟" in compact.partition("恢复")[2]:
             return {"action_id": "malacca.clock", "parameters": {"action": "stop" if "暂停" in compact else "start"}}
         if re.search(r"调节|调整|切换|设置", compact):
             matches = [key for key, label in SCENARIOS.items() if key in compact or label in compact]

@@ -125,7 +125,7 @@ def test_energy_environment_accounts_for_degradation_and_terminal_recovery() -> 
             break
     metrics = environment.episode_metrics(0.0)
 
-    assert parameters.public_dict()["environment_version"] == "xiaoyi-energy-env.v2"
+    assert parameters.public_dict()["environment_version"] == "xiaoyi-energy-env.v3-causal"
     assert metrics["total_degradation_cost"] > 0
     assert metrics["total_cost"] == pytest.approx(
         metrics["total_grid_energy_cost"] + metrics["total_degradation_cost"],

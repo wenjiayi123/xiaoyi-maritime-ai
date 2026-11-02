@@ -236,3 +236,15 @@ def test_external_model_requires_explicit_data_egress_authorization() -> None:
     assert result.generation_fallback is True
     assert "external_data_not_authorized" in (result.generation_notice or "")
     assert gateway.status()["requests"] == 0
+
+
+def test_only_successful_evidence_pages_allow_same_origin_embedding() -> None:
+    for path in ("/web/shanghai-lab.html", "/web/priority-v9.html", "/web/root-cause-v10.html"):
+        response = client.get(path)
+        assert response.status_code == 200
+        assert response.headers["x-frame-options"] == "SAMEORIGIN"
+        assert "frame-ancestors 'self'" in response.headers["content-security-policy"]
+    for path in ("/", "/api/system/info", "/web/missing-evidence.html", "/web/demo_guide.js"):
+        response = client.get(path)
+        assert response.headers["x-frame-options"] == "DENY"
+        assert "frame-ancestors 'none'" in response.headers["content-security-policy"]

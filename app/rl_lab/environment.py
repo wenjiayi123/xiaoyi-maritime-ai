@@ -50,7 +50,7 @@ class EnvironmentParameters:
     def public_dict(self) -> dict[str, Any]:
         return {
             "environment_type": "energy_storage",
-            "environment_version": "xiaoyi-energy-env.v2",
+            "environment_version": "xiaoyi-energy-env.v3-causal",
             "capacity_kwh": round(self.capacity_kwh, 6),
             "max_power_kw": round(self.max_power_kw, 6),
             "minimum_soc": self.minimum_soc,
@@ -172,13 +172,13 @@ class EnergySchedulingEnvironment:
 
     def state(self) -> tuple[int, ...]:
         current = self.records[self.index]
-        following = self.records[min(self.index + 1, len(self.records) - 1)]
+        previous = self.records[max(0, self.index - 1)]
         hour_bin = current.timestamp.hour // 4
         load_bin = self._bin(current.load_kw, self.parameters.load_bins)
         soc_bin = min(7, max(0, int(self.soc * 8)))
         tariff = tariff_for(current)
         tariff_bin = 0 if tariff < 0.14 else 1 if tariff < 0.25 else 2
-        delta = following.load_kw - current.load_kw
+        delta = current.load_kw - previous.load_kw
         tolerance = max(0.001, self.parameters.mean_load_kw * 0.05)
         trend_bin = 0 if delta < -tolerance else 2 if delta > tolerance else 1
         return hour_bin, load_bin, soc_bin, tariff_bin, trend_bin

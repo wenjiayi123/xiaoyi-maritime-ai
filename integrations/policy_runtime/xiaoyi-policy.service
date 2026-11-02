@@ -1,0 +1,27 @@
+[Unit]
+Description=Xiaoyi isolated public policy inference
+After=network-online.target
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=apple
+WorkingDirectory=/opt/xiaoyi/runtime
+ExecStart=/home/apple.guest/policy-env/bin/python -m uvicorn server:app --host 127.0.0.1 --port 11839
+Environment=WANDB_MODE=offline
+Environment=HF_HUB_OFFLINE=1
+Environment=DO_NOT_TRACK=1
+Environment=MPLCONFIGDIR=/tmp/xiaoyi-matplotlib
+Restart=on-failure
+RestartSec=3
+CPUQuota=200%
+MemoryMax=1400M
+TasksMax=128
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+
+[Install]
+WantedBy=multi-user.target

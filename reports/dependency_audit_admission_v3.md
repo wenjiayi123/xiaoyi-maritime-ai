@@ -1,6 +1,6 @@
 # Dependency vulnerability admission v3
 
-- Run ID: `depaudit-v3-20260814-842e502a245e`
+- Run ID: `depaudit-v3-20260814-d53dd968f8fc`
 - Tool: pip-audit 2.9.0 / PyPI
 - Initial runtime: **7 findings** (retained failure evidence)
 - Fixed runtime: **0 findings**

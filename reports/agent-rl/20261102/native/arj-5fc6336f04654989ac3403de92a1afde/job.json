@@ -1,0 +1,883 @@
+{
+  "id": "arj-5fc6336f04654989ac3403de92a1afde",
+  "actor_id": "local-admin",
+  "request_id": "arl_2ad352e628d14ab18aa4ea99ea88491c",
+  "request_sha256": "3b6e0d068fa4e1d6e2bdcd6df07b6ec6ebd6a9ace6b57f8e06b674227cb10697",
+  "goal": "读取港口、能碳和马六甲系统的当前状态；比较基准绿色偏好0.50、候选绿色偏好0.82、碳价85元/吨的能碳方案；评估港口高密度靠泊情景。遇到可恢复的读取故障请处理后继续，最后给我带来源、参数、结果和实际执行记录的联合报告。只在本机工程模拟中操作。",
+  "task": {
+    "case_id": "acceptance-4bdf1e9f6cfd4b8e8ea7d9ec7e87c5d3",
+    "split": "acceptance",
+    "family": "joint",
+    "seed": 440001,
+    "green": 0.82,
+    "carbon": 85.0,
+    "baseline": 0.5,
+    "scenario": "high_density_berthing",
+    "fault": "transient_read",
+    "max_steps": 18
+  },
+  "group": "D_rl",
+  "status": "completed",
+  "success": true,
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 18
+      },
+      "choice": "A",
+      "action": {
+        "tool": "port.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-001.json",
+        "sha256": "3790d0af3b5a508b0635586b1b98222d721877650773b85943d66692696501e0"
+      },
+      "feedback": "read_ok:port",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 17
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.3333333333333333,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.16666666666666666,
+      "potential_before": 0.0,
+      "potential_after": 0.16666666666666666,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-001.json",
+        "sha256": "3790d0af3b5a508b0635586b1b98222d721877650773b85943d66692696501e0",
+        "tool": "port.read"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数18。\n任务缺项：港口状态尚未读取；能源状态尚未读取；交通状态尚未读取；港口情景尚无评估结果；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "A",
+        "log_probability": 0.0,
+        "probabilities": [
+          1.0,
+          7.041376759008705e-14,
+          7.038144481281983e-13,
+          2.8485639411504615e-13,
+          5.473588907969028e-14,
+          2.280852373290343e-14,
+          5.900331984202154e-16,
+          7.402989608454964e-16,
+          5.012305818674298e-16,
+          1.3151265149641782e-16,
+          4.0546471921350333e-16,
+          3.942588968378026e-15,
+          9.390798058741883e-16
+        ],
+        "seconds": 10.5778,
+        "input_tokens": 342,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 17
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": false,
+      "result": {},
+      "feedback": "read_timeout: safe to retry read; diagnose also available",
+      "reward": -0.5,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_timeout: safe to retry read; diagnose also available",
+        "remaining_steps": 16
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.0,
+        "step_cost": -0.1,
+        "invalid_action": -0.2,
+        "no_progress": -0.2,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.16666666666666666,
+      "progress_after": 0.16666666666666666,
+      "potential_before": 0.16666666666666666,
+      "potential_after": 0.16666666666666666,
+      "native_executed": false,
+      "backend_executed": false,
+      "fault_injection": true,
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:port。剩余步数17。\n任务缺项：能源状态尚未读取；交通状态尚未读取；港口情景尚无评估结果；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "B",
+        "log_probability": 0.0,
+        "probabilities": [
+          1.6843384326170607e-13,
+          1.0,
+          1.3711125117221723e-11,
+          7.864806896018539e-13,
+          6.684823999686049e-14,
+          1.2478824126371107e-13,
+          4.723935569363939e-16,
+          8.554986709851926e-16,
+          5.305189165406745e-16,
+          9.846461550299702e-17,
+          7.840022610337925e-16,
+          6.582249410916384e-15,
+          1.0295186571470088e-14
+        ],
+        "seconds": 4.9776,
+        "input_tokens": 341,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_timeout: safe to retry read; diagnose also available",
+        "remaining_steps": 16
+      },
+      "choice": "B",
+      "action": {
+        "tool": "energy.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-002.json",
+        "sha256": "81488ab6499ab2b69bb0218974eaa0a37c674cd8d8f9b2234f5b46799f85f9c3"
+      },
+      "feedback": "read_ok:energy",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 15
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.3333333333333333,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.16666666666666666,
+      "progress_after": 0.3333333333333333,
+      "potential_before": 0.16666666666666666,
+      "potential_after": 0.3333333333333333,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-002.json",
+        "sha256": "81488ab6499ab2b69bb0218974eaa0a37c674cd8d8f9b2234f5b46799f85f9c3",
+        "tool": "energy.read"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_timeout: safe to retry read; diagnose also available。剩余步数16。\n任务缺项：能源状态尚未读取；交通状态尚未读取；港口情景尚无评估结果；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "B",
+        "log_probability": 0.0,
+        "probabilities": [
+          4.8564355661917524e-12,
+          1.0,
+          8.484358215987697e-10,
+          1.0823907742318895e-11,
+          1.3388800701799597e-12,
+          2.0821239697654814e-12,
+          8.074991243972162e-15,
+          6.800862261855615e-15,
+          9.1558205312617e-15,
+          1.234901192263306e-15,
+          1.2663826964073172e-14,
+          8.840713263454786e-14,
+          1.1043506468457961e-13
+        ],
+        "seconds": 4.7387,
+        "input_tokens": 348,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 4,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:energy",
+        "remaining_steps": 15
+      },
+      "choice": "C",
+      "action": {
+        "tool": "traffic.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-003.json",
+        "sha256": "887dd64a55d88e45e11f19512a796814bb86d7fc1d95857f761ab94665c492d7"
+      },
+      "feedback": "read_ok:traffic",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:traffic",
+        "remaining_steps": 14
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.33333333333333337,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.3333333333333333,
+      "progress_after": 0.5,
+      "potential_before": 0.3333333333333333,
+      "potential_after": 0.5,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-003.json",
+        "sha256": "887dd64a55d88e45e11f19512a796814bb86d7fc1d95857f761ab94665c492d7",
+        "tool": "traffic.read"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：能源读取、港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:energy。剩余步数15。\n任务缺项：交通状态尚未读取；港口情景尚无评估结果；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "C",
+        "log_probability": 0.0,
+        "probabilities": [
+          3.033840946476893e-14,
+          8.693181808086536e-14,
+          1.0,
+          2.887754597079295e-13,
+          1.0005619379901964e-13,
+          2.6636890731860687e-14,
+          3.698679054952572e-15,
+          4.1807073999057466e-16,
+          1.3034947673649065e-15,
+          6.605135394118248e-16,
+          7.208560395192791e-15,
+          4.734961608996585e-15,
+          4.838417366141278e-15
+        ],
+        "seconds": 4.6551,
+        "input_tokens": 339,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 5,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:traffic",
+        "remaining_steps": 14
+      },
+      "choice": "D",
+      "action": {
+        "tool": "port.evaluate",
+        "arguments": {
+          "scenario": "high_density_berthing",
+          "horizon_min": 60,
+          "step_min": 15
+        }
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-004.json",
+        "sha256": "997f22cfb07672dcb3b1ab1d7cbf9e3c3ed36521b6b57c06ab78037282d0a611"
+      },
+      "feedback": "port_evaluate_ok",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.33333333333333326,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.5,
+      "progress_after": 0.6666666666666666,
+      "potential_before": 0.5,
+      "potential_after": 0.6666666666666666,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-004.json",
+        "sha256": "997f22cfb07672dcb3b1ab1d7cbf9e3c3ed36521b6b57c06ab78037282d0a611",
+        "tool": "port.evaluate"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：能源读取、港口读取、交通读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:traffic。剩余步数14。\n任务缺项：港口情景尚无评估结果；能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "D",
+        "log_probability": 0.0,
+        "probabilities": [
+          1.3225852704690233e-12,
+          1.9299867625821414e-14,
+          2.471389249931316e-13,
+          1.0,
+          3.01833943039051e-13,
+          6.893607321263595e-13,
+          3.0208129868250586e-15,
+          1.2946720721863057e-14,
+          8.104524741744078e-15,
+          3.968724169965557e-15,
+          1.663104510945851e-15,
+          4.6493191241392395e-14,
+          4.019998716504533e-14
+        ],
+        "seconds": 4.6199,
+        "input_tokens": 337,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 6,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "port_evaluate_ok",
+        "remaining_steps": 13
+      },
+      "choice": "E",
+      "action": {
+        "tool": "energy.compare",
+        "arguments": {
+          "baseline_green_preference": 0.5,
+          "green_preference": 0.82,
+          "carbon_price_cny_per_ton": 85.0
+        }
+      },
+      "ok": true,
+      "result": {
+        "source": "actual_local_system_api",
+        "evidence_file": "evidence-005.json",
+        "sha256": "409e62f89825a2162f78ec2694ce7f097d8ff4fde692a841236046642b2193ab"
+      },
+      "feedback": "energy_compare_ok",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "energy",
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "energy_compare_ok",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.3333333333333335,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.6666666666666666,
+      "progress_after": 0.8333333333333334,
+      "potential_before": 0.6666666666666666,
+      "potential_after": 0.8333333333333334,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "actual_local_system_api",
+      "native_evidence": {
+        "file": "evidence-005.json",
+        "sha256": "409e62f89825a2162f78ec2694ce7f097d8ff4fde692a841236046642b2193ab",
+        "tool": "energy.compare"
+      },
+      "source": "actual_local_system_api",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：能源读取、港口读取、交通读取、港口情景评估。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：port_evaluate_ok。剩余步数13。\n任务缺项：能碳比较尚无匹配参数的结果；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "E",
+        "log_probability": -2.3841860752327193e-07,
+        "probabilities": [
+          1.0523343535549096e-13,
+          1.5179338905615958e-12,
+          6.175921440920717e-10,
+          2.212098308973509e-07,
+          0.9999997615814209,
+          1.0454868082376834e-08,
+          2.3796099097271595e-13,
+          2.2792059038712065e-12,
+          4.274206336085662e-11,
+          6.018690754117095e-12,
+          3.3543621439507953e-12,
+          1.7510220703953472e-11,
+          5.120621635046341e-11
+        ],
+        "seconds": 4.754,
+        "input_tokens": 334,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 7,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "energy",
+          "port"
+        ],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "energy_compare_ok",
+        "remaining_steps": 12
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "local_runtime_tool",
+        "evidence_file": "evidence-006.json",
+        "sha256": "5fb7f055a955b41b8f8c536dd6f6ae92e9a1e4b715bd0f3fb3e93d84d016fefb"
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.233333,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "energy",
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 0.33333333333333326,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.8333333333333334,
+      "progress_after": 1.0,
+      "potential_before": 0.8333333333333334,
+      "potential_after": 1.0,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "local_runtime_tool",
+      "native_evidence": {
+        "file": "evidence-006.json",
+        "sha256": "5fb7f055a955b41b8f8c536dd6f6ae92e9a1e4b715bd0f3fb3e93d84d016fefb",
+        "tool": "execution.verify"
+      },
+      "source": "local_runtime_tool",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：能源读取、港口读取、交通读取、能碳参数比较、港口情景评估。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：energy_compare_ok。剩余步数12。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "I",
+        "log_probability": 0.0,
+        "probabilities": [
+          6.700454658650735e-16,
+          9.901836329226452e-16,
+          5.685045939866559e-14,
+          4.2885289985861164e-08,
+          7.542884719602405e-12,
+          5.07979997042135e-13,
+          5.972187059667157e-15,
+          1.9462567408395914e-13,
+          1.0,
+          9.841685105760334e-11,
+          9.381248355184654e-14,
+          1.889711396261054e-13,
+          7.032196277113184e-14
+        ],
+        "seconds": 4.5638,
+        "input_tokens": 329,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    },
+    {
+      "step": 8,
+      "observation": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "energy",
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 11
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "local_runtime_tool",
+        "evidence_file": "evidence-007.json",
+        "sha256": "40811396d9b0c439c68b35c8762dd0b6e61983ab471e49b1bb4cf1ca3e5038c5"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。",
+        "reads": [
+          "energy",
+          "port",
+          "traffic"
+        ],
+        "completed": [
+          "energy",
+          "port"
+        ],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 10
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0,
+      "native_executed": true,
+      "backend_executed": true,
+      "execution_origin": "local_runtime_tool",
+      "native_evidence": {
+        "file": "evidence-007.json",
+        "sha256": "40811396d9b0c439c68b35c8762dd0b6e61983ab471e49b1bb4cf1ca3e5038c5",
+        "tool": "artifact.report"
+      },
+      "source": "local_runtime_tool",
+      "decision_input": "任务：读取港口、能源、交通，完成港口情景与能碳比较，核验后交付联合报告。 基准=0.5，绿色偏好=0.82，碳价=85。 情景=high_density_berthing。\n已完成：能源读取、港口读取、交通读取、能碳参数比较、港口情景评估、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数11。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(high_density_berthing);E=能碳比较(偏好0.82,碳价85);F=能碳比较(偏好0.95,碳价85);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.82,碳价104);M=询问用户\n下一步只输出一个字母：",
+      "model": {
+        "choice": "J",
+        "log_probability": -0.023333726450800896,
+        "probabilities": [
+          3.027168036800291e-17,
+          6.14228456330518e-17,
+          1.179147683730015e-15,
+          1.5740589170629149e-12,
+          6.372300012961671e-14,
+          2.016774097170996e-14,
+          2.147749023035739e-15,
+          3.833501170582426e-13,
+          0.023063594475388527,
+          0.976936399936676,
+          2.551558953272498e-13,
+          5.629225926541415e-13,
+          7.491624237198485e-14
+        ],
+        "seconds": 4.5064,
+        "input_tokens": 329,
+        "exact_logit_cache_hit": false,
+        "group": "D_rl",
+        "model": "Qwen3-1.7B",
+        "adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+        "decision_mode": "causal_lm_constrained_next_token"
+      }
+    }
+  ],
+  "experiment": "experiment-004",
+  "fault_injection_requested": true,
+  "production_authority": false,
+  "expected_adapter_sha256": "789eff996e2f88dc7edaa2b2b1d71f5110967b9912a94bb2ed76b5a2c00c023b",
+  "environment": "xiaoyi-agent-env.v3-dense-progress",
+  "runtime_source_sha256": "a3c266856a0d744cecb18ef5947c1e04eac1e009763b3a4faf1874c57c106df1",
+  "environment_source_sha256": {
+    "environment.py": "e582b6cd4f17c1d8ecfeec1a7850c7122acec5499e0feca3a127767ff845e13f",
+    "environment_v2.py": "5b4dd76f0b637855b99403058c59b71e63fbe8dea85fbc2924e27d198ed29525"
+  },
+  "elapsed_seconds": 45.01,
+  "outcome": {
+    "case_id": "acceptance-4bdf1e9f6cfd4b8e8ea7d9ec7e87c5d3",
+    "family": "joint",
+    "split": "acceptance",
+    "success": true,
+    "steps": 8,
+    "reward": 1.599998,
+    "parameter_attempts": 1,
+    "parameter_correct": 1,
+    "errors": 1,
+    "fault_injected": true,
+    "recovered": true,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "46263aaf524cc37b3a849474f7dcc2831a9db45b6c3946bb5009ebac63fec268",
+    "source": "synthetic_training_environment"
+  },
+  "evidence": [
+    {
+      "file": "evidence-001.json",
+      "sha256": "3790d0af3b5a508b0635586b1b98222d721877650773b85943d66692696501e0",
+      "tool": "port.read"
+    },
+    {
+      "file": "evidence-002.json",
+      "sha256": "81488ab6499ab2b69bb0218974eaa0a37c674cd8d8f9b2234f5b46799f85f9c3",
+      "tool": "energy.read"
+    },
+    {
+      "file": "evidence-003.json",
+      "sha256": "887dd64a55d88e45e11f19512a796814bb86d7fc1d95857f761ab94665c492d7",
+      "tool": "traffic.read"
+    },
+    {
+      "file": "evidence-004.json",
+      "sha256": "997f22cfb07672dcb3b1ab1d7cbf9e3c3ed36521b6b57c06ab78037282d0a611",
+      "tool": "port.evaluate"
+    },
+    {
+      "file": "evidence-005.json",
+      "sha256": "409e62f89825a2162f78ec2694ce7f097d8ff4fde692a841236046642b2193ab",
+      "tool": "energy.compare"
+    },
+    {
+      "file": "evidence-006.json",
+      "sha256": "5fb7f055a955b41b8f8c536dd6f6ae92e9a1e4b715bd0f3fb3e93d84d016fefb",
+      "tool": "execution.verify"
+    },
+    {
+      "file": "evidence-007.json",
+      "sha256": "40811396d9b0c439c68b35c8762dd0b6e61983ab471e49b1bb4cf1ca3e5038c5",
+      "tool": "artifact.report"
+    }
+  ],
+  "report": "report.html"
+}

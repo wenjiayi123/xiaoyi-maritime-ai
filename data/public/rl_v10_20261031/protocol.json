@@ -1,0 +1,77 @@
+{
+  "schema": "xiaoyi-root-rollout-rl.v10",
+  "registered_at": "2026-10-31T01:49:15.388131+00:00",
+  "new_ports": [
+    {
+      "id": "port1070",
+      "name": "Dongjiakou",
+      "country": "China"
+    },
+    {
+      "id": "port1071",
+      "name": "Qinzhou",
+      "country": "China"
+    },
+    {
+      "id": "port1072",
+      "name": "Qinhuangdao",
+      "country": "China"
+    },
+    {
+      "id": "port285",
+      "name": "Delfzijl",
+      "country": "The Netherlands"
+    },
+    {
+      "id": "port153",
+      "name": "Bluff Harbor",
+      "country": "New Zealand"
+    },
+    {
+      "id": "port396",
+      "name": "Gisborne",
+      "country": "New Zealand"
+    },
+    {
+      "id": "port1142",
+      "name": "San Giorgio",
+      "country": "Italy"
+    },
+    {
+      "id": "port191",
+      "name": "Safaga",
+      "country": "Egypt"
+    }
+  ],
+  "test_years": [
+    2026
+  ],
+  "test_months": [
+    1,
+    4
+  ],
+  "method": "One-step policy improvement by 7-day common-scenario rollout of frozen learned RL policy. Future weekday features known from calendar, input history frozen at decision cutoff. Learned centroids and five bootstrap fits inherited unchanged; no language model. Hybrid RL+planning, not pure learned execution. Strong matched 28-day rollout included.",
+  "baseline_pool": [
+    "mean_mpc28",
+    "mean_mpc90",
+    "constrained.stochastic28",
+    "matched_rollout28"
+  ],
+  "selection": "Strongest same-filter normal-validation baseline; fixed candidate horizon7. All original benefit and safety admission gates retained. No holdout retuning.",
+  "guard": {
+    "name": "reserve",
+    "sigma": 1.0,
+    "queue_budget": 0.0
+  },
+  "acceptance": {
+    "port_cluster_ci_lower_gt": 0,
+    "no_mean_port_regression": true,
+    "stress_noninferiority": true,
+    "no_feasible_violation": true,
+    "no_excess_max_capacity": true,
+    "positive_gain_max_port_share_le": 0.5
+  },
+  "scope": "Public arrival proxy, local queue assumed, synthetic stress, finite action resource surrogate; no financial/physical port benefit claim.",
+  "production_authority": false,
+  "diagnostic": "90-step exact hindsight MILP, allowed original safety constraints; oracle output never used by deployable policy. Separately reports theoretical cost headroom."
+}

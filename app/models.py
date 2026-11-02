@@ -33,6 +33,16 @@ class ChatRequest(BaseModel):
     )
 
 
+class DemoTriadRequest(BaseModel):
+    session_id: str = Field(
+        "demo-triad",
+        min_length=1,
+        max_length=120,
+        pattern=r"^[A-Za-z0-9._:-]+$",
+        description="三类问答对比演示的审计会话标识",
+    )
+
+
 class Evidence(BaseModel):
     id: str
     source: str

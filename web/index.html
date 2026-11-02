@@ -7,7 +7,11 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
   <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
   <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20260907-agent-v1">
+  <link rel="stylesheet" href="/web/styles.css?v=20261031-full-demo-layout-v1">
+  <link rel="stylesheet" href="/web/system-data-desk.css?v=20261023-1">
+  <link rel="stylesheet" href="/web/harness.css?v=20261030-public-port-assurance">
+  <link rel="stylesheet" href="/web/harness_chat.css?v=20261101-v13">
+  <link rel="stylesheet" href="/web/proof_console.css?v=20261030-v5-1">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -53,15 +57,16 @@
       </button>
 
       <nav class="top-nav" aria-label="主导航">
-        <button class="nav-item active" type="button" data-view-target="chat" data-agent-target="nav-chat"><svg><use href="#i-chat"/></svg><span>智能对话</span></button>
-        <button class="nav-item" type="button" data-view-target="decisions" data-agent-target="nav-decisions"><svg><use href="#i-bulb"/></svg><span>决策建议</span></button>
-        <button class="nav-item" type="button" data-view-target="analytics" data-agent-target="nav-analytics"><svg><use href="#i-chart"/></svg><span>数据分析</span></button>
-        <button class="nav-item" type="button" data-view-target="rl" data-agent-target="nav-rl"><svg><use href="#i-agv"/></svg><span>训练中心</span></button>
-        <button class="nav-item" type="button" data-view-target="knowledge" data-agent-target="nav-knowledge"><svg><use href="#i-book"/></svg><span>知识库</span></button>
-        <button class="nav-item" type="button" data-view-target="tasks" data-agent-target="nav-tasks"><svg><use href="#i-task"/></svg><span>任务中心</span><b id="taskNavBadge">0</b></button>
+        <button class="nav-item active" type="button" data-view-target="chat" data-agent-target="nav-chat" aria-label="智能对话"><svg><use href="#i-chat"/></svg><span>智能对话</span></button>
+        <button class="nav-item" type="button" data-view-target="decisions" data-agent-target="nav-decisions" aria-label="决策建议"><svg><use href="#i-bulb"/></svg><span>决策建议</span></button>
+        <button class="nav-item" type="button" data-view-target="analytics" data-agent-target="nav-analytics" aria-label="数据分析"><svg><use href="#i-chart"/></svg><span>数据分析</span></button>
+        <button class="nav-item" type="button" data-view-target="rl" data-agent-target="nav-rl" aria-label="训练中心"><svg><use href="#i-agv"/></svg><span>训练中心</span></button>
+        <button class="nav-item" type="button" data-view-target="knowledge" data-agent-target="nav-knowledge" aria-label="知识库"><svg><use href="#i-book"/></svg><span>知识库</span></button>
+        <button class="nav-item" type="button" data-view-target="tasks" data-agent-target="nav-tasks" aria-label="任务中心"><svg><use href="#i-task"/></svg><span>任务中心</span><b id="taskNavBadge">0</b></button>
       </nav>
 
       <div class="top-tools">
+        <button class="demo-guide-launch" type="button" data-demo-guide-launch aria-label="开始小懿AI操作演示"><svg><use href="#i-play"/></svg><span>演示开始</span></button>
         <button class="icon-button sidebar-toggle-button" type="button" data-action="toggle-sidebar" aria-label="打开功能侧栏"><svg><use href="#i-command"/></svg></button>
         <button class="icon-button rail-toggle-button" type="button" data-action="toggle-rail" aria-label="打开运营看板"><svg><use href="#i-chart"/></svg></button>
         <button class="system-status-indicator" type="button" data-action="system-status" aria-label="查看系统状态">
@@ -89,6 +94,14 @@
           <button type="button" id="connectorCenterBtn" data-action="connectors" data-agent-target="connectors"><svg><use href="#i-command"/></svg><span>接口中心</span><b class="connector-nav-badge" id="connectorNavBadge">待接入</b></button>
           <button type="button" id="intelligenceHubBtn" data-action="intelligence-hub" data-agent-target="intelligence-hub"><svg><use href="#i-spark"/></svg><span>智能联动中心</span><b class="hub-nav-badge">模块7/7</b></button>
           <button type="button" id="systemLaunchHubBtn" data-action="system-linkage" data-agent-target="system-linkage"><svg><use href="#i-play"/></svg><span>四系统联动</span><b class="system-launch-nav-badge" id="systemLaunchBadge">0/4</b></button>
+          <button type="button" id="harnessConsoleBtn" data-action="harness" data-agent-target="harness"><svg><use href="#i-task"/></svg><span>Harness 任务工作台</span></button>
+          <button type="button" id="jointHarnessBtn" data-action="joint-harness"><svg><use href="#i-task"/></svg><span>双模式港航联合系统</span></button>
+          <button type="button" id="proofConsoleBtn" data-action="proof-console"><svg><use href="#i-task"/></svg><span>小懿能力实证演示</span></button>
+          <button type="button" id="shanghaiLabBtn" data-action="shanghai-lab"><svg><use href="#i-task"/></svg><span>上海港统一联动试验</span></button>
+          <a href="/web/capability-review.html" class="capability-review-link">能力评估与提升 · 37项</a>
+          <a href="/web/priority-v9.html" class="priority-v9-link">专项提升 · 预测 / RL / 年度孪生</a>
+          <a href="/web/root-cause-v10.html" class="root-cause-v10-link">根因诊断 · 模型体量与独立复验</a>
+          <a href="http://127.0.0.1:18783/web/agent-rl.html" class="capability-review-link" target="_blank" rel="noopener">语言模型 RL · 四组实测与任务验收</a>
           <button type="button" id="ragEvaluationBtn" data-action="rag-evaluation" data-agent-target="rag-evaluation"><svg><use href="#i-check"/></svg><span>RAG评测闭环</span><b class="rag-nav-badge">评测</b></button>
         </div>
 
@@ -104,6 +117,12 @@
         </section>
 
         <div class="sidebar-bottom">
+          <div class="mobile-only-tools" aria-label="更多功能">
+            <button type="button" data-action="system-status"><svg><use href="#i-command"/></svg><span>系统状态</span></button>
+            <button type="button" data-action="notifications"><svg><use href="#i-bell"/></svg><span>通知</span><b id="mobileNotificationBadge">0</b></button>
+            <button type="button" data-action="settings"><svg><use href="#i-settings"/></svg><span>设置</span></button>
+            <button type="button" data-action="profile"><svg><use href="#i-user"/></svg><span>管理员</span></button>
+          </div>
           <button type="button" class="theme-switch" data-action="theme"><svg><use href="#i-moon"/></svg><span><strong>深海模式</strong><small>沉浸式港航驾驶舱</small></span><i></i></button>
           <div class="rl-mission-launcher" aria-label="RL智能调度入口">
             <button type="button" class="agent-demo-button" data-rl-mission-launch data-q="启动RL训练实验：使用真实公开能源时序数据，运行Q-learning、SARSA、Expected SARSA、Double Q-learning和PID控制基线；训练阶段不渲染，训练完成后再用保留测试集渲染并比较结果。" data-mode="ops"><svg><use href="#i-agv"/></svg><span>真实RL训练实验室</span></button>
@@ -127,6 +146,14 @@
                 <button type="button" class="capability-card amber" data-view-target="decisions"><span class="capability-icon"><svg><use href="#i-bulb"/></svg></span><strong>决策建议</strong><small>提供优化建议与决策支持</small></button>
                 <button type="button" class="capability-card violet" data-action="generate-report" data-agent-target="generate-report"><span class="capability-icon"><svg><use href="#i-report"/></svg></span><strong>报告生成</strong><small>自动生成分析报告</small></button>
               </div>
+              <section class="chat-demo-prompts" aria-label="小懿三类真实问答演示">
+                <div><svg><use href="#i-chat"/></svg><strong>三类真实问答</strong><small>逐题填入输入框，再点击发送</small></div>
+                <nav>
+                  <button type="button" class="general" data-chat-demo-prompt="general">一般问答</button>
+                  <button type="button" class="daily" data-chat-demo-prompt="daily">日常问答</button>
+                  <button type="button" class="emergency" data-chat-demo-prompt="emergency">紧急问答</button>
+                </nav>
+              </section>
 
               <div class="conversation-feed" id="conversationFeed" aria-live="polite">
                 <div class="conversation-transcript" id="conversationTranscript"></div>
@@ -138,7 +165,7 @@
                   <div class="mini-assistant-avatar"><span class="bot-face"><i></i><b></b></span></div>
                   <div class="assistant-response-card">
                     <header class="response-header">
-                      <div><strong>小懿AI</strong><span id="responseStatus" hidden aria-hidden="true"></span></div>
+                      <div><strong>小懿AI</strong><span class="demo-answer-type" id="demoAnswerType" hidden></span><span id="responseStatus" hidden aria-hidden="true"></span></div>
                       <div class="response-actions">
                         <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">公开数据校准模拟</span>
                         <span class="grounding-badge pending" id="groundingBadge" aria-live="polite">等待验证</span>
@@ -159,7 +186,7 @@
                     <div class="response-kpis" id="responseKpis">
                       <div><span>总能耗</span><strong>-- <small>MWh</small></strong><em>等待数据</em></div>
                       <div><span>碳排放总量</span><strong>-- <small>tCO₂e</small></strong><em>等待数据</em></div>
-                      <div><span>单位吞吐能耗</span><strong>-- <small>kgCO₂e/TEU</small></strong><em>等待数据</em></div>
+                      <div><span>碳强度</span><strong>-- <small>kgCO₂e/TEU</small></strong><em>等待数据</em></div>
                       <div><span>岸电使用率</span><strong>--<small>%</small></strong><em>等待数据</em></div>
                     </div>
 
@@ -184,7 +211,7 @@
 
               <form class="composer" id="composerForm">
                 <button type="button" class="composer-icon" data-action="attachment" aria-label="添加附件"><svg><use href="#i-paperclip"/></svg></button>
-                <button type="button" class="agent-mode-toggle active" id="agentModeBtn" data-action="toggle-agent-mode" data-agent-target="agent-mode" aria-label="切换智能操作模式" aria-pressed="true" title="智能操作已开启：小懿会先生成安全计划，再按顺序执行界面动作"><svg><use href="#i-spark"/></svg><span>智能操作</span><i aria-hidden="true"></i></button>
+                <button type="button" class="agent-mode-toggle active" id="agentModeBtn" data-action="toggle-agent-mode" data-agent-target="agent-mode" aria-label="切换智能操作模式" aria-pressed="true" title="跨系统任务由Harness模型逐步决策；原有界面操作与问答继续可用"><svg><use href="#i-spark"/></svg><span>智能操作</span><i aria-hidden="true"></i></button>
                 <textarea id="question" rows="1" placeholder="请输入您的问题..." aria-label="问题输入"></textarea>
                 <button type="button" class="composer-settings" data-action="advanced" aria-label="高级设置"><svg><use href="#i-sliders"/></svg><span id="modeShortLabel">专业</span></button>
                 <button type="submit" class="send-button" id="askBtn" aria-label="发送"><svg class="send-icon"><use href="#i-send"/></svg><svg class="stop-icon"><use href="#i-pause"/></svg></button>
@@ -265,6 +292,7 @@
           <header class="view-header rl-center-header">
             <div><p>PORT RL EVIDENCE CENTER</p><h2>真实训练与证据中心</h2><span>训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动</span></div>
             <div class="view-header-actions">
+              <button type="button" class="outline-button" data-rl-center-action="show-datasets"><svg><use href="#i-book"/></svg>训练数据与官方来源</button>
               <button type="button" class="outline-button" data-rl-center-action="show-evidence"><svg><use href="#i-check"/></svg>正式证据与失败候选</button>
               <button type="button" class="outline-button" data-rl-center-action="refresh"><svg><use href="#i-history"/></svg>刷新证据</button>
               <button type="button" class="primary-button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg>配置六算法对比</button>
@@ -375,8 +403,47 @@
   <button id="clearTopicsBtn" type="button" hidden></button>
   <span id="kbChip" hidden></span>
 
+  <aside class="demo-guide" id="demoGuide" aria-label="小懿AI演示引导" aria-hidden="true" hidden>
+    <header class="demo-guide__header">
+      <div><span>DEMO GUIDE</span><strong>小懿AI核心闭环</strong></div>
+      <div class="demo-guide__header-actions">
+        <button type="button" id="demoGuideResetAll" data-demo-guide-action="reset-all" aria-label="重置整个演示">↻</button>
+        <button type="button" data-demo-guide-action="collapse" aria-label="收起演示引导">⌃</button>
+        <button type="button" data-demo-guide-action="close" aria-label="关闭演示引导">×</button>
+      </div>
+    </header>
+    <div class="demo-guide__body">
+      <div class="demo-guide__progress"><i id="demoGuideProgress"></i></div>
+      <div class="demo-guide__counter"><span id="demoGuidePhase">系统开场</span><b id="demoGuideCount">1/22</b></div>
+      <ol class="demo-guide__steps" id="demoGuideSteps"></ol>
+      <section class="demo-guide__script">
+        <span>本步台词</span>
+        <strong id="demoGuideTitle">系统价值与安全边界</strong>
+        <p id="demoGuideScript"></p>
+      </section>
+      <div class="demo-guide__state" id="demoGuideState" aria-live="polite">点击下方按钮，页面会立即响应并自动进入下一步。</div>
+      <button class="demo-guide__primary" type="button" id="demoGuidePrimary"></button>
+      <div class="demo-guide__recovery">
+        <button type="button" id="demoGuideRetry" data-demo-guide-action="retry">重试本步</button>
+        <button type="button" id="demoGuideResetStep" data-demo-guide-action="reset-step">重置本步</button>
+        <button type="button" id="demoGuideFallback" data-demo-guide-action="fallback">保底下一步</button>
+      </div>
+    </div>
+  </aside>
+
   <script src="/web/runtime_contract.js?v=20260814-security-r1" defer></script>
-  <script src="/web/linked_agent.js?v=20260907-agent-v1" defer></script>
-  <script src="/web/app.js?v=20260907-agent-v1" defer></script>
+  <script src="/web/linked_agent.js?v=20261101-v13" defer></script>
+  <script src="/web/harness.js?v=20261101-v13" defer></script>
+  <script src="/web/remediation_harness.js?v=20261030-remediation-1" defer></script>
+  <script src="/web/learning_harness_v3.js?v=20261030-learning-1" defer></script>
+  <script src="/web/risk_harness_v4.js?v=20261030-risk-1" defer></script>
+  <script src="/web/crossport_harness.js?v=20261030-crossport-6" defer></script>
+  <script src="/web/joint_harness.js?v=20261031-full-demo-audit-v8" defer></script>
+  <script src="/web/proof_console.js?v=20261031-full-demo-audit-v8" defer></script>
+  <script src="/web/harness_chat.js?v=20261101-v13" defer></script>
+  <script src="/web/app.js?v=20261101-v13" defer></script>
+  <script src="/web/demo_guide.js?v=20261031-full-demo-audit-v8" defer></script>
+<script src="/web/demo-evidence.js?v=20261021" defer></script>
+  <script defer data-system="xiaoyi" src="/web/system-data-desk.js?v=20261023-6"></script>
 </body>
 </html>

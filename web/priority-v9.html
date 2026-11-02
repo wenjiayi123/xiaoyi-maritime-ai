@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>小懿 · 三项优先能力提升</title><link rel="stylesheet" href="/web/capability-review.css">
+<script src="/web/priority-v9.js" defer></script></head>
+<body><main>
+<header><a href="/">← 返回小懿</a><span>2026.10.31 · V9 专项实测</span></header>
+<section class="hero"><p class="eyebrow">覆盖率 / 策略收益 / 跨年稳定性</p><h1>每一次提升，都接受同一门槛的检验。</h1>
+<p>先冻结规则，再检验新港口与新站点。保留失败、简单基线和全部样本；评分表示证据成熟度，不代表行业排名。</p></section>
+<div id="status" role="status" aria-live="polite">正在核对本轮证据…</div>
+<div id="metrics" class="metrics"></div>
+<nav class="tabs"><a href="#forecast">预测区间</a><a href="#rl">RL与强MPC</a><a href="#annual">年度孪生</a><a href="#scores">逐项评分</a><a href="/web/capability-review.html">上一轮37项评估</a><button id="export" disabled>导出证据摘要</button></nav>
+<section id="forecast"><p class="eyebrow">01 / 预测区间覆盖</p><h2>用分港历史误差校准区间</h2>
+<p>7个新港口 × 1、7、14天提前量。公开日港口活动指标假设延迟7天发布；目标是可信的活动趋势，不是单船ETA。90%名义区间的最低研究覆盖门槛仍为80%，平均归一宽度不超过2。</p>
+<div class="table-scroll"><table><thead><tr><th>方法</th><th>覆盖/宽度同时通过</th><th>最差覆盖率</th><th>平均归一宽度</th><th>归一WIS↓</th><th>研究允许比例</th></tr></thead><tbody id="forecast-methods"></tbody></table></div>
+<p class="muted">WIS同时惩罚漏覆盖和过宽区间；分港固定校准是必须保留的简单对照。暂停样本仍计入全样本误差。自适应方法在所有场景中更优的结论尚不成立。</p>
+<div class="controls"><label>港口<select id="port"></select></label><label>决策日期<input id="origin" type="date" value="2026-06-01" min="2026-01-21" max="2026-07-10"></label><label>提前量<select id="horizon"><option value="1">1天</option><option value="7" selected>7天</option><option value="14">14天</option></select></label><label>输入演练<select id="fault"><option value="none">原始归档</option><option value="source_gap">删除最新已公布观测</option></select></label><button id="run-forecast" data-compute disabled>因果重算预测</button></div>
+<div id="forecast-result" class="result" aria-live="polite">等待重算；回执不包含未公布真值。</div></section>
+<section id="rl"><p class="eyebrow">02 / RL 相对收益</p><h2>安全约束进入训练，强基线保留</h2>
+<p>离线经验模型Bellman策略，五个港口—年份块重采样训练。与28/90步MPC及使用相同经验分布的随机MPC比较。所有策略使用同一观测、动作、成本和安全过滤器；不把回退到MPC记作RL收益。</p>
+<div class="table-scroll"><table><thead><tr><th>策略</th><th>相对成本改善</th><th>港口簇95%区间</th><th>安全动作修正比例</th><th>研究准入</th></tr></thead><tbody id="rl-methods"></tbody></table></div>
+<div id="rl-verdict" class="result"></div><p class="muted">使用公开到港活动代理、本地队列假设和合成压力场景；代理成本不是实际经济收益。正收益、各港不退化、压力非劣、安全与分散性门槛全部满足后才可准入。</p></section>
+<section id="annual"><p class="eyebrow">03 / 年度潮位分量</p><h2>完整年份、逐季验证，保留观测缺口</h2>
+<p>8个此前未使用的NOAA站点，2016–2024年历史用于选型与校准；全部模型冻结后才下载2025年真值。比较3/5年拟合窗、谐波与残差趋势，采用更严格的逐季退化门槛和全季最差误差区间。</p>
+<div class="table-scroll"><table><thead><tr><th>站点</th><th>旧规则全年 / 季度</th><th>V9全年 / 季度</th><th>MAE / m</th><th>覆盖率</th><th>最大宽度 / m</th><th>预测/真值齐备率</th></tr></thead><tbody id="annual-cells"></tbody></table></div>
+<div class="controls"><label>站点<select id="station"></select></label><label>归档日期<input id="annual-day" type="date" value="2025-06-01" min="2025-01-01" max="2025-12-31"></label><button id="run-annual" data-compute disabled>重算24小时潮位</button></div>
+<div id="annual-result" class="result" aria-live="polite">全年MAE≤0.2m、覆盖≥80%、最大宽度≤0.75m、观测可用率≥95%，且不劣于强物理基线。季度另行验收。</div>
+<p class="muted">小时高度采用MLLW基准、米、UTC。拒收推算或异常标记数据，不用插值替代真值。年度潮位只是孪生的一个分量，未验收完整港口作业孪生或未来风暴潮。</p></section>
+<section id="scores"><p class="eyebrow">04 / 更新评分</p><h2>通过什么，就只为那部分加分</h2><div class="table-scroll"><table><thead><tr><th>能力</th><th>上轮 → 本轮</th><th>依据与下一步</th></tr></thead><tbody id="score-rows"></tbody></table></div><div id="references" class="sources"></div></section>
+<footer>公开归档与本地研究实验 · 保留全部失败记录 · 现场生产调度权限关闭</footer>
+</main></body></html>

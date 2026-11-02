@@ -1,0 +1,581 @@
+{
+  "schema": "xiaoyi-capability-improvements.v5",
+  "baseline": "data/evaluation/xiaoyi_capability_scorecard_20261030.json",
+  "notice": "逐项说明实际改动、相关可核验证据和未完成部分；不自动提高分数。",
+  "components": [
+    {
+      "id": "qa",
+      "name": "港航知识问答",
+      "baseline_score": 55,
+      "status": "新增实操或核验入口",
+      "change": "新增现场输入问题、辖区和日期的证据问答面板；回答和每条原始检索证据可导出。",
+      "remaining": "固定题与本地案例有证据；陌生港口业务人员盲评和全球知识覆盖不足。",
+      "current_score": 55,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "retrieval",
+      "name": "语义检索与Hybrid RAG",
+      "baseline_score": 65,
+      "status": "新增实操或核验入口",
+      "change": "可展开实际检索命中与来源字段，保留证据不足；未把界面增强折算为召回率提升。",
+      "remaining": "882分块属于有限知识快照，固定题高命中不能推算开放世界准确率。",
+      "current_score": 65,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "dialogue",
+      "name": "多轮理解与问题拆解",
+      "baseline_score": 55,
+      "status": "新增实操或核验入口",
+      "change": "新增模型—工具任务状态和历史恢复；开放长对话盲测仍未完成。",
+      "remaining": "缺大量未见长对话、指代冲突及跨工具长程盲测。",
+      "current_score": 55,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "sop",
+      "name": "SOP与风险提示",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "增加四类副本故障和未知UKC阻断示例，逐项显示触发检查与恢复。",
+      "remaining": "建议性质；没有港方现场操作签收和真实事故复盘验证。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "regulatory",
+      "name": "法规辖区、时效与冲突治理",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "现场传入辖区、适用日期并展示实际证据；没有新增全量法规覆盖。",
+      "remaining": "登记范围有限，缺持续全量法规更新与外部专业审查。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "handover",
+      "name": "报告与交接草稿",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "增加同一快照问数、风险和情景证据包，正式交接仍走已有任务链与责任人复核。",
+      "remaining": "草稿需业务责任人复核，尚无机构正式签收。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "query",
+      "name": "结构化问数与业务分析",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "同一快照的单位、字段、时间及摘要一起显示，可实际重取并追溯。",
+      "remaining": "现场数据连接未验证，模拟字段完整度不等于实测字段完整度。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "llm",
+      "name": "本机4B生成模型",
+      "baseline_score": 40,
+      "status": "新增实操或核验入口",
+      "change": "新增实际4B选择联合优化工具；用户参数在生成格式和执行层双重锁定，模型不冒充优化器。",
+      "remaining": "基础能力来自开放权重；未做与前沿基础模型的同条件独立盲测。",
+      "current_score": 40,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "lora",
+      "name": "LoRA训练与领域适配",
+      "baseline_score": 30,
+      "status": "保留原证据与缺口",
+      "change": "本轮未重训LoRA；保留原训练/推理证据与质量准入阻断。",
+      "remaining": "质量准入仍阻断；少量loss下降不证明业务质量或前沿模型水平。",
+      "current_score": 30,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "harness",
+      "name": "Harness工具型任务工作台",
+      "baseline_score": 75,
+      "status": "新增实操或核验入口",
+      "change": "新增真实优化工具、研究模板、参数绑定及核验报告，保留模型与算法责任分工。",
+      "remaining": "可复现工程任务较完整；缺开放任务基准、跨机构长期运行和外部盲评。",
+      "current_score": 75,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "durability",
+      "name": "检查点、租约、恢复与取消",
+      "baseline_score": 70,
+      "status": "新增实操或核验入口",
+      "change": "新增演示回执身份隔离、同请求幂等、历史恢复；模拟响应丢失时可按原请求重取。",
+      "remaining": "本地进程与SQLite证据；未覆盖分布式集群灾备或港口OT。",
+      "current_score": 70,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "skills",
+      "name": "技能、显式记忆和MCP只读工具",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "证据问答和专业工具有现场核验入口，现有技能与显式记忆边界不变。",
+      "remaining": "不等于自主学习全港知识；缺外部生态与陌生任务规模验证。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "linkage",
+      "name": "四系统联动与连续观测",
+      "baseline_score": 70,
+      "status": "新增实操或核验入口",
+      "change": "原八个实际适配器另行复验；新演示不将私有副本故障当成跨系统写入。",
+      "remaining": "连接的是已登记演示/研究系统；观测差值不自动构成因果收益。",
+      "current_score": 70,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "rollback",
+      "name": "受控模拟执行与回滚",
+      "baseline_score": 65,
+      "status": "新增实操或核验入口",
+      "change": "新增四类故障副本恢复一致性核验；原目标系统配置回滚证据分别保留。",
+      "remaining": "没有真实设备指令权限，组织身份及OT恢复尚未签收。",
+      "current_score": 65,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "simulator",
+      "name": "十域实时业务模拟",
+      "baseline_score": 65,
+      "status": "新增实操或核验入口",
+      "change": "实时读取当前工程模拟快照并在隔离副本重算三种压力情景，避免静态截图。",
+      "remaining": "物理容量、设备负荷和故障影响多为工程假设。",
+      "current_score": 65,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "visual",
+      "name": "孪生可视化与跨端展示",
+      "baseline_score": 50,
+      "status": "新增实操或核验入口",
+      "change": "新增原始真值、冻结预测、强基线、区间阴影，以及RL动作/积压和联合排程甘特图。",
+      "remaining": "外部联动能力；几何和动画不能证明水深、设备或全港物理标定。",
+      "current_score": 55,
+      "score_change_reason": "实际浏览器逐点读取真值、冻结预测、原区间与强基线，并画RL动作/积压、排程甘特和电网曲线；未提高预测准确率评分。"
+    },
+    {
+      "id": "lineage",
+      "name": "公开数据、来源与证据血缘",
+      "baseline_score": 80,
+      "status": "新增实操或核验入口",
+      "change": "增加八个此前未使用港口、22096条公开记录，CSV可直接下载并核验摘要。",
+      "remaining": "同源归档不等于实时现场遥测，历史修订/发布时间仍有不确定性。",
+      "current_score": 80,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "forecast",
+      "name": "跨港需求预测与区间",
+      "baseline_score": 65,
+      "status": "保留原证据与缺口",
+      "change": "保留原预测留出与区间门禁；本轮没有用展示增强宣称新的预测精度。",
+      "remaining": "是AIS活动指标预测；没有真实到港预约、现场发布时间和漂移SLA。",
+      "current_score": 65,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "rl_lab",
+      "name": "RL研究、消融与策略评估框架",
+      "baseline_score": 70,
+      "status": "新增实操或核验入口",
+      "change": "新增按港口、季度、压力查看冻结策略的逐步原始/过滤动作与成本；未重训。",
+      "remaining": "方法验证较完整，复杂多智能体真实港口任务与独立机构复核仍不足。",
+      "current_score": 70,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "rl_policy",
+      "name": "RL相对强MPC的有效收益",
+      "baseline_score": 30,
+      "status": "保留原证据与缺口",
+      "change": "原收益失败保持；联合整数优化属于另一业务任务，不冒充RL超过强MPC。",
+      "remaining": "安全版与安全MPC动作相同；没有额外RL收益准入，跨港相对成本和集中收益仍失败。",
+      "current_score": 30,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "mpc",
+      "name": "PID/MPC控制与强基线",
+      "baseline_score": 55,
+      "status": "新增实操或核验入口",
+      "change": "新增同窗口RL与成本/安全MPC曲线和原轨迹对照，保留动作相同与退化。",
+      "remaining": "五档容量代理问题；未完成真实设备动态、业务成本和控制链标定。",
+      "current_score": 55,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "short_tide",
+      "name": "短期水位预测与因果同化",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "新增可核对的单元选择、真值和原区间；完整短期46/54门禁未改。",
+      "remaining": "完整项46/54；缺测和实时传感器可用性仍阻断资格。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "annual_twin",
+      "name": "年度开环物理孪生",
+      "baseline_score": 40,
+      "status": "保留原证据与缺口",
+      "change": "年度5/21仍失败；七日曲线和短期同化不能替代年度资格。",
+      "remaining": "年度新留出5/21；稳定跨年/跨季标定尚未通过。",
+      "current_score": 40,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "forced_twin",
+      "name": "逐次天气预报强迫的七日孪生",
+      "baseline_score": 50,
+      "status": "新增实操或核验入口",
+      "change": "56个历史单元可逐一查看原预测/真值/强基线，缺测单元保持空。",
+      "remaining": "两种模式均15/28；覆盖、基线和数据可用性仍失败，不能替代年度资格。",
+      "current_score": 50,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "schedule",
+      "name": "引航、泊位、岸桥和堆场排程",
+      "baseline_score": 40,
+      "status": "新增算法/业务能力",
+      "change": "新增HiGHS整数联合优化、四个启发式基线、求解界限和独立小规模穷举校验。",
+      "remaining": "缺真实船舶工单、港区布局、服务时长和效率标定。",
+      "current_score": 50,
+      "score_change_reason": "新增HiGHS联合整数优化；8个新港5月32例及新6月32例，全部约束通过且界限闭合，独立小规模穷举检查；现场参数仍是假设。"
+    },
+    {
+      "id": "energy",
+      "name": "能耗、储能与碳核算",
+      "baseline_score": 45,
+      "status": "新增算法/业务能力",
+      "change": "把岸桥、岸电与引航/堆场用电纳入联合容量约束和分时目标；未知碳因子不补造。",
+      "remaining": "未取得港口电表、设备工况及可核验电网因子，不能宣称实测节能减排。",
+      "current_score": 50,
+      "score_change_reason": "供电、岸桥、岸电、引航和堆场同时参与资源优化；可靠供电与分时目标明确，未把未知碳因子或合成电价写成实测收益。"
+    },
+    {
+      "id": "wholeport",
+      "name": "全港多业务物理闭环",
+      "baseline_score": 35,
+      "status": "新增算法/业务能力",
+      "change": "新增工单原子完整、泊位长度、资源时隙和可靠供电的共同求解；现场物理标定仍缺。",
+      "remaining": "水深/吃水/基准、设备能耗和全港实际业务数据仍缺，现场物理闭环未成立。",
+      "current_score": 40,
+      "score_change_reason": "联合排程扩大资源与供电的共同求解范围；UKC、水深、设备参数和机构签收仍缺，未提高现场成熟度。"
+    },
+    {
+      "id": "dcsa",
+      "name": "DCSA/MSW多机构协同",
+      "baseline_score": 35,
+      "status": "新增实操核验入口",
+      "change": "新增一键实际执行DCSA官方规范子集、E-R-P-A四阶段与13项契约/异常演练，原事件字段和固定技术时钟可导出；尚无外部一致性签收。 补充9项独立前置条件/技术时钟对齐的单因素语义核验，检查预期错误与无部分写入；分数仍35。",
+      "remaining": "尚无完整外部一致性测试、MSW接入、机构身份或签收。",
+      "current_score": 35,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。",
+      "additional_isolated_validation": {
+        "schema": "xiaoyi-dcsa-isolated-precondition-validation.v5",
+        "passed": true,
+        "cases": [
+          {
+            "case": "wrong_actor",
+            "valid_prefix_events": 0,
+            "technical_clock": "2026-02-02T00:00:00+00:00",
+            "actor": "consumer",
+            "event": {
+              "eventID": "cf902ecd-d26a-5bfb-bebb-09afab48ec7a",
+              "eventUpdatedDateTime": "2026-02-02T00:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "EST",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              }
+            },
+            "expected_error_fragment": "ownership mismatch",
+            "actual_error": "PermissionError: timestamp ownership mismatch",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "identity_conflict",
+            "valid_prefix_events": 4,
+            "technical_clock": "2026-02-02T02:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "f903a0b7-fb8d-560b-a821-2d5fd11f55f0",
+              "eventUpdatedDateTime": "2026-02-02T02:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "ACT",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              },
+              "replyToEventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7",
+              "isFYI": true
+            },
+            "expected_error_fragment": "identity conflict",
+            "actual_error": "ValueError: event identity conflict",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "stale_technical_clock",
+            "valid_prefix_events": 0,
+            "technical_clock": "2026-02-01T23:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "cf902ecd-d26a-5bfb-bebb-09afab48ec7a",
+              "eventUpdatedDateTime": "2026-02-02T00:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "EST",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              }
+            },
+            "expected_error_fragment": "stale/future technical clock",
+            "actual_error": "ValueError: stale/future technical clock",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "plan_wrong_requested_time",
+            "valid_prefix_events": 2,
+            "technical_clock": "2026-02-02T00:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7",
+              "eventUpdatedDateTime": "2026-02-02T00:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "PLN",
+                "serviceDateTime": "2026-02-02T03:00:00+00:00"
+              },
+              "replyToEventID": "c4fbf642-132b-597d-ad74-74599551d5f9"
+            },
+            "expected_error_fragment": "planned timestamp differs",
+            "actual_error": "ValueError: planned timestamp differs from requested timestamp",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "actual_without_accepted_plan",
+            "valid_prefix_events": 2,
+            "technical_clock": "2026-02-02T02:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "f903a0b7-fb8d-560b-a821-2d5fd11f55f0",
+              "eventUpdatedDateTime": "2026-02-02T02:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "ACT",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              },
+              "replyToEventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7"
+            },
+            "expected_error_fragment": "actual requires accepted plan",
+            "actual_error": "ValueError: actual requires accepted plan in this rehearsal",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "actual_event_in_future",
+            "valid_prefix_events": 3,
+            "technical_clock": "2026-02-02T02:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "f903a0b7-fb8d-560b-a821-2d5fd11f55f0",
+              "eventUpdatedDateTime": "2026-02-02T02:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "ACT",
+                "serviceDateTime": "2026-02-02T03:00:00+00:00"
+              },
+              "replyToEventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7"
+            },
+            "expected_error_fragment": "actual event cannot describe a future",
+            "actual_error": "ValueError: actual event cannot describe a future execution",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "superseded_request",
+            "valid_prefix_events": 3,
+            "technical_clock": "2026-02-02T00:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7",
+              "eventUpdatedDateTime": "2026-02-02T00:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "PLN",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              },
+              "replyToEventID": "c4fbf642-132b-597d-ad74-74599551d5f9"
+            },
+            "expected_error_fragment": "plan must confirm latest request",
+            "actual_error": "ValueError: plan must confirm latest request",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "network_partition",
+            "valid_prefix_events": 0,
+            "technical_clock": "2026-02-02T00:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "cf902ecd-d26a-5bfb-bebb-09afab48ec7a",
+              "eventUpdatedDateTime": "2026-02-02T00:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "EST",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              }
+            },
+            "expected_error_fragment": "partition",
+            "actual_error": "ConnectionError: partition; no dispatch/effect",
+            "actual_response": null,
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          },
+          {
+            "case": "exact_duplicate",
+            "valid_prefix_events": 4,
+            "technical_clock": "2026-02-02T02:00:00+00:00",
+            "actor": "provider",
+            "event": {
+              "eventID": "f903a0b7-fb8d-560b-a821-2d5fd11f55f0",
+              "eventUpdatedDateTime": "2026-02-02T02:00:00+00:00",
+              "timestamp": {
+                "classifierCode": "ACT",
+                "serviceDateTime": "2026-02-02T02:00:00+00:00"
+              },
+              "replyToEventID": "283af763-c38b-5113-b3ee-d2dc8c4304f7"
+            },
+            "expected_error_fragment": "duplicate",
+            "actual_error": null,
+            "actual_response": "duplicate",
+            "intended_condition_rejected_or_idempotent": true,
+            "no_partial_effect": true,
+            "passed": true
+          }
+        ],
+        "count": 9,
+        "method": "Fresh Negotiation instance for every case; accept its valid prefix first; align technical clocks so an unrelated stale check cannot masquerade as identity/version/time validation. Verify intended exception and no partial events.",
+        "reused_validator_source_sha256": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+        "official_schema": {
+          "path": "data/public/port_standards_v3_20261030/dcsa-pc200-openapi.yaml",
+          "sha256": "fcc6877230d6f99ca26ddf82ff2004d4c88b44d644c82c86843234267bf00bcd"
+        },
+        "driver_sha256": "2a96655ae007367a49b880bd96cee73754e7c82c3833fb1b4e2379f4b3c595f7",
+        "external_conformance_completed": false,
+        "production_authority": false,
+        "notice": "Nine additional isolated local semantic checks; the older13-case rehearsal is retained but is not thirteen independent attacks or external DCSA certification."
+      }
+    },
+    {
+      "id": "navigation",
+      "name": "航行/运输模型联动",
+      "baseline_score": 50,
+      "status": "保留原证据与缺口",
+      "change": "保留外部航行/运输模型联动证据；未宣称新增完整实船航次验证。",
+      "remaining": "属于外部系统联动；缺真实航道、硬件和端到端RL训练验收。",
+      "current_score": 50,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "clients",
+      "name": "移动与客户端签收",
+      "baseline_score": 50,
+      "status": "新增实操或核验入口",
+      "change": "新增窄屏实证工作台核验；原生客户端窗口和全设备签收缺口不抹去。",
+      "remaining": "原生桌面窗口既定验收仍未通过；历史签收不能当作当前全设备兼容证明。",
+      "current_score": 50,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "audit",
+      "name": "审计回执与执行证据完整性",
+      "baseline_score": 80,
+      "status": "新增实操或核验入口",
+      "change": "新增身份绑定演示回执、结果/输入摘要、事件链、完整失败与整场证据导出。",
+      "remaining": "本地SHA一致性尚无外部签名、独立不可篡改存证和多方取证。",
+      "current_score": 80,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "security",
+      "name": "权限、注入防护与供应链",
+      "baseline_score": 60,
+      "status": "新增实操或核验入口",
+      "change": "新增优化参数生成格式常量绑定、执行层复核、身份隔离及篡改检测回归。",
+      "remaining": "缺外部红队、真实机构IAM/密钥及OT网络安全验收。",
+      "current_score": 60,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "observability",
+      "name": "监控、健康和故障诊断",
+      "baseline_score": 65,
+      "status": "新增实操或核验入口",
+      "change": "四类可控副本故障可显示具体阻断检查，并核对恢复后的原始摘要。",
+      "remaining": "本机时点/历史持续探测证据，缺多站点长期SLO和高可用实测。",
+      "current_score": 65,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "container",
+      "name": "Docker发行与可复现部署",
+      "baseline_score": 70,
+      "status": "新增实操或核验入口",
+      "change": "最终当前源码重新实建并验收；仍不宣称容器内4B推理或多站点高可用。",
+      "remaining": "单机Linux容器；未验证高可用集群、灾备、现场运维或容器内4B推理。",
+      "current_score": 70,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "live_data",
+      "name": "真实港口只读接入准备",
+      "baseline_score": 25,
+      "status": "保留原证据与缺口",
+      "change": "新增公开来源下载和校验入口；真实港口只读现场准入仍是单独七项门禁。",
+      "remaining": "没有完成港方现场七项准入；真实接入完成度仍为0/7。",
+      "current_score": 25,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "dispatch",
+      "name": "真实港口自主调度",
+      "baseline_score": 0,
+      "status": "保留原证据与缺口",
+      "change": "没有真实港口签字与现场授权，本轮保持0分和生产权限关闭。",
+      "remaining": "没有签字授权、现场HIL、影子运行和生产调度资格。",
+      "current_score": 0,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    },
+    {
+      "id": "multimodal",
+      "name": "视频/雷达多模态感知",
+      "baseline_score": 0,
+      "status": "保留原证据与缺口",
+      "change": "未接入已验收的视频/雷达感知链，本轮保持0分，不用动画替代感知证据。",
+      "remaining": "没有已验收的真实港口视频识别、雷达融合或视觉闭环。",
+      "current_score": 0,
+      "score_change_reason": "本轮增加相关实操或维持缺口；没有足以改变该项成熟度评分的新证据。"
+    }
+  ]
+}

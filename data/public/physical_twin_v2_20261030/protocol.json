@@ -1,0 +1,126 @@
+{
+  "schema": "xiaoyi-international-twin-protocol.v2",
+  "frozen_at": "2026-10-30T03:07:34.633603+00:00",
+  "noaa_stations": {
+    "9410660": "Los Angeles",
+    "8518750": "The Battery, New York",
+    "9447130": "Seattle"
+  },
+  "uhslc_stations": {
+    "175": "Fremantle, Australia",
+    "115": "Colombo, Sri Lanka",
+    "101": "Mombasa, Kenya"
+  },
+  "fit_period": [
+    "2024-01-01",
+    "2024-12-31"
+  ],
+  "validation_blocks": [
+    "2025-02",
+    "2025-05",
+    "2025-08",
+    "2025-11"
+  ],
+  "fresh_test_blocks": [
+    "2026-02",
+    "2026-05",
+    "2026-08"
+  ],
+  "block_days": 8,
+  "context_hours": 24,
+  "harmonic_candidates": {
+    "method": "UTide 0.4.0 OLS with astronomical nodal/Greenwich corrections, fixed annual fit; no provider amplitudes/phases",
+    "constituents": [
+      [
+        "M2",
+        "S2",
+        "N2",
+        "K2",
+        "K1",
+        "O1",
+        "P1",
+        "Q1"
+      ],
+      [
+        "M2",
+        "S2",
+        "N2",
+        "K2",
+        "K1",
+        "O1",
+        "P1",
+        "Q1",
+        "M4",
+        "MS4",
+        "MN4",
+        "2N2",
+        "MU2",
+        "NU2",
+        "L2",
+        "T2",
+        "J1",
+        "OO1",
+        "SA",
+        "SSA"
+      ]
+    ],
+    "trend": false
+  },
+  "short_horizons_minutes": [
+    60,
+    360
+  ],
+  "additional_noaa_horizon_minutes": [
+    6
+  ],
+  "residual_memory_candidates": [
+    1,
+    3,
+    6
+  ],
+  "interval_nominal_quantile": 0.95,
+  "research_limits": {
+    "long_open_loop": {
+      "mae_m": 0.2,
+      "coverage": 0.8,
+      "width_m": 0.75
+    },
+    "6": {
+      "mae_m": 0.05,
+      "coverage": 0.8,
+      "width_m": 0.2
+    },
+    "60": {
+      "mae_m": 0.1,
+      "coverage": 0.8,
+      "width_m": 0.5
+    },
+    "360": {
+      "mae_m": 0.2,
+      "coverage": 0.8,
+      "width_m": 0.75
+    }
+  },
+  "availability_floor": 0.95,
+  "quality_rules": "NOAA verified q=v when present and all flags zero; UHSLC finite sea_level and quality>=3; keep quality distribution. Reject duplicate times or changing record/datum, no interpolation.",
+  "assumptions": [
+    "UHSLC is delayed-mode 4-6 week FD/RQ archive, not operational telemetry. Short-horizon replay assumes event-time local sensor access which this archive does not establish.",
+    "NOAA MLLW and UHSLC reference datums are local, never pooled as common elevation.",
+    "2024 and previously inspected 2025 observations may be used for development; all 2026 blocks are new held-out results and must not be retuned after viewing.",
+    "Short horizon does not replace long-open-loop qualification. Hourly UHSLC supports 1h/6h only; six-minute extension evaluated only for NOAA.",
+    "No wind/surge physical model, bathymetry, UKC, equipment or energy field calibration is implied."
+  ],
+  "production_authority": false,
+  "protocol_errata": {
+    "at": "2026-10-30T03:14:55.998743+00:00",
+    "reason": "UTide 0.4.0 does not register M1; remove this unsupported name before any test predictions or metrics. No thresholds, target periods or observed outcomes used to choose the repair."
+  },
+  "per_station_training_override": {
+    "175": [
+      "2023-01-01",
+      "2024-12-31"
+    ]
+  },
+  "training_supplement_reason": "Fremantle 2024 had only4330 valid training hours (<7000). Supplement2023 real observed training history before any2026 test prediction; preserve data gaps, same quality filters, thresholds and test periods.",
+  "supplement_declared_at": "2026-10-30T03:20:42.943647+00:00"
+}

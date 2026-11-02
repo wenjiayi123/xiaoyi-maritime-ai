@@ -1,0 +1,2228 @@
+{
+  "schema": "xiaoyi-capability-scorecard.v10",
+  "reviewed_on": "2026-10-31",
+  "baseline": {
+    "path": "data/evaluation/xiaoyi_capability_scorecard_v9_20261031.json",
+    "sha256": "ca3e347239c27e5c997360629f4267b3ab8b5a2c2f823d0956cf4958aac37093"
+  },
+  "rubric": {
+    "max_score": 100,
+    "method": "每项五维各0至4分，相加乘5。由本次代码、实际运行和研究证据作工程判断，不是全球排名、标准化竞赛成绩或第三方认证。",
+    "dimensions": {
+      "功能覆盖": "能实际执行的范围",
+      "验证深度": "可复现、真实调用与负面证据",
+      "陌生场景泛化": "未见港口、时期、任务及稳健性",
+      "港航业务闭合": "数据、物理、业务约束和责任链闭合",
+      "运行成熟度": "隔离部署、恢复、长期与机构验证，按模块用途评估"
+    },
+    "anchors": {
+      "0": "未具备或无验收证据",
+      "20": "概念或局部展示",
+      "40": "局部可运行、验证不足",
+      "60": "可复现离线研究/工程能力",
+      "80": "多场景稳健、业务与运行验证较充分",
+      "100": "该模块目标范围内长期、独立、规模化验收充分；这是本量表目标定义，不是行业超级智能认证"
+    },
+    "scope": "面向当前/前沿智能港口的证据成熟度粗评；本地工程通过、算法有效、现场资格分别看。"
+  },
+  "components": [
+    {
+      "id": "qa",
+      "name": "港航知识问答",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 1
+      },
+      "score": 55,
+      "can_do": "结合登记资料回答概念、常见业务问题并标注证据。",
+      "boundary": "固定题与本地案例有证据；陌生港口业务人员盲评和全球知识覆盖不足。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/xiaoyi.py",
+        "reports/maritime_rag_benchmark_v1_20260814_r3.json"
+      ],
+      "previous_score": 55,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "qa",
+        "priority": "P1",
+        "target": "按港区、岗位与情境给出可回溯的专业答案",
+        "next": "建立业务专家盲评题集，覆盖新港口、相互矛盾证据和信息不足",
+        "acceptance": "冻结题目后逐题记录事实正确率、引用支持率、拒答正确率；危险行动误导单列且须为0",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/xiaoyi.py",
+          "exists": true,
+          "sha256_at_review": "ba9253c3b95dbcc9fd10502ead6b972f61aefe204e172baf954ea05aa7fbd27e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/maritime_rag_benchmark_v1_20260814_r3.json",
+          "exists": true,
+          "sha256_at_review": "5ad83d0cc3066fc285432bfb973e1b5909254925d1b36655345060e3a4e4a4da",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "retrieval",
+      "name": "语义检索与Hybrid RAG",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 65,
+      "can_do": "本地向量、Sparse/BM25、多证据召回与引用。",
+      "boundary": "882分块属于有限知识快照，固定题高命中不能推算开放世界准确率。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/retrieval.py",
+        "app/vector_retrieval.py"
+      ],
+      "previous_score": 65,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "retrieval",
+        "priority": "P1",
+        "target": "跨语言、长文与实时版本的高召回检索",
+        "next": "按文档/港口隔离检索集，加入同名设备、旧规和相似数字干扰",
+        "acceptance": "报告Recall@k、nDCG、错误引用率及延迟；按港口和文档类型分层，不用训练片段作测试",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/retrieval.py",
+          "exists": true,
+          "sha256_at_review": "65e7c1b4fa514b2061bd82d34c119ec77f37bcde4c9b8b822637a2bb24ba81b2",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/vector_retrieval.py",
+          "exists": true,
+          "sha256_at_review": "78d41c245007c8c23e59d39df9f344c26f0ffa6cdfbbb877b9204fc725174e34",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "dialogue",
+      "name": "多轮理解与问题拆解",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 2
+      },
+      "score": 55,
+      "can_do": "改写追问、拆分问题、继承结构化上下文。",
+      "boundary": "缺大量未见长对话、指代冲突及跨工具长程盲测。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/query_intelligence.py",
+        "app/conversations.py"
+      ],
+      "previous_score": 55,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "dialogue",
+        "priority": "P1",
+        "target": "多轮协作中保持对象、单位和任务约束一致",
+        "next": "构造跨20轮交接、纠正、否定、指代及取消任务回放",
+        "acceptance": "冻结对话脚本；对象切换与撤销后执行错误为0，长程任务成功率及超时分别报告",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/query_intelligence.py",
+          "exists": true,
+          "sha256_at_review": "5b768556c56f3d2a457c672a8db933d71905449b942f3aa4d8ef1706828b1c33",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/conversations.py",
+          "exists": true,
+          "sha256_at_review": "b50163f2c80bf74b3834d62425c7de6f26c3451657bfdef007658bb1dabd2893",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "sop",
+      "name": "SOP与风险提示",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "生成核验步骤、补齐对象信息并提示高风险事项。",
+      "boundary": "建议性质；没有港方现场操作签收和真实事故复盘验证。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/decision_assurance.py",
+        "app/answer_verification.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "sop",
+        "priority": "P0",
+        "target": "与现场职责相连的操作建议和停止条件",
+        "next": "把缺数据、宽区间、漂移和不可行计划的停止理由写入交接",
+        "acceptance": "预测暂停时不输出可执行调度；现场操作仍需站点SOP、责任人和签收",
+        "references": [
+          "nist",
+          "mpa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/decision_assurance.py",
+          "exists": true,
+          "sha256_at_review": "beb3a28d0ab2fe6895ec1623c48d59a0971d7c79f982fd389ff16681ac631c30",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/answer_verification.py",
+          "exists": true,
+          "sha256_at_review": "dc5a500ae01068ad5e1ac5d9710d7c151f6973371e0c3cbcb02ac9610034d183",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "regulatory",
+      "name": "法规辖区、时效与冲突治理",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "区分辖区、日期、证据冲突和新鲜度。",
+      "boundary": "登记范围有限，缺持续全量法规更新与外部专业审查。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/governance.py",
+        "app/evidence_fusion.py"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "regulatory",
+        "priority": "P1",
+        "target": "辖区、有效期、版本和冲突明确的法规依据",
+        "next": "按主管机关维护修订登记和失效通知，增加跨辖区冲突盲测",
+        "acceptance": "逐条保留正式来源、实施日期、适用对象和废止关系；无法判定时明确暂缓",
+        "references": [
+          "msw",
+          "dcsa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/governance.py",
+          "exists": true,
+          "sha256_at_review": "289b738886e1fb0620de726fbab6dc957f39ff5a921dc17ea1fc5c7660598558",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/evidence_fusion.py",
+          "exists": true,
+          "sha256_at_review": "4864623e0c8fada959d87e7774a9d5bea7adbcc4437b514ba3dae5413977fa7e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "handover",
+      "name": "报告与交接草稿",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "生成结构化业务/研究交接并保留来源和缺项。",
+      "boundary": "草稿需业务责任人复核，尚无机构正式签收。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/maritime.py",
+        "app/harness/business.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "handover",
+        "priority": "P1",
+        "target": "交接包含预测区间、计划代价和未解决事项",
+        "next": "导出本轮37项评估、暂停理由和稳健排程的额外暂缓/代价",
+        "acceptance": "报告数字能回到同一摘要绑定的结果文件；失败与未验证项不省略",
+        "references": [
+          "rotterdam",
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/maritime.py",
+          "exists": true,
+          "sha256_at_review": "ed92d1829a1679949c2da4b7adaee437feb051d541854ee200e814e80863c4ab",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/business.py",
+          "exists": true,
+          "sha256_at_review": "51984b8be7d74a46ac9af61a71f5fe6c14136a74941f7248a6f6c3442e0efc64",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "query",
+      "name": "结构化问数与业务分析",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "读取登记字段和运行快照，输出可追溯数字。",
+      "boundary": "现场数据连接未验证，模拟字段完整度不等于实测字段完整度。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/maritime.py",
+        "app/port_runtime.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "query",
+        "priority": "P0",
+        "target": "每个业务数字绑定单位、来源、时间与统计口径",
+        "next": "本轮区分AIS日活动指标、假设发布时钟、预测提前量和合成工单",
+        "acceptance": "问数与图表使用同一结果；活动指标不直接解释为ETA、真实船期或服务容量",
+        "references": [
+          "rotterdam",
+          "ovs"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/maritime.py",
+          "exists": true,
+          "sha256_at_review": "ed92d1829a1679949c2da4b7adaee437feb051d541854ee200e814e80863c4ab",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/port_runtime.py",
+          "exists": true,
+          "sha256_at_review": "4f9496848a9f199515e7b0b5c216ce7bebc09c098ab386261c37f696bed633ac",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "llm",
+      "name": "本机4B生成模型",
+      "dimensions": {
+        "功能覆盖": 2,
+        "验证深度": 2,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 1,
+        "运行成熟度": 2
+      },
+      "score": 40,
+      "can_do": "本机完成文本生成与真实工具选择，减少外发。",
+      "boundary": "基础能力来自开放权重；未做与前沿基础模型的同条件独立盲测。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/model_gateway.py",
+        "data/model_registry.json"
+      ],
+      "previous_score": 40,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "llm",
+        "priority": "P1",
+        "target": "准确、低延迟且能受约束使用工具的领域模型",
+        "next": "同一冻结盲测对比本机4B及可用候选模型，记录成本和P95延迟",
+        "acceptance": "同提示/工具/预算；事实、工具成功率、拒答、最差任务分别评测；参数量不作质量得分",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/model_gateway.py",
+          "exists": true,
+          "sha256_at_review": "5cb908a14763f2dacac83770c49f6d67a185df9c79816ef5a5813e8a60271000",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/model_registry.json",
+          "exists": true,
+          "sha256_at_review": "100401b52849b8e705c5b560b7b99fd554386b092153913c71283602ed07c44d",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "lora",
+      "name": "LoRA训练与领域适配",
+      "dimensions": {
+        "功能覆盖": 2,
+        "验证深度": 2,
+        "陌生场景泛化": 0,
+        "港航业务闭合": 1,
+        "运行成熟度": 1
+      },
+      "score": 30,
+      "can_do": "有本机适配器训练、导出和推理工程流程。",
+      "boundary": "质量准入仍阻断；少量loss下降不证明业务质量或前沿模型水平。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "reports/lora_admission_v1.json",
+        "reports/local_lora_inference_v3.json"
+      ],
+      "previous_score": 30,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "lora",
+        "priority": "P2",
+        "target": "领域适配产生可复现净收益而不损害安全",
+        "next": "先冻结按文档隔离的训练/验证/测试划分，再训练候选适配器",
+        "acceptance": "与原模型同条件比较，安全/引用不退化，留出收益可信后才替换；训练loss不作准入",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "reports/lora_admission_v1.json",
+          "exists": true,
+          "sha256_at_review": "860c390e09dfb2abaa7ca90b50423fadddb4e4a8113bbf4663ac144ffb5931ab",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/local_lora_inference_v3.json",
+          "exists": true,
+          "sha256_at_review": "f94f966c4ad6383d57264d406af14ceb47b67323da055b495c0dda1086a1ee23",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "harness",
+      "name": "Harness工具型任务工作台",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 75,
+      "can_do": "真实模型/规则调工具、预算、审批、工件及受控结果核验。",
+      "boundary": "可复现工程任务较完整；缺开放任务基准、跨机构长期运行和外部盲评。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/runner.py",
+        "docs/HARNESS_RUNTIME.md",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 75,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "harness",
+        "priority": "P1",
+        "target": "跨工具任务有预算、停机、结果验证与可复算工件",
+        "next": "将预测审查和多情景优化作为受限只读研究API供工作台调用",
+        "acceptance": "每次计算返回输入摘要、模型/算法边界和失败状态；未获现场授权不执行设备动作",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/runner.py",
+          "exists": true,
+          "sha256_at_review": "a6ae9a4a2bb7c7406a781cf47fbb2be4f1d14248d4b2428395393bfc0e355f58",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "docs/HARNESS_RUNTIME.md",
+          "exists": true,
+          "sha256_at_review": "b4f6dc356443b24a2a60d42ca0a3d1d53942ecf248245ed4f450b7561a90298d",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "durability",
+      "name": "检查点、租约、恢复与取消",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 2
+      },
+      "score": 70,
+      "can_do": "持久任务、跨进程目标锁、故障恢复、取消和状态保留。",
+      "boundary": "本地进程与SQLite证据；未覆盖分布式集群灾备或港口OT。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/store.py",
+        "app/linked_agent.py",
+        "tests/test_runtime_test_isolation.py"
+      ],
+      "previous_score": 70,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "durability",
+        "priority": "P1",
+        "target": "任务重启和重试不重复产生业务效果",
+        "next": "补分区、磁盘耗尽、写入中断及恢复压力矩阵",
+        "acceptance": "独立进程回读验证原子提交、租约过期、幂等和取消；在隔离库执行",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/store.py",
+          "exists": true,
+          "sha256_at_review": "f1dcc31a1e5ce35ae518798a17ea3635ac60e7db84d44e9112f756414550bf3f",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/linked_agent.py",
+          "exists": true,
+          "sha256_at_review": "35f2ad992d5bbda275b3e5462325223bcd3635b5bf11c413c6e714222cbbc95a",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "tests/test_runtime_test_isolation.py",
+          "exists": true,
+          "sha256_at_review": "7714f50a01af7788a055c07574c240376025faf4463f25a36a29ca1be8e79398",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "skills",
+      "name": "技能、显式记忆和MCP只读工具",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 60,
+      "can_do": "按任务引用技能、显式记忆及只读工具接口。",
+      "boundary": "不等于自主学习全港知识；缺外部生态与陌生任务规模验证。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/tools.py",
+        "docs/HARNESS_RUNTIME.md"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "skills",
+        "priority": "P2",
+        "target": "工具与显式记忆具有来源、权限和可撤销性",
+        "next": "增加记忆过期、权限撤回和跨用户隔离的任务级盲测",
+        "acceptance": "外部文本不能改变工具权限；忘记/撤回后不可再用于任务；未授权外发为0",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/tools.py",
+          "exists": true,
+          "sha256_at_review": "72551258e145038d8348afea6027df51df5b4740d14dbbd5046c0b3fb856f64e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "docs/HARNESS_RUNTIME.md",
+          "exists": true,
+          "sha256_at_review": "b4f6dc356443b24a2a60d42ca0a3d1d53942ecf248245ed4f450b7561a90298d",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "语言/检索模型、训练数据与任务链",
+        "verdict": "未证明；需要固定数据/工具/提示的跨规模对照",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "linkage",
+      "name": "四系统联动与连续观测",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 2
+      },
+      "score": 70,
+      "can_do": "八个登记本机适配器动作、连续观测与参数恢复。",
+      "boundary": "连接的是已登记演示/研究系统；观测差值不自动构成因果收益。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "reports/linked_agent_acceptance_risk_v4_final_20261030.json",
+        "app/linked_agent_catalog.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+        "reports/linked_agent_acceptance_capability_v8_ready_20261031.json"
+      ],
+      "previous_score": 70,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "linkage",
+        "priority": "P1",
+        "target": "跨系统的同一事件、时间、单位及因果链可核对",
+        "next": "增加延迟、重复、乱序和部分失败的跨系统联动演练",
+        "acceptance": "八类适配器分别保留调用与恢复回执；差分观测不自动宣称因果收益",
+        "references": [
+          "mpa",
+          "rotterdam"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "reports/linked_agent_acceptance_risk_v4_final_20261030.json",
+          "exists": true,
+          "sha256_at_review": "a44cb5a2b09a674f2a0bc366d7d05346287b99112d3937ceedd71594ed980d60",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/linked_agent_catalog.py",
+          "exists": true,
+          "sha256_at_review": "278e326cc0f656964551d995f745aea84b151672a4b8349d45c294ddfc3bb5c6",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/linked_agent_acceptance_capability_v8_ready_20261031.json",
+          "exists": true,
+          "sha256_at_review": "f3543b93e3f2f6de1894cf307179fc607fdb06270e1ee7b122a16fe00a5862d4",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "rollback",
+      "name": "受控模拟执行与回滚",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 65,
+      "can_do": "预览、角色检查、幂等、配置完整性与模拟回滚。",
+      "boundary": "没有真实设备指令权限，组织身份及OT恢复尚未签收。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/linked_agent.py",
+        "app/harness/operations_v3.py"
+      ],
+      "previous_score": 65,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "rollback",
+        "priority": "P0",
+        "target": "越权、失联和回滚失败时停止计划传播",
+        "next": "对计划版本、陈旧输入和人工停止做独立故障注入",
+        "acceptance": "过期计划不可继续；回滚后原参数逐项一致；现场OT回滚需港方演练",
+        "references": [
+          "nist",
+          "mpa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/linked_agent.py",
+          "exists": true,
+          "sha256_at_review": "35f2ad992d5bbda275b3e5462325223bcd3635b5bf11c413c6e714222cbbc95a",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v3.py",
+          "exists": true,
+          "sha256_at_review": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "simulator",
+      "name": "十域实时业务模拟",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 65,
+      "can_do": "船舶、设备、泊位、堆场、闸口、能碳等模拟流与场景。",
+      "boundary": "物理容量、设备负荷和故障影响多为工程假设。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/realtime_port_simulator.py",
+        "reports/port_realtime_simulator_evidence_remediation_20261030.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 65,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "simulator",
+        "priority": "P1",
+        "target": "时间连续、守恒一致且假设透明的多业务仿真",
+        "next": "将压力情景从单一展示扩展为共享计划约束并对比失败",
+        "acceptance": "需求/工单守恒、资源/供电约束逐情景复算；不可行保留原始失败",
+        "references": [
+          "mpa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/realtime_port_simulator.py",
+          "exists": true,
+          "sha256_at_review": "d10f641ce4c4cad30f8adae5d8e0ecd361899372dcf18ed66470544d46270fec",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/port_realtime_simulator_evidence_remediation_20261030.json",
+          "exists": true,
+          "sha256_at_review": "8ed6fe6d054eb53e0d6cbcea21d5217cc24a8db24187200ac44e876086aaf161",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "visual",
+      "name": "孪生可视化与跨端展示",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 55,
+      "can_do": "可现场选择原始历史单元并核对真值、预测、强基线、原区间和缺测；支持资源甘特及RL逐步回放。",
+      "boundary": "外部联动能力；几何和动画不能证明水深、设备或全港物理标定。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+        "app/capability_hub.py",
+        ".codex_artifacts/improvement-v5-20261030/browser-attempt2/acceptance.json",
+        "web/proof_console.js",
+        "config/research_v6_evidence_registry.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 55,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "visual",
+        "priority": "P2",
+        "target": "可交互查看全部港口、区间、失败和退化",
+        "next": "增加37项评估与预测/稳健计划独立页面及筛选",
+        "acceptance": "桌面和窄屏可读，图表有单位和来源，未运行/失败不显示通过",
+        "references": [
+          "mpa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+          "exists": true,
+          "sha256_at_review": "6ddc041f2419618a72287851ee0d96c2b52270c6e59824d6bb25aafd925122a2",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/capability_hub.py",
+          "exists": true,
+          "sha256_at_review": "def0f98df73385c28cde4f95ae69237f8d6ab9fd99c368f39002a1b01249233a",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/improvement-v5-20261030/browser-attempt2/acceptance.json",
+          "exists": true,
+          "sha256_at_review": "940b5c9aaab1e062005ae273d8e22790e317ea1544c9bac47e5bc95d743d180b",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "web/proof_console.js",
+          "exists": true,
+          "sha256_at_review": "fdf4c3a3dcac29ae82de07962b174d8992cd968c23c07674469a6b3613a7d2cd",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "lineage",
+      "name": "公开数据、来源与证据血缘",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 3,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 80,
+      "can_do": "跨港真实公开指标、原始文件、时钟、质量、版本和失败可查。",
+      "boundary": "同源归档不等于实时现场遥测，历史修订/发布时间仍有不确定性。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "config/remediation_v4_evidence_registry.json",
+        "data/public/portwatch_v4_20261030/manifest.json",
+        "config/research_v6_evidence_registry.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 80,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "lineage",
+        "priority": "P0",
+        "target": "来源事件时间、发布时间、版本和修订可追溯",
+        "next": "本轮将选型、校准、回放和模型/输入摘要分别绑定",
+        "acceptance": "缺失或哈希变化停止重算；历史归档的假设时延不得标成真实发布时间",
+        "references": [
+          "rotterdam",
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "config/remediation_v4_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "1674914f1a8328e696345aa67060137480b51a5d5d049ccbe7a83810318ec1af",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/portwatch_v4_20261030/manifest.json",
+          "exists": true,
+          "sha256_at_review": "2d2653ae79ac5f8905dfd800d82f18152e3649fa5b58adeb194176a49ff4dd6f",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "forecast",
+      "name": "跨港需求预测与区间",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 3,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 70,
+      "can_do": "在已声明的公开日港口活动指标范围，执行1/7/14天分港区间、延迟自适应校准、宽度/漂移/滚动覆盖门禁；新7港逐季回放通过。",
+      "boundary": "点预测未变；平均区间更宽，自适应WIS未超过简单分港固定校准；无实时船期/ETA或历史实际发布时间验证。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        ".codex_artifacts/remediation-v4-20261030/forecast-new-eight.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+        "data/public/interval_v9_20261031/report.json"
+      ],
+      "previous_score": 70,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "forecast",
+        "priority": "P0",
+        "target": "按港口/提前量输出可信区间、强基线和暂停机制",
+        "next": "冻结混合/分层校准选型，在新港新时期同时检验WIS、季度覆盖和暂停比例；不得依已看过测试结果改选方法。",
+        "acceptance": "同时报告全部样本与允许使用子集；覆盖、区间宽度、最差港口和基线比较；新盲测另立协议",
+        "references": [
+          "wis",
+          "nist",
+          "ovs"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": ".codex_artifacts/remediation-v4-20261030/forecast-new-eight.json",
+          "exists": true,
+          "sha256_at_review": "9378989647aa19f78b7cd99eb050f7ff6b7acbc7d0e943734068a5fe4f13b546",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/interval_v9_20261031/report.json",
+          "exists": true,
+          "sha256_at_review": "8f0f323a3a0d8e26a814745cbbeea98c5b6479ae93244de5670d9a5528247709",
+          "notice": "本轮冻结后新港/新站实测；保留失败"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "rl_lab",
+      "name": "RL研究、消融与策略评估框架",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 75,
+      "can_do": "真实训练、固定回放单因素消融、强基线、逐港风险和失败追溯。",
+      "boundary": "方法验证较完整，复杂多智能体真实港口任务与独立机构复核仍不足。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        ".runtime/learning-v3-20261030/ablation-development.json",
+        ".runtime/robust-v4-20261030/report.json",
+        "config/research_v6_evidence_registry.json"
+      ],
+      "previous_score": 75,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "rl_lab",
+        "priority": "P1",
+        "target": "统计独立、可复现且与强控制基线公平的策略研究",
+        "next": "保留训练中的V7，待冻结与完整报告后单独复核；本轮不改其数据或选型",
+        "acceptance": "相同观测/安全过滤/成本合同；逐港、种子、置信区间和消融全部披露",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": ".runtime/learning-v3-20261030/ablation-development.json",
+          "exists": true,
+          "sha256_at_review": "e7c0a61873125329bcc1012adcca1d1f276fe6a5c353885f330d48316af919d5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".runtime/robust-v4-20261030/report.json",
+          "exists": true,
+          "sha256_at_review": "4bdb7541febd95306aaacffff51b74d7cb7f8580cc9e06b3956af9664fcb7ce5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "rl_policy",
+      "name": "RL相对强MPC的有效收益",
+      "dimensions": {
+        "功能覆盖": 2,
+        "验证深度": 3,
+        "陌生场景泛化": 0,
+        "港航业务闭合": 1,
+        "运行成熟度": 0
+      },
+      "score": 30,
+      "can_do": "可训练并评估候选，识别退化与安全/收益取舍。",
+      "boundary": "新八港相对开发集最强基线平均成本改善0.0000%；准入False，失败项：positive_port_cluster_ci、gain_not_concentrated。旧集中收益和退化结果保留；仍无现场收益。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        ".codex_artifacts/remediation-v4-20261030/rl-diagnostics.json",
+        "config/research_v6_evidence_registry.json",
+        ".runtime/rl-v9-20261031/report.json",
+        ".runtime/rl-v10-20261031/report.json"
+      ],
+      "previous_score": 30,
+      "score_change_reason": "7日RL策略场景推演与同信息28日强对照已实测；相对最强MPC收益仍0。新8港常态15/16窗口连知晓未来的最优诊断器都无法改善，平均收益上界仅0.0101933%。瓶颈为本基准的信息/动作/成本结构，30分不变。",
+      "target": {
+        "id": "rl_policy",
+        "priority": "P0",
+        "target": "在新港口和压力条件下建立相对强MPC的净收益",
+        "next": "不继续在接近最优的单队列基准上堆模型；取得真实多资源耦合作业数据后另立问题合同与独立数据，不把更换任务的收益冒充当前任务胜出。",
+        "acceptance": "港口簇收益区间下界大于0，无新增可避免违规；收益不集中于单港；不满足则保留强基线",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "已改进并用独立8新港测试；未通过正收益门槛",
+      "evidence_inventory": [
+        {
+          "path": ".codex_artifacts/remediation-v4-20261030/rl-diagnostics.json",
+          "exists": true,
+          "sha256_at_review": "e4040180dbcc60fde1a93846a4881f60257113242ed815ac7f32f30ea3b157a9",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".runtime/rl-v9-20261031/report.json",
+          "exists": true,
+          "sha256_at_review": "c59e0f533e8e3224ebacc395ce05a5eb1e6e472fcf33750f2b535b5cdb6fa134",
+          "notice": "本轮冻结后新港/新站实测；保留失败"
+        },
+        {
+          "path": ".runtime/rl-v10-20261031/report.json",
+          "exists": true,
+          "sha256_at_review": "97e88f065363e30802654b6797a729857967be4cc7e980a725f8d190aef4ec89",
+          "notice": "本轮冻结后独立新港/新站实测"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "已核查独立数值调用链并实测，非语言模型直接瓶颈",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "mpc",
+      "name": "PID/MPC控制与强基线",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "整定PID、不同预测时域/稳健系数MPC和同条件安全过滤。",
+      "boundary": "五档容量代理问题；未完成真实设备动态、业务成本和控制链标定。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/modelbased_v3.py",
+        "app/harness/robust_v4.py",
+        "config/research_v6_evidence_registry.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "mpc",
+        "priority": "P1",
+        "target": "有模型误差意识、强基线和可行性保障的滚动控制",
+        "next": "比较精确/随机/稳健MPC的时域、成本及在线求解预算",
+        "acceptance": "同合同独立小问题最优解核验；不可行与超时显式返回；真实动态标定另验",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/modelbased_v3.py",
+          "exists": true,
+          "sha256_at_review": "e03e04f2ba6779442665bb6ab9e7bcf57016466c627e5ae266deffa99b8e4efc",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/robust_v4.py",
+          "exists": true,
+          "sha256_at_review": "57cceb784b2c3be23a20cbedc0925c2b89362147b0568d5187ab1ab6fa24277e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "short_tide",
+      "name": "短期水位预测与因果同化",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "有观测的46个新年度单元达到冻结误差、覆盖、宽度和可用率门禁。",
+      "boundary": "完整项46/54；缺测和实时传感器可用性仍阻断资格。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "data/public/physical_twin_v3_20261030/report.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "short_tide",
+        "priority": "P0",
+        "target": "短期水位区间在测站、季节和极端条件下可靠",
+        "next": "按观测可用时钟检查缺测、连续中断和分站覆盖",
+        "acceptance": "缺测单元保留在分母；预报提前量与更新频率分开；水位不是UKC完整证据",
+        "references": [
+          "iho",
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "data/public/physical_twin_v3_20261030/report.json",
+          "exists": true,
+          "sha256_at_review": "ed9908d3db4c50657429b737f3b462b0b599b2d926c9b74f26cd9e2ce6e12fd9",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "annual_twin",
+      "name": "年度开环物理孪生",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 0
+      },
+      "score": 50,
+      "can_do": "冻结滚动年度选型和月度区间，再下载新站完整年度及新晚期时段真值；全部小时、缺测和四季分别评估。",
+      "boundary": "新站完整年度3/8，季度13/32；新晚期时段5/16。覆盖、历史不足与真实缺测仍失败；纯天文模型不能预知年度异常海平面和风暴增水。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "data/public/physical_twin_v3_20261030/report.json",
+        "config/research_v6_evidence_registry.json",
+        "data/public/annual_v9_20261031/report.json",
+        "data/public/annual_v10_20261031/report.json"
+      ],
+      "previous_score": 45,
+      "score_change_reason": "新8站同数据对照：全年5→5/8，季度20→25/32，全年及四季5→5/8；WIS 0.056519→0.050067。额外发布门槛通过=True，原验收阈值不变。根因消融、未见站独立复验和逐季非退化证据补齐，验证深度3→4，45→50；不提高现场成熟度。",
+      "target": {
+        "id": "annual_twin",
+        "priority": "P1",
+        "target": "跨年度/季节稳定的水位物理预测与失效说明",
+        "next": "剩余失败站保持暂停；按真实季节偏差与气象/水文强迫建立新开发协议，冻结后使用新站新年验证，不放宽宽度/覆盖门槛。",
+        "acceptance": "全年及四季分别达到预注册误差/覆盖/宽度/可用率；旧失败不可删；不能用短期结果替代",
+        "references": [
+          "iho",
+          "nist"
+        ]
+      },
+      "round_status": "已用冻结规则完成8个独立新站全年与逐季测试",
+      "evidence_inventory": [
+        {
+          "path": "data/public/physical_twin_v3_20261030/report.json",
+          "exists": true,
+          "sha256_at_review": "ed9908d3db4c50657429b737f3b462b0b599b2d926c9b74f26cd9e2ce6e12fd9",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/annual_v9_20261031/report.json",
+          "exists": true,
+          "sha256_at_review": "8e3f0f6a1a37c7a9128233230953412eb6522ecc664375f4f4f312f3e6d178d7",
+          "notice": "本轮冻结后新港/新站实测；保留失败"
+        },
+        {
+          "path": "data/public/annual_v10_20261031/report.json",
+          "exists": true,
+          "sha256_at_review": "53ef1b080cf547d30df70c25c4e30e03b48a6497f6d6522a8a821f60a5d8983d",
+          "notice": "本轮冻结后独立新港/新站实测"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "已核查独立数值调用链并实测，非语言模型直接瓶颈",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "forced_twin",
+      "name": "逐次天气预报强迫的七日孪生",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 50,
+      "can_do": "同一初始化天气预报驱动七日水位，初始水位模式另列。",
+      "boundary": "两种模式均15/28；覆盖、基线和数据可用性仍失败，不能替代年度资格。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "data/public/forecast_forcing_v4_20261030/report.json"
+      ],
+      "previous_score": 50,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "forced_twin",
+        "priority": "P1",
+        "target": "只用决策时已发布的气象运行驱动水位预测",
+        "next": "引入逐次预报发布时间与同化断流压力，分开零初始化/起点初始化",
+        "acceptance": "不拼接未来运行；覆盖宽度与基线同时比较；极端天气留出不得参与调参",
+        "references": [
+          "iho",
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "data/public/forecast_forcing_v4_20261030/report.json",
+          "exists": true,
+          "sha256_at_review": "1d2402df84c8a28d5c2c0b2e79a7ad4c2fb0a5faf282e26123b7dee7aa8bf4db",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "schedule",
+      "name": "引航、泊位、岸桥和堆场排程",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 0
+      },
+      "score": 55,
+      "can_do": "在公开活动指标驱动的合成工单上，联合优化泊位长度、引航、岸桥、集卡、堆场和可靠供电；比较四种启发式与求解界限。新增同一计划在五种压力情景中共同满足约束，报告稳健性代价。",
+      "boundary": "缺真实船舶工单、港区布局、服务时长和效率标定。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/operations_v3.py",
+        ".codex_artifacts/remediation-v3-20261030/operations/report.json",
+        "data/public/operations_v5_20261030/report-qualified.json",
+        "app/harness/operations_v5.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 55,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "schedule",
+        "priority": "P0",
+        "target": "到港、引航、泊位、设备与供电不确定性下的共享计划",
+        "next": "落实五情景min-max联合优化，并与原名义计划在相同情景下复算",
+        "acceptance": "每情景资源/工期/供电均可行；披露最优界、等待和暂缓的代价；不承诺情景外安全",
+        "references": [
+          "mpa",
+          "rotterdam"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/operations_v3.py",
+          "exists": true,
+          "sha256_at_review": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/remediation-v3-20261030/operations/report.json",
+          "exists": true,
+          "sha256_at_review": "41f15de94f7d9a61b68ad3f8fc01f70d086783034aa66ab3b96a8f2ac823a63e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/operations_v5_20261030/report-qualified.json",
+          "exists": true,
+          "sha256_at_review": "947f5fc2f2a969582125239ba0fac0fb9afe8c22321995a5a8dab6a71b92ac48",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v5.py",
+          "exists": true,
+          "sha256_at_review": "84a338f22c3cd24e64c26d8350f38e7c12f9d84bacb80eeeacfbc77c3885545c",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "energy",
+      "name": "能耗、储能与碳核算",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 0
+      },
+      "score": 50,
+      "can_do": "联合排程纳入分时用电权重和可靠供电容量；原SOC/储能守恒检查保留，碳因子未知时暂缓。",
+      "boundary": "未取得港口电表、设备工况及可核验电网因子，不能宣称实测节能减排。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/operations_v3.py",
+        "app/harness/operations_v2.py",
+        "data/public/operations_v5_20261030/report-qualified.json",
+        "app/harness/operations_v5.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 50,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "energy",
+        "priority": "P0",
+        "target": "供电约束与作业计划一致，能源和碳因子可核验",
+        "next": "联合计划纳入20%供电下降；保留基本负荷不可行的暂停",
+        "acceptance": "逐时供电约束通过；设备电表/因子未知时不输出实测节能、货币收益或减排",
+        "references": [
+          "mpa",
+          "rotterdam"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/operations_v3.py",
+          "exists": true,
+          "sha256_at_review": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v2.py",
+          "exists": true,
+          "sha256_at_review": "d33dbe545fb87ed7cb931f70c3d1f067b4baac72fa796a9f2a8e8718587c322a",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/operations_v5_20261030/report-qualified.json",
+          "exists": true,
+          "sha256_at_review": "947f5fc2f2a969582125239ba0fac0fb9afe8c22321995a5a8dab6a71b92ac48",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v5.py",
+          "exists": true,
+          "sha256_at_review": "84a338f22c3cd24e64c26d8350f38e7c12f9d84bacb80eeeacfbc77c3885545c",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "wholeport",
+      "name": "全港多业务物理闭环",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 1,
+        "运行成熟度": 0
+      },
+      "score": 40,
+      "can_do": "能在明确假设下共同求解工单完整、资源时隙、泊位长度和供电约束，并生成可核验的执行证据。",
+      "boundary": "水深/吃水/基准、设备能耗和全港实际业务数据仍缺，现场物理闭环未成立。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/operations_v3.py",
+        "data/contracts/port_site_admission_v1.json",
+        "data/public/operations_v5_20261030/report-qualified.json",
+        "app/harness/operations_v5.py",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 40,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "wholeport",
+        "priority": "P0",
+        "target": "船舶、资源、能量、环境与责任链共同闭合",
+        "next": "本轮联解多情景资源与能源；后续接入实际船期、吃水和港区容量标定",
+        "acceptance": "各业务时钟/单位/状态一致；真实水深、基准、吃水、能源与工单证据齐备才能称现场闭环",
+        "references": [
+          "mpa",
+          "iho",
+          "rotterdam"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/operations_v3.py",
+          "exists": true,
+          "sha256_at_review": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/contracts/port_site_admission_v1.json",
+          "exists": true,
+          "sha256_at_review": "4ffdaaad4bd3ad3a0b15baa2111f35384ad970dba710b10f21fb6814ab0f1b07",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/public/operations_v5_20261030/report-qualified.json",
+          "exists": true,
+          "sha256_at_review": "947f5fc2f2a969582125239ba0fac0fb9afe8c22321995a5a8dab6a71b92ac48",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v5.py",
+          "exists": true,
+          "sha256_at_review": "84a338f22c3cd24e64c26d8350f38e7c12f9d84bacb80eeeacfbc77c3885545c",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "dcsa",
+      "name": "DCSA/MSW多机构协同",
+      "dimensions": {
+        "功能覆盖": 2,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 1,
+        "运行成熟度": 0
+      },
+      "score": 35,
+      "can_do": "官方PC2.0.0 schema子集和E-R-P-A时序、冲突与分区本地演练。",
+      "boundary": "尚无完整外部一致性测试、MSW接入、机构身份或签收。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "data/public/port_standards_v3_20261030/manifest.json",
+        "app/harness/operations_v3.py"
+      ],
+      "previous_score": 35,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "dcsa",
+        "priority": "P1",
+        "target": "正式船港协同接口与伙伴一致性测试",
+        "next": "核对PC2.0.0和OVS3.0.2版本；补引航点/泊位时间语义和官方conformance流程",
+        "acceptance": "完整接口与正式参与方签收；本地schema子集及HMAC演练不能写成DCSA/MSW认证",
+        "references": [
+          "dcsa",
+          "ovs",
+          "msw"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "data/public/port_standards_v3_20261030/manifest.json",
+          "exists": true,
+          "sha256_at_review": "260a62f562f71a6a728d9ca6c3992c62635c154954a5cbecc5cbc8f69980c987",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/harness/operations_v3.py",
+          "exists": true,
+          "sha256_at_review": "49930448460ef5d2e802b6a80f11d6f01e0e70532fbdf0bced1d61fd015a78b1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "真实数据、机构接口、授权或专用感知缺口",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "navigation",
+      "name": "航行/运输模型联动",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 50,
+      "can_do": "历史航行场景和真实预训练运输策略推理可经联动核查。",
+      "boundary": "属于外部系统联动；缺真实航道、硬件和端到端RL训练验收。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+        "docs/HARNESS_MODELS_EXPLAINED_20261029.md"
+      ],
+      "previous_score": 50,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "navigation",
+        "priority": "P1",
+        "target": "以真实航道、船舶动态与环境约束验证航行建议",
+        "next": "增加含测深、垂直基准、潮流和动态障碍的留出场景",
+        "acceptance": "到达、碰撞、规则与UKC分别验收；仿真与真实航行/HIL清晰分开",
+        "references": [
+          "iho",
+          "mpa"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+          "exists": true,
+          "sha256_at_review": "6ddc041f2419618a72287851ee0d96c2b52270c6e59824d6bb25aafd925122a2",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "docs/HARNESS_MODELS_EXPLAINED_20261029.md",
+          "exists": true,
+          "sha256_at_review": "584603b19077621e9cf17c621ea2347ec638d842aa12ce4f37e59e49b07f79a9",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "专业数值模型、观测信息与物理约束",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "clients",
+      "name": "移动与客户端签收",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 3,
+        "陌生场景泛化": 1,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 50,
+      "can_do": "有Web/Flutter自动检查及客户端签收记录。",
+      "boundary": "原生桌面窗口既定验收仍未通过；历史签收不能当作当前全设备兼容证明。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 50,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "clients",
+        "priority": "P2",
+        "target": "浏览器/原生客户端一致且可恢复的交互",
+        "next": "本轮验收新增页面；原生窗口问题仍单独保留待真实窗口测试",
+        "acceptance": "可见UI完成查询/筛选/重算/导出；Web通过不替代原生或全设备签收",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+          "exists": true,
+          "sha256_at_review": "6ddc041f2419618a72287851ee0d96c2b52270c6e59824d6bb25aafd925122a2",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "audit",
+      "name": "审计回执与执行证据完整性",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 3,
+        "港航业务闭合": 3,
+        "运行成熟度": 2
+      },
+      "score": 80,
+      "can_do": "工件、来源、事件链、哈希、独立回读及历史失败完整保留。",
+      "boundary": "本地SHA一致性尚无外部签名、独立不可篡改存证和多方取证。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/harness/store.py",
+        "scripts/verify_v4_evidence.py",
+        "config/research_v6_evidence_registry.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 80,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "audit",
+        "priority": "P0",
+        "target": "结论绑定原始输入、代码、协议、全部失败与回读",
+        "next": "本轮追加独立评估目录、摘要绑定和证据变更检查",
+        "acceptance": "修改源文件即显示陈旧并暂停计算；不覆盖原始报告；本地哈希不等于外部不可抵赖存证",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/harness/store.py",
+          "exists": true,
+          "sha256_at_review": "f1dcc31a1e5ce35ae518798a17ea3635ac60e7db84d44e9112f756414550bf3f",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "scripts/verify_v4_evidence.py",
+          "exists": true,
+          "sha256_at_review": "b39d99121fc586fa81be16aaa22b7fcecee651fe9ac597e573b85d092d660fe1",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "security",
+      "name": "权限、注入防护与供应链",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 1
+      },
+      "score": 60,
+      "can_do": "角色约束、审批、注入固定回归、依赖锁和生产边界。",
+      "boundary": "缺外部红队、真实机构IAM/密钥及OT网络安全验收。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/access_control.py",
+        "reports/prompt_injection_benchmark_v1_20260813.json",
+        "reports/dependency_audit_admission_v3.json",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 60,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "security",
+        "priority": "P0",
+        "target": "身份权限、外部输入与供应链在真实威胁下稳健",
+        "next": "新API继承身份校验、有限输入、只读来源和本机计算限流",
+        "acceptance": "越权、注入、非法数值、并发及路径输入失败关闭；独立红队和现场IAM另验",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/access_control.py",
+          "exists": true,
+          "sha256_at_review": "28fbe350f1f128f2d6414a04f13a259053c8bd86e90bf5ee64df5bf697fedfa7",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/prompt_injection_benchmark_v1_20260813.json",
+          "exists": true,
+          "sha256_at_review": "f5b59ed337a5184a728729c7abd64bc5a2dab85257c9a4c8fb58a875afa3e10b",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "reports/dependency_audit_admission_v3.json",
+          "exists": true,
+          "sha256_at_review": "3bb604e55ea8db582778d077c452cb90f92bf24230809534db5e1aeaf319d2a0",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "observability",
+      "name": "监控、健康和故障诊断",
+      "dimensions": {
+        "功能覆盖": 3,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 2
+      },
+      "score": 65,
+      "can_do": "健康/就绪、日志、模型网关、失败和恢复状态可查。",
+      "boundary": "本机时点/历史持续探测证据，缺多站点长期SLO和高可用实测。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/observability.py",
+        "app/main.py",
+        "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+        ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json"
+      ],
+      "previous_score": 65,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "observability",
+        "priority": "P0",
+        "target": "不仅监测服务存活，也监测预测质量和停止理由",
+        "next": "本轮增加已公布真值下的滚动误差/覆盖、数据缺口与漂移状态",
+        "acceptance": "监控不能读未来真值；暂停与退回基线可解释；长期SLO不能用一次ready代替",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/observability.py",
+          "exists": true,
+          "sha256_at_review": "a24c116447c352a3a829c9516b639ed15a96ad67feac56025664a5cbc3ac4ab5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "app/main.py",
+          "exists": true,
+          "sha256_at_review": "bde14d6634745efe62a3ee88aaf45ce5943784984bfe8e3fa0d7ac84678293a7",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md",
+          "exists": true,
+          "sha256_at_review": "6ddc041f2419618a72287851ee0d96c2b52270c6e59824d6bb25aafd925122a2",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": ".codex_artifacts/capability-review-v8-20261031/experiment-qualified/summary.json",
+          "exists": true,
+          "sha256_at_review": "92f19da1a96369a272a1a1c7d96c6bdad1ea44e3a74e4d01e9f31a18e1f57aa5",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "container",
+      "name": "Docker发行与可复现部署",
+      "dimensions": {
+        "功能覆盖": 4,
+        "验证深度": 4,
+        "陌生场景泛化": 2,
+        "港航业务闭合": 2,
+        "运行成熟度": 2
+      },
+      "score": 70,
+      "can_do": "真实镜像构建、非root只读启动、源码核验和重启持久化。",
+      "boundary": "单机Linux容器；未验证高可用集群、灾备、现场运维或容器内4B推理。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "Dockerfile",
+        "compose.yaml",
+        "scripts/verify_container_v4.py",
+        "config/research_v6_evidence_registry.json"
+      ],
+      "previous_score": 70,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "container",
+        "priority": "P1",
+        "target": "完整数据/模型/代码版本可重建且可恢复的发行",
+        "next": "本轮保留历史镜像验收；新增版本另做镜像、受限启动与恢复测试",
+        "acceptance": "镜像内容与当前源码一致；旧镜像通过不可宣称包含本轮新增代码",
+        "references": [
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "Dockerfile",
+          "exists": true,
+          "sha256_at_review": "3be6baa4a71f6cab1b08f47f935a398c461ba5c75f1a08120644cad3ff25d280",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "compose.yaml",
+          "exists": true,
+          "sha256_at_review": "e2562cf381b098632a99133b201959052a0c6f7b5d53ae570e6bfd993075cbfe",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "scripts/verify_container_v4.py",
+          "exists": true,
+          "sha256_at_review": "137693e027f12d7bef5361b1ced07ab19ffc4a25ebfcb8ec8000fb5020e0510e",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "config/research_v6_evidence_registry.json",
+          "exists": true,
+          "sha256_at_review": "9b60d7dda7cbe2a21938889a6012e084b55c95dff7450eff68f0ffb6a7929843",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "工程可靠性、证据治理与交付条件",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "live_data",
+      "name": "真实港口只读接入准备",
+      "dimensions": {
+        "功能覆盖": 2,
+        "验证深度": 2,
+        "陌生场景泛化": 0,
+        "港航业务闭合": 1,
+        "运行成熟度": 0
+      },
+      "score": 25,
+      "can_do": "已有字段、质量、漂移和标定元数据门禁与接口适配框架。",
+      "boundary": "没有完成港方现场七项准入；真实接入完成度仍为0/7。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "app/site_admission.py",
+        "data/contracts/port_site_admission_v1.json"
+      ],
+      "previous_score": 25,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "live_data",
+        "priority": "P0",
+        "target": "有正式来源和时钟SLA的只读港口数据",
+        "next": "取得港方授权端点、字段映射、质量/漂移与标定清单后进行影子接入",
+        "acceptance": "七项站点门禁全部闭合，发布延迟与可用率实测；当前仍待外部资料",
+        "references": [
+          "rotterdam",
+          "msw"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "app/site_admission.py",
+          "exists": true,
+          "sha256_at_review": "c1f6868e3762f8b8ffcd77d5cea52e6a7e1dc2e26d0f100a6ad8db958e84bc6d",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        },
+        {
+          "path": "data/contracts/port_site_admission_v1.json",
+          "exists": true,
+          "sha256_at_review": "4ffdaaad4bd3ad3a0b15baa2111f35384ad970dba710b10f21fb6814ab0f1b07",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "真实数据、机构接口、授权或专用感知缺口",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "dispatch",
+      "name": "真实港口自主调度",
+      "dimensions": {
+        "功能覆盖": 0,
+        "验证深度": 0,
+        "陌生场景泛化": 0,
+        "港航业务闭合": 0,
+        "运行成熟度": 0
+      },
+      "score": 0,
+      "can_do": "当前系统保持生产权限关闭。",
+      "boundary": "没有签字授权、现场HIL、影子运行和生产调度资格。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [
+        "data/contracts/port_site_admission_v1.json"
+      ],
+      "previous_score": 0,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "dispatch",
+        "priority": "P0",
+        "target": "经机构授权、HIL和影子运行证明的生产调度",
+        "next": "在真实数据与安全链验收后，由港方完成授权、停止/接管及回滚演练",
+        "acceptance": "没有机构签字、责任边界与现场安全验收就保持生产权限关闭",
+        "references": [
+          "mpa",
+          "nist"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [
+        {
+          "path": "data/contracts/port_site_admission_v1.json",
+          "exists": true,
+          "sha256_at_review": "4ffdaaad4bd3ad3a0b15baa2111f35384ad970dba710b10f21fb6814ab0f1b07",
+          "notice": "文件存在与摘要核对；不等于此项全部业务在本轮重新执行"
+        }
+      ],
+      "limitation_attribution": {
+        "category": "真实数据、机构接口、授权或专用感知缺口",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    },
+    {
+      "id": "multimodal",
+      "name": "视频/雷达多模态感知",
+      "dimensions": {
+        "功能覆盖": 0,
+        "验证深度": 0,
+        "陌生场景泛化": 0,
+        "港航业务闭合": 0,
+        "运行成熟度": 0
+      },
+      "score": 0,
+      "can_do": "当前可查的是文本、结构化数据和演示/研究场景。",
+      "boundary": "没有已验收的真实港口视频识别、雷达融合或视觉闭环。",
+      "confidence": "中：本次证据审视，差5分不代表统计显著",
+      "evidence": [],
+      "previous_score": 0,
+      "score_change_reason": "没有本轮该项独立收益证据，保持V9评分；不把可能受规模影响当作已证明体量不足。",
+      "target": {
+        "id": "multimodal",
+        "priority": "P2",
+        "target": "视频、雷达、AIS和环境感知的时空融合",
+        "next": "取得合法标注数据和传感器标定，先做离线感知基准",
+        "acceptance": "跨昼夜/天气/遮挡报告误报漏报、定位/时间误差及延迟；未取得数据与实测前保持0分",
+        "references": [
+          "mpa",
+          "iho"
+        ]
+      },
+      "round_status": "本轮根因归类；沿用V9评分",
+      "evidence_inventory": [],
+      "limitation_attribution": {
+        "category": "真实数据、机构接口、授权或专用感知缺口",
+        "verdict": "现有证据不支持归因于语言模型参数量",
+        "scope": "职责与既有证据审查，除标明专项外未进行本轮跨规模因果实验"
+      }
+    }
+  ],
+  "references": [
+    {
+      "id": "mpa",
+      "name": "MPA 2026协同作业、事件响应与数字孪生试点",
+      "kind": "官方试点方向",
+      "url": "https://www.mpa.gov.sg/media-centre/details/strengthening-maritime-competitiveness-and-operational-excellence",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "rotterdam",
+      "name": "鹿特丹船舶挂靠优化与数据所有者协同",
+      "kind": "港口公开实践",
+      "url": "https://www.portofrotterdam.com/en/port-future/digitisation/improving-logistics-processes/port-call-optimisation",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "msw",
+      "name": "IMO Maritime Single Window",
+      "kind": "规范背景，须按适用辖区核对",
+      "url": "https://www.imo.org/en/mediacentre/hottopics/pages/free-flow-of-trade-by-ship.aspx",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "dcsa",
+      "name": "DCSA Port Call 2.0.0",
+      "kind": "数据与接口标准",
+      "url": "https://reference.dcsa.org/content/standards/releases/port-call",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "ovs",
+      "name": "DCSA OVS 3.0.2（含引航登轮点时间）",
+      "kind": "数据与接口标准",
+      "url": "https://reference.dcsa.org/content/standards/guidelines/implementation-guides/implementing-operational-vessel-schedules",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "iho",
+      "name": "IHO S-100及S-102/S-104/S-111/S-129资源",
+      "kind": "测深、水位、流场和富余水深数据体系",
+      "url": "https://iho-ohi.github.io/S100Resources/",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "nist",
+      "name": "NIST AI RMF Measure",
+      "kind": "通用AI评测与持续监测指引",
+      "url": "https://airc.nist.gov/airmf-resources/playbook/measure/",
+      "checked_on": "2026-10-31"
+    },
+    {
+      "id": "wis",
+      "name": "Bracher等：Weighted Interval Score",
+      "kind": "概率预测评分方法，非港航精度阈值标准",
+      "url": "https://arxiv.org/abs/2005.12881",
+      "checked_on": "2026-10-31"
+    }
+  ],
+  "scope": "全37项限制归因审查；仅RL和年度潮位实施本轮独立新港/新站复验，不把结构审查称为37项因果实测。",
+  "production_authority": false
+}

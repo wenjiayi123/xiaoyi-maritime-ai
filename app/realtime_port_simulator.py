@@ -506,7 +506,7 @@ class PortRealtimeSimulator:
                 "work_order_id": None, "permit_required": permit, "isolation_required": isolation,
             })
 
-        low_soc = [item for item in equipment if item["asset_type"] == "agv" and float(item["soc_percent"] or 100) < 15]
+        low_soc = [item for item in equipment if item["asset_type"] == "agv" and item["soc_percent"] is not None and float(item["soc_percent"]) < 15]
         add(
             "SIM-QC03-ENERGY", "critical", "equipment_energy", "QC-03",
             "QC-03单位作业能耗偏高",
@@ -527,7 +527,7 @@ class PortRealtimeSimulator:
 
     def _decisions(self, snapshot: dict[str, Any]) -> list[dict[str, Any]]:
         energy = snapshot["energy"]
-        low_soc = sum(1 for item in snapshot["equipment"] if item["asset_type"] == "agv" and float(item["soc_percent"] or 100) < 20)
+        low_soc = sum(1 for item in snapshot["equipment"] if item["asset_type"] == "agv" and item["soc_percent"] is not None and float(item["soc_percent"]) < 20)
         calls = snapshot["port_calls"]
         window_risk = min(item["window_risk_minutes"] for item in snapshot["berths"])
         definitions = [
@@ -581,9 +581,16 @@ class PortRealtimeSimulator:
         return definitions
 
     def snapshot(self) -> dict[str, Any]:
+        return self.snapshot_at()
+
+    def snapshot_at(self, *, sequence: int | None = None, observed_at: datetime | None = None) -> dict[str, Any]:
+        """Render an explicit clock for isolated studies; ordinary snapshots keep their live clock."""
         with self._lock:
-            sequence = self._sequence()
-            observed_at = _now()
+            frozen = sequence is not None or observed_at is not None
+            sequence = self._sequence() if sequence is None else sequence
+            observed_at = _now() if observed_at is None else observed_at
+            if sequence < 0 or observed_at.tzinfo is None:
+                raise ValueError("模拟序号必须非负，观测时间必须带时区")
             scenario_id = self._scenario_id
             scenario = _SCENARIOS[scenario_id]
             multipliers = scenario["multipliers"]
@@ -609,7 +616,7 @@ class PortRealtimeSimulator:
                 "yard_blocks": yards, "gates": gates, "energy": energy, "weather_tide": weather, "alerts": alerts,
                 "fleet_summary": {
                     "quay_cranes": {"total": len(qc), "working": sum(item["status"] == "working" for item in qc), "fault": sum(item["status"] == "fault" for item in qc)},
-                    "agv": {"total": len(agv), "working": sum(item["status"] == "working" for item in agv), "charging": sum(item["status"] == "charging" for item in agv), "low_soc": sum(float(item["soc_percent"] or 100) < 20 for item in agv)},
+                    "agv": {"total": len(agv), "working": sum(item["status"] == "working" for item in agv), "charging": sum(item["status"] == "charging" for item in agv), "low_soc": sum(item["soc_percent"] is not None and float(item["soc_percent"]) < 20 for item in agv)},
                     "yard_cranes": {"total": len(yc), "working": sum(item["status"] == "working" for item in yc)},
                 },
                 "quality": {
@@ -629,6 +636,7 @@ class PortRealtimeSimulator:
                     "site_replacement": "replace adapter only; keep port-realtime.v1 and port-ops.v1 contracts",
                 },
             }
+            payload["simulation"].update(sequence=sequence, observed_at=observed_at.isoformat())
             payload["overview"] = {
                 "port_name": payload["port"]["name"], "operational_date": observed_at.date(),
                 "metrics": [
@@ -640,6 +648,8 @@ class PortRealtimeSimulator:
                 "secondary_metrics": {"yard_occupancy_percent": round(sum(item["occupancy_percent"] for item in yards) / len(yards), 1), "gate_queue_vehicles": sum(item["queue_vehicles"] for item in gates), "working_berths": sum(item["occupied"] for item in berths), "active_quay_cranes": sum(item["status"] == "working" for item in qc)},
             }
             payload["metadata"] = self._metadata(sequence, observed_at, payload)
+            if frozen:
+                payload["metadata"]["generated_at"] = observed_at
             payload["decisions"] = self._decisions(payload)
             return payload
 

@@ -1,0 +1,2731 @@
+{
+  "schema": "xiaoyi-international-physical-twin.v2",
+  "protocol": {
+    "schema": "xiaoyi-international-twin-protocol.v2",
+    "frozen_at": "2026-10-30T03:07:34.633603+00:00",
+    "noaa_stations": {
+      "9410660": "Los Angeles",
+      "8518750": "The Battery, New York",
+      "9447130": "Seattle"
+    },
+    "uhslc_stations": {
+      "175": "Fremantle, Australia",
+      "115": "Colombo, Sri Lanka",
+      "101": "Mombasa, Kenya"
+    },
+    "fit_period": [
+      "2024-01-01",
+      "2024-12-31"
+    ],
+    "validation_blocks": [
+      "2025-02",
+      "2025-05",
+      "2025-08",
+      "2025-11"
+    ],
+    "fresh_test_blocks": [
+      "2026-02",
+      "2026-05",
+      "2026-08"
+    ],
+    "block_days": 8,
+    "context_hours": 24,
+    "harmonic_candidates": {
+      "method": "UTide 0.4.0 OLS with astronomical nodal/Greenwich corrections, fixed annual fit; no provider amplitudes/phases",
+      "constituents": [
+        [
+          "M2",
+          "S2",
+          "N2",
+          "K2",
+          "K1",
+          "O1",
+          "P1",
+          "Q1"
+        ],
+        [
+          "M2",
+          "S2",
+          "N2",
+          "K2",
+          "K1",
+          "O1",
+          "P1",
+          "Q1",
+          "M4",
+          "MS4",
+          "MN4",
+          "2N2",
+          "MU2",
+          "NU2",
+          "L2",
+          "T2",
+          "J1",
+          "OO1",
+          "SA",
+          "SSA"
+        ]
+      ],
+      "trend": false
+    },
+    "short_horizons_minutes": [
+      60,
+      360
+    ],
+    "additional_noaa_horizon_minutes": [
+      6
+    ],
+    "residual_memory_candidates": [
+      1,
+      3,
+      6
+    ],
+    "interval_nominal_quantile": 0.95,
+    "research_limits": {
+      "long_open_loop": {
+        "mae_m": 0.2,
+        "coverage": 0.8,
+        "width_m": 0.75
+      },
+      "6": {
+        "mae_m": 0.05,
+        "coverage": 0.8,
+        "width_m": 0.2
+      },
+      "60": {
+        "mae_m": 0.1,
+        "coverage": 0.8,
+        "width_m": 0.5
+      },
+      "360": {
+        "mae_m": 0.2,
+        "coverage": 0.8,
+        "width_m": 0.75
+      }
+    },
+    "availability_floor": 0.95,
+    "quality_rules": "NOAA verified q=v when present and all flags zero; UHSLC finite sea_level and quality>=3; keep quality distribution. Reject duplicate times or changing record/datum, no interpolation.",
+    "assumptions": [
+      "UHSLC is delayed-mode 4-6 week FD/RQ archive, not operational telemetry. Short-horizon replay assumes event-time local sensor access which this archive does not establish.",
+      "NOAA MLLW and UHSLC reference datums are local, never pooled as common elevation.",
+      "2024 and previously inspected 2025 observations may be used for development; all 2026 blocks are new held-out results and must not be retuned after viewing.",
+      "Short horizon does not replace long-open-loop qualification. Hourly UHSLC supports 1h/6h only; six-minute extension evaluated only for NOAA.",
+      "No wind/surge physical model, bathymetry, UKC, equipment or energy field calibration is implied."
+    ],
+    "production_authority": false,
+    "protocol_errata": {
+      "at": "2026-10-30T03:14:55.998743+00:00",
+      "reason": "UTide 0.4.0 does not register M1; remove this unsupported name before any test predictions or metrics. No thresholds, target periods or observed outcomes used to choose the repair."
+    },
+    "per_station_training_override": {
+      "175": [
+        "2023-01-01",
+        "2024-12-31"
+      ]
+    },
+    "training_supplement_reason": "Fremantle 2024 had only4330 valid training hours (<7000). Supplement2023 real observed training history before any2026 test prediction; preserve data gaps, same quality filters, thresholds and test periods.",
+    "supplement_declared_at": "2026-10-30T03:20:42.943647+00:00"
+  },
+  "sources": {
+    "schema": "xiaoyi-international-physical-sources.v2",
+    "retrieved_at": "2026-10-30T03:09:06.514063+00:00",
+    "protocol_sha256": "1fd5840431949cb0db3b4357b9fdf02044416c55b7e589d663c83ba03f919ab0",
+    "entries": [
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "fit",
+        "period": [
+          "20240101",
+          "20241231"
+        ],
+        "product": "hourly_height",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=hourly_height&application=xiaoyi-public-research&begin_date=20240101&end_date=20241231&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2024010-fit.raw",
+        "sha256": "0c61d1e7259032318a15f89566122054db73e3f1fb47ae3f0e8124da9ce10c9f",
+        "rows": 8784,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "validation",
+        "period": [
+          "20250201",
+          "20250208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250201&end_date=20250208&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2025020-validation.raw",
+        "sha256": "6e42b7cf118fce146e54257a20ef99b79814bf310cee072ff2116c1bb0a1dfc2",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "validation",
+        "period": [
+          "20250501",
+          "20250508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250501&end_date=20250508&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2025050-validation.raw",
+        "sha256": "f41b5eb338e626f402f49060dba16125737c54e2bf2f440917b97d39199453f5",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "validation",
+        "period": [
+          "20250801",
+          "20250808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250801&end_date=20250808&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2025080-validation.raw",
+        "sha256": "011f14b63d77a43b767f79399c170a8ef9940d0759627f308783e4808c8725ec",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "validation",
+        "period": [
+          "20251101",
+          "20251108"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20251101&end_date=20251108&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2025110-validation.raw",
+        "sha256": "4d41c57ec29db256bebbd0c72768fdd2f18f5dd778310bafa8cb457720779f74",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "test",
+        "period": [
+          "20260201",
+          "20260208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260201&end_date=20260208&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2026020-test.raw",
+        "sha256": "dba64788f007d8fe05f4687db8f22179cb8317e945276b74890083166cfb3e38",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "test",
+        "period": [
+          "20260501",
+          "20260508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260501&end_date=20260508&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2026050-test.raw",
+        "sha256": "9b8f0552fae9f6429b59d1e21fe92c3a17b96de31dd4bb3288109b0383dfa5b0",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "split": "test",
+        "period": [
+          "20260801",
+          "20260808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260801&end_date=20260808&datum=MLLW&station=9410660&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9410660-2026080-test.raw",
+        "sha256": "54950c5e259a2d640fb3e5ca5f927215bc6e9aaf5681f87f26287318a133794b",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "fit",
+        "period": [
+          "20240101",
+          "20241231"
+        ],
+        "product": "hourly_height",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=hourly_height&application=xiaoyi-public-research&begin_date=20240101&end_date=20241231&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2024010-fit.raw",
+        "sha256": "87818484a26415859f98e26689204433edfc7485ac869f5d1d63873b5fe8753e",
+        "rows": 8784,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "validation",
+        "period": [
+          "20250201",
+          "20250208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250201&end_date=20250208&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2025020-validation.raw",
+        "sha256": "8988e61aa5b8ca859b72237290e4f779b06a9b9a03a8bf5255706cf1fd65d528",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "validation",
+        "period": [
+          "20250501",
+          "20250508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250501&end_date=20250508&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2025050-validation.raw",
+        "sha256": "25c9d9df9d3d409a8a211cc83f8b6840e0f9b68bcbe1db4e4b349478fc3059a0",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "validation",
+        "period": [
+          "20250801",
+          "20250808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250801&end_date=20250808&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2025080-validation.raw",
+        "sha256": "48480bb1a6366bc7a989b904b63518090c5910fbe9c297d5d8bffc714173501c",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "validation",
+        "period": [
+          "20251101",
+          "20251108"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20251101&end_date=20251108&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2025110-validation.raw",
+        "sha256": "073d937a75603beb98531870c3e5b3c0cb1c50d472a3ee072ae0b6915045295a",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "test",
+        "period": [
+          "20260201",
+          "20260208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260201&end_date=20260208&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2026020-test.raw",
+        "sha256": "02ac268bbba9aca0eff61139a478539ca713ec5a1b79e2cc606c4584f79dde7e",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "test",
+        "period": [
+          "20260501",
+          "20260508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260501&end_date=20260508&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2026050-test.raw",
+        "sha256": "c098b855592cdd27121ffb342bc40767410361c8c6d70142e7cf001394da2f7d",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "split": "test",
+        "period": [
+          "20260801",
+          "20260808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260801&end_date=20260808&datum=MLLW&station=8518750&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-8518750-2026080-test.raw",
+        "sha256": "b58c5ef88b7cf2b5ba25a02cf423c3fd067bcf7a54f053b5d66bbd944a2febc6",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "fit",
+        "period": [
+          "20240101",
+          "20241231"
+        ],
+        "product": "hourly_height",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=hourly_height&application=xiaoyi-public-research&begin_date=20240101&end_date=20241231&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2024010-fit.raw",
+        "sha256": "fd9914c64b5eb5a43c4ef2378806b446d039d8394123b72d338adf69f129297b",
+        "rows": 8784,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "validation",
+        "period": [
+          "20250201",
+          "20250208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250201&end_date=20250208&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2025020-validation.raw",
+        "sha256": "ca7bf5078eb565e873a46fe977e01cacb29f65f95a7331fe07956ff18b598108",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "validation",
+        "period": [
+          "20250501",
+          "20250508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250501&end_date=20250508&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2025050-validation.raw",
+        "sha256": "fe803c2813d04561a780faf7dc9e34ac5ce707f35685868f8b3905a9def47789",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "validation",
+        "period": [
+          "20250801",
+          "20250808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20250801&end_date=20250808&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2025080-validation.raw",
+        "sha256": "9abd8c71308ddf4a4c388a3faa0ef69f5cb37bade6e6bb0f12d7b3a61771c67b",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "validation",
+        "period": [
+          "20251101",
+          "20251108"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20251101&end_date=20251108&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2025110-validation.raw",
+        "sha256": "36e2dc6630ddf9a4eb7169bb8a0bd35b6470b73fb873715cf5430254cc648ab2",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "test",
+        "period": [
+          "20260201",
+          "20260208"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260201&end_date=20260208&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2026020-test.raw",
+        "sha256": "6d50c56ee0b76ac39f3ee784d120f7b492505e07cd945baa5c2dfb8f1cd6aca8",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "test",
+        "period": [
+          "20260501",
+          "20260508"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260501&end_date=20260508&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2026050-test.raw",
+        "sha256": "daa7ef9856c7ea1d0d130110e03f14114150aeb741b40e01adc42aeaf081e761",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "noaa",
+        "station_id": "9447130",
+        "site": "Seattle",
+        "split": "test",
+        "period": [
+          "20260801",
+          "20260808"
+        ],
+        "product": "water_level",
+        "url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?product=water_level&application=xiaoyi-public-research&begin_date=20260801&end_date=20260808&datum=MLLW&station=9447130&time_zone=gmt&units=metric&format=json",
+        "path": "data/public/physical_twin_v2_20261030/raw/noaa-9447130-2026080-test.raw",
+        "sha256": "701efea67820c9e3069c4924eaa69e3fa00f1d14da385d4d4e89fae010bf950e",
+        "rows": 1920,
+        "units": "m MLLW"
+      },
+      {
+        "provider": "uhslc",
+        "station_id": "175",
+        "site": "Fremantle, Australia",
+        "split": "all",
+        "period": [
+          "2024-01-01T00:00:00Z",
+          "2026-09-01T00:00:00Z"
+        ],
+        "product": "sea_level",
+        "url": "https://uhslc.soest.hawaii.edu/erddap/tabledap/global_hourly_fast.csv?time,sea_level,quality,reference_datum,record_id,latitude,station_name&uhslc_id=175&time%3E=2024-01-01T00:00:00Z&time%3C2026-09-01T00:00:00Z",
+        "path": "data/public/physical_twin_v2_20261030/raw/uhslc-175-202401-all.raw",
+        "sha256": "05f50abf647f042227d166ac7f1b702e6f60676eafc49b39f7d200fa959bd464",
+        "rows": 21888,
+        "units": "mm local reference_datum; convert to m by /1000"
+      },
+      {
+        "provider": "uhslc",
+        "station_id": "115",
+        "site": "Colombo, Sri Lanka",
+        "split": "all",
+        "period": [
+          "2024-01-01T00:00:00Z",
+          "2026-09-01T00:00:00Z"
+        ],
+        "product": "sea_level",
+        "url": "https://uhslc.soest.hawaii.edu/erddap/tabledap/global_hourly_fast.csv?time,sea_level,quality,reference_datum,record_id,latitude,station_name&uhslc_id=115&time%3E=2024-01-01T00:00:00Z&time%3C2026-09-01T00:00:00Z",
+        "path": "data/public/physical_twin_v2_20261030/raw/uhslc-115-202401-all.raw",
+        "sha256": "1d34425c3f14c1b676b7824015bc7000c7ff622f65579963ee37e93a4d5cd226",
+        "rows": 23376,
+        "units": "mm local reference_datum; convert to m by /1000"
+      },
+      {
+        "provider": "uhslc",
+        "station_id": "101",
+        "site": "Mombasa, Kenya",
+        "split": "all",
+        "period": [
+          "2024-01-01T00:00:00Z",
+          "2026-09-01T00:00:00Z"
+        ],
+        "product": "sea_level",
+        "url": "https://uhslc.soest.hawaii.edu/erddap/tabledap/global_hourly_fast.csv?time,sea_level,quality,reference_datum,record_id,latitude,station_name&uhslc_id=101&time%3E=2024-01-01T00:00:00Z&time%3C2026-09-01T00:00:00Z",
+        "path": "data/public/physical_twin_v2_20261030/raw/uhslc-101-202401-all.raw",
+        "sha256": "5126e2474a61ca05f1cb607e7db41da156571ff67f78fe69e8bce5c4138f2d24",
+        "rows": 23376,
+        "units": "mm local reference_datum; convert to m by /1000"
+      },
+      {
+        "provider": "uhslc",
+        "station_id": "175",
+        "site": "Fremantle, Australia",
+        "split": "training_supplement",
+        "period": [
+          "2023-01-01T00:00:00Z",
+          "2024-01-01T00:00:00Z"
+        ],
+        "product": "sea_level",
+        "url": "https://uhslc.soest.hawaii.edu/erddap/tabledap/global_hourly_fast.csv?time,sea_level,quality,reference_datum,record_id,latitude,station_name&uhslc_id=175&time%3E=2023-01-01T00:00:00Z&time%3C2024-01-01T00:00:00Z",
+        "path": "data/public/physical_twin_v2_20261030/raw/uhslc-175-2023-training-supplement.raw",
+        "sha256": "e5de042e0525ceeaf2f2840927419be3bbeedd1e2a89026150840158acf5eb83",
+        "rows": 8760,
+        "units": "mm local reference_datum; convert to m by /1000"
+      }
+    ],
+    "uhslc_metadata": {
+      "path": "data/public/physical_twin_v2_20261030/raw/uhslc-metadata.json",
+      "sha256": "510da67caecee31a576f774091a1a0fb21ea749fc17068fad0dc3cfd6f1649d2",
+      "url": "https://uhslc.soest.hawaii.edu/erddap/info/global_hourly_fast/index.json"
+    },
+    "landing_urls": [
+      "https://api.tidesandcurrents.noaa.gov/api/prod/",
+      "https://uhslc.soest.hawaii.edu/data/"
+    ],
+    "notice": "NOAA verified local-datum observations and UHSLC FD/RQ hourly observations; UHSLC normally published 4-6 weeks later. Operational short-horizon replay is a declared hypothetical sensor-access experiment, not a live UHSLC service.",
+    "production_authority": false
+  },
+  "selection": {
+    "frozen_before_test_at": "2026-10-30T03:22:43.610559+00:00",
+    "implementation_sha256": "86682a19d960921df63a8ec6a20c133371a6fc1e2681d7e5ff0645fb10759ca3",
+    "protocol_sha256": "1fd5840431949cb0db3b4357b9fdf02044416c55b7e589d663c83ba03f919ab0",
+    "manifest_sha256": "7f74c21dbace1b5b7a2deed32dc22ac945e609bcb8c3a532eb84e660abd80b9b",
+    "models": [
+      {
+        "station_id": "9410660",
+        "site": "Los Angeles",
+        "provider": "noaa",
+        "lat": 33.72,
+        "training_hours": 8761,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.05817542645247732,
+          0.05339705556557794
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-9410660.json",
+        "coefficient_sha256": "355701ced03afabf714fb60e3d5ed12c87dba60817814e87e42e2a43b1b5a244",
+        "long_radius_m": 0.12063564895374923,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.014587420809920579,
+              "radius_m": 0.033952729414314486,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.014587420809920579,
+                "radius_m": 0.033952729414314486,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.017793938162606486,
+                "radius_m": 0.04260941090798931,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.022758322791902715,
+                "radius_m": 0.052092809820940555,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.0350752422083446,
+              "radius_m": 0.078147116327419,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.0350752422083446,
+                "radius_m": 0.078147116327419,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.03570916576467944,
+                "radius_m": 0.0826661158767783,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.03619385788304077,
+                "radius_m": 0.08395802802622687,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 6,
+            "resolution": 6,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.008437971782407737,
+              "radius_m": 0.022153525783258576,
+              "n": 6712
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.008437971782407737,
+                "radius_m": 0.022153525783258576,
+                "n": 6712
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.012586624274173225,
+                "radius_m": 0.033034418032689805,
+                "n": 6710
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.014785817556262558,
+                "radius_m": 0.03891844240665576,
+                "n": 6707
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "verified_hourly_product": 8761,
+          "v": 13432
+        },
+        "rejected": 31,
+        "datums": [
+          "MLLW"
+        ],
+        "record_ids": []
+      },
+      {
+        "station_id": "8518750",
+        "site": "The Battery, New York",
+        "provider": "noaa",
+        "lat": 40.7006,
+        "training_hours": 8780,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.1366905938797275,
+          0.13044299612283647
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-8518750.json",
+        "coefficient_sha256": "6ab75300ec1cdc55fc64d9a14cb48470d888448384d3b21f4bd3754e0b93e6dc",
+        "long_radius_m": 0.4227109734807388,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.041938808889331665,
+              "radius_m": 0.11493079081897462,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.041938808889331665,
+                "radius_m": 0.11493079081897462,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.05564573158964693,
+                "radius_m": 0.14723936529953097,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.0563285241353292,
+                "radius_m": 0.17054837983205912,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 3,
+              "mae_m": 0.07485422633794907,
+              "radius_m": 0.21291996825248516,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.07885404443040021,
+                "radius_m": 0.23302463679507487,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.07485422633794907,
+                "radius_m": 0.21291996825248516,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.0784369851308318,
+                "radius_m": 0.24532582753922716,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 6,
+            "resolution": 6,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.005925688411157128,
+              "radius_m": 0.01511658476061184,
+              "n": 6720
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.005925688411157128,
+                "radius_m": 0.01511658476061184,
+                "n": 6720
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.010097915278835622,
+                "radius_m": 0.025718848043473574,
+                "n": 6720
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.016397967936770008,
+                "radius_m": 0.042426684010493654,
+                "n": 6720
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "verified_hourly_product": 8780,
+          "v": 11519
+        },
+        "rejected": 1925,
+        "datums": [
+          "MLLW"
+        ],
+        "record_ids": []
+      },
+      {
+        "station_id": "9447130",
+        "site": "Seattle",
+        "provider": "noaa",
+        "lat": 47.6026,
+        "training_hours": 8747,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.13927461050427267,
+          0.10475214562379355
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-9447130.json",
+        "coefficient_sha256": "a6a9b43f61caf3ce19d1431ef834a554204d4a889df82a97fe76d0cc6342edab",
+        "long_radius_m": 0.2804418984402526,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.03449074784956666,
+              "radius_m": 0.08650812411821729,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.03449074784956666,
+                "radius_m": 0.08650812411821729,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.057006077558219924,
+                "radius_m": 0.14059177974362025,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.07145241633277923,
+                "radius_m": 0.17903801557719368,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 6,
+              "mae_m": 0.09600371176170847,
+              "radius_m": 0.24454673965464613,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.10434163753034717,
+                "radius_m": 0.26732106954306634,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.09810861883935702,
+                "radius_m": 0.2512443963174258,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.09600371176170847,
+                "radius_m": 0.24454673965464613,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 6,
+            "resolution": 6,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.004641631274439263,
+              "radius_m": 0.011853215532196426,
+              "n": 6720
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.004641631274439263,
+                "radius_m": 0.011853215532196426,
+                "n": 6720
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.00770747863731249,
+                "radius_m": 0.019300479576522922,
+                "n": 6720
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.012723724987055726,
+                "radius_m": 0.031755944640971534,
+                "n": 6720
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "verified_hourly_product": 8747,
+          "v": 13440
+        },
+        "rejected": 37,
+        "datums": [
+          "MLLW"
+        ],
+        "record_ids": []
+      },
+      {
+        "station_id": "175",
+        "site": "Fremantle, Australia",
+        "provider": "uhslc",
+        "lat": -32.05,
+        "training_hours": 13090,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.16333978533462506,
+          0.1295957556538893
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-175.json",
+        "coefficient_sha256": "be9773df78d40e1de64cc6573050ea18a2787645705cfca2d8d0d5e553e43664",
+        "long_radius_m": 0.34460946203587906,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 3,
+              "mae_m": 0.019578124292653237,
+              "radius_m": 0.04679593915556568,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.021289291946117388,
+                "radius_m": 0.05198394142558482,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.019578124292653237,
+                "radius_m": 0.04679593915556568,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.0266789082050016,
+                "radius_m": 0.06628461250513529,
+                "n": 672
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.04169851133129326,
+              "radius_m": 0.10529921075278292,
+              "n": 672
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.04169851133129326,
+                "radius_m": 0.10529921075278292,
+                "n": 672
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.045004446986124234,
+                "radius_m": 0.11093640475306588,
+                "n": 672
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.05017953294846113,
+                "radius_m": 0.12357751809520379,
+                "n": 672
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "3": 23338
+        },
+        "rejected": 7310,
+        "datums": [
+          "station zero"
+        ],
+        "record_ids": [
+          "1750"
+        ]
+      },
+      {
+        "station_id": "115",
+        "site": "Colombo, Sri Lanka",
+        "provider": "uhslc",
+        "lat": 6.94012,
+        "training_hours": 8708,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.06331911437558967,
+          0.04254751204464996
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-115.json",
+        "coefficient_sha256": "01e1242598c690bfc9c65ac3519660dc701b4ff45a768374346319c2ae0a6f8d",
+        "long_radius_m": 0.1075132674281265,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.010352723583545848,
+              "radius_m": 0.027116173819008882,
+              "n": 580
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.010352723583545848,
+                "radius_m": 0.027116173819008882,
+                "n": 580
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.015828860779193345,
+                "radius_m": 0.042979004084848116,
+                "n": 561
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.02137945394163366,
+                "radius_m": 0.05382015602717127,
+                "n": 534
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 6,
+              "mae_m": 0.029529283440053716,
+              "radius_m": 0.06989889289069362,
+              "n": 502
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.03220905969161752,
+                "radius_m": 0.08184659793178395,
+                "n": 544
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.032143128286967894,
+                "radius_m": 0.07844291860800423,
+                "n": 526
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.029529283440053716,
+                "radius_m": 0.06989889289069362,
+                "n": 502
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "4": 8708,
+          "3": 13939
+        },
+        "rejected": 729,
+        "datums": [
+          "station zero"
+        ],
+        "record_ids": [
+          "1150"
+        ]
+      },
+      {
+        "station_id": "101",
+        "site": "Mombasa, Kenya",
+        "provider": "uhslc",
+        "lat": -4.06999,
+        "training_hours": 8665,
+        "basis_count": 20,
+        "candidate_mae_m": [
+          0.09990419319045604,
+          0.09409639495408309
+        ],
+        "coefficient_path": "data/public/physical_twin_v2_20261030/coefficients-101.json",
+        "coefficient_sha256": "c5deae4264236f500b38f1041f4c4da0c5908ec687fe819a7ae733b474caac84",
+        "long_radius_m": 0.20298114519512023,
+        "short_choices": [
+          {
+            "horizon": 60,
+            "resolution": 60,
+            "selected": {
+              "memory": 1,
+              "mae_m": 0.017511939380890733,
+              "radius_m": 0.04487296487151493,
+              "n": 661
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.017511939380890733,
+                "radius_m": 0.04487296487151493,
+                "n": 661
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.027566347869370032,
+                "radius_m": 0.07213485007004916,
+                "n": 651
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.03716760532383793,
+                "radius_m": 0.10018316533304672,
+                "n": 635
+              }
+            ]
+          },
+          {
+            "horizon": 360,
+            "resolution": 60,
+            "selected": {
+              "memory": 6,
+              "mae_m": 0.05066730575424288,
+              "radius_m": 0.13017213256496296,
+              "n": 629
+            },
+            "candidates": [
+              {
+                "memory": 1,
+                "mae_m": 0.05695031154302235,
+                "radius_m": 0.14722833599574114,
+                "n": 659
+              },
+              {
+                "memory": 3,
+                "mae_m": 0.05636475475240966,
+                "radius_m": 0.14748695848765103,
+                "n": 647
+              },
+              {
+                "memory": 6,
+                "mae_m": 0.05066730575424288,
+                "radius_m": 0.13017213256496296,
+                "n": 629
+              }
+            ]
+          }
+        ],
+        "quality_counts": {
+          "4": 8665,
+          "3": 14470
+        },
+        "rejected": 241,
+        "datums": [
+          "station zero"
+        ],
+        "record_ids": [
+          "1010"
+        ]
+      }
+    ],
+    "dependencies": {
+      "numpy": "2.2.6",
+      "utide": "0.4.0"
+    },
+    "selection_uses_test_labels": false
+  },
+  "results": [
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05592693141002103,
+      "rmse_m": 0.06482366730926832,
+      "bias_m": -0.054980644208108644,
+      "baseline_mae_m": 0.058285768621044565,
+      "coverage": 0.9642857142857143,
+      "interval_width_m": 0.24127129790749846,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.01589097374360017,
+      "rmse_m": 0.019730000993470675,
+      "bias_m": 1.814218133017798e-05,
+      "baseline_mae_m": 0.19477380952380954,
+      "coverage": 0.9107142857142857,
+      "interval_width_m": 0.06790545882862897,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.03950012115482669,
+      "rmse_m": 0.04789209883252076,
+      "bias_m": 3.475466378338145e-05,
+      "baseline_mae_m": 0.8028571428571428,
+      "coverage": 0.8928571428571429,
+      "interval_width_m": 0.156294232654838,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.0074571787832148195,
+      "rmse_m": 0.009611967819181484,
+      "bias_m": 2.9947406711761752e-05,
+      "baseline_mae_m": 0.020773809523809524,
+      "coverage": 0.9714285714285714,
+      "interval_width_m": 0.04430705156651715,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.03838360542672085,
+      "rmse_m": 0.043655435589429664,
+      "bias_m": -0.03540400411411799,
+      "baseline_mae_m": 0.04944623197906869,
+      "coverage": 1.0,
+      "interval_width_m": 0.24127129790749846,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.013977519837027576,
+      "rmse_m": 0.01745949696070513,
+      "bias_m": -7.618655839541177e-05,
+      "baseline_mae_m": 0.15083333333333332,
+      "coverage": 0.9523809523809523,
+      "interval_width_m": 0.06790545882862897,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.03111109666976929,
+      "rmse_m": 0.038028405028340914,
+      "bias_m": -0.00014853798329539833,
+      "baseline_mae_m": 0.6623333333333333,
+      "coverage": 0.9940476190476191,
+      "interval_width_m": 0.156294232654838,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1678,
+      "expected": 1680,
+      "mae_m": 0.00822532206605891,
+      "rmse_m": 0.01095280927844247,
+      "bias_m": -1.918222346605769e-05,
+      "baseline_mae_m": 0.016912991656734207,
+      "coverage": 0.9541120381406436,
+      "interval_width_m": 0.04430705156651715,
+      "availability": 0.9988095238095238,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.08492130519515725,
+      "rmse_m": 0.09266942657497455,
+      "bias_m": -0.08474982223356259,
+      "baseline_mae_m": 0.15815530628549845,
+      "coverage": 0.8154761904761905,
+      "interval_width_m": 0.24127129790749846,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.018625043030436543,
+      "rmse_m": 0.023087197946208227,
+      "bias_m": -0.00021470113422042002,
+      "baseline_mae_m": 0.1405595238095238,
+      "coverage": 0.8392857142857143,
+      "interval_width_m": 0.06790545882862897,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05259719699315301,
+      "rmse_m": 0.061991408310280716,
+      "bias_m": -0.0015744448063899174,
+      "baseline_mae_m": 0.5936904761904762,
+      "coverage": 0.7797619047619048,
+      "interval_width_m": 0.156294232654838,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": false,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "coverage"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "9410660",
+      "site": "Los Angeles",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.009505386651445284,
+      "rmse_m": 0.01187646195007826,
+      "bias_m": 1.2547040812671948e-05,
+      "baseline_mae_m": 0.01646547619047619,
+      "coverage": 0.9375,
+      "interval_width_m": 0.04430705156651715,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.13106038987261653,
+      "rmse_m": 0.181994405717445,
+      "bias_m": 0.048804131678575835,
+      "baseline_mae_m": 0.13248225295649618,
+      "coverage": 0.9404761904761905,
+      "interval_width_m": 0.8454219469614777,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": false,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "interval_width"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05790680839315282,
+      "rmse_m": 0.07348933737277773,
+      "bias_m": 0.0004104135131789934,
+      "baseline_mae_m": 0.23910714285714288,
+      "coverage": 0.8809523809523809,
+      "interval_width_m": 0.22986158163794923,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.1042497689835386,
+      "rmse_m": 0.14887180148243706,
+      "bias_m": 0.007745881905291886,
+      "baseline_mae_m": 0.9471607142857142,
+      "coverage": 0.8988095238095238,
+      "interval_width_m": 0.4258399365049703,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1678,
+      "expected": 1680,
+      "mae_m": 0.0071434879662699,
+      "rmse_m": 0.008910367111798068,
+      "bias_m": 4.437628201643545e-05,
+      "baseline_mae_m": 0.024373659117997618,
+      "coverage": 0.9147794994040525,
+      "interval_width_m": 0.03023316952122368,
+      "availability": 0.9988095238095238,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "passed": false,
+      "n": 0,
+      "expected": 1680,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.08069122408438435,
+      "rmse_m": 0.09331391461694437,
+      "bias_m": 0.05072497297241003,
+      "baseline_mae_m": 0.08418382865272811,
+      "coverage": 1.0,
+      "interval_width_m": 0.8454219469614777,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": false,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "interval_width"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.037274623728670055,
+      "rmse_m": 0.04503733467598374,
+      "bias_m": 0.0010709678810663574,
+      "baseline_mae_m": 0.20550000000000002,
+      "coverage": 1.0,
+      "interval_width_m": 0.22986158163794923,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05050283834753524,
+      "rmse_m": 0.06277751712438061,
+      "bias_m": 0.0045661082045056105,
+      "baseline_mae_m": 0.8330535714285714,
+      "coverage": 1.0,
+      "interval_width_m": 0.4258399365049703,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "8518750",
+      "site": "The Battery, New York",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.009750497250911486,
+      "rmse_m": 0.012899274135962892,
+      "bias_m": 0.000138540689970995,
+      "baseline_mae_m": 0.02250297619047619,
+      "coverage": 0.780952380952381,
+      "interval_width_m": 0.03023316952122368,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": false,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "coverage"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.11853821462841967,
+      "rmse_m": 0.15090170869218486,
+      "bias_m": 0.10306691933809703,
+      "baseline_mae_m": 0.11381352296624267,
+      "coverage": 0.9285714285714286,
+      "interval_width_m": 0.5608837968805052,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.034655511896092575,
+      "rmse_m": 0.04697324155545791,
+      "bias_m": 0.0008670978009958126,
+      "baseline_mae_m": 0.41727380952380955,
+      "coverage": 0.9166666666666666,
+      "interval_width_m": 0.17301624823643458,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.1263490053450927,
+      "rmse_m": 0.15312435847933234,
+      "bias_m": 0.0036792218251033354,
+      "baseline_mae_m": 1.692654761904762,
+      "coverage": 0.9107142857142857,
+      "interval_width_m": 0.48909347930929226,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.005711248587436836,
+      "rmse_m": 0.007513695230244574,
+      "bias_m": 8.431104064060755e-05,
+      "baseline_mae_m": 0.04242738095238095,
+      "coverage": 0.9017857142857143,
+      "interval_width_m": 0.023706431064392852,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.10339152251533476,
+      "rmse_m": 0.12538346646054904,
+      "bias_m": -0.09334898249153108,
+      "baseline_mae_m": 0.09550451331496204,
+      "coverage": 1.0,
+      "interval_width_m": 0.5608837968805052,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.03858528326052601,
+      "rmse_m": 0.047086338350953494,
+      "bias_m": 0.0010190920094642721,
+      "baseline_mae_m": 0.3341547619047619,
+      "coverage": 0.9642857142857143,
+      "interval_width_m": 0.17301624823643458,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.07061336036932274,
+      "rmse_m": 0.08849628309033133,
+      "bias_m": 0.008742998160786383,
+      "baseline_mae_m": 1.4950773809523805,
+      "coverage": 1.0,
+      "interval_width_m": 0.48909347930929226,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.0050205298836164215,
+      "rmse_m": 0.006291802099480708,
+      "bias_m": 3.715843067972697e-05,
+      "baseline_mae_m": 0.03358928571428571,
+      "coverage": 0.9446428571428571,
+      "interval_width_m": 0.023706431064392852,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.06526849361345494,
+      "rmse_m": 0.08199118231982182,
+      "bias_m": -4.5425956557839285e-05,
+      "baseline_mae_m": 0.0977042658194207,
+      "coverage": 1.0,
+      "interval_width_m": 0.5608837968805052,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.028602076268107117,
+      "rmse_m": 0.03566145361827003,
+      "bias_m": -0.0003403984176773663,
+      "baseline_mae_m": 0.35350000000000004,
+      "coverage": 0.9821428571428571,
+      "interval_width_m": 0.17301624823643458,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05788853015543527,
+      "rmse_m": 0.07130622960584615,
+      "bias_m": -0.004329806283888777,
+      "baseline_mae_m": 1.5199404761904762,
+      "coverage": 1.0,
+      "interval_width_m": 0.48909347930929226,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "9447130",
+      "site": "Seattle",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 6,
+      "n": 1680,
+      "expected": 1680,
+      "mae_m": 0.0038812983238607954,
+      "rmse_m": 0.004888174956198568,
+      "bias_m": -4.4830756325551845e-05,
+      "baseline_mae_m": 0.035382142857142855,
+      "coverage": 0.9803571428571428,
+      "interval_width_m": 0.023706431064392852,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.15079296441470674,
+      "rmse_m": 0.16399624511107402,
+      "bias_m": 0.1430712370776395,
+      "baseline_mae_m": 0.13543043521938924,
+      "coverage": 1.0,
+      "interval_width_m": 0.6892189240717581,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.017975918069514023,
+      "rmse_m": 0.022966144029484634,
+      "bias_m": 3.543809154473615e-05,
+      "baseline_mae_m": 0.040749999999999995,
+      "coverage": 0.9583333333333334,
+      "interval_width_m": 0.09359187831113136,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.03532181612960953,
+      "rmse_m": 0.045277742302519935,
+      "bias_m": 0.0005722783938606896,
+      "baseline_mae_m": 0.18004761904761907,
+      "coverage": 0.9523809523809523,
+      "interval_width_m": 0.21059842150556585,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "n": 40,
+      "expected": 168,
+      "mae_m": 0.07090286201920828,
+      "rmse_m": 0.07915175143299473,
+      "bias_m": 0.07090286201920828,
+      "baseline_mae_m": 0.05821361799214096,
+      "coverage": 1.0,
+      "interval_width_m": 0.6892189240717581,
+      "availability": 0.23809523809523808,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": false,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "availability",
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 37,
+      "expected": 168,
+      "mae_m": 0.01924530433218671,
+      "rmse_m": 0.02382077796354669,
+      "bias_m": 0.00032731613462692915,
+      "baseline_mae_m": 0.042621621621621614,
+      "coverage": 0.972972972972973,
+      "interval_width_m": 0.09359187831113136,
+      "availability": 0.22023809523809523,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": false,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "availability"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 34,
+      "expected": 168,
+      "mae_m": 0.04197726068767122,
+      "rmse_m": 0.047768494215353584,
+      "bias_m": 0.003051889876047728,
+      "baseline_mae_m": 0.1961470588235294,
+      "coverage": 1.0,
+      "interval_width_m": 0.21059842150556585,
+      "availability": 0.20238095238095238,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": false,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "availability"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "175",
+      "site": "Fremantle, Australia",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "passed": false,
+      "n": 0,
+      "expected": 168,
+      "blockers": [
+        "no_evaluable_observations"
+      ]
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.04348791544695218,
+      "rmse_m": 0.049477356406723634,
+      "bias_m": -0.0378091626700374,
+      "baseline_mae_m": 0.049102076754380865,
+      "coverage": 1.0,
+      "interval_width_m": 0.215026534856253,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.011814550425896365,
+      "rmse_m": 0.015189587510563457,
+      "bias_m": 0.00023393743071857542,
+      "baseline_mae_m": 0.09068452380952381,
+      "coverage": 0.9285714285714286,
+      "interval_width_m": 0.054232347638017764,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.024394207081779536,
+      "rmse_m": 0.03129706468957553,
+      "bias_m": 3.022789080093143e-05,
+      "baseline_mae_m": 0.35214285714285715,
+      "coverage": 0.9642857142857143,
+      "interval_width_m": 0.13979778578138724,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.06279932129376607,
+      "rmse_m": 0.07597901680976009,
+      "bias_m": 0.05386053992226488,
+      "baseline_mae_m": 0.04845380868873698,
+      "coverage": 0.7976190476190477,
+      "interval_width_m": 0.215026534856253,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": false,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "coverage",
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.010203500890211862,
+      "rmse_m": 0.012997006478661175,
+      "bias_m": -0.00010339368847524431,
+      "baseline_mae_m": 0.07679761904761906,
+      "coverage": 0.9642857142857143,
+      "interval_width_m": 0.054232347638017764,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.0238936492431051,
+      "rmse_m": 0.02899849437078589,
+      "bias_m": -0.0003250029877818294,
+      "baseline_mae_m": 0.3050357142857143,
+      "coverage": 0.9880952380952381,
+      "interval_width_m": 0.13979778578138724,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.04418144413439368,
+      "rmse_m": 0.04999103359332681,
+      "bias_m": 0.036345785880104994,
+      "baseline_mae_m": 0.13975410258975718,
+      "coverage": 1.0,
+      "interval_width_m": 0.215026534856253,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.011557603291552759,
+      "rmse_m": 0.014368980012196185,
+      "bias_m": -2.8514857900040014e-05,
+      "baseline_mae_m": 0.058565476190476196,
+      "coverage": 0.9464285714285714,
+      "interval_width_m": 0.054232347638017764,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "115",
+      "site": "Colombo, Sri Lanka",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.024598516859235735,
+      "rmse_m": 0.03262105007954041,
+      "bias_m": 6.845385276098623e-05,
+      "baseline_mae_m": 0.24164285714285716,
+      "coverage": 0.9404761904761905,
+      "interval_width_m": 0.13979778578138724,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-02",
+      "kind": "long_open_loop",
+      "n": 167,
+      "expected": 168,
+      "mae_m": 0.07864467084612861,
+      "rmse_m": 0.09728004064040635,
+      "bias_m": 0.07438631820790063,
+      "baseline_mae_m": 0.1192223799646409,
+      "coverage": 0.9580838323353293,
+      "interval_width_m": 0.40596229039024045,
+      "availability": 0.9940476190476191,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 166,
+      "expected": 168,
+      "mae_m": 0.025258624378681715,
+      "rmse_m": 0.03147005508723461,
+      "bias_m": 0.0002196928547640436,
+      "baseline_mae_m": 0.46571084337349394,
+      "coverage": 0.8614457831325302,
+      "interval_width_m": 0.08974592974302986,
+      "availability": 0.9880952380952381,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-02",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 161,
+      "expected": 168,
+      "mae_m": 0.07346563924336555,
+      "rmse_m": 0.08643974444229902,
+      "bias_m": -0.004232729802340939,
+      "baseline_mae_m": 1.8925900621118013,
+      "coverage": 0.9006211180124224,
+      "interval_width_m": 0.2603442651299259,
+      "availability": 0.9583333333333334,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-05",
+      "kind": "long_open_loop",
+      "n": 166,
+      "expected": 168,
+      "mae_m": 0.13901437824149984,
+      "rmse_m": 0.14819109318034512,
+      "bias_m": 0.13901437824149984,
+      "baseline_mae_m": 0.09093233160901507,
+      "coverage": 0.8614457831325302,
+      "interval_width_m": 0.40596229039024045,
+      "availability": 0.9880952380952381,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": false
+      },
+      "blockers": [
+        "matches_or_beats_baseline"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 164,
+      "expected": 168,
+      "mae_m": 0.023862590116567824,
+      "rmse_m": 0.029573652999268982,
+      "bias_m": -0.00017755577386902168,
+      "baseline_mae_m": 0.36407317073170725,
+      "coverage": 0.8475609756097561,
+      "interval_width_m": 0.08974592974302986,
+      "availability": 0.9761904761904762,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-05",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 154,
+      "expected": 168,
+      "mae_m": 0.057513510592676474,
+      "rmse_m": 0.06684509231080606,
+      "bias_m": 0.004840266120953229,
+      "baseline_mae_m": 1.4494740259740257,
+      "coverage": 1.0,
+      "interval_width_m": 0.2603442651299259,
+      "availability": 0.9166666666666666,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": false,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [
+        "availability"
+      ],
+      "passed": false
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-08",
+      "kind": "long_open_loop",
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.05085193558478821,
+      "rmse_m": 0.05978349400756267,
+      "bias_m": 0.031573290974524236,
+      "baseline_mae_m": 0.06277637690481168,
+      "coverage": 1.0,
+      "interval_width_m": 0.40596229039024045,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 60,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.021508357293906894,
+      "rmse_m": 0.026066693000545156,
+      "bias_m": 6.125768881858525e-05,
+      "baseline_mae_m": 0.33301785714285714,
+      "coverage": 0.9226190476190477,
+      "interval_width_m": 0.08974592974302986,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    },
+    {
+      "station_id": "101",
+      "site": "Mombasa, Kenya",
+      "month": "2026-08",
+      "kind": "short_assimilation",
+      "horizon_minutes": 360,
+      "n": 168,
+      "expected": 168,
+      "mae_m": 0.057626033206116686,
+      "rmse_m": 0.06830879007043579,
+      "bias_m": 0.0025993444483769076,
+      "baseline_mae_m": 1.3393690476190476,
+      "coverage": 0.9523809523809523,
+      "interval_width_m": 0.2603442651299259,
+      "availability": 1.0,
+      "checks": {
+        "mae": true,
+        "coverage": true,
+        "interval_width": true,
+        "availability": true,
+        "matches_or_beats_baseline": true
+      },
+      "blockers": [],
+      "passed": true
+    }
+  ],
+  "trace_path": "data/public/physical_twin_v2_20261030/predictions.jsonl.gz",
+  "trace_sha256": "450649c23ea5cd157848339868b3c982099fed7386fdaab19f71503320a7fa65",
+  "selection_sha256": "76aad16db1d17789d1fca3d8999b59345c0b15902bab679c0a5093e408141650",
+  "long_passed": 8,
+  "long_total": 18,
+  "short_passed": 35,
+  "short_total": 45,
+  "production_authority": false,
+  "notice": "新国际测站与2026留出。归档观测短期回放假设本地传感器即时可用；UHSLC归档本身有4-6周延迟。保留旧物理失败和本轮全部未通过单元，不代替全港物理标定。"
+}

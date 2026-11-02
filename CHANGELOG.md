@@ -1,6 +1,26 @@
 # Changelog
 
-## Unreleased
+## [harness-rl-20261102] - 2026-11-02
+
+- Publish the current Harness V13 runtime, model-directed tool loop, persistence,
+  recovery, execution verification, cross-system research tools and workbenches.
+- Add the 1.7B language-model LoRA RL laboratory, training/evaluation/audit scripts,
+  frontend and frozen experiment-004 evidence. Held-out completion: rules 24/24,
+  base 9/24, frozen SFT 14/24, SFT+RL 19/24, continued SFT 22/24.
+- Publish all 120 final-test trajectories, five chart families, checkpoint selection
+  amendment, six native executions (C and D both 2/3), retention checks and the
+  prior negative result. Full frozen checkpoints and training branches are provided
+  as a GitHub Release attachment with SHA-256 verification.
+- Keep the later curriculum experiment explicitly developmental, with its final
+  test unopened at the publication snapshot. Production authority remains disabled.
+- Add a dependency-free public-evidence replay command to CI. See
+  `docs/GITHUB_RELEASE_20261102.md` for the download, methods and limits.
+
+## Earlier unreleased engineering updates
+
+- Replaced the Malacca clock command's backtracking regex with an ordered string
+  search; repeated input no longer triggers quadratic scanning. Added command
+  guard regressions and reran all eight real local adapter acceptance cases.
 
 - Added eight local linked-agent actions with parameter previews, asynchronous
   observation, same-dataset energy comparisons, Malacca scenario/clock changes,

@@ -1,0 +1,17 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小懿 · 体量、信息与算法根因</title><link rel="stylesheet" href="/web/capability-review.css"><script src="/web/root-cause-v10.js" defer></script></head>
+<body><main><header><a href="/">← 返回小懿</a><span>2026.10.31 · V10 根因实证</span></header>
+<section class="hero"><p class="eyebrow">理论审查 + 调用链核查 + 独立新数据</p><h1>先找到限制在哪里，再决定是否值得增加模型。</h1><p>RL控制和年度潮位由独立数值模型计算。语言模型规模、专业模型复杂度、可用信息、决策空间和验证条件需要分别判断。</p></section>
+<div id="status" role="status">正在核验源代码与冻结证据…</div><div id="metrics" class="metrics"></div>
+<nav class="tabs"><a href="#cause">是不是模型太小</a><a href="#rl">RL收益上界</a><a href="#annual">年度独立复验</a><a href="#assessment">37项限制归因</a><a href="/web/priority-v9.html">上一轮证据</a><button id="export" disabled>导出本轮证据</button></nav>
+<section id="cause"><p class="eyebrow">01 / 因果边界</p><h2>这两项失败不由4B语言模型直接产生</h2><p>冻结RL策略、MPC和潮位重构没有调用语言生成层；禁止网络和语言模型网关后，数值计算仍通过测试。这不能证明4B在复杂对话与长链规划中已经足够：这些能力仍需要不同规模模型的同题对照。</p>
+<div id="root-findings" class="result"></div><div id="references" class="sources"></div></section>
+<section id="rl"><p class="eyebrow">02 / 决策空间与最优界</p><h2>连知道未来的诊断器，还能省下多少成本？</h2><p>新8港 × 每港2个90天窗口 × 4种情景。诊断器预先知道未来到港量，但仍遵守原动作集合、安全约束和成本；它给出收益上界，绝不参与实际策略。</p>
+<div class="table-scroll"><table><thead><tr><th>情景</th><th>强MPC已达最优的窗口</th><th>平均最大可能改善</th><th>单窗最大可能改善</th></tr></thead><tbody id="oracle"></tbody></table></div>
+<div id="rl-result" class="result"></div><p class="muted">新增可执行候选采用已训练RL策略的7天场景推演，强基线池同时增加同信息的28天推演。正收益置信区间、逐港非退化、压力非劣和安全门槛原样保留。代理成本不是实际经济收益。</p></section>
+<section id="annual"><p class="eyebrow">03 / 年度潮位分量</p><h2>在开发集选季节区间，再冻结到8个新站</h2><p id="annual-method"></p>
+<div class="table-scroll"><table><thead><tr><th>方法</th><th>全年通过</th><th>季度通过</th><th>全年及全部四季</th><th>平均WIS↓</th></tr></thead><tbody id="annual-summary"></tbody></table></div>
+<div class="table-scroll"><table><thead><tr><th>新站点</th><th>V9 / V10季度通过</th><th>V10全年</th><th>MAE / m</th><th>覆盖率</th><th>最大宽度 / m</th></tr></thead><tbody id="annual-sites"></tbody></table></div>
+<div class="controls"><label>新站点<select id="station"></select></label><label>归档日<input id="day" type="date" value="2025-06-01" min="2025-01-01" max="2025-12-31"></label><button id="run" disabled>实际重算24小时</button></div><div id="annual-receipt" class="result" aria-live="polite">同一条点预测，比较旧全年区间与新季节区间。</div>
+<p class="muted">门槛仍为MAE≤0.2m、覆盖≥80%、最大宽度≤0.75m、观测可用率≥95%，且不劣于强物理基线；全年和四季都要通过。90%是区间名义水平，不是未经检验的保证。缺失不补造、超宽不截窄。</p></section>
+<section id="assessment"><p class="eyebrow">04 / 全能力限制分类</p><h2>哪些可能受规模影响，哪些需要别的条件</h2><div class="table-scroll"><table><thead><tr><th>能力</th><th>上轮→本轮</th><th>主要限制类型</th><th>是否已证明由语言模型规模导致</th></tr></thead><tbody id="components"></tbody></table></div></section>
+<footer>新港/新站的公开归档验证 · 非历史实际发布时间验证 · 非现场生产验收 · 原失败证据全部保留</footer></main></body></html>

@@ -1,0 +1,289 @@
+{
+  "task": {
+    "case_id": "v2-test-port_read-000",
+    "split": "test",
+    "family": "port_read",
+    "seed": 733000,
+    "green": 0.61,
+    "carbon": 136,
+    "baseline": 0.65,
+    "scenario": "channel_congestion",
+    "fault": "none",
+    "max_steps": 14
+  },
+  "outcome": {
+    "case_id": "v2-test-port_read-000",
+    "family": "port_read",
+    "split": "test",
+    "success": true,
+    "steps": 3,
+    "reward": 2.5,
+    "parameter_attempts": 0,
+    "parameter_correct": 0,
+    "errors": 0,
+    "fault_injected": false,
+    "recovered": false,
+    "checks": {
+      "required_observations": true,
+      "energy_parameters": true,
+      "port_scenario": true,
+      "restoration": true,
+      "no_uncertain_write": true,
+      "verified": true
+    },
+    "trajectory_sha256": "e97d7ffb68e515b5368c15b70a3b4daab88771370f6895600a5c59ec91a8e871",
+    "source": "synthetic_training_environment",
+    "parameter_matches": 0,
+    "elapsed_seconds": 1.8221
+  },
+  "steps": [
+    {
+      "step": 1,
+      "observation": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "none",
+        "remaining_steps": 14
+      },
+      "choice": "A",
+      "action": {
+        "tool": "port.read",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "source": "synthetic_resettable_environment",
+        "target": "port",
+        "case": "v2-test-port_read-000",
+        "production_authority": false,
+        "source_hash": "db57b951ddfddc001673bba8cc4ffb6ad65ccb6077fb6c631c03a0462dea0f63"
+      },
+      "feedback": "read_ok:port",
+      "reward": 0.9,
+      "after": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 1.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.0,
+      "progress_after": 0.5,
+      "potential_before": 0.0,
+      "potential_after": 0.5
+    },
+    {
+      "step": 2,
+      "observation": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": false,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "read_ok:port",
+        "remaining_steps": 13
+      },
+      "choice": "I",
+      "action": {
+        "tool": "execution.verify",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "checks": {
+          "required_observations": true,
+          "energy_parameters": true,
+          "port_scenario": true,
+          "restoration": true,
+          "no_uncertain_write": true,
+          "verified": true
+        }
+      },
+      "feedback": "all_receipts_verified",
+      "reward": 0.9,
+      "after": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 12
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": 1.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": 0.0,
+        "terminal_success": 0.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 0.5,
+      "progress_after": 1.0,
+      "potential_before": 0.5,
+      "potential_after": 1.0
+    },
+    {
+      "step": 3,
+      "observation": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "all_receipts_verified",
+        "remaining_steps": 12
+      },
+      "choice": "J",
+      "action": {
+        "tool": "artifact.report",
+        "arguments": {}
+      },
+      "ok": true,
+      "result": {
+        "report_sha256": "b7d8ce93e03511d25d18481c36ea3f6fba297d22d5b45bfc406a480a3a6489de"
+      },
+      "feedback": "completed",
+      "reward": 0.7,
+      "after": {
+        "goal": "读取港口状态，核验后交付报告。",
+        "reads": [
+          "port"
+        ],
+        "completed": [],
+        "verified": true,
+        "clock": "running",
+        "ever_paused": false,
+        "restored": false,
+        "uncertain_write": false,
+        "last": "completed",
+        "remaining_steps": 11
+      },
+      "model_action": true,
+      "environment_revision": "xiaoyi-agent-env.v3-dense-progress",
+      "reward_components": {
+        "potential_shaping": -2.0,
+        "step_cost": -0.1,
+        "invalid_action": 0.0,
+        "no_progress": -0.2,
+        "terminal_success": 3.0,
+        "budget_failure": 0.0
+      },
+      "progress_before": 1.0,
+      "progress_after": 1.0,
+      "potential_before": 1.0,
+      "potential_after": 0.0
+    }
+  ],
+  "decisions": [
+    {
+      "prompt": "麻烦协助完成以下工作：读取港口状态，核验后交付报告。\n已完成：无。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：none。剩余步数14。\n任务缺项：港口状态尚未读取；结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.61,碳价136);F=能碳比较(偏好0.48,碳价136);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.61,碳价117);M=询问用户\n下一步只输出一个字母：",
+      "label": "A",
+      "log_probability": 0.0,
+      "probabilities": [
+        1.0,
+        5.123680275084634e-15,
+        6.7623163335249134e-15,
+        2.4464606975991253e-14,
+        5.646119185522772e-15,
+        4.3880007142961075e-16,
+        1.812491853882715e-17,
+        4.581405997073948e-17,
+        1.9577460929360068e-17,
+        1.689499195782818e-17,
+        1.8784487543858558e-17,
+        3.8264792801551823e-16,
+        1.1186823691391648e-16
+      ],
+      "seconds": 0.6174,
+      "input_tokens": 275,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "麻烦协助完成以下工作：读取港口状态，核验后交付报告。\n已完成：港口读取。当前时钟：运行。结果核验：尚未通过。执行结果不明：否。最近反馈：read_ok:port。剩余步数13。\n任务缺项：结果尚未通过核验；报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.61,碳价136);F=能碳比较(偏好0.48,碳价136);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.61,碳价117);M=询问用户\n下一步只输出一个字母：",
+      "label": "I",
+      "log_probability": 0.0,
+      "probabilities": [
+        5.351287345374284e-16,
+        3.455142947754653e-16,
+        1.3147560703986524e-15,
+        1.412661220639988e-13,
+        7.984508643447616e-15,
+        5.400092854399485e-16,
+        1.3913194446754177e-17,
+        5.353471631587016e-16,
+        1.0,
+        4.488894472061064e-14,
+        9.75828939095747e-17,
+        2.4806384770208363e-15,
+        4.741339449452055e-16
+      ],
+      "seconds": 0.6068,
+      "input_tokens": 274,
+      "exact_logit_cache_hit": false
+    },
+    {
+      "prompt": "麻烦协助完成以下工作：读取港口状态，核验后交付报告。\n已完成：港口读取、全部结果核验。当前时钟：运行。结果核验：已通过。执行结果不明：否。最近反馈：all_receipts_verified。剩余步数12。\n任务缺项：报告尚未交付。\n工具：A=读取港口;B=读取能源;C=读取交通;D=港口评估(channel_congestion);E=能碳比较(偏好0.61,碳价136);F=能碳比较(偏好0.48,碳价136);G=暂停模拟时钟;H=恢复原时钟;I=核验全部结果;J=交付报告;K=诊断接口;L=能碳比较(偏好0.61,碳价117);M=询问用户\n下一步只输出一个字母：",
+      "label": "J",
+      "log_probability": 0.0,
+      "probabilities": [
+        2.489608464218609e-21,
+        1.863984301963478e-20,
+        3.587746626697586e-20,
+        7.701903498899617e-19,
+        4.2717089139896044e-17,
+        9.351028670728212e-20,
+        4.1311567908831886e-20,
+        6.496802924189077e-17,
+        1.3673437932915805e-15,
+        1.0,
+        1.775497921521955e-16,
+        2.0758929615714458e-17,
+        8.941494858175658e-18
+      ],
+      "seconds": 0.5962,
+      "input_tokens": 273,
+      "exact_logit_cache_hit": false
+    }
+  ]
+}

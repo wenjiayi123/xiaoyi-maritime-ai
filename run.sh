@@ -3,6 +3,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+# Once configured, desktop launches use the same database, model and code build.
+# Explicit ports / legacy mode keep the original developer launcher available.
+if [[ -f .runtime/harness-runtime.json && -z "${XIAOYI_PORT:-}" && "${XIAOYI_LEGACY_RUNTIME:-0}" != "1" ]]; then
+  exec .venv/bin/python scripts/start_harness.py "$@"
+fi
+
 XIAOYI_PROJECT_ROOT="$PWD"
 XIAOYI_DESKTOP_ROOT="$(dirname "$XIAOYI_PROJECT_ROOT")"
 PORT_CONTRACT_FILE="$XIAOYI_PROJECT_ROOT/config/local_ports.env"
@@ -122,7 +128,8 @@ if [[ -z "$LLAMA_SERVER_BIN" && -x "$BUNDLED_LLAMA_SERVER" ]]; then
 fi
 MODEL_ID=xiaoyi-local-4b-q4-k-m
 MODEL_ALIAS=xiaoyi-local-4b
-MODEL_CONTEXT=4096
+# Harness tasks retain tool contracts and source summaries across model turns.
+MODEL_CONTEXT=8192
 USE_LORA=false
 DISCOVERED_TRAINING_MODEL="$(discover_weight_by_size 1834426016c)"
 LORA_MODEL_FILE="${XIAOYI_LORA_MODEL_PATH:-${DISCOVERED_TRAINING_MODEL:-$PWD/.runtime/models/maritime-training-1.7b-q8-0.gguf}}"
@@ -132,7 +139,7 @@ if [[ "${XIAOYI_LOCAL_MODEL_PROFILE:-base}" == "lora" && -f "$LORA_ADAPTER_FILE"
   MODEL_FILE="$LORA_MODEL_FILE"
   MODEL_ID=xiaoyi-local-1.7b-q8-0
   MODEL_ALIAS=xiaoyi-maritime-1.7b-lora
-  MODEL_CONTEXT=4096
+  MODEL_CONTEXT=8192
   USE_LORA=true
 fi
 MODEL_STARTED_HERE=false

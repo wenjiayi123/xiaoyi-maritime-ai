@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>小懿 · 语言模型 RL 实验</title>
+  <link rel="stylesheet" href="/web/agent-rl.css">
+  <script src="/web/agent-rl.js?v=20261102-11" defer></script>
+</head>
+<body>
+  <header><a href="/">小懿 AI</a><span>本机 1.7B 语言模型实验</span></header>
+  <main>
+    <p class="eyebrow">多任务工具决策 · 参数选择 · 跨系统协作 · 异常恢复</p>
+    <h1>从执行记录，看训练是否有效</h1>
+    <p class="intro">各组使用相同任务环境、工具和调用预算。模型选择登记的工具及参数候选；运行层执行并核验。原 4B 日常模型保留。</p>
+    <div id="status" class="status" role="status">正在读取实验状态…</div>
+    <nav aria-label="实验内容"><a href="#comparison">训练对照</a><a href="#command">下达任务</a><a href="#evidence">证据与范围</a></nav>
+    <section id="development" hidden>
+      <h2>开发验证进展</h2>
+      <p id="development-note">用于选择检查点，不作为最终测试成绩。</p>
+      <div class="table-wrap"><table><thead><tr><th>模型</th><th>额外训练步数</th><th>验证任务完成</th><th>完整任务平均回报</th><th>8 题回归</th></tr></thead><tbody id="development-rows"></tbody></table></div>
+    </section>
+    <section id="comparison">
+      <h2>四组对照与继续 SFT 检查</h2>
+      <p>A 固定规则 · B 原始模型 · C SFT · D SFT 后继续 RL。第二轮加入 E 继续 SFT，检查提升是否仅来自额外训练。RL 增量看 D−C，再比较 D−E。</p>
+      <div id="metrics" class="metrics"></div>
+      <div class="table-wrap"><table><thead><tr><th>组别</th><th>完成 / 测试</th><th>任务完成率</th><th>参数尝试正确率</th><th>故障恢复率</th><th>平均步数</th><th>8 题回归</th><th>20 题独立检查</th></tr></thead><tbody id="groups"><tr><td colspan="8">尚未产生四组实测结果，不展示示意分数。</td></tr></tbody></table></div>
+      <div id="figures" class="figures" hidden>
+        <figure><img data-src="/api/harness/agent-rl/figures/four-group-comparison.svg" alt="四组实测任务完成率与各类任务表现"><figcaption>完整刻度；失败样本保留。<a href="/api/harness/agent-rl/figures/four-group-comparison.png" download>下载 PNG</a> · <a href="/api/harness/agent-rl/figures/four-group-comparison.pdf" download>下载 PDF</a></figcaption></figure>
+        <figure><img data-src="/api/harness/agent-rl/figures/training-and-retention.svg" alt="实际训练过程与模型能力回归检查"><figcaption>训练信号与任务成功率分别展示。<a href="/api/harness/agent-rl/figures/training-and-retention.png" download>下载 PNG</a></figcaption></figure>
+        <figure><img data-src="/api/harness/agent-rl/figures/reward-trajectories.svg" data-independent="true" alt="训练代理奖励与完整验证任务奖励曲线"><figcaption>两步模拟回报与完整任务回报分别记录。<a href="/api/harness/agent-rl/figures/reward-trajectories.pdf" download>下载 PDF</a></figcaption></figure>
+        <figure><img data-src="/api/harness/agent-rl/figures/retention-checks.svg" data-independent="true" alt="全部开发检查点的能力回归与20道独立检查题"><figcaption>开发回归用于选择；独立检查在模型选择冻结后执行。有限检查不能证明全面能力保持。<a href="/api/harness/agent-rl/figures/retention-checks.png" download>下载 PNG</a></figcaption></figure>
+      </div>
+    </section>
+    <section id="command">
+      <h2>给实验版小懿下达任务</h2>
+      <p>连接本机港口、能碳和马六甲原系统；训练沙箱分数与这里的真实 API 执行分开记录。</p>
+      <form id="task-form">
+        <label for="goal">任务指令</label><textarea id="goal" rows="5" maxlength="2000" required></textarea>
+        <div class="controls"><label>模型 <select id="group"><option value="D_rl">D · SFT＋RL</option><option value="C_sft">C · 仅 SFT</option><option value="B_base">B · 原始模型</option><option value="E_more_sft" disabled>E · 继续 SFT</option></select></label>
+          <label class="check"><input type="checkbox" id="inject-fault">注入一次读取超时，验证恢复</label>
+          <button id="submit-task" type="submit" disabled>交给小懿执行</button></div>
+      </form>
+      <p id="task-status" role="status">任务尚未开始。</p>
+      <p id="executed-goal" hidden></p>
+      <ol id="trajectory" class="trajectory"></ol>
+      <div id="report-links"></div>
+    </section>
+    <section id="evidence">
+      <h2>如何解释这次实验</h2>
+      <ul><li>训练对象：1.7B 语言模型内部注意力层的 LoRA 参数。并未训练或替换默认 4B。</li>
+        <li>动作范围：13 个明确展示的工具 / 参数候选；不是任意工具或自由参数生成。</li>
+        <li>实验范围：8 类可复位任务；独立测试保留未见参数组合，未宣称未知任务类别泛化。</li>
+        <li>固定规则也可能表现最好。图表如实呈现，不能仅凭使用 RL 宣称优于所有 Harness。</li>
+        <li>真实系统执行仍为公开数据和工程模拟；报告按已核验事实自动编制。</li></ul>
+      <details><summary>实验配置与权重证据</summary><pre id="evidence-json"></pre></details>
+    </section>
+  </main>
+</body></html>

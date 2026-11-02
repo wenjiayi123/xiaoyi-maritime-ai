@@ -1,0 +1,124 @@
+{
+  "schema": "xiaoyi-learning-independent-protocol.v3",
+  "declared_at": "2026-10-30T06:02:36.069135+00:00",
+  "train_ports": [
+    "port1201",
+    "port1114",
+    "port1188",
+    "port664"
+  ],
+  "training_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "validation_year": 2025,
+  "fresh_ports": {
+    "port1160": {
+      "name": "Santos",
+      "ISO3": "BRA"
+    },
+    "port985": {
+      "name": "Le Havre",
+      "ISO3": "FRA"
+    },
+    "port1417": {
+      "name": "Yokohama",
+      "ISO3": "JPN"
+    },
+    "port541": {
+      "name": "Kaohsiung",
+      "ISO3": "TWN"
+    },
+    "port746": {
+      "name": "Salalah",
+      "ISO3": "OMN"
+    },
+    "port395": {
+      "name": "Gioia Tauro",
+      "ISO3": "ITA"
+    },
+    "port79": {
+      "name": "Auckland",
+      "ISO3": "NZL"
+    },
+    "port1045": {
+      "name": "Callao",
+      "ISO3": "PER"
+    }
+  },
+  "test_year": 2026,
+  "test_months": [
+    1,
+    4
+  ],
+  "seeds": [
+    32101,
+    32102,
+    32103,
+    32104,
+    32105
+  ],
+  "fixed_replay_ablation": {
+    "transitions_per_seed_at_least": 12000,
+    "updates": 3000,
+    "batch_size": 64,
+    "conditions": [
+      "reference_td",
+      "td_off",
+      "imitation_off",
+      "gamma_one",
+      "encoder_frozen",
+      "monte_carlo_target",
+      "learning_rate_tenth"
+    ],
+    "constant": "same initialization, optimizer reset, replay, minibatch ordering and update count within seed; target refresh every62updates",
+    "metrics": "2025 four-port validation curves, teacher agreement, paired seed score deltas",
+    "mc_limit": "fixed behavior returns are not optimal-action targets"
+  },
+  "offline_model_based_rl_candidates": {
+    "noise_scale": [
+      0.5,
+      1.0,
+      1.5
+    ],
+    "remaining_horizon_cap": 90,
+    "demand_bins": [
+      0.4,
+      2.0,
+      0.1
+    ],
+    "backlog_grid": [
+      0,
+      12,
+      0.05
+    ],
+    "volatility_bins": [
+      0.05,
+      0.15,
+      0.3,
+      0.5,
+      0.8
+    ],
+    "transition_model": "known proxy queue physics plus empirical normalized forecast-error quantiles from training only; offline stochastic Bellman policy iteration, direct table lookup in test",
+    "baselines": "validation-tuned MPC horizons7/14/28 and robustness0/.5, PID"
+  },
+  "holdout_gate": {
+    "port_cluster_ci95_lower_above_zero": true,
+    "no_mean_port_regression": true,
+    "stress_noninferiority": true,
+    "feasible_window_violations_zero": true
+  },
+  "source": "previously pinned complete IMF PortWatch official CSV; new ports not previously fitted or scored",
+  "assumptions": [
+    "Public indicators, not terminal operational ground truth. 7d/14d availability lags and physical capacity are frozen proxies.",
+    "Ablations are a new controlled fixed-replay study, not exact reproduction of the online v2 trajectory.",
+    "New test ports may provide lagged historical context but no fitting or selection labels.",
+    "All failed candidates retained. Previously viewed12 ports are development/historical only.",
+    "New whole-port holdouts share source vintage and macro shocks; not independent vendor or live-port evidence."
+  ],
+  "production_authority": false
+}

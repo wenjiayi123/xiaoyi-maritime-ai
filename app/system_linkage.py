@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Literal, Optional
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, Request, build_opener
 from uuid import uuid4
 
 from fastapi import APIRouter, HTTPException, Request as WebRequest
@@ -138,7 +138,7 @@ def _local_json(
     timeout: float = 5.0,
 ) -> dict[str, Any]:
     parsed = urlparse(url)
-    if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}:
+    if parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"} or parsed.username or parsed.password:
         raise RuntimeError("联动网关只允许访问登记的本机 HTTP 服务")
     raw_body = (
         json.dumps(payload, ensure_ascii=False).encode("utf-8")
@@ -148,19 +148,36 @@ def _local_json(
     headers = {"Accept": "application/json"}
     if raw_body is not None:
         headers["Content-Type"] = "application/json"
+    for base, token_variable in (
+        (_ENERGY_API, "XIAOYI_ENERGY_API_TOKEN"),
+        (str(linked_system_launcher._TARGETS["port-dt-multi"]["url"]), "XIAOYI_PORT_DT_API_TOKEN"),
+        (str(linked_system_launcher._TARGETS["malacca-sandbox"]["url"]), "XIAOYI_MALACCA_API_TOKEN"),
+    ):
+        if parsed.netloc == urlparse(base).netloc and os.getenv(token_variable):
+            headers["Authorization"] = f"Bearer {os.environ[token_variable]}"
+            break
     request = Request(url, method=method, headers=headers, data=raw_body)
     try:
-        with urlopen(request, timeout=timeout) as response:
-            raw = response.read(2_000_000)
+        with build_opener(_NoRedirect).open(request, timeout=timeout) as response:
+            raw = response.read(2_000_001)
+            if len(raw) > 2_000_000:
+                raise RuntimeError("目标系统返回超出读取上限")
             parsed_body = json.loads(raw)
             if not isinstance(parsed_body, dict):
-                return {"items": parsed_body}
+                raise RuntimeError("目标系统未返回登记的业务对象")
+            if parsed_body.get("ok") is False or parsed_body.get("available") is False:
+                raise RuntimeError("目标系统未返回可用的业务结果")
             return parsed_body
     except HTTPError as exc:
         detail = exc.read(4_000).decode("utf-8", "replace")
         raise RuntimeError(f"目标系统返回 HTTP {exc.code}：{detail[:500]}") from exc
     except (URLError, TimeoutError, OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"目标系统请求失败：{exc}") from exc
+
+
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, *args, **kwargs):
+        raise RuntimeError("登记的本机联动接口不得重定向")
 
 
 def _web_runtime(target: str) -> dict[str, Any]:
@@ -479,6 +496,41 @@ def _execute_target(
         _last_results[target] = result
         return result
 
+    if request.parameters.get("preview_only") is True:
+        runtime = _runtime(target)
+        payload = {
+            "target": target,
+            "runtime_state": runtime.get("state"),
+            "running": bool(runtime.get("running")),
+            "capability_preview": True,
+            "auto_start": False,
+            "downstream_action_executed": False,
+            "production_write_enabled": False,
+        }
+        result = {
+            "trace_id": trace_id,
+            "target": target,
+            "name": runtime.get("name") or target,
+            "status": "completed",
+            "action": "能力登记与运行状态快速核验",
+            "runtime": runtime,
+            "summary": {
+                "preview_only": True,
+                "runtime_state": runtime.get("state"),
+                "running": bool(runtime.get("running")),
+                "adapter_registered": True,
+                "downstream_action_executed": False,
+                "production_write_enabled": False,
+            },
+            "payload_sha256": _sha256(payload),
+            "duration_ms": round((time.monotonic() - started_at) * 1000),
+            "completed_at": _utc_now(),
+            "boundary": "快速演示只核验适配器登记与运行状态；不自动启动目标系统，不执行下游业务动作，不写入生产系统。",
+            "production_write_enabled": False,
+        }
+        _last_results[target] = result
+        return result
+
     runtime = (
         _ensure_running(target, request.wait_seconds)
         if request.auto_start
@@ -532,6 +584,8 @@ def _execute_target(
             timeout=30.0,
         )
         summary = _compact_energy(payload)
+        if not summary["dataset_id"] or not summary["dataset_sha256"] or summary["production_dispatch_enabled"] is not False:
+            raise RuntimeError("能碳试算缺少数据来源或隔离权限证明")
         action = "能碳策略重算"
         boundary = "调用能碳后端执行离线策略重算；数据来自登记数据集，不写入生产调度。"
     elif target == "malacca-sandbox":
@@ -540,6 +594,8 @@ def _execute_target(
         snapshot = _local_json("GET", f"{base_url}/api/public-data/snapshot", timeout=12.0)
         payload = {"health": health, "snapshot": snapshot}
         summary = _compact_malacca(health, snapshot)
+        if health.get("status") != "ok" or health.get("service") != "malacca-reference-rl" or not snapshot.get("scenario") or not snapshot.get("source"):
+            raise RuntimeError("马六甲未返回完整的登记业务快照")
         action = "沙盘数据与RL能力读取"
         boundary = "读取沙盘公开数据快照和RL引擎状态；不启动训练、不提交生产动作。"
     result = {

@@ -135,6 +135,16 @@ def _probe_json_health(health_url: str) -> tuple[LinkedState, str]:
             payload = json.loads(body)
             if not isinstance(payload, dict):
                 return "port_conflict", "目标端口返回了非预期内容，已阻止启动。"
+            expected_services = {
+                "energy-cockpit": "energy-carbon-dispatch-cockpit",
+                "malacca-sandbox": "malacca-reference-rl",
+            }
+            for target, service in expected_services.items():
+                if health_url == str(_TARGETS[target]["health_url"]):
+                    if payload.get("service") != service:
+                        return "port_conflict", "目标端口服务身份与登记系统不符，已阻止复用或重复启动。"
+                    if payload.get("status") not in {"ok", "ready", "healthy"}:
+                        return "offline", "登记服务已响应，但业务健康状态尚未就绪。"
             return "online", "业务健康接口已就绪。"
     except HTTPError as exc:
         if exc.code in {401, 403, 404, 405}:
@@ -158,6 +168,13 @@ def _probe_ui(ui_url: str) -> tuple[LinkedState, str]:
             content_type = str(response.headers.get("Content-Type", "")).lower()
             if "text/html" not in content_type and "<html" not in body and "<!doctype" not in body:
                 return "port_conflict", "前端端口返回了非 HTML 内容，已阻止复用。"
+            expected_titles = {
+                "energy-cockpit": "港口能碳实时模拟与调度优化驾驶舱",
+                "malacca-sandbox": "港航网络韧性数字孪生沙盘推演系统",
+            }
+            for target, title in expected_titles.items():
+                if ui_url == str(_TARGETS[target]["url"]) and f"<title>{title}</title>" not in body:
+                    return "port_conflict", "前端页面身份与登记系统不符，已阻止复用。"
             return "online", "前端页面已就绪。"
     except HTTPError as exc:
         if exc.code in {401, 403, 404, 405}:

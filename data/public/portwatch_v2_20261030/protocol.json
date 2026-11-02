@@ -1,0 +1,78 @@
+{
+  "schema": "xiaoyi-crossport-independent.v2",
+  "train_ports": [
+    "port1201",
+    "port1114",
+    "port1188",
+    "port664"
+  ],
+  "fresh_ports": {
+    "port729": {
+      "name": "Melbourne",
+      "country": "Australia",
+      "ISO3": "AUS"
+    },
+    "port699": {
+      "name": "Manzanillo",
+      "country": "Mexico",
+      "ISO3": "MEX"
+    },
+    "port343": {
+      "name": "Felixstowe",
+      "country": "United Kingdom",
+      "ISO3": "GBR"
+    },
+    "port1350": {
+      "name": "Vancouver",
+      "country": "Canada",
+      "ISO3": "CAN"
+    },
+    "port1348": {
+      "name": "Valencia",
+      "country": "Spain",
+      "ISO3": "ESP"
+    },
+    "port311": {
+      "name": "Durban",
+      "country": "South Africa",
+      "ISO3": "ZAF"
+    },
+    "port1065": {
+      "name": "Busan",
+      "country": "Korea",
+      "ISO3": "KOR"
+    },
+    "port1269": {
+      "name": "Tanjung Pelepas",
+      "country": "Malaysia",
+      "ISO3": "MYS"
+    }
+  },
+  "training_years": [
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "validation_years": [
+    2025
+  ],
+  "fresh_test_year": 2026,
+  "test_quarters": [
+    1,
+    4,
+    7
+  ],
+  "horizon_days": 90,
+  "context_days": 42,
+  "public_lag_days": 7,
+  "controls": "identical five capacity actions, masks, cost and shock assumptions as v1; no diversion secretly added; infeasible episodes reported separately",
+  "baselines": "validation-tuned PID; MPC horizon3 and grid-DP14, candidate interval-robust MPC; fixed maximum capacity",
+  "RL": "fresh five-seed Double DQN with scenario-balanced replay and full terminal cost; MPC imitation warm start separately disclosed; no test-based selection",
+  "forecast": "training-only ridge AR7; validation-only selection plus trailing-history volatility-scaled conformal intervals, no per-test-port label tuning",
+  "statistics": "paired port-cluster bootstrap; validation-selected baseline and algorithm; infeasible capacity shocks remain failed for operational admission",
+  "target": "strictly improve selected MPC with positive lower CI in temporal and whole-port holdouts; no port mean regression; no feasible-window constraint violation; preserve all failures",
+  "production_authority": false
+}

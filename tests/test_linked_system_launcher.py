@@ -1,4 +1,7 @@
 from pathlib import Path
+import json
+
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -7,6 +10,50 @@ from app.main import app
 
 
 client = TestClient(app)
+
+
+class ProbeResponse:
+    status = 200
+    headers = {"Content-Type": "text/html"}
+
+    def __init__(self, body):
+        self.body = body.encode()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+    def read(self, limit):
+        return self.body[:limit]
+
+
+@pytest.mark.parametrize("target,service", [
+    ("energy-cockpit", "energy-carbon-dispatch-cockpit"),
+    ("malacca-sandbox", "malacca-reference-rl"),
+])
+def test_probe_checks_registered_backend_identity(monkeypatch, target, service):
+    url = str(linked_system_launcher._TARGETS[target]["health_url"])
+    reply = {"status": "ok", "service": "unrelated-service"}
+    monkeypatch.setattr(linked_system_launcher, "urlopen", lambda *a, **kw: ProbeResponse(json.dumps(reply)))
+    assert linked_system_launcher._probe_json_health(url)[0] == "port_conflict"
+    reply["service"] = service
+    assert linked_system_launcher._probe_json_health(url)[0] == "online"
+    reply["status"] = "failed"
+    assert linked_system_launcher._probe_json_health(url)[0] == "offline"
+
+
+@pytest.mark.parametrize("target,title", [
+    ("energy-cockpit", "港口能碳实时模拟与调度优化驾驶舱"),
+    ("malacca-sandbox", "港航网络韧性数字孪生沙盘推演系统"),
+])
+def test_probe_rejects_unrelated_html_on_registered_frontend_port(monkeypatch, target, title):
+    url = str(linked_system_launcher._TARGETS[target]["url"])
+    monkeypatch.setattr(linked_system_launcher, "urlopen", lambda *a, **kw: ProbeResponse("<html><title>Other App</title></html>"))
+    assert linked_system_launcher._probe_ui(url)[0] == "port_conflict"
+    monkeypatch.setattr(linked_system_launcher, "urlopen", lambda *a, **kw: ProbeResponse(f"<html><title>{title}</title></html>"))
+    assert linked_system_launcher._probe_ui(url)[0] == "online"
 
 
 def test_energy_readiness_uses_fast_service_health_not_deep_linkage_rollup() -> None:

@@ -1,0 +1,76 @@
+{
+  "schema": "xiaoyi-constrained-rl.v9",
+  "registered_at": "2026-10-31T01:26:04.613073+00:00",
+  "new_ports": [
+    {
+      "id": "port45",
+      "name": "Amsterdam",
+      "country": "The Netherlands"
+    },
+    {
+      "id": "port1069",
+      "name": "Qingdao Port",
+      "country": "China"
+    },
+    {
+      "id": "port1237",
+      "name": "Surabaya",
+      "country": "Indonesia"
+    },
+    {
+      "id": "port458",
+      "name": "Hay Point",
+      "country": "Australia"
+    },
+    {
+      "id": "port370",
+      "name": "Fuzhou",
+      "country": "China"
+    },
+    {
+      "id": "port767",
+      "name": "Morehead City",
+      "country": "United States"
+    },
+    {
+      "id": "port1325",
+      "name": "Tsuruga",
+      "country": "Japan"
+    },
+    {
+      "id": "port4",
+      "name": "Abidjan",
+      "country": "C\u00f4te d'Ivoire"
+    }
+  ],
+  "test_years": [
+    2026
+  ],
+  "test_months": [
+    1,
+    4
+  ],
+  "method": "Safety constraints inside empirical Bellman backups, 90-step trained policy, five inherited port-year block-bootstrap centroids; no test-time MPC fallback. Same external reserve filter retained.",
+  "baseline_pool": [
+    "mean_mpc28",
+    "mean_mpc90",
+    "model.stochastic28",
+    "constrained.stochastic28"
+  ],
+  "selection": "Strongest baseline on frozen 2025 validation by mean normal score, all compared with same reserve filter. Candidate fixed a priori. No retuning on test.",
+  "guard": {
+    "name": "reserve",
+    "sigma": 1.0,
+    "queue_budget": 0.0
+  },
+  "acceptance": {
+    "port_cluster_ci_lower_gt": 0,
+    "no_mean_port_regression": true,
+    "stress_noninferiority": true,
+    "no_feasible_violation": true,
+    "no_excess_max_capacity": true,
+    "positive_gain_max_port_share_le": 0.5
+  },
+  "scope": "Public arrival proxy, local queue assumed, synthetic stress, finite action resource surrogate; no financial/physical port benefit claim.",
+  "production_authority": false
+}
