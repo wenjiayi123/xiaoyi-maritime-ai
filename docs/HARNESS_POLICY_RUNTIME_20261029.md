@@ -66,6 +66,6 @@
 
 ## 2026-11-02 发布依赖修订
 
-上表保留 10 月 29 日实际运行环境。GitHub 发布检查发现旧安装清单中的 Torch 2.5.1 受 [GHSA-53q9-r3pm-6pq6](https://github.com/advisories/GHSA-53q9-r3pm-6pq6) 影响，公开的新安装清单与 bootstrap 改为 Torch 2.6.0+cpu、TorchRL 0.7.2、TensorDict 0.7.2；其余依赖按原锁定记录。原完整 freeze 及摘要保留在 `reports/publication_20261102/policy-runtime-dependency-migration.json`。
+上表保留 10 月 29 日实际运行环境。GitHub 发布检查发现旧安装清单中的 Torch 2.5.1 受 [GHSA-53q9-r3pm-6pq6](https://github.com/advisories/GHSA-53q9-r3pm-6pq6) 影响，公开的新安装清单与 bootstrap 改为 Torch 2.6.0+cpu、TorchRL 0.7.2、TensorDict 0.7.2、Lightning 2.6.6（同时修复 [GHSA-qqmf-gpg7-g8gw](https://github.com/advisories/GHSA-qqmf-gpg7-g8gw)）；其余依赖按原锁定记录。原完整 freeze 及摘要保留在 `reports/publication_20261102/policy-runtime-dependency-migration.json`。
 
 这只修复本次阻断发布的 critical 依赖问题，不表示消除所有中低风险上游通告。已运行的本机 VM、旧策略权重和语言模型 RL 冻结实验均未修改；升级环境的兼容检查不替代重新训练或性能对照。

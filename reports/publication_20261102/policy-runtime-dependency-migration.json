@@ -1,6 +1,6 @@
 {
   "scope": "Optional isolated Linux transport-policy runtime, distinct from the 1.7B language-model RL experiment. Existing VM and frozen RL evidence unchanged.",
-  "reason": "GHSA-53q9-r3pm-6pq6: torch <2.6.0 critical checkpoint deserialization vulnerability",
+  "reason": "GHSA-53q9-r3pm-6pq6: torch <2.6.0 critical checkpoint deserialization vulnerability; Lightning <2.6.6 high checkpoint-instantiator vulnerability",
   "advisory_url": "https://github.com/advisories/GHSA-53q9-r3pm-6pq6",
   "old_freeze_sha256": "79447c5cbd3fb3c645295e1d85dbf551eb77faf714c1826363f20e0ef6b00f8d",
   "old_freeze": [
@@ -128,7 +128,8 @@
   "updated_pins": {
     "torch": "2.6.0+cpu",
     "torchrl": "0.7.2",
-    "tensordict": "0.7.2"
+    "tensordict": "0.7.2",
+    "lightning": "2.6.6"
   },
   "limitations": "This fixes the critical dependency-review finding, not every lower-severity upstream advisory or a production security certification.",
   "compatibility_check": {
@@ -145,5 +146,21 @@
       "PARCOPolicy"
     ],
     "passed": true
-  }
+  },
+  "additional_advisory": "https://github.com/advisories/GHSA-qqmf-gpg7-g8gw",
+  "inference_probe": {
+    "routefinder": {
+      "jobs": 10,
+      "feasible": true
+    },
+    "parco": {
+      "jobs": 10,
+      "feasible": false,
+      "violations": [
+        "refill_not_allowed"
+      ]
+    },
+    "interpretation": "Inference compatibility checked; the independent validator rejected the PARCO sample. Not a new performance benchmark or promotion."
+  },
+  "direct_dependency_audit": "policy-direct-dependency-audit.json"
 }
