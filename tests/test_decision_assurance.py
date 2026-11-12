@@ -39,7 +39,7 @@ def _evidence(
 
 def _response(evidence: list[Evidence]) -> ChatResponse:
     return ChatResponse(
-        app="小懿",
+        app="舷鸥",
         mode="expert",
         intent="policy",
         question="该规则是否生效？",
@@ -122,7 +122,7 @@ def test_failed_citation_integrity_blocks_decision_chain() -> None:
 
 def test_internal_sop_control_action_requires_site_confirmation() -> None:
     response = ChatResponse(
-        app="小懿",
+        app="舷鸥",
         mode="sop",
         intent="sop",
         question="岸电 THDi 超标怎么办？",

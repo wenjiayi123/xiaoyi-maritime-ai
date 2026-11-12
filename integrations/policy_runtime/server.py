@@ -21,7 +21,7 @@ from action_codec import parco_stops
 
 torch.set_num_threads(2)
 torch.set_num_interop_threads(1)
-app = FastAPI(title="Xiaoyi isolated open transport policy runtime", version="1")
+app = FastAPI(title="GullMate isolated open transport policy runtime", version="1")
 LOCK = threading.Lock()
 MODELS = {}
 SOURCE_SHA256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()

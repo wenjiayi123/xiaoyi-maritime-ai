@@ -1,13 +1,21 @@
 from datetime import date
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+from app.offer_comparison import OfferSheet
+from app.exercise_records import ExerciseRecord, applicable, from_command
+from app.shore_history import ShoreCase, command as shore_command, command_change
 
 
 Mode = Literal["expert", "ops", "sop", "brief"]
 
 
 class ChatRequest(BaseModel):
+    offer_sheet: OfferSheet | None = None
+    exercise_record: ExerciseRecord | None = None
+    shore_case: ShoreCase | None = None
+    shore_change: str | None = Field(None,min_length=2,max_length=1000)
     question: str = Field(..., min_length=2, max_length=2000, description="用户问题")
     mode: Mode = Field("expert", description="回答模式")
     top_k: int = Field(5, ge=1, le=10, description="检索证据数量")
@@ -31,6 +39,38 @@ class ChatRequest(BaseModel):
         pattern=r"^[A-Za-z0-9._:-]+$",
         description="持久对话会话标识；生产环境按认证主体隔离",
     )
+
+
+    @model_validator(mode="after")
+    def validate_exercise(self):
+        command=from_command(self.question)
+        if self.exercise_record and self.exercise_record.kind=="general":
+            inferred=command.kind if command else applicable(self.exercise_record.facts,self.question)
+            if inferred=="berth_clock":
+                self.exercise_record=self.exercise_record.model_copy(update={"kind":inferred})
+        shore=shore_command(self.question)
+        amendment=command_change(self.question)
+        if amendment:
+            if self.shore_change is not None and self.shore_change!=amendment:raise ValueError("两处变更说明不一致")
+            self.shore_change=amendment
+        if shore:
+            if self.shore_case and self.shore_case!=shore:
+                raise ValueError("命令与结构化岸电历史资料不一致")
+            self.shore_case=shore
+        if self.shore_change is not None and self.shore_case is None:
+            raise ValueError("解读岸电历史变更需要明确的基础事实")
+        if command:
+            if self.exercise_record and self.exercise_record!=command:
+                raise ValueError("聊天命令与单独提交的演练记录不一致")
+            self.exercise_record=command
+        if self.shore_case and (self.offer_sheet is not None or self.exercise_record is not None):
+            raise ValueError("岸电历史资料、报价单和通用演练须分别提交")
+        if self.exercise_record:
+            if self.offer_sheet is not None:
+                raise ValueError("演练记录与报价单须分别提交")
+            if not command and (applicable(self.exercise_record.facts, self.question) or "general") != self.exercise_record.kind:
+                raise ValueError("问题、演练记录与所选核验类型不一致")
+        return self
 
 
 class DemoTriadRequest(BaseModel):
@@ -183,6 +223,10 @@ class AnswerTiming(BaseModel):
 
 
 class ChatResponse(BaseModel):
+    shore_history_receipt: dict | None = None
+    exercise_receipt: dict | None = None
+    offer_comparison: dict | None = None
+    policy_comparison: dict | None = None
     app: str
     mode: Mode
     intent: str

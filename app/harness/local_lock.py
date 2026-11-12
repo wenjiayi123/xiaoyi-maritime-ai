@@ -1,7 +1,10 @@
 """OS releases this local executor lease on process exit, including a crash."""
 from __future__ import annotations
 
-import fcntl
+try:
+    import fcntl
+except ImportError:  # Windows
+    from app import windows_flock as fcntl
 
 from app.harness.store import Conflict
 

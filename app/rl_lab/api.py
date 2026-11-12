@@ -11,9 +11,18 @@ from app.rl_lab.algorithms import ALL_ALGORITHM_IDS, algorithm_catalog
 from app.rl_lab.contracts import environment_contract, environment_contract_catalog
 from app.rl_lab.datasets import DatasetError, dataset_catalog
 from app.rl_lab.service import RunConflict, RunNotFound, rl_lab_service
+from app.policy_release import PolicySelection, ReleaseUnavailable, compare
 
 
 router = APIRouter(prefix="/api/rl-lab", tags=["可复现RL训练实验室"])
+
+
+@router.post("/policy-comparison")
+def compare_trained_policy(selection: PolicySelection) -> dict:
+    try:
+        return compare(selection)
+    except ReleaseUnavailable as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 class TrainRunRequest(BaseModel):
@@ -70,7 +79,7 @@ def _evidence_report() -> dict[str, Any]:
     return {
         "status": "available",
         "report": report,
-        "report_path": str(path.relative_to(path.parents[1])),
+        "report_path": path.relative_to(path.parents[1]).as_posix(),
         "notice": report.get("scope_notice"),
     }
 
@@ -265,6 +274,31 @@ def get_training_run(run_id: str) -> dict[str, object]:
         return rl_lab_service.get_run(run_id)
     except RunNotFound as exc:
         raise HTTPException(status_code=404, detail=f"unknown run_id: {run_id}") from exc
+
+
+class RetryTrainingRequest(BaseModel):
+    expected_attempt: int = Field(ge=0)
+
+
+@router.get("/runs/{run_id}/test-result")
+def stored_test_result(run_id: str) -> dict[str, object]:
+    try:
+        return rl_lab_service.read_test_result(run_id)
+    except RunNotFound as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except RunConflict as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/runs/{run_id}/retry", status_code=202)
+def retry_training(run_id: str, request: RetryTrainingRequest) -> dict[str, object]:
+    try:
+        return rl_lab_service.retry_run(run_id, request.expected_attempt)
+    except RunNotFound as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (RunConflict, DatasetError, OSError) as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
 
 
 @router.post("/runs/{run_id}/cancel", status_code=202)

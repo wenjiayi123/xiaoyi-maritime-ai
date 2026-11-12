@@ -9,35 +9,35 @@
       script:"逐个场景核对实际训练算法、数据集名称与记录数、State状态、Reward奖励、Action动作和输出。每张卡保留训练记录、来源文件与SHA-256；真实观测、派生量、模拟状态和未准入候选分别注明。" },
     {
       phase:"01 系统开场", title:"系统价值与安全边界", label:"查看系统状态", selector:'[data-action="system-status"]',
-      script:"这套小懿AI把证据问答、数据治理、强化学习和跨系统编排接成一条可审计链。先看运行边界：本机应用可用不等于现场系统在线，当前保持推荐模式，生产写入和调度权限关闭。"
+      script:"这套舷鸥 · GullMate把证据问答、数据治理、强化学习和跨系统编排接成一条可审计链。先看运行边界：本机应用可用不等于现场系统在线，当前保持推荐模式，生产写入和调度权限关闭。"
     },
     {
-      phase:"01 小懿对话", title:"填入一般知识问题", label:"填入一般问题", selector:'[data-chat-demo-prompt="general"]', closeSurface:true, waitSelector:'#question[data-demo-chat-category="general"]',
+      phase:"01 舷鸥对话", title:"填入一般知识问题", label:"填入一般问题", selector:'[data-chat-demo-prompt="general"]', closeSurface:true, waitSelector:'#question[data-demo-chat-category="general"]',
       script:"先演示一般问答。我点击蓝色模板，只把问题真实填进下方输入框；此时还没有答案，观众能看清我准备问的是TOS与PCS的职责及协同关系。"
     },
     {
-      phase:"01 小懿对话", title:"发送并等待一般回答", label:"发送一般问题", selector:'html[data-demo-chat-category="general"] #askBtn', context:'[data-chat-demo-prompt="general"]', waitSelector:'#assistantMessage[data-demo-chat-category="general"][data-demo-chat-complete="true"]', timeoutMs:240000,
-      script:"现在点击页面原有的发送键。小懿会依次显示理解意图、检索知识、组织回答和证据校验，蓝色回答强调概念解释、职责边界与来源依据；回答完成后我再进入下一题。"
+      phase:"01 舷鸥对话", title:"发送并等待一般回答", label:"发送一般问题", selector:'html[data-demo-chat-category="general"] #askBtn', context:'[data-chat-demo-prompt="general"]', waitSelector:'#assistantMessage[data-demo-chat-category="general"][data-demo-chat-complete="true"]', timeoutMs:240000,
+      script:"现在点击页面原有的发送键。舷鸥会依次显示理解意图、检索知识、组织回答和证据校验，蓝色回答强调概念解释、职责边界与来源依据；回答完成后我再进入下一题。"
     },
     {
-      phase:"01 小懿对话", title:"填入日常运营问题", label:"填入日常问题", selector:'[data-chat-demo-prompt="daily"]', waitSelector:'#question[data-demo-chat-category="daily"]',
-      script:"第二轮是日常运营问答。我把岸桥单位作业能耗偏高的问题填入同一个输入框，让小懿从值班人员的实际工作顺序来回答。"
+      phase:"01 舷鸥对话", title:"填入日常运营问题", label:"填入日常问题", selector:'[data-chat-demo-prompt="daily"]', waitSelector:'#question[data-demo-chat-category="daily"]',
+      script:"第二轮是日常运营问答。我把岸桥单位作业能耗偏高的问题填入同一个输入框，让舷鸥从值班人员的实际工作顺序来回答。"
     },
     {
-      phase:"01 小懿对话", title:"发送并等待日常回答", label:"发送日常问题", selector:'html[data-demo-chat-category="daily"] #askBtn', context:'[data-chat-demo-prompt="daily"]', waitSelector:'#assistantMessage[data-demo-chat-category="daily"][data-demo-chat-complete="true"]', timeoutMs:240000,
-      script:"这次仍走真实问答链路。绿色回答不只解释概念，而是给出现象判断、排查先后、岗位交接和复核动作，展示小懿对日常运营工作的可执行支持。"
+      phase:"01 舷鸥对话", title:"发送并等待日常回答", label:"发送日常问题", selector:'html[data-demo-chat-category="daily"] #askBtn', context:'[data-chat-demo-prompt="daily"]', waitSelector:'#assistantMessage[data-demo-chat-category="daily"][data-demo-chat-complete="true"]', timeoutMs:240000,
+      script:"这次仍走真实问答链路。绿色回答不只解释概念，而是给出现象判断、排查先后、岗位交接和复核动作，展示舷鸥对日常运营工作的可执行支持。"
     },
     {
-      phase:"01 小懿对话", title:"填入紧急处置问题", label:"填入紧急问题", selector:'[data-chat-demo-prompt="emergency"]', waitSelector:'#question[data-demo-chat-category="emergency"]',
-      script:"第三轮是紧急问答。我把冷藏箱区域冒烟的问题填入输入框，现场演示同一个小懿如何切换到应急SOP表达，而不是展示预先排好的静态卡片。"
+      phase:"01 舷鸥对话", title:"填入紧急处置问题", label:"填入紧急问题", selector:'[data-chat-demo-prompt="emergency"]', waitSelector:'#question[data-demo-chat-category="emergency"]',
+      script:"第三轮是紧急问答。我把冷藏箱区域冒烟的问题填入输入框，现场演示同一个舷鸥如何切换到应急SOP表达，而不是展示预先排好的静态卡片。"
     },
     {
-      phase:"01 小懿对话", title:"发送并等待紧急回答", label:"发送紧急问题", selector:'html[data-demo-chat-category="emergency"] #askBtn', context:'[data-chat-demo-prompt="emergency"]', waitSelector:'#assistantMessage[data-demo-chat-category="emergency"][data-demo-chat-complete="true"]', timeoutMs:240000,
+      phase:"01 舷鸥对话", title:"发送并等待紧急回答", label:"发送紧急问题", selector:'html[data-demo-chat-category="emergency"] #askBtn', context:'[data-chat-demo-prompt="emergency"]', waitSelector:'#assistantMessage[data-demo-chat-category="emergency"][data-demo-chat-complete="true"]', timeoutMs:240000,
       script:"红色回答会优先给出停止危险作业、人员隔离、报警通报和禁止盲目处置等动作，再补充恢复门禁与审计要求。三轮都是逐题输入、逐题等待、逐题形成真实对话记录。"
     },
     {
       phase:"01 证据底座", title:"进入港航知识库", label:"打开知识库", selector:'.top-nav [data-view-target="knowledge"]', closeSurface:true,
-      script:"小懿不是只靠大模型生成答案，而是先检索登记过的港航知识，再把结论和证据对应起来（先找依据，再组织回答）。"
+      script:"舷鸥不是只靠大模型生成答案，而是先检索登记过的港航知识，再把结论和证据对应起来（先找依据，再组织回答）。"
     },
     {
       phase:"01 证据底座", title:"核验官方来源", label:"查看来源审计", selector:'[data-action="knowledge-sources"]', context:'.top-nav [data-view-target="knowledge"]',
@@ -64,44 +64,44 @@
       script:"这里看的是已保存的正式训练证据：多数据集、多种子、验证集选模、保留测试和失败候选都被保留。系统展示区间和准入结果，不把一次高分包装成生产收益。"
     },
     {
-      phase:"03 小懿联动", title:"让小懿解释训练证据", label:"询问小懿训练顾问", selector:'[data-rl-advisor-prompt*="公开数据有多少行"]', waitSelector:'.rl-advisor-message.assistant:last-child small', timeoutMs:25000, context:'.top-nav [data-view-target="rl"]', closeSurface:true,
-      script:"我可以直接问小懿哪套数据更可信。它只根据当前数据目录、环境契约、运行记录和证据回答（不是凭宣传语补数字）。"
+      phase:"03 舷鸥联动", title:"让舷鸥解释训练证据", label:"询问舷鸥训练顾问", selector:'[data-rl-advisor-prompt*="公开数据有多少行"]', waitSelector:'.rl-advisor-message.assistant:last-child small', timeoutMs:25000, context:'.top-nav [data-view-target="rl"]', closeSurface:true,
+      script:"我可以直接问舷鸥哪套数据更可信。它只根据当前数据目录、环境契约、运行记录和证据回答（不是凭宣传语补数字）。"
     },
     {
-      phase:"03 小懿联动", title:"打开智能联动中心", label:"进入智能联动中心", selector:'#intelligenceHubBtn',
+      phase:"03 舷鸥联动", title:"打开智能联动中心", label:"进入智能联动中心", selector:'#intelligenceHubBtn',
       script:"联动中心把自然语言意图转换为白名单能力计划，并分层展示知识证据、业务系统结果、推演结果和交接入口；默认只做dry-run（安全预览）。"
     },
     {
-      phase:"03 小懿联动", title:"自然语言跨系统编排", label:"开始安全编排", selector:'#genericModal [data-action="hub-run-demo"]', waitSelector:'#hubOrchestrationResult .hub-run-summary', timeoutMs:30000, context:'#intelligenceHubBtn',
+      phase:"03 舷鸥联动", title:"自然语言跨系统编排", label:"开始安全编排", selector:'#genericModal [data-action="hub-run-demo"]', waitSelector:'#hubOrchestrationResult .hub-run-summary', timeoutMs:30000, context:'#intelligenceHubBtn',
       script:"这条指令会识别港口、泊位和时间范围，选择可用能力并生成可审计步骤。此处只规划和解释，不自动改变其他系统。"
     },
     {
-      phase:"03 小懿联动", title:"查看四系统交接回执", label:"打开四系统回执", selector:'#genericModal [data-action="system-linkage"]', context:'#intelligenceHubBtn',
-      script:"小懿把数字孪生、能碳驾驶舱、马六甲沙盘和航行模拟器统一成回执入口。每个系统仍保留自己的业务逻辑、权限和失败状态，小懿只负责安全编排与交接。"
+      phase:"03 舷鸥联动", title:"查看四系统交接回执", label:"打开四系统回执", selector:'#genericModal [data-action="system-linkage"]', context:'#intelligenceHubBtn',
+      script:"舷鸥把数字孪生、能碳驾驶舱、马六甲沙盘和航行模拟器统一成回执入口。每个系统仍保留自己的业务逻辑、权限和失败状态，舷鸥只负责安全编排与交接。"
     },
     {
       phase:"03 跨系统闭环", title:"启动并确认能碳系统在线", label:"启动能碳系统", selector:'#genericModal [data-linkage-start="energy-cockpit"]', context:'#systemLaunchHubBtn', waitSelector:'[data-system-linkage-card="energy-cockpit"].online', timeoutMs:60000,
-      script:"现在只启动本次需要的能碳驾驶舱，而不是一次拉起所有大系统。启动后小懿会先确认目标本机接口在线，再允许下一步业务试算。"
+      script:"现在只启动本次需要的能碳驾驶舱，而不是一次拉起所有大系统。启动后舷鸥会先确认目标本机接口在线，再允许下一步业务试算。"
     },
     {
       phase:"03 跨系统闭环", title:"打开八项能力实操矩阵", label:"打开八项能力矩阵", selector:'#genericModal [data-action="linked-agent"]', context:'#systemLaunchHubBtn',
-      script:"这里不是一句‘小懿有八项能力’，而是八个可点击的真实白名单动作：数字孪生2项、能碳2项、马六甲3项、航行隔离核验1项。每项都写明目标系统、参数边界和是否会改变模拟状态。"
+      script:"这里不是一句‘舷鸥有八项能力’，而是八个可点击的真实白名单动作：数字孪生2项、能碳2项、马六甲3项、航行隔离核验1项。每项都写明目标系统、参数边界和是否会改变模拟状态。"
     },
     {
       phase:"03 跨系统闭环", title:"核验八项能力接口状态", label:"八项能力联动体检", selector:'#genericModal [data-la-check-capabilities]', contextChain:['#systemLaunchHubBtn','#genericModal [data-action="linked-agent"]'], waitSelector:'#genericModal [data-la-capability-audit="complete"]', timeoutMs:10000,
-      script:"我现在一次读取四个目标的真实接口状态。八张能力卡会同步标出在线、离线或隔离核验；这一步只做快速体检，不启动大系统、不执行写操作，现场几秒内就能说明小懿到底能联动什么。"
+      script:"我现在一次读取四个目标的真实接口状态。八张能力卡会同步标出在线、离线或隔离核验；这一步只做快速体检，不启动大系统、不执行写操作，现场几秒内就能说明舷鸥到底能联动什么。"
     },
     {
-      phase:"03 跨系统闭环", title:"让小懿执行能碳参数对比", label:"一键执行能碳试算", selector:'#genericModal [data-la-demo-energy]', contextChain:['#systemLaunchHubBtn','#genericModal [data-action="linked-agent"]'], waitSelector:'#genericModal [data-la-status="completed"][data-la-action="energy.compare"]', timeoutMs:30000,
-      script:"这一步是真正的跨系统操作：小懿读取能碳当前状态，在同一公开数据集上对比绿色偏好 0.50 和 0.82、试算碳价 100，并回写成本、减排、数据哈希和 trace ID。它不改变生产参数。"
+      phase:"03 跨系统闭环", title:"让舷鸥执行能碳参数对比", label:"一键执行能碳试算", selector:'#genericModal [data-la-demo-energy]', contextChain:['#systemLaunchHubBtn','#genericModal [data-action="linked-agent"]'], waitSelector:'#genericModal [data-la-status="completed"][data-la-action="energy.compare"]', timeoutMs:30000,
+      script:"这一步是真正的跨系统操作：舷鸥读取能碳当前状态，在同一公开数据集上对比绿色偏好 0.50 和 0.82、试算碳价 100，并回写成本、减排、数据哈希和 trace ID。它不改变生产参数。"
     },
     {
       phase:"03 跨系统闭环", title:"进入目标系统RL训练配置", label:"打开能碳 RL 配置", selector:'#genericModal [data-la-open-rl="energy-cockpit"]', contextChain:['#systemLaunchHubBtn','#genericModal [data-action="linked-agent"]'],
-      script:"从小懿直接打开能碳驾驶舱原生RL训练配置。目标页面会同时展开数据集、算法、State、Action、Reward和训练参数；顶部的双向任务链可把配置结果再回传小懿。"
+      script:"从舷鸥直接打开能碳驾驶舱原生RL训练配置。目标页面会同时展开数据集、算法、State、Action、Reward和训练参数；顶部的双向任务链可把配置结果再回传舷鸥。"
     },
     {
-      phase:"03 跨系统闭环", title:"核验小懿·能碳双向回执", label:"完成闭环核验", selector:'#genericModal [data-action="ack-roundtrip-receipt"]',
-      script:"能碳系统已把业务目标、数据集、当前策略、安全边界和 trace ID 回传小懿。这才是最关键的联动能力：自然语言下发目标，目标系统原生处理，再把可审计证据带回；生产写入始终关闭。"
+      phase:"03 跨系统闭环", title:"核验舷鸥·能碳双向回执", label:"完成闭环核验", selector:'#genericModal [data-action="ack-roundtrip-receipt"]',
+      script:"能碳系统已把业务目标、数据集、当前策略、安全边界和 trace ID 回传舷鸥。这才是最关键的联动能力：自然语言下发目标，目标系统原生处理，再把可审计证据带回；生产写入始终关闭。"
     },
     {"phase": "04 Harness核心", "title": "Harness任务工作台", "label": "打开任务工作台", "selector": "#harnessConsoleBtn", "script": "Harness将任务目标、预算、真实工具调用、检查点和证据绑定到同一任务编号，关闭界面后任务仍可恢复。", "closeSurface": true, "waitSelector": "#harnessConsole [data-hx-capabilities] p"},
     {"phase": "04 Harness核心", "title": "同一快照的多工具业务任务", "label": "填入联合研判任务", "selector": "[data-hx=\"briefing-preset\"]", "script": "明确选择规则驱动，演示同一快照的问数、风险、情景比较和交接草稿。后面再单独展示真实4B模型调用工具，二者分别记账。", "waitSelector": "#harnessConsole[data-hx-preset=\"port-briefing\"]"},
@@ -125,7 +125,7 @@
     {"phase": "05 核心实证", "title": "DCSA协同异常演练", "label": "核验DCSA协同异常演练", "selector": "[data-pf=\"run\"][data-kind=\"standards\"]", "script": "核对原始来源、冻结协议、检查项和失败原因。动作执行通过不等于研究收益、现场验收或标准认证通过。", "timeoutMs": 120000, "waitSelector": "[data-pf-kind=\"standards\"][data-pf-status=\"completed\"][data-pf-integrity=\"true\"]"},
     {"phase": "05 核心实证", "title": "导出完整核心实证包", "label": "导出实证证据包", "selector": "[data-pf=\"export\"]", "script": "导出本次实际动作、模型工具记录和未完成项，原有训练证据继续独立保留。", "waitSelector": "#proofConsole[data-pf-exported=\"true\"]"},
     {"phase": "06 上海港联动", "title": "上海港统一联动入口", "label": "打开上海港试验", "selector": "#shanghaiLabBtn", "script": "将上海港公开活动数据和气象统一绑定到同一试验。补足的资源与工单明确标记为工程假设，不能称为实港生产验证。", "closeSurface": true, "waitSelector": "#run:not(:disabled)", "waitFrame":"#shanghaiLabFrame"},
-    {"phase": "06 上海港联动", "title": "执行上海统一作业链", "label": "运行联合试验", "selector": "#run", "script": "同一输入依次执行马六甲排程、能碳守恒、Port执行读回与恢复，再生成小懿核验简报。查看成本、碳排和服务约束的真实取舍。", "frame": "#shanghaiLabFrame", "timeoutMs": 90000, "waitSelector": "#metrics .metric"},
+    {"phase": "06 上海港联动", "title": "执行上海统一作业链", "label": "运行联合试验", "selector": "#run", "script": "同一输入依次执行马六甲排程、能碳守恒、Port执行读回与恢复，再生成舷鸥核验简报。查看成本、碳排和服务约束的真实取舍。", "frame": "#shanghaiLabFrame", "timeoutMs": 90000, "waitSelector": "#metrics .metric"},
     {"phase": "06 上海港联动", "title": "导出上海统一联动证据", "label": "导出上海试验证据", "selector": "#export", "script": "保留试验编号、输入与实现摘要、各系统回执和签收状态。移动端签收必须实际完成才算闭环，未签收会保留待办。", "frame": "#shanghaiLabFrame"},
     {"phase": "07 最新独立证据", "title": "打开V9专项实证", "label": "打开V9专项实证", "selector": "[data-action=\"priority-v9\"]", "script": "现场重算与冻结历史证据分别展示。保留全部门槛、强基线、未通过单元和来源；研究回放不代表现场准入。", "context": "#proofConsoleBtn", "closeSurface": true, "waitSelector": "#export:not(:disabled)", "waitFrame":"#researchReviewFrame"},
     {"phase": "07 最新独立证据", "title": "因果重算活动预测", "label": "因果重算活动预测", "selector": "#run-forecast", "script": "现场重算与冻结历史证据分别展示。保留全部门槛、强基线、未通过单元和来源；研究回放不代表现场准入。", "frame": "#researchReviewFrame", "timeoutMs": 60000, "waitSelector": "#forecast-result h3"},
@@ -207,7 +207,7 @@
     }).join("");
     nodes.title.textContent = complete ? `本次演示结束 · ${completed.size}/${steps.length}步已执行` : step.title;
     nodes.script.textContent = complete
-      ? "小懿已经完成官方来源、原有训练证据、Harness任务、核心实证与上海统一联动的展示。当前结论仍限定在公开数据、离线训练和本机回执，生产授权保持关闭。"
+      ? "舷鸥已经完成官方来源、原有训练证据、Harness任务、核心实证与上海统一联动的展示。当前结论仍限定在公开数据、离线训练和本机回执，生产授权保持关闭。"
       : step.script;
     nodes.primary.textContent = complete ? "↻ 重新开始演示" : stepExecuted ? "▶ 下一步并演示" : `▶ ${step.label}`;
     nodes.primary.disabled = false;

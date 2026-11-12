@@ -2,7 +2,7 @@
 (function(){
   'use strict';
   const specs={
-    xiaoyi:{name:'小懿 AI',snapshot:'/api/runtime/snapshot',contract:'/api/port-simulator/contract',mode:'公开数据校准实时模拟',
+    xiaoyi:{name:'舷鸥 · GullMate',snapshot:'/api/runtime/snapshot',contract:'/api/port-simulator/contract',mode:'公开数据校准实时模拟',
       replacement:'XIAOYI_PORT_DATA_MODE=live；XIAOYI_PORT_BASE_URL / XIAOYI_PORT_API_TOKEN / 允许主机配置。站点适配器保留port-ops.v1与port-realtime.v1。',
       pending:['现场TOS / AIS / EMS与实际设备、告警','现场计量校准和独立运营验收','真实船舶身份、实际ETA和生产任务回执','模型权重与知识来源继续独立校验']},
     energy:{name:'港口能碳驾驶舱',snapshot:'/api/runtime/snapshot',contract:'/api/runtime/contract',mode:'洛杉矶公开数据标定工程模拟',
@@ -20,7 +20,7 @@
     if(!s||!c||typeof s!=='object'||typeof c!=='object')throw new Error('源响应不是数据对象');
     let groups=[],fields=[],sources=[],clock,site,readouts=[],quality;
     if(kind==='xiaoyi'){
-      if(!s.simulation||!s.metadata||!Array.isArray(c.domains))throw new Error('小懿遥测/合同不匹配');
+      if(!s.simulation||!s.metadata||!Array.isArray(c.domains))throw new Error('舷鸥遥测/合同不匹配');
       const records={port_call:s.port_calls,ais_vts:s.ais_tracks,berth_marine_services:s.berths,equipment:s.equipment_assets,
         yard_inventory:s.yard_blocks,gate_intermodal:s.gates,energy_carbon:[s.energy],weather_tide:[s.weather_tide],safety_maintenance:s.alerts,governance:[{...s.simulation,...s.quality,...s.metadata,...s.governance}]};
       groups=c.domains.map(d=>{const rows=(records[d.id]||[]).filter(Boolean);let complete=0,nonempty=0;const missing=[];

@@ -13,7 +13,7 @@ from app.settings import Settings  # noqa: E402
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="签发小懿AI生产Bearer访问令牌")
+    parser = argparse.ArgumentParser(description="签发舷鸥 · GullMate生产Bearer访问令牌")
     parser.add_argument("--actor", required=True, help="稳定的操作员或服务账号标识")
     parser.add_argument("--role", choices=["viewer", "analyst", "operator", "admin"], required=True)
     parser.add_argument("--minutes", type=int, default=60, help="有效分钟数")

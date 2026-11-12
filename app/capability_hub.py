@@ -17,7 +17,7 @@ from app.runtime_store import runtime_store
 from app.security import bind_claimed_identity
 
 
-router = APIRouter(prefix="/api/hub", tags=["小懿跨系统能力中枢"])
+router = APIRouter(prefix="/api/hub", tags=["舷鸥跨系统能力中枢"])
 
 SystemMode = Literal["offline", "demo", "live"]
 RiskLevel = Literal["low", "medium", "high"]
@@ -96,7 +96,7 @@ _SYSTEM_SPECS = (
         "role": "能耗、碳排、岸电与MARL业务决策表达", "prefix": "ENERGY_COCKPIT", "default_url": "http://127.0.0.1:8808",
         "health": "/api/linkage/health", "ui": "http://127.0.0.1:5173/",
         "capabilities": (
-            ("energy_linkage_health", "能碳联动状态", "Energy Linkage Health", "读取训练、仿真、航行和小懿联动状态", "GET", "/api/linkage/health", []),
+            ("energy_linkage_health", "能碳联动状态", "Energy Linkage Health", "读取训练、仿真、航行和舷鸥联动状态", "GET", "/api/linkage/health", []),
             ("energy_training_status", "能碳策略训练状态", "Energy Policy Training", "读取MARL长时训练进度和剩余时间", "GET", "/api/rl/train/status", []),
             ("open_energy_cockpit", "打开能碳驾驶舱", "Open Energy Cockpit", "跳转到能碳业务驾驶舱", "NAVIGATE", "/", []),
         ),
@@ -107,7 +107,7 @@ _SYSTEM_SPECS = (
         "health": "/api/rl/health", "ui": "http://127.0.0.1:5174/",
         "capabilities": (
             ("open_malacca_sandbox", "打开马六甲推演", "Open Malacca Sandbox", "跳转到场景推演和策略测试工作台", "NAVIGATE", "/", []),
-            ("malacca_policy_test", "策略测试交接", "Policy Test Handoff", "生成策略测试所需上下文并交接到沙盘，不在小懿内重复执行", "NAVIGATE", "/", ["scenario_id", "policy_id"]),
+            ("malacca_policy_test", "策略测试交接", "Policy Test Handoff", "生成策略测试所需上下文并交接到沙盘，不在舷鸥内重复执行", "NAVIGATE", "/", ["scenario_id", "policy_id"]),
         ),
     },
     {
@@ -201,12 +201,12 @@ def invoke_capability(capability_id: str, payload: CapabilityInvokeRequest) -> C
     if capability.method == "NAVIGATE":
         status = "handoff_ready"
         data["handoff_url"] = system.ui_url
-        notice = "已生成原系统深度跳转，不在小懿内复制其业务功能。"
+        notice = "已生成原系统深度跳转，不在舷鸥内复制其业务功能。"
     elif not payload.dry_run:
         if system.mode != "live":
             raise HTTPException(status_code=409, detail="只有显式配置为 live 的系统才能执行真实只读调用")
         if capability.method != "GET":
-            raise HTTPException(status_code=403, detail="小懿跨系统中枢当前仅允许真实 GET 只读调用")
+            raise HTTPException(status_code=403, detail="舷鸥跨系统中枢当前仅允许真实 GET 只读调用")
         if not source_url:
             raise HTTPException(status_code=409, detail="目标系统未配置基础地址")
         try:

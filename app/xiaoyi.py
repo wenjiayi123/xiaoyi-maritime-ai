@@ -5,10 +5,11 @@ import re
 from dataclasses import replace
 from datetime import date
 
-from app.config import APP_NAME, KNOWLEDGE_CATALOG_PATH
+from app.config import APP_NAME, GREETING, KNOWLEDGE_CATALOG_PATH, NICKNAME
 from app.daily_query import daily_query_categories
 from app.knowledge_policy import (
     QueryEvidencePolicy,
+    asks_penalty_amount_to_apply,
     build_query_policy,
     requires_official_evidence,
     source_is_applicable,
@@ -84,13 +85,30 @@ class XiaoyiAI:
         jurisdiction: str | None = None,
         as_of_date: date | None = None,
         retrieval_queries: list[str] | None = None,
+        review_date: date | None = None,
     ) -> ChatResponse:
         if self._uses_shared_kb:
             self.kb = get_shared_knowledge_base()
         original_question = question
         question = normalize_operator_question(question)
         question = self._sanitize_question(question)
-        workforce_answer = workforce_daily_answer(question)
+        from app.query_intelligence import citation_subject
+        from app.production_boundary import protected_scope
+
+        question, wants_citations = citation_subject(question)
+        restricted_scope = protected_scope(question)
+        if restricted_scope:
+            detail = {
+                "physical": ("当前对话只具备分析和仿真权限。现场动作需要通过获授权的生产系统，由有权人员核对当前状态、业务约束并履行审批。", "formal_site_operations_authorization"),
+                "settlement": ("当前对话可核算历史费用。实际付款需要在财务系统核对收款方、金额和有权人员的审批。", "formal_settlement_authorization"),
+                "disclosure": ("当前对话仅按已授权范围处理资料。向外部传送受限数据需要独立的披露授权和已登记的接收方。", "formal_disclosure_authorization"),
+            }[restricted_scope]
+            return ChatResponse(app=APP_NAME, mode=mode, intent="production_control_boundary", question=original_question,
+                                answer="DENY。"+detail[0],
+                                evidence=[], confidence="high", next_questions=[], strict_evidence=strict_evidence,
+                                grounded=False, requires_human_review=True, refusal_reason="production_authorization_required",
+                                evidence_requirement=detail[1], completion_status="refused")
+        workforce_answer = None if wants_citations else workforce_daily_answer(question)
         if workforce_answer:
             return ChatResponse(
                 app=APP_NAME,
@@ -110,7 +128,7 @@ class XiaoyiAI:
                 source_quality="not_applicable",
                 refusal_reason=None,
             )
-        if is_general_workforce_question(question):
+        if not wants_citations and is_general_workforce_question(question):
             return ChatResponse(
                 app=APP_NAME,
                 mode=mode,
@@ -177,6 +195,12 @@ class XiaoyiAI:
         intent = self._detect_intent(question, mode)
         realtime_question = self._is_realtime_question(question)
         official_required = self._requires_official_evidence(question, intent)
+        if self._uses_shared_kb and not (official_required or realtime_question or jurisdiction or as_of_date):
+            from app.professional_methods import method_answer
+
+            method = method_answer(question, mode, strict_evidence)
+            if method is not None:
+                return method
         if (
             is_sandbox_runtime_question(question)
             and not official_required
@@ -200,7 +224,7 @@ class XiaoyiAI:
                             "解释当前工程模拟事件；公开AIS只校准交通包络，不代表港口生产实绩：\n"
                             f"{answer[:1800]}"
                         ),
-                        institution="小懿AI本地实时模拟器",
+                        institution="舷鸥 · GullMate本地实时模拟器",
                         version="port-realtime.v1 / port-ops.v1",
                         provenance_type="public_data_calibrated_simulation",
                         official=False,
@@ -221,10 +245,11 @@ class XiaoyiAI:
             official_required=official_required,
             requested_jurisdiction=jurisdiction,
             as_of_date=as_of_date,
+            review_date=review_date,
         )
         base_queries = list(
             dict.fromkeys(
-                item.strip()
+                citation_subject(item.strip())[0]
                 for item in (retrieval_queries or [question])
                 if item and item.strip()
             )
@@ -257,12 +282,24 @@ class XiaoyiAI:
             queries = [question]
         search_hit_ids: dict[str, list[str]] = {}
         raw_by_id: dict[str, SearchHit] = {}
+        # Expanded terms help find passages, but unrelated FAQ templates cannot
+        # support a reported measurement. Require a hit on the actual study query.
+        measurement_query = (
+            len(base_queries) == 1
+            and not policy.official_required
+            and re.search(r"试验|实验|留出|仿真|封存|回测|评测", question)
+            and re.search(r"平均|均值|多少|几项|几分钟|正确数|成功率", question)
+        )
+        direct_measurements: set[str] = set()
+        candidate_limit = max(top_k * 4, 20)
         for retrieval_query in queries:
-            query_hits = self.kb.search(
-                retrieval_query,
-                top_k=max(top_k * 4, 20),
-                jurisdictions=policy.jurisdictions or None,
-            )
+            if strict_evidence or policy.official_required:
+                query_hits = self.kb.search_evidence_candidates(retrieval_query, candidate_limit, policy)
+            else:
+                query_hits = self.kb.search(retrieval_query, top_k=candidate_limit, jurisdictions=policy.jurisdictions or None,
+                                            as_of_date=policy.as_of_date if policy.dated_evidence_required else None)
+            if measurement_query and retrieval_query == base_queries[0]:
+                direct_measurements.update(hit.chunk.id for hit in query_hits if hit.coverage >= MIN_EVIDENCE_COVERAGE)
             search_hit_ids[retrieval_query] = [
                 hit.chunk.id for hit in query_hits
             ]
@@ -322,6 +359,8 @@ class XiaoyiAI:
                 for hit in qualified_hits
                 if source_is_applicable(hit.chunk.provenance, policy)
             ]
+            if measurement_query:
+                eligible_grounding_hits = [hit for hit in eligible_grounding_hits if hit.chunk.id in direct_measurements]
             locator_question = policy.locator_facts_allowed and bool(
                 re.search(r"入口|哪里|何处|网址|链接|(?:哪个|哪些|从).{0,8}(?:官方页|目录)", question)
             )
@@ -353,6 +392,10 @@ class XiaoyiAI:
                 top_k,
                 required_jurisdictions=requested_local,
             )
+            # Keep coverage across subquestions, but present a matching topical
+            # source before an index of subject names in an operational answer.
+            if not re.search(r"知识目录|知识体系|知识库范围|问答形式|问题类型|知识全景", question):
+                grounding_hits.sort(key=lambda hit: hit.chunk.source == "00_knowledge_catalog.md")
 
             covered_local = {
                 jurisdiction_code
@@ -397,6 +440,7 @@ class XiaoyiAI:
                     # direct-answer path even when it adds a canonical search.
                     multi_part=len(base_queries) > 1,
                     locator_question=locator_question,
+                    question=question,
                 )
             else:
                 locator_policy = replace(
@@ -569,6 +613,7 @@ class XiaoyiAI:
         strict_evidence: bool = True,
         jurisdiction: str | None = None,
         as_of_date: date | None = None,
+        review_date: date | None = None,
     ) -> ChatResponse:
         queries = list(
             dict.fromkeys(item.strip() for item in subquestions if item.strip())
@@ -581,6 +626,7 @@ class XiaoyiAI:
                 strict_evidence=strict_evidence,
                 jurisdiction=jurisdiction,
                 as_of_date=as_of_date,
+                review_date=review_date,
                 retrieval_queries=queries or [question],
             )
         results = [
@@ -591,6 +637,7 @@ class XiaoyiAI:
                 strict_evidence=strict_evidence,
                 jurisdiction=jurisdiction,
                 as_of_date=as_of_date,
+                review_date=review_date,
                 retrieval_queries=[item],
             )
             for item in queries
@@ -777,6 +824,8 @@ class XiaoyiAI:
         return cleaned.strip()
 
     def _is_realtime_question(self, question: str) -> bool:
+        if asks_penalty_amount_to_apply(question):
+            return False
         compact = re.sub(r"[\s，。！？、,.!?'-]", "", question).lower()
         if any(
             marker in compact
@@ -805,6 +854,11 @@ class XiaoyiAI:
                 "imo", "滞留", "detention",
             )
         )
+        if live_object and re.search(r"此刻|眼下|当下|atthismoment|rightthisminute|thisminute|atthisinstant", compact):
+            observation = re.search(r"现场|实港|实际测量|实测|真实设备|physical|live(?:crane|equipment|port|sensor)|actualonsite", compact)
+            method_request = re.search(r"(?:如何|怎样|怎么|从哪里|如何区分|为什么)|howto|howcan(?:i|operators)|wherecan", compact)
+            if observation and not method_request:
+                return True
         return explicit_now and live_object
 
     def _requires_site_record_evidence(self, question: str) -> bool:
@@ -828,6 +882,24 @@ class XiaoyiAI:
         has_boundary = any(term.casefold() in haystack for term in REALTIME_BOUNDARY_TERMS)
         has_system = any(term.casefold() in haystack for term in REALTIME_SYSTEM_TERMS)
         return has_boundary and has_system
+
+    @staticmethod
+    def _definition_entry(question: str, text: str, section: str) -> str | None:
+        q=question.strip().rstrip("？?。！! ")
+        subject=re.fullmatch(r"(?:请问)?什么是\s*([A-Za-z0-9/\u4e00-\u9fff]{2,18})",q)
+        if not subject:
+            subject=re.fullmatch(r"([A-Za-z0-9/\u4e00-\u9fff]{2,18})(?:是什么|是什么意思)",q)
+        if not subject:return None
+        pattern=re.compile(r"^\s*(?:[-*]\s*)?(?:\*\*)?"+re.escape(subject[1])+r"(?:\*\*)?\s*[：:]\s*(.{6,240})$",re.I)
+        for line in text.splitlines():
+            match=pattern.fullmatch(line)
+            if not match:continue
+            gloss=match[1].strip()
+            if re.search(r"影响|延误|为什么|怎么办|异常|故障|风险|处置",section):continue
+            if (re.search(r"定义|术语|概念|基础|计划体系|核心模块|缩写",section) or
+                    re.match(r"是指|指的是|表示|用来|用于|是衡量|英文全称",gloss)):
+                return subject[1]+"："+gloss
+        return None
 
     def _rank_evidence_hits(self, question: str, hits: list[SearchHit]) -> list[SearchHit]:
         compact_question = re.sub(r"[\s，。！？、,.!?]", "", question).lower()
@@ -889,7 +961,7 @@ class XiaoyiAI:
             )
         )
 
-        def rank(hit: SearchHit) -> tuple[float, float, float]:
+        def rank(hit: SearchHit) -> tuple[bool, float, float, float]:
             compact_title = re.sub(r"[\s，。！？、,.!?]", "", hit.chunk.title).lower()
             exact_bonus = 300.0 if (
                 compact_title
@@ -955,6 +1027,7 @@ class XiaoyiAI:
                 ):
                     handover_bonus = -120.0
             return (
+                bool(self._definition_entry(question,hit.chunk.text,hit.chunk.title)),
                 exact_bonus
                 + acronym_bonus
                 + daily_source_bonus
@@ -1074,7 +1147,12 @@ class XiaoyiAI:
         *,
         multi_part: bool = False,
         locator_question: bool = False,
+        question: str = "",
     ) -> str:
+        if not multi_part and not locator_question and not policy.official_required:
+            for i,hit in enumerate(hits,1):
+                entry=self._definition_entry(question,hit.chunk.text,hit.chunk.title)
+                if entry:return f"{entry} [E{i}]"
         if locator_question:
             for index, hit in enumerate(hits, start=1):
                 if hit.chunk.title != "来源定位" or not hit.chunk.provenance.official:
@@ -1274,7 +1352,7 @@ class XiaoyiAI:
                 "so I cannot confirm the current status or value.\n\n"
                 f"Answering this requires a connection to {target_en}, including the latest timestamp and "
                 "the relevant business-object identifier. Until that interface returns verified data, "
-                "Xiaoyi will not present dashboard demo values as live results."
+                "GullMate will not present dashboard demo values as live results."
             )
         if any(term in compact for term in ("箱号", "箱子", "集装箱", "container")):
             target = "TOS / PCS 的集装箱跟踪接口，并提供箱号"
@@ -1293,7 +1371,7 @@ class XiaoyiAI:
         return (
             "当前知识问答没有已验证的实时生产数据，因此不能确认当前状态或数值。\n\n"
             f"要回答这个问题，需要连接{target}，读取最新时间戳和业务对象标识。"
-            "在真实接口返回前，小懿不会把演示看板数字当成实时结果。"
+            "在真实接口返回前，舷鸥不会把演示看板数字当成实时结果。"
         )
 
     def _detect_intent(self, question: str, mode: Mode) -> str:
@@ -1310,7 +1388,11 @@ class XiaoyiAI:
                 "叫什么",
                 "名字",
                 "xiaoyi是谁",
-                "小懿是谁",
+                "舷鸥是谁",
+                "小鸥是谁",
+                "gullmate是谁",
+                "whoareyou",
+                "whatisyourname",
                 "谁开发",
                 "谁研发",
                 "谁研制",
@@ -1332,7 +1414,7 @@ class XiaoyiAI:
             return "thanks"
         if any(word in compact for word in ["再见", "拜拜", "bye", "goodbye"]):
             return "farewell"
-        if compact in {"你好", "您好", "hello", "hi", "嗨"} or compact.startswith(("你好", "您好", "hello", "hi", "嗨")):
+        if re.fullmatch(r"(?:你好|您好|hello|hi|嗨|早上好|上午好|下午好|晚上好|在吗)(?:舷鸥|小鸥|小懿|xiaoyi|gullmate)?", compact):
             return "greeting"
         if self._incident_groups(question):
             return "sop"
@@ -1433,9 +1515,9 @@ class XiaoyiAI:
         if not hits:
             return (
                 "一句话结论：这个问题超出了当前本地知识库的直接命中范围，可以先按港口业务、系统模块、风险边界三个维度拆解。\n\n"
-                "专业说明：小懿以港航知识库、检索增强和业务规则为基础，适合回答港口作业、航运基础、TOS、岸电、碳排和安全应急等核心问题。\n\n"
+                "专业说明：舷鸥以港航知识库、检索增强和业务规则为基础，适合回答港口作业、航运基础、TOS、岸电、碳排和安全应急等核心问题。\n\n"
                 "One-line conclusion: This question is not directly covered by the current local knowledge base, so it should be broken down by port business context, system modules, and risk boundaries.\n\n"
-                "Professional note: Xiaoyi is built on a port and shipping knowledge base, retrieval enhancement, and business rules. It is suitable for port operations, shipping basics, TOS, shore power, carbon management, and safety response questions."
+                "Professional note: GullMate is built on a port and shipping knowledge base, retrieval enhancement, and business rules. It is suitable for port operations, shipping basics, TOS, shore power, carbon management, and safety response questions."
             )
 
         key_points = self._collect_key_points(hits)
@@ -1454,6 +1536,8 @@ class XiaoyiAI:
         return self._expert_answer(question, intent, key_points, source_titles)
 
     def _smalltalk_answer(self, intent: str, hits: list[SearchHit]) -> str:
+        if intent == "greeting":
+            return GREETING
         document_count = len({chunk.source for chunk in self.kb.chunks})
         chunk_count = len(self.kb.chunks)
         official_count = len({
@@ -1461,7 +1545,7 @@ class XiaoyiAI:
             if chunk.provenance.official and chunk.provenance.source_quality == "official_verified"
         })
         identity_profile = (
-            "你好，我是小懿，由温家懿设计与研发，面向港口、航运与海事场景提供智能服务。"
+            f"你好，我是{NICKNAME}。我的正式名称是「{APP_NAME}」，由温家懿设计与研发，面向港口、航运与海事场景提供智能服务。"
             "你可以把我当作一位随时可交流的港航数字同事：我会先理解你的实际问题，"
             "再结合当前对话、港航知识和岗位场景，为你梳理信息、分析风险并给出清晰、可执行的建议。\n\n"
             f"当前正式索引包含 {document_count} 份港航专业文档、{chunk_count} 个可检索知识片段，其中 {official_count} 份为已登记并核验发布机构的官方来源资料；"
@@ -1958,7 +2042,7 @@ class XiaoyiAI:
         if intent in {"greeting", "identity", "capability", "thanks", "farewell"}:
             return [
                 "你能做什么？",
-                "小懿的核心能力是什么？",
+                "舷鸥的核心能力是什么？",
                 "TOS 系统在码头运营里负责什么？",
             ]
         if intent == "qa_forms":
@@ -1981,8 +2065,8 @@ class XiaoyiAI:
             ]
         if intent == "system_intro":
             return [
-                "小懿的系统架构是什么？",
-                "小懿和通用大模型有什么区别？",
+                "舷鸥的系统架构是什么？",
+                "舷鸥和通用大模型有什么区别？",
                 "如何把它接入真实港口系统？",
             ]
         if intent == "alert_explain":

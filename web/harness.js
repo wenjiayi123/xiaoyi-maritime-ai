@@ -2,7 +2,7 @@
 window.createHarnessConsole = function ({api: callApi, openModal, escapeHtml: esc, toast, isOpen}) {
   const labels = {queued:"排队中",running:"执行中",paused:"已暂停",waiting_input:"等待补充信息",waiting_approval:"等待操作审批",completed:"已完成",partial:"部分完成",failed:"执行失败",cancelled:"已取消",budget_exceeded:"达到预算",blocked:"已阻止",needs_review:"需要核查目标"};
   let epoch=0, selection=0, current=null, catalog=null, timer=null, busy=false, events=[], cursor=0;
-  let draft={mode:"enterprise",profile:"existing",goal:"读取小懿当前工程模拟港区快照，结合通用岸电SOP说明风险与缺失数据，不调整设备。",driver:"auto",steps:"12",seconds:"180",memory:false,template:""};
+  let draft={mode:"enterprise",profile:"existing",goal:"读取舷鸥当前工程模拟港区快照，结合通用岸电SOP说明风险与缺失数据，不调整设备。",driver:"auto",steps:"12",seconds:"180",memory:false,template:""};
   let creationKey=null, creationBody=null, inputKey=null, inputSignature=null;
   const controllers=new Set();
   const root=()=>document.getElementById("harnessConsole");
@@ -21,7 +21,7 @@ window.createHarnessConsole = function ({api: callApi, openModal, escapeHtml: es
     <div class="hx-intro"><strong>港航任务工作台</strong><span>计划、工具、证据和执行回执随任务保存</span></div>
     <div class="hx-template"><label>业务任务<select name="template"><option value="">自定义合同任务</option><option value="adaptive">自主任务 · 模型逐步选工具</option></select></label><p>业务模板共用一次采集的快照，显示单位、风险依据和推演假设；交接报告保留待签收项。</p></div>
     <div class="hx-compose"><label class="hx-goal">任务目标<textarea name="goal" rows="3" maxlength="4000">${esc(draft.goal)}</textarea></label>
-    <div class="hx-options"><label>任务模式<select name="harnessMode"><option value="enterprise">企业受控模式</option><option value="research">RL策略研究模式</option></select></label><label>规划模型<select name="modelProfile"><option value="existing">小懿现有模型</option><option value="open_agent">AgentCPM开源候选</option></select></label><label>运行方式<select name="driver"><option value="auto">自动选择可用模型</option><option value="model">模型驱动</option><option value="rules">规则驱动</option></select></label><label>最多步骤<input name="steps" type="number" min="1" max="40" value="${esc(draft.steps)}"></label><label>执行预算（秒）<input name="seconds" type="number" min="5" max="1800" value="${esc(draft.seconds)}"></label><label class="hx-check"><input name="memory" type="checkbox" ${draft.memory?"checked":""}>使用我保存的偏好</label></div>
+    <div class="hx-options"><label>任务模式<select name="harnessMode"><option value="enterprise">企业受控模式</option><option value="research">RL策略研究模式</option></select></label><label>规划模型<select name="modelProfile"><option value="existing">舷鸥现有模型</option><option value="open_agent">AgentCPM开源候选</option></select></label><label>运行方式<select name="driver"><option value="auto">自动选择可用模型</option><option value="model">模型驱动</option><option value="rules">规则驱动</option></select></label><label>最多步骤<input name="steps" type="number" min="1" max="40" value="${esc(draft.steps)}"></label><label>执行预算（秒）<input name="seconds" type="number" min="5" max="1800" value="${esc(draft.seconds)}"></label><label class="hx-check"><input name="memory" type="checkbox" ${draft.memory?"checked":""}>使用我保存的偏好</label></div>
     <div class="hx-actions"><button type="button" data-hx="briefing-preset">填入联合研判演示任务</button><button type="button" data-hx="create" class="primary-button">开始任务</button><button type="button" data-hx="refresh">刷新任务</button><button type="button" data-hx="history">任务历史</button></div></div>
     <p class="hx-notice" data-hx-notice role="status" aria-live="polite">正在读取运行能力…</p>
     <section data-hx-current aria-label="当前任务"><p>提交目标后，可查看每一步实际调用与结果。</p></section>
@@ -43,12 +43,26 @@ window.createHarnessConsole = function ({api: callApi, openModal, escapeHtml: es
       ${t.status==="needs_review"&&t.inflight?.id?`<div class="hx-approval"><strong>未决操作需要核查</strong><p>调用 ${esc(t.inflight.id)} · ${esc(t.inflight.tool)}</p><p>关联回执：${esc(t.inflight.linked_run_id||"将按操作编号查找")}</p><button type="button" data-hx="reconcile">读取关联回执核查</button></div>`:""}
       ${t.status==="waiting_approval"&&pending?`<div class="hx-approval"><strong>请审阅本次具体操作</strong><p>${esc(pending.prepared?.label||pending.action.tool)}</p><pre>${esc(JSON.stringify(pending.action.arguments,null,2))}</pre><p>审批有效至 ${esc(new Date(pending.expires_epoch*1000).toLocaleTimeString())}；摘要 ${esc(pending.action_sha256.slice(0,16))}</p><div class="hx-actions"><button type="button" data-hx="approve">批准本次操作</button><button type="button" data-hx="reject">拒绝执行</button></div></div>`:""}
       ${["queued","running","waiting_input","waiting_approval","paused"].includes(t.status)?`<label>补充信息或约束<textarea name="steer" rows="2" maxlength="4000" placeholder="运行中补充约束会使尚未执行的旧决策失效">${esc(priorInput)}</textarea></label><button type="button" data-hx="input">提交补充信息</button>`:""}
-      <div class="hx-results">${t.results.map(r=>`<details><summary>${esc(r.id)} · ${esc(r.tool)} · ${r.ok?"已返回":"调用失败"} · ${Number(r.elapsed_ms).toFixed(0)}ms</summary><pre>${esc(r.summary)}</pre><button type="button" data-hx="artifact" data-name="${esc(r.artifact)}">查看完整工具结果</button></details>`).join("")}</div>
+      ${recoveryView(t)}
+      <div class="hx-results">${t.results.map(r=>`<details><summary>${esc(r.id)} · ${esc(r.tool)} · ${r.ok?"已返回":r.resolved_by?"已由 "+esc(r.resolved_by)+" 恢复":"调用失败"} · ${Number(r.elapsed_ms).toFixed(0)}ms</summary><pre>${esc(r.summary)}</pre><button type="button" data-hx="artifact" data-name="${esc(r.artifact)}">查看完整工具结果</button></details>`).join("")}</div>
       ${t.final?`<div class="hx-final"><strong>任务结果</strong>${t.final.synthesis?.notice?`<p>${esc(t.final.synthesis.notice)}</p>`:""}<pre>${esc(t.final.text)}</pre><p>${esc(t.final.data_notice)}</p><small>有效工具引用：${esc(t.final.evidence_ids.join("、"))}</small></div>`:""}
       ${t.stop_reason?`<p class="hx-stop">${esc(t.stop_reason)}</p>`:""}
       <details data-hx-trace><summary>执行轨迹（${events.length} 项已读取）</summary><ol class="hx-events">${events.slice(-50).map(e=>`<li><time>${esc(new Date(e.at).toLocaleTimeString())}</time> ${esc(e.event)} · ${esc(labels[e.status]||e.status)}</li>`).join("")}</ol></details>`;
     setBusy(busy);
   }
+  function recoveryView(t){
+    const attempts=t.source_recoveries||[];
+    if(!attempts.length)return "";
+    const fmt=(x)=>Number(x||0).toLocaleString();
+    return `<section class="hx-recovery"><h3>恢复记录 / Recovery</h3>${attempts.map(a=>{
+      const failure=t.results.find(r=>r.id===a.failed_id);
+      const old=a.usage,newUsage=t.usage;
+      return `<p><b>${esc(a.failed_id)} → ${esc(failure?.resolved_by||"待回执 / Pending")}</b> · ${esc(a.source)}</p>
+      <p>恢复前已留存 / Retained: ${a.retained.map(r=>esc(r.id)).join(", ")||"—"}</p>
+      <p>模型 tokens ${fmt(old.tokens)} → ${fmt(newUsage.tokens)} (+${fmt(newUsage.tokens-old.tokens)}) · 工具调用 / Tool calls ${fmt(old.tool_calls)} → ${fmt(newUsage.tool_calls)} (+${fmt(newUsage.tool_calls-old.tool_calls)})</p>`;
+    }).join("")}${t.driver==="model"&&t.model_local===true?"<p>推理用量来自本机模型 / Local model inference.</p>":""}</section>`;
+  }
+
   function setBusy(value){busy=value;root()?.querySelectorAll("button[data-hx]").forEach(b=>b.disabled=value);}
   function domainView(data){
     if(!data||typeof data!=="object")return "";

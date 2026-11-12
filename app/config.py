@@ -15,7 +15,9 @@ RAG_RELEASE_REPORT_PATH = BASE_DIR / "reports" / "maritime_rag_benchmark_v1_2026
 WEB_DIR = BASE_DIR / "web"
 RUNTIME_DB_PATH = DATA_DIR / "xiaoyi_runtime.db"
 
-APP_NAME = "小懿"
+APP_NAME = "舷鸥 · GullMate"
+NICKNAME = "小鸥"
+GREETING = f"你好，我是{NICKNAME}。今天有什么港航问题想聊？"
 APP_VERSION = "0.4.0"
 DEFAULT_TOP_K = 5
 

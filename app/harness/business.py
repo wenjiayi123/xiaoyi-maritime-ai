@@ -6,11 +6,12 @@ import subprocess
 import time
 import hashlib
 from pathlib import Path
+import os
 from app.config import BASE_DIR
 from app.harness.contracts import digest, encoded, now
 from app.harness.store import Conflict
 
-PORT = Path("/Users/apple/Desktop/模拟器/port-dt-multi")
+PORT = Path(os.getenv("XIAOYI_SIMULATOR_ROOT", BASE_DIR.parent / "port-dt-multi"))
 
 
 def _call(job, target, method, path, body=None, key=None):
@@ -76,7 +77,7 @@ def port_worker(job, action, approvers=None):
     with (folder / f"port-{action}.log").open("a") as log:
         process = subprocess.run(
             [
-                str(PORT / ".venv312/bin/python"),
+                os.getenv("XIAOYI_SIMULATOR_PYTHON", str(PORT / ".venv312/bin/python")),
                 str(PORT / "tools/harness_business_worker.py"),
                 "--request",
                 str(request_path),

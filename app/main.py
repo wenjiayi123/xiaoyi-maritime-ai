@@ -14,6 +14,8 @@ from fastapi.staticfiles import StaticFiles
 
 from app.automation import router as automation_router
 from app.answer_verification import verify_response
+from app import offer_comparison, offer_language
+from app import policy_release
 from app.decision_assurance import assess_response
 from app.advanced_rl_missions import router as advanced_rl_router
 from app.capability_hub import router as capability_hub_router
@@ -30,6 +32,7 @@ from app.linked_system_launcher import router as linked_system_launcher_router
 from app.models import AnswerTiming, ChatRequest, ChatResponse, DemoTriadRequest, QueryAnalysis
 from app.model_gateway import model_gateway, router as model_router
 from app.observability import telemetry
+from app.analytics_throughput import router as throughput_analytics_router
 from app.operations import router as operations_router
 from app.operator_assistant import operator_scenarios
 from app.orchestrator import router as orchestrator_router
@@ -46,6 +49,8 @@ from app.system_api import router as system_router
 from app.system_linkage import router as system_linkage_router
 from app.linked_agent import router as linked_agent_router
 from app.harness.api import router as harness_router, close_harness
+from app.harness.workorders_api import router as workorders_router, close_workorders
+from app.cycle_routes import router as decision_cycle_router
 from app.harness.dual_api import router as dual_harness_router, recover as recover_dual_harness
 from app.harness.proof_api import router as proof_router
 from app.harness.capability_review_v8 import router as capability_review_router
@@ -63,6 +68,7 @@ async def lifespan(_: FastAPI):
     try:
         yield
     finally:
+        close_workorders()
         close_harness()
 
 
@@ -96,6 +102,7 @@ app.include_router(advanced_rl_router)
 app.include_router(connectors_router)
 app.include_router(knowledge_router)
 app.include_router(knowledge_intake_router)
+app.include_router(throughput_analytics_router)
 app.include_router(operations_router)
 app.include_router(realtime_port_simulator_router)
 app.include_router(capability_hub_router)
@@ -115,6 +122,8 @@ app.include_router(system_router)
 app.include_router(system_linkage_router)
 app.include_router(linked_agent_router)
 app.include_router(harness_router)
+app.include_router(workorders_router)
+app.include_router(decision_cycle_router)
 app.include_router(dual_harness_router)
 app.include_router(proof_router)
 app.include_router(capability_review_router)
@@ -158,7 +167,7 @@ def knowledge() -> dict[str, object]:
 def frontline_operator_scenarios() -> dict[str, object]:
     return {
         "items": operator_scenarios(),
-        "usage": "可直接点击或用现场口语提问；业务对象不明确时，小懿会先追问船名、设备号、泊位或时间范围。",
+        "usage": "可直接点击或用现场口语提问；业务对象不明确时，舷鸥会先追问船名、设备号、泊位或时间范围。",
         "safety_boundary": "沙箱态势与知识证据分层展示；生产动作必须由授权岗位确认。",
     }
 
@@ -177,7 +186,94 @@ def _prepare_answer(payload: ChatRequest, request: Request):
         else []
     )
     query_analysis = build_query_analysis(payload.question, history=history)
-    if query_analysis.requires_clarification:
+    if payload.offer_sheet is None:
+        compare_requested, sheet = offer_language.from_question(payload.question)
+    else:
+        compare_requested, sheet = True, payload.offer_sheet
+    review_requested, selection = policy_release.from_command(payload.question)
+    from app.production_boundary import requests_field_control
+
+    control_text = payload.question
+    if payload.shore_case is not None and payload.shore_change:
+        control_text += "。" + payload.shore_change
+    if requests_field_control(control_text):
+        response = engine.ask(control_text, mode=payload.mode, strict_evidence=True)
+    elif payload.shore_case is not None:
+        from app import shore_history
+
+        receipt=None;proposer=None
+        try:
+            case=payload.shore_case
+            amendment=None
+            if payload.shore_change and case.as_of.isoformat()==shore_history.source_notes()["as_of"]:
+                from app.shore_changes import bind
+
+                proposal,proposer=model_gateway.propose_shore_change(case,payload.shore_change)
+                case,amendment=bind(case,payload.shore_change,proposal)
+                amendment.update(proposer_model=proposer,proposed_changes=proposal["changes"],
+                    confirmed_berth_range=case.berth_range.model_dump() if case.berth_range else None)
+            receipt=shore_history.evaluate(case)
+            if amendment is not None:receipt["amendment"]=amendment
+            answer=shore_history.summary(receipt)
+        except (OSError,ValueError) as exc:
+            answer="本次岸电历史核对暂缓，原因是"+str(exc)[:160]+"。"
+        complete=bool(receipt and all(receipt[key]["label"]!="U" for key in ("national","local")))
+        response=ChatResponse(app=APP_NAME,mode=payload.mode,question=payload.question,intent="historical_shore_review",
+            answer=answer,shore_history_receipt=receipt,evidence=[],confidence="medium" if complete else "low",next_questions=[],
+            strict_evidence=payload.strict_evidence,source_quality="declared_case_and_verified_source" if receipt else "unverified",
+            evidence_requirement="two_named_historical_provisions",requires_human_review=True,
+            refusal_reason=None if complete else "historical_scope_or_evidence_missing",
+            generation_model=proposer or "gullmate-historical-shore-v1",generation_provider="openai_compatible" if proposer else "local_rules",
+            generation_notice="模型提议事实变更，按原文和具名条款复核。" if proposer else "按登记事实与具名条款核对。",
+            completion_status="complete" if complete else "partial")
+    elif payload.exercise_record is not None:
+        from app import exercise_records
+
+        general=payload.exercise_record.kind=="general"
+        receipt=(model_gateway.reason_about_exercise(payload.exercise_record,payload.question) if general
+                 else exercise_records.verify(payload.exercise_record,payload.question))
+        complete=receipt["decision"]!="UNKNOWN"
+        response=ChatResponse(app=APP_NAME, mode=payload.mode, question=payload.question,
+            intent="exercise_receipt", answer=exercise_records.summary(receipt), exercise_receipt=receipt,
+            evidence=[], confidence="medium" if complete else "low", next_questions=[],
+            strict_evidence=payload.strict_evidence, source_quality="declared_scenario",
+            evidence_requirement="user_declared_exercise_record", requires_human_review=True,
+            refusal_reason=None if complete else "insufficient_exercise_record",
+            generation_provider="openai_compatible" if general and receipt.get("model") else "local_rules",
+            generation_model=receipt.get("model") if general else "gullmate-exercise-v1",
+            generation_notice=("本地模型选择核算项目，核验器按已提供的统计与练习条件核对。" if receipt.get("model_role")=="operation_selection"
+                               else "模型按用户资料试算，独立业务核验尚需完成。" if general else "逐字段核对用户提供的演练资料，仅在给定假设内成立。"),
+            completion_status="complete" if complete else "partial")
+    elif review_requested and payload.offer_sheet is None:
+        policy_receipt = None
+        if selection is None:
+            answer = "请使用 /策略复验 scenario=stress seed=17 baseline=fixed window=0。窗口从 0 到 11；省略窗口可查看均值。"
+        else:
+            try:
+                policy_receipt = policy_release.compare(selection)
+                answer = policy_release.summarize(policy_receipt)
+            except policy_release.ReleaseUnavailable as exc:
+                answer = str(exc) + "，本次没有可引用的策略结果。"
+        response = ChatResponse(app=APP_NAME, mode=payload.mode, question=payload.question,
+            intent="trained_policy_review", answer=answer, evidence=[], policy_comparison=policy_receipt,
+            confidence="medium" if policy_receipt else "low", next_questions=[], strict_evidence=payload.strict_evidence,
+            source_quality="verified_simulation" if policy_receipt else "unverified", evidence_requirement="carbonops_pinned_receipt",
+            requires_human_review=True, generation_provider="local_rules", generation_model="gullmate-policy-release-v1",
+            completion_status="complete" if policy_receipt else "partial")
+    elif compare_requested:
+        receipt = offer_comparison.compare(sheet) if sheet else None
+        complete = receipt is not None and receipt["status"] != "needs_evidence"
+        answer = offer_comparison.summarize(receipt) if receipt else (
+            "要确认最低可行报价，需要逐项核对候选、价格及其适用约束。"
+            "请在「决策建议 → 可行方案比选」填写每项报价、吃水或供电容量以及核验来源；缺项可留空。"
+        )
+        response = ChatResponse(app=APP_NAME, mode=payload.mode, question=payload.question,
+            intent="offer_comparison", answer=answer, evidence=[], offer_comparison=receipt,
+            confidence="medium" if complete else "low", next_questions=[], strict_evidence=payload.strict_evidence,
+            source_quality="declared_scenario", evidence_requirement="declared_offer_sheet",
+            requires_human_review=True, generation_provider="local_rules", generation_model="offer-comparison-v1",
+            generation_notice="报价与约束按登记计算规则处理。", completion_status="complete" if complete else "partial")
+    elif query_analysis.requires_clarification:
         response = ChatResponse(
             app=APP_NAME, mode=payload.mode, question=payload.question,
             intent="operator_clarification",
@@ -281,6 +377,15 @@ def _finalize_answer(
             "numeric_integrity": response.answer_verification.numeric_integrity,
             "evidence_health": response.evidence_health.status,
             "decision_readiness": response.decision_readiness.status,
+            **({"offer_sheet_sha256": response.offer_comparison["sheet_sha256"],
+                "offer_result_sha256": response.offer_comparison["result_sha256"]} if response.offer_comparison else {}),
+            **({"exercise_source":response.exercise_receipt["source"],
+                "exercise_facts_sha256":response.exercise_receipt["facts_sha256"],
+                "exercise_decision":response.exercise_receipt["decision"]} if response.exercise_receipt else {}),
+            **({"shore_case_sha256":response.shore_history_receipt["case_sha256"],
+                "shore_source_sha256":response.shore_history_receipt["evidence_sha256"]} if response.shore_history_receipt else {}),
+            **({"policy_release_sha256": response.policy_comparison["release_sha256"],
+                "policy_sha256": response.policy_comparison["policy_sha256"]} if response.policy_comparison else {}),
             "timing": response.timing.model_dump(),
         },
         detail="问答结果已记录证据策略与回答校验指标；校验结果不阻断生成答案，审计仅保存请求与结果哈希。",
@@ -408,7 +513,7 @@ def chat_stream(payload: ChatRequest, request: Request) -> StreamingResponse:
         metadata = {
             "session_id": payload.session_id,
             "intent": prepared_response.intent,
-            "generation_provider": model_gateway.status()["provider"],
+            "generation_provider": prepared_response.generation_provider if prepared_response.intent == "offer_comparison" else model_gateway.status()["provider"],
         }
         yield f"event: metadata\ndata: {json.dumps(metadata, ensure_ascii=False)}\n\n"
         generation_started_at = time.monotonic()

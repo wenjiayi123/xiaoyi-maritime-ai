@@ -723,7 +723,7 @@ class PortRealtimeSimulator:
     def decisions(self) -> list[dict[str, Any]]:
         return self.snapshot()["decisions"]
 
-    def approve(self, decision_id: str, approval: ApprovalRequest) -> dict[str, Any]:
+    def approve(self, decision_id: str, approval: ApprovalRequest, *, identity_basis: str = "simulated_persona") -> dict[str, Any]:
         with self._lock:
             known = {item["decision_id"] for item in self.decisions()}
             if decision_id not in known:
@@ -731,7 +731,7 @@ class PortRealtimeSimulator:
             approvals = self._approvals.setdefault(decision_id, [])
             if any(item["approver_id"] == approval.approver_id for item in approvals):
                 raise ValueError("同一审批人不能重复批准同一动作")
-            item = {**approval.model_dump(), "approved_at": _now().isoformat(), "simulation_only": True}
+            item = {**approval.model_dump(), "approved_at": _now().isoformat(), "simulation_only": True, "identity_basis": identity_basis}
             approvals.append(item)
             self._record("decision.approved", f"{decision_id} 已记录第{len(approvals)}位沙箱审批人。", decision_id=decision_id, approver_id=approval.approver_id)
             return next(item for item in self.decisions() if item["decision_id"] == decision_id)
@@ -846,7 +846,11 @@ def change_scenario(payload: ScenarioRequest, request: Request) -> dict[str, Any
 @router.post("/decisions/{decision_id}/approve")
 def approve_decision(decision_id: str, payload: ApprovalRequest, request: Request) -> dict[str, Any]:
     try:
-        result = realtime_port_simulator.approve(decision_id, payload)
+        identity = request_identity(request)
+        if identity.authenticated and payload.approver_id != identity.actor_id:
+            raise HTTPException(status_code=403, detail="审批人必须是当前已认证账户")
+        basis = "authenticated_actor" if identity.authenticated else "simulated_persona"
+        result = realtime_port_simulator.approve(decision_id, payload, identity_basis=basis)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail="未知沙箱决策") from exc
     except ValueError as exc:

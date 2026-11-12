@@ -67,7 +67,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
             {
                 "role": "system",
                 "content": (
-                    "你是港航专业助手小懿。自然、简洁、专业地回答；"
+                    "你是港航专业助手舷鸥。自然、简洁、专业地回答；"
                     "不得编造实时数据。/no_think"
                 ),
             },

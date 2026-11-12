@@ -38,7 +38,7 @@ def enabled():
 
 def identity_for(request, permission="chat.use"):
     if not enabled():
-        raise HTTPException(503, "双模式扩展已关闭，原有小懿功能保持可用")
+        raise HTTPException(503, "双模式扩展已关闭，原有舷鸥功能保持可用")
     identity = request_identity(request)
     if not has_permission(identity.role, permission):
         raise HTTPException(403, "当前身份缺少所需权限")
@@ -200,6 +200,16 @@ def open_models(request: Request):
     }
 
 
+@router.get("/open-models/gullmate-14b")
+def gullmate_model_catalog(request: Request):
+    identity_for(request)
+    from app.harness.gullmate_14b import inventory
+    try:
+        return inventory()
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=503, detail="本机 14B 权重登记暂不可用") from exc
+
+
 @router.post("/open-models/activate")
 def activate_model(request: Request):
     identity_for(request, "operations.manage")
@@ -213,12 +223,14 @@ def create_mission(payload: joint.MissionCreate, request: Request):
 
 
 @router.get("/joint/missions")
-def missions(request: Request):
+def missions(request: Request, mine: bool = False):
     identity = identity_for(request)
+    if mine and not identity.authenticated:
+        raise HTTPException(status_code=403, detail="请先验证个人身份")
     return {
         "items": [
             {k: j[k] for k in ["id", "status", "config", "created_at", "updated_at", "version"]}
-            for j in joint.list_jobs(identity.actor_id, identity.role == "admin")
+            for j in joint.list_jobs(identity.actor_id, identity.role == "admin" and not mine)
         ]
     }
 
@@ -273,7 +285,17 @@ def policy_runtime(request: Request):
     identity_for(request)
     from app.harness import transport
 
-    return perform(transport.health)
+    from urllib.error import HTTPError, URLError
+
+    try:
+        return perform(transport.health)
+    except HTTPError as exc:
+        raise HTTPException(502, {"state":"upstream_error","inference_ready":False}) from exc
+    except (URLError, TimeoutError) as exc:
+        reason = getattr(exc, "reason", exc)
+        refused = isinstance(reason, ConnectionRefusedError) or getattr(reason, "errno", None) in (61, 111, 10061)
+        state = "offline" if refused else "unreachable"
+        raise HTTPException(503, {"state":state,"inference_ready":False}) from exc
 
 
 @router.post("/joint/missions/{job_id}/control/{command}")

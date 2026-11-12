@@ -64,8 +64,27 @@ _JURISDICTION_PHRASES = (
     "Rotterdam",
 )
 _SPLIT_PATTERN = re.compile(
-    r"(?:[；;]|(?:，|,)?(?:并且|同时|以及|另外|然后|再者|还要))"
+    r"(?:[；;]|(?:，|,)?(?:并且|同时|以及|另外|然后|再者)|[，,]\s*还要|(?<=[？?。])\s*还要)"
 )
+_CITATION_TAIL = re.compile(
+    r"(?<=[？?。；;!！])\s*(?:请\s*)?"
+    r"(?:(?:用|使用|依据|根据|查阅)(?:港航|港口|本地|专业)?知识库(?:来)?(?:回答|作答)[，,\s]*(?:并|且)?\s*)?"
+    r"(?:指出|给出|提供|注明|附上|列出|列明|标注)(?:相关|具体|所用)?(?:依据|出处|来源|引用)(?:链接)?[。.!！\s]*$|"
+    r"(?<=[?.!])\s*(?:please\s+)?(?:cite (?:your |the )?sources|provide (?:source )?citations)[.!\s]*$",
+    re.I,
+)
+
+
+def citation_subject(question: str) -> tuple[str, bool]:
+    """Separate a trailing citation-only instruction from search terms; retain material source/date constraints."""
+    match = _CITATION_TAIL.search(question)
+    if match:
+        subject = question[:match.start()].strip()
+        if subject:
+            return subject, True
+    return question, False
+
+
 _JURISDICTION_NAMES = {
     "GLOBAL": "国际",
     "CN": "中国",
@@ -140,6 +159,7 @@ def _strip_old_scope(question: str, current_question: str) -> str:
 
 
 def _decompose(question: str) -> list[str]:
+    question,_ = citation_subject(question)
     parts = [part.strip(" ，,。；;") for part in _SPLIT_PATTERN.split(question)]
     parts = [part for part in parts if len(part) >= 4]
     if 1 < len(parts) <= 5:
@@ -260,6 +280,12 @@ def build_query_analysis(
                 # chunks even though the business subject was already known.
                 standalone = f"{scope_context}{prior_topic}？"
                 context_topic = standalone.rstrip("？?")
+            elif re.search(r"(?:更正|纠正|改成|改为|应改作|correction\b|changed? (?:it )?to\b)", original, re.IGNORECASE):
+                # Keep the base subject and the most recent change. Later vague
+                # follow-ups can retrieve the amended scenario without growing
+                # the saved topic on each reformulation.
+                base_topic = prior_topic.partition("；最近更正：")[0]
+                context_topic = f"{base_topic}；最近更正：{original}"
             resolution = "history_resolved"
             inherited_answer_id = str(previous.get("id") or "") or None
         else:

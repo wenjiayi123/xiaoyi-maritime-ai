@@ -1,10 +1,10 @@
-# 小懿 LoRA 数据边界
+# 舷鸥 LoRA 数据边界
 
 运行 `python scripts/build_lora_dataset.py` 后，处理结果写入
 `.runtime/finetuning/xiaoyi-maritime-sft-v1/`，不会提交到 Git。
 
 构建器读取知识库中人工明确编写的“常见问法 / 等价问法 / 直接回答”配对，
-并合并 `curated_multiturn_v2.json` 中人工审核的身份、多轮追问与幻觉边界样本：
+并合并 `curated_multiturn_gullmate_v3.json` 中人工审核的身份、多轮追问与幻觉边界样本：
 
 - 不让模型自动生成训练答案；
 - 排除仓库固定评测中完全相同的问题；

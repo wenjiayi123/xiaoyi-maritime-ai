@@ -91,7 +91,7 @@ def _load_pinned_release_summary(
         "verified_metrics": metrics,
         "passed": bool(benchmark.get("passed")),
         "status": "pinned_release_evidence",
-        "evidence_source": str(path.relative_to(path.parents[1])),
+        "evidence_source": path.relative_to(path.parents[1]).as_posix(),
         "report_generated_at": payload.get("generated_at"),
         "report_sha256": _sha256_file(path),
         "live_rerun": False,
@@ -691,7 +691,7 @@ def review_feedback(
             KnowledgeIntakeRequest(
                 filename=f"{feedback_id}.md",
                 content=content,
-                institution="小懿AI反馈闭环",
+                institution="舷鸥 · GullMate反馈闭环",
                 version="pending-review",
                 official_claim=False,
             )

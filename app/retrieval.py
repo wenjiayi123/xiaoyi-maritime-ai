@@ -5,15 +5,17 @@ import hashlib
 import math
 import re
 from collections import Counter
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 from datetime import date
 from functools import lru_cache
+from itertools import islice
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 from app.config import INDEX_PATH, KB_DIR, SOURCE_REGISTRY_PATH
 from app.provenance import SourceProvenance, load_source_registry
+from app.knowledge_policy import QueryEvidencePolicy, source_effective_on, source_is_applicable, source_review_status
 from app.vector_retrieval import get_dense_vector_index
 
 
@@ -365,16 +367,28 @@ def _sha256_file(path: Path) -> str:
 
 
 def _split_markdown(
-    path: Path,
+    filename: str | Path,
+    document: bytes | None = None,
     provenance: SourceProvenance | None = None,
-    document_hash: str | None = None,
-) -> list[KnowledgeChunk]:
-    raw = path.read_text(encoding="utf-8")
+) -> tuple[KnowledgeChunk, ...]:
+    path = Path(filename)
+    content = document if document is not None else path.read_bytes()
+    return _split_markdown_bytes(path.name, content, provenance)
+
+
+@lru_cache(maxsize=256)
+def _split_markdown_bytes(
+    filename: str,
+    document: bytes,
+    provenance: SourceProvenance | None,
+) -> tuple[KnowledgeChunk, ...]:
+    path = Path(filename)
+    raw = document.decode("utf-8")
     source_provenance = provenance or SourceProvenance(
         source_id=path.name,
         display_name=path.name,
     )
-    source_hash = document_hash or _sha256_file(path)
+    source_hash = hashlib.sha256(document).hexdigest()
     chunks: list[KnowledgeChunk] = []
     document_title = path.stem
     current_title = path.stem
@@ -419,7 +433,7 @@ def _split_markdown(
         else:
             current_lines.append(line)
     flush()
-    return chunks
+    return tuple(chunks)
 
 
 def _cjk_ngrams(text: str) -> set[str]:
@@ -491,6 +505,21 @@ def _coverage_weight(term: str) -> float:
     return 1.0
 
 
+def _opaque_identifier(query: str):
+    """A lone code needs literal source evidence, even if its embedding has close neighbors."""
+    token = query.strip()
+    if not re.fullmatch(r"[A-Za-z][A-Za-z0-9_/-]{7,79}", token):
+        return None
+    # Compact references to published standard families often appear with spaces in prose.
+    if re.fullmatch(r"(?:iso|iec|gb(?:/?t)?|imo|msc|mepc|marpol|solas|stcw|imdg|isps)[_/-]?\d+(?:[./_-]\d+)*", token, re.I):
+        return None
+    serial = re.search(r"[A-Za-z_-][0-9]{3,}", token)
+    opaque_letters = len(token) >= 12 and re.search(r"[BCDFGHJKLMNPQRSTVWXYZ]{5,}", token, re.I)
+    if not serial and not opaque_letters:
+        return None
+    return re.compile(r"(?<![A-Za-z0-9_/-])"+re.escape(token)+r"(?![A-Za-z0-9_/-])", re.I)
+
+
 def _match_coverage(text: str, terms: list[str]) -> tuple[list[str], float]:
     if not terms:
         return [], 0.0
@@ -516,13 +545,9 @@ def load_chunks(
     chunks: list[KnowledgeChunk] = []
     for path in paths:
         provenance = registry.get(path.name) if registry else None
-        chunks.extend(
-            _split_markdown(
-                path,
-                provenance=provenance,
-                document_hash=_sha256_file(path),
-            )
-        )
+        # Cache only exact bytes and source metadata. Callers own their returned chunks.
+        parsed = _split_markdown(path.name, path.read_bytes(), provenance)
+        chunks.extend(replace(chunk, keywords=chunk.keywords.copy()) for chunk in parsed)
     return chunks
 
 
@@ -590,8 +615,12 @@ def _chunk_from_payload(payload: dict[str, Any]) -> KnowledgeChunk:
 def _index_needs_rebuild(items: list[dict[str, Any]]) -> bool:
     if not items:
         return True
-    required = {"content_hash", "document_hash", "provenance"}
+    required = {"id", "text", "source", "title", "content_hash", "document_hash", "provenance"}
     if any(not required.issubset(item) for item in items):
+        return True
+    if any(not isinstance(item["id"], str) for item in items):
+        return True
+    if len({item["id"] for item in items}) != len(items):
         return True
     for item in items:
         if item.get("content_hash") != _sha256_text(str(item.get("text", ""))):
@@ -621,7 +650,10 @@ def _index_needs_rebuild(items: list[dict[str, Any]]) -> bool:
 def load_index() -> list[KnowledgeChunk]:
     if not INDEX_PATH.exists():
         return build_index(KB_DIR, INDEX_PATH, SOURCE_REGISTRY_PATH)
-    data = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
+    try:
+        data = json.loads(INDEX_PATH.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return build_index(KB_DIR, INDEX_PATH, SOURCE_REGISTRY_PATH)
     if isinstance(data, dict):
         data = data.get("chunks", [])
     if not isinstance(data, list) or not all(isinstance(item, dict) for item in data):
@@ -791,14 +823,18 @@ class KnowledgeBase:
         jurisdictions: tuple[str, ...] | list[str] | None = None,
         content_scopes: tuple[str, ...] | list[str] | None = None,
         current_only: bool = False,
+        as_of_date: date | None = None,
     ) -> list[SearchHit]:
+        from app.maritime_terms import indexed_query
+        query = indexed_query(query)
         query_terms = _expand_query_terms(query, _extract_keywords(query))
         query_tokens = self._tokenize(" ".join([query, *query_terms]))
         query_semantic_features = self._semantic_feature_set(query)
         evidence_terms = _evidence_query_terms(query)
         query_lower = query.lower()
+        identifier = _opaque_identifier(query)
         try:
-            dense_scores = self._dense_index.scores(query, self.chunks)
+            dense_scores = {} if identifier is not None else self._dense_index.scores(query, self.chunks)
         except (OSError, TimeoutError, ValueError, json.JSONDecodeError):
             dense_scores = {}
         acronym_terms = [term for term in query_terms if re.fullmatch(r"[a-zA-Z][a-zA-Z0-9_/-]{1,}", term)]
@@ -809,6 +845,7 @@ class KnowledgeBase:
             str(item).strip() for item in (content_scopes or ()) if str(item).strip()
         }
         hits: list[SearchHit] = []
+        day = as_of_date or date.today()
 
         for index, chunk in enumerate(self.chunks):
             if official_only and not chunk.provenance.official:
@@ -828,25 +865,17 @@ class KnowledgeBase:
                 continue
             if allowed_scopes and chunk.provenance.content_scope not in allowed_scopes:
                 continue
-            if current_only:
-                if chunk.provenance.review_status in {"review_due", "review_date_invalid"}:
+            review = source_review_status(chunk.provenance, day)
+            if current_only or as_of_date is not None:
+                if not source_effective_on(chunk.provenance, day, require_start=as_of_date is not None):
                     continue
-                try:
-                    if (
-                        chunk.provenance.effective_from
-                        and date.fromisoformat(chunk.provenance.effective_from) > date.today()
-                    ):
-                        continue
-                    if (
-                        chunk.provenance.effective_to
-                        and date.fromisoformat(chunk.provenance.effective_to) < date.today()
-                    ):
-                        continue
-                except ValueError:
-                    continue
+            if current_only and chunk.provenance.official and review != "current":
+                continue
             text_lower = chunk.text.lower()
             title_lower = chunk.title.lower()
-            score = 0.0
+            if identifier is not None and not any(identifier.search(field) for field in (chunk.id, chunk.source, chunk.title, chunk.text)):
+                continue
+            score = 80.0 if identifier is not None else 0.0
 
             for term in query_terms:
                 term_lower = term.lower()
@@ -883,6 +912,8 @@ class KnowledgeBase:
                     f"{chunk.title}\n{chunk.text}",
                     evidence_terms,
                 )
+                if identifier is not None:
+                    matched_terms, coverage = [query.strip()], 1.0
                 provenance_bonus = (
                     2.5
                     if chunk.provenance.official
@@ -896,7 +927,7 @@ class KnowledgeBase:
                     provenance_bonus += 1.5
                 if requested_jurisdictions and source_jurisdictions.intersection(requested_jurisdictions):
                     provenance_bonus += 4.0
-                if chunk.provenance.review_status == "current":
+                if review == "current":
                     provenance_bonus += 1.0
                 title_bonus = sum(1 for term in evidence_terms if term.lower() in title_lower) * 2.0
                 rerank_score = (
@@ -928,6 +959,20 @@ class KnowledgeBase:
 
         hits.sort(key=lambda item: (item.rerank_score, item.coverage, item.lexical_score), reverse=True)
         return hits[:top_k]
+
+    def search_evidence_candidates(self, query: str, top_k: int, policy: QueryEvidencePolicy) -> list[SearchHit]:
+        """Reserve candidate slots for eligible sources while retaining the relevance shortlist."""
+        ranked = self.search(query, top_k=len(self.chunks), jurisdictions=policy.jurisdictions or None,
+                             as_of_date=policy.as_of_date if policy.dated_evidence_required else None)
+        candidates = {hit.chunk.id: hit for hit in ranked[:top_k]}
+        pools = [policy]
+        if policy.official_required and not policy.locator_facts_allowed:
+            pools.append(replace(policy, full_text_required=False, locator_facts_allowed=True))
+        for pool in pools:
+            eligible = (hit for hit in ranked if source_is_applicable(hit.chunk.provenance, pool))
+            for hit in islice(eligible, top_k):
+                candidates.setdefault(hit.chunk.id, hit)
+        return list(candidates.values())
 
 
 _SHARED_KNOWLEDGE_BASE: KnowledgeBase | None = None

@@ -5,13 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#020b18">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%23073158'/%3E%3Ctext x='8' y='.86em' font-size='78'%3E⚓%3C/text%3E%3C/svg%3E">
-  <meta name="description" content="港航小懿AI——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
-  <title>港航小懿AI · 智能助手 | Maritime Intelligence Copilot</title>
-  <link rel="stylesheet" href="/web/styles.css?v=20261031-full-demo-layout-v1">
+  <meta name="description" content="舷鸥 · GullMate——面向港口、航运与码头运营的中英双语智能决策助手 · Bilingual AI copilot for port and maritime operations">
+  <title>舷鸥 · GullMate · 智能助手 | Maritime Intelligence Copilot</title>
+  <link rel="stylesheet" href="/web/styles.css?v=20261108-source-pairs">
   <link rel="stylesheet" href="/web/system-data-desk.css?v=20261023-1">
+  <link rel="stylesheet" href="/web/offer_comparison.css?v=20261106">
   <link rel="stylesheet" href="/web/harness.css?v=20261030-public-port-assurance">
   <link rel="stylesheet" href="/web/harness_chat.css?v=20261101-v13">
   <link rel="stylesheet" href="/web/proof_console.css?v=20261030-v5-1">
+  <link rel="stylesheet" href="/web/navigation-language.css?v=1">
+  <link rel="stylesheet" href="/web/knowledge-citations.css?v=1">
+  <link rel="stylesheet" href="/web/throughput-comparison.css?v=1">
 </head>
 <body data-theme="deep-sea" data-language="zh-primary">
   <svg class="svg-sprite" aria-hidden="true">
@@ -53,7 +57,7 @@
     <header class="topbar">
       <button class="brand" type="button" data-action="home" aria-label="返回智能对话">
         <span class="brand-mark"><svg><use href="#i-anchor"/></svg><i></i></span>
-        <span class="brand-copy" data-no-bilingual><strong>港航小懿<span>AI</span></strong><small>智能助手 <em>MARITIME COPILOT</em></small></span>
+        <span class="brand-copy" data-no-bilingual><strong>舷鸥 <span>· GullMate</span></strong><small>智能助手 <em>MARITIME COPILOT</em></small></span>
       </button>
 
       <nav class="top-nav" aria-label="主导航">
@@ -66,7 +70,7 @@
       </nav>
 
       <div class="top-tools">
-        <button class="demo-guide-launch" type="button" data-demo-guide-launch aria-label="开始小懿AI操作演示"><svg><use href="#i-play"/></svg><span>演示开始</span></button>
+        <button class="demo-guide-launch" type="button" data-demo-guide-launch aria-label="开始舷鸥 · GullMate操作演示"><svg><use href="#i-play"/></svg><span>演示开始</span></button>
         <button class="icon-button sidebar-toggle-button" type="button" data-action="toggle-sidebar" aria-label="打开功能侧栏"><svg><use href="#i-command"/></svg></button>
         <button class="icon-button rail-toggle-button" type="button" data-action="toggle-rail" aria-label="打开运营看板"><svg><use href="#i-chart"/></svg></button>
         <button class="system-status-indicator" type="button" data-action="system-status" aria-label="查看系统状态">
@@ -82,11 +86,13 @@
       <aside class="left-sidebar" id="leftSidebar">
         <div class="assistant-card">
           <div class="assistant-avatar"><span class="bot-face"><i></i><b></b></span><em></em></div>
-          <div><strong>小懿AI</strong><span>您的港航智能助手</span></div>
+          <div><strong>舷鸥 · GullMate</strong><span>您的港航智能助手</span></div>
           <i class="online-dot" title="本机界面可用；不代表本地模型或港口系统在线"></i>
         </div>
 
         <div class="side-menu" aria-label="对话功能">
+          <label class="nav-language" data-no-bilingual for="navLanguage"><span lang="zh-CN">导航语言</span> <span lang="en">Navigation language</span>
+            <select id="navLanguage"><option value="auto">自动 / Auto</option><option value="zh">中文</option><option value="en">English</option></select></label>
           <button type="button" id="newTopicBtn" data-action="new-chat" data-agent-target="new-chat"><svg><use href="#i-plus"/></svg><span>新建对话</span></button>
           <button type="button" data-action="history" data-agent-target="history"><svg><use href="#i-history"/></svg><span>对话历史</span><b id="historyCount">0</b></button>
           <button type="button" data-action="commands"><svg><use href="#i-command"/></svg><span>常用指令</span></button>
@@ -96,12 +102,12 @@
           <button type="button" id="systemLaunchHubBtn" data-action="system-linkage" data-agent-target="system-linkage"><svg><use href="#i-play"/></svg><span>四系统联动</span><b class="system-launch-nav-badge" id="systemLaunchBadge">0/4</b></button>
           <button type="button" id="harnessConsoleBtn" data-action="harness" data-agent-target="harness"><svg><use href="#i-task"/></svg><span>Harness 任务工作台</span></button>
           <button type="button" id="jointHarnessBtn" data-action="joint-harness"><svg><use href="#i-task"/></svg><span>双模式港航联合系统</span></button>
-          <button type="button" id="proofConsoleBtn" data-action="proof-console"><svg><use href="#i-task"/></svg><span>小懿能力实证演示</span></button>
+          <button type="button" id="proofConsoleBtn" data-action="proof-console"><svg><use href="#i-task"/></svg><span>舷鸥能力实证演示</span></button>
           <button type="button" id="shanghaiLabBtn" data-action="shanghai-lab"><svg><use href="#i-task"/></svg><span>上海港统一联动试验</span></button>
           <a href="/web/capability-review.html" class="capability-review-link">能力评估与提升 · 37项</a>
           <a href="/web/priority-v9.html" class="priority-v9-link">专项提升 · 预测 / RL / 年度孪生</a>
           <a href="/web/root-cause-v10.html" class="root-cause-v10-link">根因诊断 · 模型体量与独立复验</a>
-          <a href="http://127.0.0.1:18783/web/agent-rl.html" class="capability-review-link" target="_blank" rel="noopener">语言模型 RL · 四组实测与任务验收</a>
+          <a href="/web/agent-rl.html" class="capability-review-link">语言模型 RL · 四组实测与任务验收</a>
           <button type="button" id="ragEvaluationBtn" data-action="rag-evaluation" data-agent-target="rag-evaluation"><svg><use href="#i-check"/></svg><span>RAG评测闭环</span><b class="rag-nav-badge">评测</b></button>
         </div>
 
@@ -135,8 +141,8 @@
           <div class="chat-stage">
             <div class="conversation-column">
               <div class="welcome-block">
-                <p class="eyebrow"><span></span>YIPORT INTELLIGENCE COPILOT</p>
-                <h1 id="greetingTitle">上午好！<span>我是小懿AI</span></h1>
+                <p class="eyebrow"><span></span>GULLMATE MARITIME COPILOT</p>
+                <h1 id="greetingTitle">上午好！<span>我是小鸥</span></h1>
                 <p>您的港航智能助手，随时为您提供专业的决策支持与知识服务</p>
               </div>
 
@@ -146,7 +152,7 @@
                 <button type="button" class="capability-card amber" data-view-target="decisions"><span class="capability-icon"><svg><use href="#i-bulb"/></svg></span><strong>决策建议</strong><small>提供优化建议与决策支持</small></button>
                 <button type="button" class="capability-card violet" data-action="generate-report" data-agent-target="generate-report"><span class="capability-icon"><svg><use href="#i-report"/></svg></span><strong>报告生成</strong><small>自动生成分析报告</small></button>
               </div>
-              <section class="chat-demo-prompts" aria-label="小懿三类真实问答演示">
+              <section class="chat-demo-prompts" aria-label="舷鸥三类真实问答演示">
                 <div><svg><use href="#i-chat"/></svg><strong>三类真实问答</strong><small>逐题填入输入框，再点击发送</small></div>
                 <nav>
                   <button type="button" class="general" data-chat-demo-prompt="general">一般问答</button>
@@ -165,7 +171,7 @@
                   <div class="mini-assistant-avatar"><span class="bot-face"><i></i><b></b></span></div>
                   <div class="assistant-response-card">
                     <header class="response-header">
-                      <div><strong>小懿AI</strong><span class="demo-answer-type" id="demoAnswerType" hidden></span><span id="responseStatus" hidden aria-hidden="true"></span></div>
+                      <div><strong>舷鸥 · GullMate</strong><span class="demo-answer-type" id="demoAnswerType" hidden></span><span id="responseStatus" hidden aria-hidden="true"></span></div>
                       <div class="response-actions">
                         <span class="demo-badge" id="runtimeStatusBadge" data-action="runtime-status" title="查看数据来源、观测时间与质量码">公开数据校准模拟</span>
                         <span class="grounding-badge pending" id="groundingBadge" aria-live="polite">等待验证</span>
@@ -190,7 +196,7 @@
                       <div><span>岸电使用率</span><strong>--<small>%</small></strong><em>等待数据</em></div>
                     </div>
 
-                    <div class="answer" id="answer">正在读取运营数据接口。接口不可用时，小懿会显示空值，不会使用静态数字冒充现场结果。</div>
+                    <div class="answer" id="answer">正在读取运营数据接口。接口不可用时，舷鸥会显示空值，不会使用静态数字冒充现场结果。</div>
 
                     <div class="answer-trust-meta" id="answerTrustMeta" aria-live="polite">
                       <span><small>证据覆盖度</small><b id="answerCoverageMetric">—</b></span>
@@ -223,14 +229,14 @@
                   <p>调整会应用到下一次提问。</p>
                 </div>
               </form>
-              <p class="disclaimer">小懿AI 可能会生成不准确的信息，生产系统操作需由授权人员确认。</p>
+              <p class="disclaimer">舷鸥 · GullMate 可能会生成不准确的信息，生产系统操作需由授权人员确认。</p>
             </div>
 
-            <section class="hero-visual" id="heroVisual" aria-label="小懿AI 港航领航员">
-              <img src="/web/assets/xiaoyi-ai-port-hero.png" alt="港航小懿AI领航员站在智慧港口中">
+            <section class="hero-visual" id="heroVisual" aria-label="舷鸥 · GullMate 港航领航员">
+              <img src="/web/assets/xiaoyi-ai-port-hero.png" alt="舷鸥 · GullMate领航员站在智慧港口中">
               <div class="hero-vignette"></div>
               <div class="voice-bubble" id="voiceBubble">
-                <strong id="heroSpeechTitle">您好！我是小懿AI</strong>
+                <strong id="heroSpeechTitle">您好！我是小鸥</strong>
                 <span id="heroSpeechText">您的港航智能助手</span>
                 <div class="voice-wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
               </div>
@@ -241,7 +247,26 @@
         </section>
 
         <section class="workspace-view" data-view="decisions">
-          <header class="view-header"><div><p>DECISION INTELLIGENCE</p><h2>决策建议</h2><span>基于运营快照、港航知识库与安全边界生成可追溯建议</span></div><button type="button" class="primary-button" id="decisionGenerateButton" data-task-template="optimize-berth" data-agent-target="task-optimize-berth"><svg><use href="#i-spark"/></svg>生成智能方案</button></header>
+          <header class="view-header"><div><p>DECISION INTELLIGENCE</p><h2>决策建议</h2><span>基于运营快照、港航知识库与安全边界生成可追溯建议</span></div><a class="outline-button" data-decision-ledger href="/web/policy-evidence/decision-cycles/index.html">工单签注与反馈 / Decisions and feedback</a><button type="button" class="primary-button" id="decisionGenerateButton" data-task-template="optimize-berth" data-agent-target="task-optimize-berth"><svg><use href="#i-spark"/></svg>生成智能方案</button></header>
+          <details id="offer-workbench" class="glass-card">
+            <summary>可行方案比选</summary>
+            <form class="offer-body">
+              <div class="offer-bar">
+                <label>业务范围<select name="profile"><option value="berth">泊位成本与吃水</option><option value="shore_power">岸电报价与容量</option></select></label>
+                <label><span data-offer="demand">船舶吃水（m）</span><input name="required" type="number" min="0.000001" step="any"></label>
+                <label>需求记录编号<input name="requirement_ref" maxlength="96"></label>
+                <label>比选时刻（本地时间）<input name="as_of" type="datetime-local"></label>
+              </div>
+              <div data-offer="rows"></div>
+              <div class="offer-commands">
+                <button type="button" data-offer="add">添加候选</button>
+                <button type="button" data-offer="example">载入仿真示例</button>
+                <button type="submit">比较可行报价</button>
+              </div>
+              <div class="offer-output" data-offer="output" aria-live="polite"></div>
+            </form>
+          </details>
+
           <div class="decision-layout">
             <section class="glass-card decision-hero"><div class="card-heading"><span class="heading-icon amber"><svg><use href="#i-bulb"/></svg></span><div><strong>今日决策焦点</strong><small>模拟/现场数据共用同一约束计算链</small></div><span class="demo-badge" data-action="runtime-status">公开数据校准模拟</span></div><div id="decisionCards" class="decision-cards"></div></section>
             <section class="glass-card risk-board"><div class="card-heading"><span class="heading-icon red"><svg><use href="#i-alert"/></svg></span><div><strong>风险态势</strong><small id="riskAlertSummary">等待告警数据</small></div></div><div class="risk-orbit"><div><strong id="riskHealthScore">--</strong><span>现场告警健康分</span></div><i class="orbit-one"></i><i class="orbit-two"></i></div><div id="riskLegend" class="risk-legend"></div></section>
@@ -251,10 +276,25 @@
 
         <section class="workspace-view" data-view="analytics">
           <header class="view-header"><div><p>PORT DATA OBSERVATORY</p><h2>数据分析</h2><span>运营、能耗、碳排与设备态势一屏联动</span></div><div class="segmented" id="analyticsRange" data-agent-target="analytics-range"><button class="active" type="button" data-range="today">今日</button><button type="button" data-range="7d">7日</button><button type="button" data-range="30d">30日</button></div></header>
+          <details id="throughputComparison" class="glass-card throughput-comparison" data-no-bilingual>
+            <summary><span lang="zh-CN">港口集装箱吞吐量对比</span> <small lang="en">Container throughput</small></summary>
+            <form data-tp-form>
+              <label>港口 / Port<select name="port"><option value="shanghai">上海 / Shanghai</option><option value="ningbo">宁波舟山 / Ningbo-Zhoushan</option><option value="singapore">新加坡 / Singapore</option></select></label>
+              <label>窗口 / Months<select name="months"><option value="2">2</option><option value="6">6</option><option value="12">12</option></select></label>
+              <label>基期起月 / Base start<select name="base"></select></label>
+              <label>对比起月 / Current start<select name="current"></select></label>
+              <label>单位 / Unit<select name="unit"><option value="TEU">TEU</option><option value="10k_TEU">万 TEU / 10,000 TEU</option></select></label>
+              <button class="outline-button" type="submit" disabled>比较 / Compare</button>
+            </form>
+            <p data-tp-status role="status" aria-live="polite"></p>
+            <div data-tp-result></div>
+            <button class="outline-button" type="button" data-tp-download disabled>下载本次对比 / Download CSV</button>
+          </details>
+
           <div class="analytics-grid">
             <div class="analytics-kpis" id="analyticsKpis"></div>
             <section class="glass-card analytics-chart-card"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-chart"/></svg></span><div><strong>港区能耗与碳排趋势</strong><small id="analyticsUpdated">正在读取模拟流</small></div><span class="demo-badge" data-action="runtime-status">公开数据校准模拟</span></div><div class="large-chart" id="largeEnergyChart"></div><div class="chart-insight" id="chartInsights"></div></section>
-            <section class="glass-card efficiency-card"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-leaf"/></svg></span><div><strong>可核验能耗指标</strong><small>直接读取当前能源数据接口</small></div></div><div class="energy-evidence-metrics" id="energyEvidenceMetrics"><span>综合能耗<b>--</b></span><span>碳排放<b>--</b></span><span>碳强度<b>--</b></span><span>岸电利用率<b>--</b></span></div><button type="button" class="outline-button" data-task-template="analyze-energy" data-agent-target="task-analyze-energy">让小懿深度分析</button></section>
+            <section class="glass-card efficiency-card"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-leaf"/></svg></span><div><strong>可核验能耗指标</strong><small>直接读取当前能源数据接口</small></div></div><div class="energy-evidence-metrics" id="energyEvidenceMetrics"><span>综合能耗<b>--</b></span><span>碳排放<b>--</b></span><span>碳强度<b>--</b></span><span>岸电利用率<b>--</b></span></div><button type="button" class="outline-button" data-task-template="analyze-energy" data-agent-target="task-analyze-energy">让舷鸥深度分析</button></section>
             <section class="glass-card realtime-port-card" id="realtimeSimulatorPanel">
               <div class="realtime-port-heading">
                 <div><span class="heading-icon cyan"><svg><use href="#i-command"/></svg></span><div><strong>港口实时数据模拟与决策闭环</strong><small id="simulatorStatus">连接事件流中 · 不是现场实测</small></div></div>
@@ -281,23 +321,38 @@
         <section class="workspace-view" data-view="knowledge">
           <header class="view-header"><div><p>MARITIME KNOWLEDGE GRAPH</p><h2>港航知识库</h2><span class="knowledge-stats"><span><b id="knowledgeCount">—</b> 份专业文档</span><i></i><span><b id="knowledgeChunkCount">—</b> 个索引片段</span><i></i><span><b id="knowledgeOfficialCount">—</b> 个官方来源</span></span></div><div class="view-header-actions"><button type="button" class="outline-button catalog-button" data-action="knowledge-catalog" data-agent-target="knowledge-catalog"><svg><use href="#i-book"/></svg>专业目录</button><button type="button" class="outline-button" data-action="authority-coverage"><svg><use href="#i-chart"/></svg>权威覆盖</button><button type="button" class="outline-button source-audit-button" data-action="knowledge-sources" data-agent-target="knowledge-sources"><svg><use href="#i-check"/></svg>来源审计</button><button type="button" class="outline-button" data-action="knowledge-map"><svg><use href="#i-spark"/></svg>知识全景</button></div></header>
           <div class="knowledge-search"><svg><use href="#i-search"/></svg><input id="knowledgeSearch" data-agent-target="knowledge-search" type="search" placeholder="搜索港口运营、航运调度、岸电、TOS、安全应急..."><kbd>⌘ K</kbd></div>
+          <label class="knowledge-date-filter" for="knowledgeAsOf">正文适用日期 <input id="knowledgeAsOf" type="date"></label>
           <div class="knowledge-layout">
             <section class="knowledge-categories" id="knowledgeCategories"></section>
             <section class="glass-card knowledge-docs"><div class="card-heading"><span class="heading-icon violet"><svg><use href="#i-book"/></svg></span><div><strong>知识文件</strong><small id="knowledgeResultLabel">全部文档</small></div></div><div id="kbList" class="kb-list"></div></section>
-            <section class="glass-card knowledge-map-card"><img src="/web/xiaoyi-port-diagram.svg" alt="小懿港航知识图谱"><div><strong>港航知识全景</strong><span>覆盖港航专业领域、业务流程与可核验知识来源</span><button type="button" data-action="knowledge-map">展开查看</button></div></section>
+            <section class="glass-card knowledge-map-card"><img src="/web/xiaoyi-port-diagram.svg" alt="舷鸥港航知识图谱"><div><strong>港航知识全景</strong><span>覆盖港航专业领域、业务流程与可核验知识来源</span><button type="button" data-action="knowledge-map">展开查看</button></div></section>
           </div>
         </section>
 
         <section class="workspace-view" data-view="rl">
           <header class="view-header rl-center-header">
-            <div><p>PORT RL EVIDENCE CENTER</p><h2>真实训练与证据中心</h2><span>训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动</span></div>
+            <div><p>PORT RL EVIDENCE CENTER</p><h2>真实训练与证据中心</h2><span>训练中心、算法矩阵、舷鸥训练顾问、全系统助手同屏联动</span></div>
             <div class="view-header-actions">
               <button type="button" class="outline-button" data-rl-center-action="show-datasets"><svg><use href="#i-book"/></svg>训练数据与官方来源</button>
+              <a class="outline-button" href="/web/policy-replay.html">训练策略与基线回放</a>
+              <a class="outline-button" href="/web/actor-policy-replay.html">14B 工具策略回放</a>
+<a class="outline-button" href="/web/actor-transfer.html">14B 训练前后逐步对照</a>
+              <a class="outline-button" href="/web/harness-credit-review.html">14B 的 RL 工具编排实验</a>
+              <a class="outline-button" href="/web/free-policy-replay.html">自由选工具 RL 留出任务回放</a>
               <button type="button" class="outline-button" data-rl-center-action="show-evidence"><svg><use href="#i-check"/></svg>正式证据与失败候选</button>
               <button type="button" class="outline-button" data-rl-center-action="refresh"><svg><use href="#i-history"/></svg>刷新证据</button>
               <button type="button" class="primary-button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg>配置六算法对比</button>
             </div>
           </header>
+          <details id="trainingJobDetail" class="glass-card throughput-comparison" data-no-bilingual>
+            <summary>训练作业与留出测试 / Training jobs and held-out results</summary>
+            <form><label>作业编号 / Run ID<input name="run" type="text" required maxlength="64" list="trainingRecent"></label><datalist id="trainingRecent"></datalist>
+              <button class="outline-button">查看作业 / Open</button></form>
+            <p data-job-status role="status" aria-live="polite"></p><div data-job-body></div>
+            <button class="outline-button" type="button" data-job-retry hidden>恢复中断作业 / Retry from checkpoint</button>
+            <button class="outline-button" type="button" data-job-test hidden>在留出集评估 / Evaluate on held-out data</button>
+          </details>
+
           <div class="rl-center-layout">
             <section class="glass-card rl-center-overview">
               <div class="rl-center-title"><div><span>REPRODUCIBILITY LEDGER</span><strong>训练中心</strong><small>公开数据血缘 · 时间隔离 · 模型哈希 · 测试后回放</small></div><b id="rlCenterGate">LOADING</b></div>
@@ -311,7 +366,7 @@
             </section>
 
             <section class="glass-card rl-center-advisor-card">
-              <div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-spark"/></svg></span><div><strong>小懿训练顾问</strong><small>只根据当前数据、契约、运行记录与证据回答</small></div><span class="grounding-badge verified">证据约束</span></div>
+              <div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-spark"/></svg></span><div><strong>舷鸥训练顾问</strong><small>只根据当前数据、契约、运行记录与证据回答</small></div><span class="grounding-badge verified">证据约束</span></div>
               <div class="rl-advisor-feed" id="rlAdvisorFeed">
                 <div class="rl-advisor-message assistant"><i>懿</i><p>我正在读取数据集、算法契约与最近运行。你可以直接问：观测和动作是什么、哪套数据更可信、最近一次结果是否满足试点门禁。</p></div>
               </div>
@@ -321,7 +376,7 @@
                 <button type="button" data-rl-advisor-prompt="六种候选与基线的区别是什么，为什么保留PID和SOP规则？">解释六算法矩阵</button>
               </div>
               <form class="rl-advisor-composer" id="rlAdvisorForm">
-                <textarea id="rlAdvisorInput" rows="1" placeholder="向小懿训练顾问提问..." aria-label="训练顾问问题"></textarea>
+                <textarea id="rlAdvisorInput" rows="1" placeholder="向舷鸥训练顾问提问..." aria-label="训练顾问问题"></textarea>
                 <button type="submit" aria-label="发送给训练顾问"><svg><use href="#i-send"/></svg></button>
               </form>
             </section>
@@ -332,7 +387,7 @@
             </section>
 
             <section class="glass-card rl-center-system-card">
-              <div class="card-heading"><span class="heading-icon green"><svg><use href="#i-command"/></svg></span><div><strong>小懿全系统助手</strong><small>训练按钮到数据、算法、测试、证据和港口接入的真实联动</small></div><b class="system-link-pulse">LINKED</b></div>
+              <div class="card-heading"><span class="heading-icon green"><svg><use href="#i-command"/></svg></span><div><strong>舷鸥全系统助手</strong><small>训练按钮到数据、算法、测试、证据和港口接入的真实联动</small></div><b class="system-link-pulse">LINKED</b></div>
               <div class="rl-system-linkage" id="rlSystemLinkage"></div>
               <div class="rl-system-actions">
                 <button type="button" data-rl-center-action="start-training"><svg><use href="#i-play"/></svg><span>训练中心</span></button>
@@ -348,7 +403,7 @@
         </section>
 
         <section class="workspace-view" data-view="tasks">
-          <header class="view-header"><div><p>AI ACTION CENTER</p><h2>任务中心</h2><span>小懿可在安全白名单内逐步执行，生产操作始终需要人工确认</span></div><button type="button" class="primary-button" data-action="new-task"><svg><use href="#i-plus"/></svg>新建智能任务</button></header>
+          <header class="view-header"><div><p>AI ACTION CENTER</p><h2>任务中心</h2><span>舷鸥可在安全白名单内逐步执行，生产操作始终需要人工确认</span></div><button type="button" class="primary-button" data-action="new-task"><svg><use href="#i-plus"/></svg>新建智能任务</button></header>
           <div class="task-center-layout">
             <section class="glass-card template-panel"><div class="card-heading"><span class="heading-icon cyan"><svg><use href="#i-spark"/></svg></span><div><strong>智能任务模板</strong><small>点击即可创建可视化执行流程</small></div></div><div class="task-templates" id="taskTemplates"></div></section>
             <section class="glass-card running-panel"><div class="card-heading"><span class="heading-icon green"><svg><use href="#i-task"/></svg></span><div><strong>执行记录</strong><small>每一步均保留时间与结果</small></div><span class="status-pill"><i></i>DRY-RUN 审计</span></div><div id="taskList" class="task-list"></div></section>
@@ -403,9 +458,9 @@
   <button id="clearTopicsBtn" type="button" hidden></button>
   <span id="kbChip" hidden></span>
 
-  <aside class="demo-guide" id="demoGuide" aria-label="小懿AI演示引导" aria-hidden="true" hidden>
+  <aside class="demo-guide" id="demoGuide" aria-label="舷鸥 · GullMate演示引导" aria-hidden="true" hidden>
     <header class="demo-guide__header">
-      <div><span>DEMO GUIDE</span><strong>小懿AI核心闭环</strong></div>
+      <div><span>DEMO GUIDE</span><strong>舷鸥 · GullMate核心闭环</strong></div>
       <div class="demo-guide__header-actions">
         <button type="button" id="demoGuideResetAll" data-demo-guide-action="reset-all" aria-label="重置整个演示">↻</button>
         <button type="button" data-demo-guide-action="collapse" aria-label="收起演示引导">⌃</button>
@@ -433,17 +488,24 @@
 
   <script src="/web/runtime_contract.js?v=20260814-security-r1" defer></script>
   <script src="/web/linked_agent.js?v=20261101-v13" defer></script>
-  <script src="/web/harness.js?v=20261101-v13" defer></script>
+  <script src="/web/harness.js?v=20261110-recovery-evidence" defer></script>
   <script src="/web/remediation_harness.js?v=20261030-remediation-1" defer></script>
   <script src="/web/learning_harness_v3.js?v=20261030-learning-1" defer></script>
   <script src="/web/risk_harness_v4.js?v=20261030-risk-1" defer></script>
   <script src="/web/crossport_harness.js?v=20261030-crossport-6" defer></script>
-  <script src="/web/joint_harness.js?v=20261031-full-demo-audit-v8" defer></script>
+  <script src="/web/joint_harness.js?v=20261110-mobile-handoff" defer></script>
   <script src="/web/proof_console.js?v=20261031-full-demo-audit-v8" defer></script>
-  <script src="/web/harness_chat.js?v=20261101-v13" defer></script>
-  <script src="/web/app.js?v=20261101-v13" defer></script>
+  <script src="/web/harness_chat.js?v=20261112-deep-storage" defer></script>
+  <script src="/web/offer_comparison.js?v=20261106" defer></script>
+  <script src="/web/app.js?v=20261110-cited-passages" defer></script>
+  <script src="/web/navigation-language.js?v=1" defer></script>
   <script src="/web/demo_guide.js?v=20261031-full-demo-audit-v8" defer></script>
 <script src="/web/demo-evidence.js?v=20261021" defer></script>
   <script defer data-system="xiaoyi" src="/web/system-data-desk.js?v=20261023-6"></script>
+  <script src="/web/throughput-comparison.js?v=1" defer></script>
+<script src="/web/training-trace.js?v=1" defer></script>
+<script src="/web/training-job.js?v=1" defer></script>
+<script src="/web/gullmate-model-inventory.js?v=1" defer></script>
+<script src="/web/system-components.js?v=1" defer></script>
 </body>
 </html>

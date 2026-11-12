@@ -1,0 +1,15 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>自主工单与跨系统对账 · 小鸥</title><style>
+*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0;background:#f0f4f1;color:#173b3c;font:16px/1.6 "Source Sans 3","Microsoft YaHei",sans-serif}main{max-width:980px;margin:auto;padding:24px clamp(14px,4vw,42px) 50px}header{border-bottom:2px solid #1a6861}h1{margin:12px 0 5px;font-size:clamp(28px,5vw,43px);line-height:1.2}h2{margin:0 0 8px;font-size:20px}p{margin:8px 0}section{background:#fff;border:1px solid #cddbd2;border-radius:7px;margin:14px 0;padding:clamp(12px,3vw,22px)}a{color:#12695d}label{display:grid;gap:5px}select,button,textarea{font:inherit;color:inherit;max-width:100%;border:1px solid #95aaa3;border-radius:4px;background:white;padding:6px 9px}button{cursor:pointer}button.primary,button[aria-pressed=true]{background:#165c57;color:white}textarea{width:100%;min-height:95px;resize:vertical}nav,.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}#answer,#latest,.question{white-space:pre-wrap;overflow-wrap:anywhere}.note{color:#49665e}summary{cursor:pointer}details,li{margin:6px 0}pre,code{white-space:pre-wrap;overflow-wrap:anywhere;font:13px/1.55 "IBM Plex Mono",Consolas,monospace}#lane{font-size:15px}#answer{font-size:18px}table{border-collapse:collapse;width:100%}td,th{padding:5px;text-align:left;border-bottom:1px solid #d4dfd8}#checks{margin:0;padding-left:20px}.ok{color:#16604b}.failed{color:#9a4727}li::marker{color:#51736d}
+</style><main><a href="../../policy-replay.html">返回策略中心</a><header><h1>自主工单与跨系统对账</h1><p>查看小鸥怎样拆解业务问题、选择工具，并用原始回执完成核对。</p></header>
+<nav><button id="reviewTab" aria-pressed="true">工单回放</button><button id="runTab" aria-pressed="false">新建只读工单</button></nav>
+<div id="review"><label>已验证的实际运行<select id="pick"></select></label><p id="error" role="status"></p>
+<div id="record" hidden><section><h2>业务问题</h2><p id="question" class="question"></p><p id="lane" class="note"></p></section>
+<section><h2>交付结果</h2><p id="verdict"></p><p id="answer"></p><p id="basis" class="note"></p></section>
+<section><h2>模型计划与实际调用</h2><div id="plans"></div><div id="traces"></div></section>
+<details><summary>核验条件与工单编号</summary><code id="id"></code><ul id="checks"></ul></details></div></div>
+<div id="compose" hidden><section><h2>提交到本机小鸥任务中心</h2><p class="note">此入口仅开放只读工具。运行需要本机 14B，实时读取还需要对应业务系统在线。</p>
+<label>业务问题<textarea id="goal" maxlength="4000">请只读核对数字孪生的能力覆盖（coverage）和能碳系统的预测（forecast）。分别报告场景覆盖数、场景总数、能碳预测的模型 ID 和预测时距 horizon_hours 列表，引用两份业务工件并说明现场权限。</textarea></label>
+<div class="actions"><button class="primary" id="send">提交工单</button><button id="clear">新起一单</button></div><p role="status" id="message"></p><p id="local" hidden>当前网关尚未加载这类专业工具。可通过已安装的本机命令运行同一问题。</p><code id="example"></code></section>
+<section id="out" hidden><h2>本次工单</h2><p id="stage"></p><ol id="actions"></ol><p id="latest"></p><a id="export" target="_blank" rel="noopener">查看该工单导出</a></section></div>
+<p class="note">这里的证据来自工程仿真、公开电表和真实本机系统调用。生产控制权限关闭。</p></main><script type="module" src="./orders.js"></script></html>

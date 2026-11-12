@@ -78,7 +78,7 @@ def run_probe(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="记录小懿RAG + 本地LoRA生成 + 回答后证据报告的端到端探针"
+        description="记录舷鸥RAG + 本地LoRA生成 + 回答后证据报告的端到端探针"
     )
     parser.add_argument("--base-url", default="http://127.0.0.1:8010")
     parser.add_argument("--question", default=DEFAULT_QUESTION)

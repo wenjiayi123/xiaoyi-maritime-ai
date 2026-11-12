@@ -15,7 +15,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "data" / "model_registry.json"
-DEFAULT_DATASET = ROOT / ".runtime" / "finetuning" / "xiaoyi-maritime-sft-v1"
+DEFAULT_DATASET = ROOT / ".runtime" / "finetuning" / "xiaoyi-maritime-sft-v4"
 DEFAULT_OUTPUT = ROOT / "artifacts" / "lora" / "xiaoyi-maritime-1.7b"
 DEFAULT_BASE_MODEL = ROOT / ".runtime" / "models" / "maritime-training-1.7b"
 
@@ -89,10 +89,13 @@ def _training_contract() -> dict[str, Any]:
     }
 
 
-def _load_jsonl(path: Path) -> list[dict[str, Any]]:
+def _load_jsonl(path: Path, expected_sha256: str | None = None) -> list[dict[str, Any]]:
+    payload = path.read_bytes()
+    if expected_sha256 is not None and hashlib.sha256(payload).hexdigest() != expected_sha256:
+        raise ValueError("数据核验后文件发生变更，请重新核验后训练")
     return [
         json.loads(line)
-        for line in path.read_text(encoding="utf-8").splitlines()
+        for line in payload.decode("utf-8").splitlines()
         if line.strip()
     ]
 
@@ -176,6 +179,13 @@ def _mean_loss(
 
 
 def train(args: argparse.Namespace) -> dict[str, Any]:
+    if __package__:
+        from .build_lora_dataset import audit_dataset
+    else:
+        from build_lora_dataset import audit_dataset
+    dataset_audit = audit_dataset(args.dataset_dir)
+    if not dataset_audit["ready_for_training"]:
+        raise ValueError("训练数据核验未通过：" + json.dumps(dataset_audit, ensure_ascii=False))
     torch, LoraConfig, get_peft_model, AutoModelForCausalLM, AutoTokenizer = (
         _require_dependencies()
     )
@@ -197,9 +207,9 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         or not test_path.is_file()
     ):
         raise SystemExit("LoRA数据集不存在；先运行 scripts/build_lora_dataset.py")
-    train_items = _load_jsonl(train_path)
-    validation_items = _load_jsonl(validation_path)
-    test_items = _load_jsonl(test_path)
+    train_items = _load_jsonl(train_path, dataset_audit["partition_sha256"]["train"])
+    validation_items = _load_jsonl(validation_path, dataset_audit["partition_sha256"]["validation"])
+    test_items = _load_jsonl(test_path, dataset_audit["partition_sha256"]["test"])
     if not train_items:
         raise SystemExit("训练分区为空")
 
@@ -337,12 +347,13 @@ def train(args: argparse.Namespace) -> dict[str, Any]:
         },
         "dataset": {
             "directory": str(args.dataset_dir),
+            "audit": dataset_audit,
             "train_examples": len(train_items),
             "validation_examples": len(validation_items),
             "test_examples": len(test_items),
-            "train_sha256": _sha256_file(train_path),
-            "validation_sha256": _sha256_file(validation_path),
-            "test_sha256": _sha256_file(test_path),
+            "train_sha256": dataset_audit["partition_sha256"]["train"],
+            "validation_sha256": dataset_audit["partition_sha256"]["validation"],
+            "test_sha256": dataset_audit["partition_sha256"]["test"],
         },
         "lora": {
             "rank": args.rank,

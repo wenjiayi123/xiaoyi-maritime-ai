@@ -182,7 +182,7 @@ def test_idempotency_replays_success_and_rejects_key_reuse() -> None:
 def test_server_chat_history_streaming_and_clear() -> None:
     session_id = f"test-{uuid4().hex}"
     body = {
-        "question": "小懿的核心能力是什么？",
+        "question": "舷鸥的核心能力是什么？",
         "mode": "expert",
         "top_k": 5,
         "strict_evidence": True,
@@ -221,7 +221,7 @@ def test_external_model_requires_explicit_data_egress_authorization() -> None:
     )
     gateway = ModelGateway(configuration)
     local = ChatResponse(
-        app="小懿",
+        app="舷鸥",
         mode="expert",
         intent="knowledge_qa",
         question="test",

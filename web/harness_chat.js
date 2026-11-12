@@ -13,6 +13,7 @@ window.createHarnessChat = function ({api: rawApi, escapeHtml: esc, onUpdate}) {
   function button(action, text) { return `<button type="button" data-hchat="${action}" ${busy?"disabled":""}>${text}</button>`; }
   function render() {
     if (!task) return;
+    const openResultIds=new Set([...root().querySelectorAll("details[open] [data-ref]")].map(x=>x.dataset.ref));
     const previousInput = root().querySelector("[data-hchat-input]");
     const draft = previousInput?.value || "", focused = document.activeElement === previousInput;
     const selection = previousInput?.selectionStart;
@@ -20,7 +21,7 @@ window.createHarnessChat = function ({api: rawApi, escapeHtml: esc, onUpdate}) {
     root().innerHTML = `<header><strong>Harness 自主任务</strong><span>${esc(labels[task.status]||task.status)}</span></header>
       <p>${esc(task.goal)}</p><small>模型逐步选择工具 · ${task.usage.tool_calls} 次工具调用 · ${Math.round(task.usage.active_seconds)} 秒活动时间</small>
       ${task.plan.length?`<ol>${task.plan.map(s=>`<li>${esc(s)}</li>`).join("")}</ol>`:""}
-      <div class="harness-chat-results">${task.results.map(r=>`<details><summary>${esc(r.id)} · ${esc(r.tool)} · ${r.ok?"成功":r.resolved_by?"失败后已恢复":"未成功"}</summary><pre>${esc(r.summary)}</pre></details>`).join("")}</div>
+      <div class="harness-chat-results">${task.results.map(r=>`<details><summary>${esc(r.id)} · ${esc(r.tool)} · ${r.ok?"成功":r.resolved_by?"失败后已恢复":"未成功"}</summary><pre>${esc(r.summary)}</pre>${r.ok&&r.tool==="policy.deep_storage"?'<button type="button" data-hchat="deep" data-ref="'+esc(r.id)+'">查看 24 小时策略</button>':""}</details>`).join("")}</div>
       ${task.status==="waiting_approval"&&pending?`<div class="harness-chat-approval"><b>请核对本次具体操作</b><pre>${esc(JSON.stringify({tool:pending.action.tool,arguments:pending.action.arguments,preview:pending.prepared},null,2))}</pre>${button("approve","批准本次操作")}${button("reject","拒绝")}</div>`:""}
       ${task.question&&task.status==="waiting_input"?`<p>${esc(task.question)}</p>`:""}
       ${task.final?`<p class="harness-chat-final">${esc(task.final.text)}</p><small>${esc(task.final.data_notice)}</small>`:""}
@@ -29,6 +30,7 @@ window.createHarnessChat = function ({api: rawApi, escapeHtml: esc, onUpdate}) {
       ${!terminal.has(task.status)?`<label>补充目标或约束<input data-hchat-input placeholder="例如：先不要改配置，只做参数对比"></label>${button("input","发送补充")}`:""}<p data-hchat-notice role="status"></p>`;
     const nextInput = root().querySelector("[data-hchat-input]");
     if (nextInput) { nextInput.value = draft; if (focused) { nextInput.focus(); nextInput.setSelectionRange(selection,selection); } }
+    root().querySelectorAll("[data-ref]").forEach(x=>{if(openResultIds.has(x.dataset.ref))x.closest("details").open=true;});
     onUpdate?.(task);
   }
   async function refresh() {
@@ -50,6 +52,15 @@ window.createHarnessChat = function ({api: rawApi, escapeHtml: esc, onUpdate}) {
     const input = root().querySelector("[data-hchat-input]")?.value.trim();
     busy = true;
     try {
+      if (action === "deep") {
+        const result=task.results.find(x=>x.id===control.dataset.ref && x.tool==="policy.deep_storage" && x.ok);
+        if(!result)throw new Error("找不到对应的储能回执");
+        const file=await api("/api/harness/tasks/"+id+"/artifacts/"+encodeURIComponent(result.artifact));
+        if(task?.id!==id)return;
+        const {openDeepStorage}=await import("/web/deep-storage-view.js");
+        if(task?.id===id)openDeepStorage(JSON.parse(file.content),control);
+        return;
+      }
       if (action === "refresh") { await refresh(); return; }
       if (["pause","resume","cancel"].includes(action)) await api(`/api/harness/tasks/${id}/control/${action}`, {method:"POST"});
       if (["approve","reject"].includes(action)) {

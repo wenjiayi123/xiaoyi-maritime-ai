@@ -4,7 +4,7 @@ import argparse
 import hashlib
 import json
 import re
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -13,15 +13,15 @@ ROOT = Path(__file__).resolve().parents[1]
 KB_DIR = ROOT / "data" / "kb"
 REGISTRY_PATH = ROOT / "data" / "source_registry.json"
 EVALUATION_DIR = ROOT / "data" / "evaluation"
-DEFAULT_OUTPUT = ROOT / ".runtime" / "finetuning" / "xiaoyi-maritime-sft-v1"
-CURATED_MULTITURN_PATH = ROOT / "data" / "finetuning" / "curated_multiturn_v2.json"
+DEFAULT_OUTPUT = ROOT / ".runtime" / "finetuning" / "xiaoyi-maritime-sft-v4"
+CURATED_MULTITURN_PATH = ROOT / "data" / "finetuning" / "curated_multiturn_gullmate_v3.json"
 CURATED_SUPERVISION_PATHS = (
     CURATED_MULTITURN_PATH,
     ROOT / "data" / "finetuning" / "curated_workforce_daily_v3.json",
     ROOT / "data" / "finetuning" / "curated_maritime_gaps_v3.json",
 )
 SYSTEM_PROMPT = (
-    "你是港航专业助手小懿。用自然、直接、专业的中文回答，优先给出判断和下一步。"
+    "你是港航专业助手「舷鸥 · GullMate」，日常称呼是「小鸥」。问候时自称小鸥。用自然、直接、专业的中文回答，优先给出判断和下一步。"
     "生活、健康、情绪、天气、通勤等日常问题先正常回答，再说明对港航当班与现场"
     "作业的影响，并针对船员、引航、调度中控、装卸堆场、闸口、维修等岗位给出"
     "安全建议；纯问候、身份、致谢或告别无需生硬扩展。"
@@ -220,7 +220,143 @@ def _curated_multiturn_examples(
     return curated
 
 
-def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727) -> dict[str, Any]:
+def prompt_key(item: dict[str, Any]) -> str:
+    """Include preceding turns so context-dependent followups remain distinct."""
+    return json.dumps([
+        [message["role"], _normalize_question(message["content"])]
+        for message in item["messages"][:-1]
+    ], ensure_ascii=False)
+
+
+def separate_repeated_prompts(examples: list[dict]) -> tuple[list[dict], list[dict]]:
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for item in examples:
+        groups[prompt_key(item)].append(item)
+    retained, quarantine = [], []
+    for group in groups.values():
+        reason = ""
+        if len({item["split"] for item in group}) > 1:
+            reason = "identical_prompt_across_splits"
+        elif len({_normalize_question(item["answer"]) for item in group}) > 1:
+            reason = "conflicting_answers_for_identical_prompt"
+        if reason:
+            quarantine.extend({"reason": reason, "example": item} for item in group)
+        else:
+            retained.append(group[0])
+            quarantine.extend({"reason": "duplicate_prompt_and_answer", "example": item} for item in group[1:])
+    return retained, quarantine
+
+
+def valid_example(item: dict, split: str) -> bool:
+    try:
+        messages = item["messages"]
+        if not isinstance(messages, list) or len(messages) < 2:
+            return False
+        if not all(m["role"] in {"system", "user", "assistant"}
+                   and isinstance(m["content"], str) and m["content"].strip() for m in messages):
+            return False
+        users = [m["content"] for m in messages if m["role"] == "user"]
+        return bool(
+            messages[-1]["role"] == "assistant" and item["answer"] == messages[-1]["content"]
+            and users and item["question"] == users[-1] and item["split"] == split
+            and isinstance(item["id"], str) and item["id"]
+            and isinstance(item["source"], str) and item["source"]
+            and re.fullmatch(r"[0-9a-f]{64}", item["source_sha256"])
+        )
+    except (KeyError, TypeError):
+        return False
+
+
+def audit_dataset(directory: Path) -> dict[str, Any]:
+    """Validate frozen files and split isolation before loading a training model."""
+    errors: list[str] = []
+    drift: set[str] = set()
+    manifest_path = directory / "manifest.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    expected = {Path(name).name: value for name, value in manifest.get("artifact_sha256", {}).items()}
+    counts, hashes, ids = {}, {}, set()
+    sources: dict[str, set[str]] = defaultdict(set)
+    prompts: dict[str, set[str]] = defaultdict(set)
+    evaluation_questions = held_out_questions()
+    source_hashes: dict[Path, str | None] = {}
+    for split in ("train", "validation", "test"):
+        path = directory / f"{split}.jsonl"
+        if not path.is_file():
+            errors.append(f"missing_partition:{split}")
+            continue
+        payload = path.read_bytes()
+        hashes[split] = _sha256_bytes(payload)
+        if hashes[split] != expected.get(path.name):
+            errors.append(f"partition_hash_mismatch:{split}")
+        rows = []
+        for line_no, line in enumerate(payload.decode("utf-8").splitlines(), 1):
+            try:
+                item = json.loads(line)
+            except ValueError:
+                item = None
+            if not valid_example(item, split):
+                errors.append(f"invalid_example:{split}:{line_no}")
+                continue
+            users = [m["content"] for m in item["messages"] if m["role"] == "user"]
+            rows.append(item)
+            if item["id"] in ids:
+                errors.append(f"duplicate_id:{item['id']}")
+            ids.add(item["id"])
+            sources[item["source"]].add(split)
+            prompts[prompt_key(item)].add(split)
+            if any(_normalize_question(question) in evaluation_questions for question in users):
+                errors.append(f"evaluation_question_overlap:{item['id']}")
+            source_name = item.get("source_file", item["source"])
+            source = ROOT / "data" / ("finetuning" if item.get("source_file") else "kb") / source_name
+            if Path(source_name).name != source_name:
+                errors.append(f"invalid_source_path:{item['id']}")
+                continue
+            if source not in source_hashes:
+                source_hashes[source] = _sha256_file(source) if source.is_file() else None
+            if source_hashes[source] != item["source_sha256"]:
+                drift.add(source_name)
+        counts[split] = len(rows)
+        if not rows:
+            errors.append(f"empty_partition:{split}")
+    cross_sources = sorted(source for source, splits in sources.items() if len(splits) > 1)
+    cross_prompts = sum(len(splits) > 1 for splits in prompts.values())
+    if cross_sources:
+        errors.append("source_crosses_partitions")
+    if cross_prompts:
+        errors.append("identical_prompt_crosses_partitions")
+    if counts != manifest.get("split_counts") or sum(counts.values()) != manifest.get("example_count"):
+        errors.append("manifest_count_mismatch")
+    if manifest.get("source_registry_sha256") != _sha256_file(REGISTRY_PATH):
+        drift.add("source_registry.json")
+    if "quarantine_sha256" in manifest:
+        quarantine = directory / "quarantine.jsonl"
+        if not quarantine.is_file() or _sha256_file(quarantine) != manifest["quarantine_sha256"]:
+            errors.append("quarantine_hash_mismatch")
+    return {
+        "schema_version": "1.0", "dataset": str(directory.resolve()),
+        "manifest_sha256": _sha256_file(manifest_path), "split_counts": counts, "partition_sha256": hashes,
+        "errors": errors, "source_drift": sorted(drift),
+        "cross_split_sources": cross_sources, "cross_split_prompt_count": cross_prompts,
+        "ready_for_training": not errors and not drift,
+        "scope": "Exact input, source, split and file integrity checks. Domain expertise and semantic overlap require separate review.",
+    }
+
+
+def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727, dataset_id: str = "xiaoyi-maritime-sft-v4") -> dict[str, Any]:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    lock = output_dir / ".dataset-build.lock"
+    lock.open("x", encoding="utf-8").close()
+    try:
+        return _build_dataset(output_dir, seed=seed, dataset_id=dataset_id)
+    finally:
+        # Keep partial files for diagnosis. Close the handle before unlinking
+        # on Windows. A failed build must use a new output directory.
+        lock.unlink()
+
+
+def _build_dataset(output_dir: Path, *, seed: int, dataset_id: str) -> dict[str, Any]:
+    if any((output_dir / name).exists() for name in ("manifest.json", "train.jsonl", "validation.jsonl", "test.jsonl")):
+        raise FileExistsError("数据目录已有版本，请指定新的输出目录以保留原始数据")
     registry = _registry_documents()
     held_out = held_out_questions()
     examples_by_source: dict[str, list[dict[str, Any]]] = {}
@@ -251,6 +387,7 @@ def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727) ->
         excluded_questions=held_out,
     )
     examples.extend(curated_examples)
+    examples, quarantine = separate_repeated_prompts(examples)
 
     output_dir.mkdir(parents=True, exist_ok=True)
     counts: Counter[str] = Counter(item["split"] for item in examples)
@@ -269,11 +406,16 @@ def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727) ->
             artifact_name = destination.name
         artifact_hashes[artifact_name] = _sha256_file(destination)
 
+    quarantine_path = output_dir / "quarantine.jsonl"
+    quarantine_path.write_text("".join(json.dumps(row, ensure_ascii=False, sort_keys=True) + "\n"
+                                       for row in quarantine), encoding="utf-8")
+
     manifest = {
         "schema_version": "1.0",
-        "dataset_id": "xiaoyi-maritime-sft-v3",
+        "dataset_id": dataset_id,
         "purpose": "LoRA learns maritime language, answer structure, clarification and refusal behavior; RAG remains the authority for current or private facts.",
         "generator": "scripts/build_lora_dataset.py",
+        "generator_sha256": _sha256_file(Path(__file__)),
         "seed": seed,
         "split_policy": "source-grouped deterministic 80/10/10 hash split; paraphrases from one source never cross splits",
         "example_count": len(examples),
@@ -297,6 +439,9 @@ def build_dataset(output_dir: Path = DEFAULT_OUTPUT, *, seed: int = 20260727) ->
         ),
         "source_registry_sha256": _sha256_file(REGISTRY_PATH),
         "artifact_sha256": artifact_hashes,
+        "quarantined_count": len(quarantine),
+        "quarantine_sha256": _sha256_file(quarantine_path),
+        "prompt_isolation_policy": "Quarantine all identical prompts spanning partitions or carrying conflicting answers; preserve preceding conversational turns.",
         "limitations": [
             "Repository-authored supervision, not an independent blinded set reviewed by operational participants excluded from development.",
             "No raw private material is exported by this builder.",
@@ -316,9 +461,15 @@ def main() -> None:
         description="从内部整理的明确问答段落构建可审计的LoRA SFT数据集"
     )
     parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--dataset-id", default="xiaoyi-maritime-sft-v4", help="新不可变版本的标识")
     parser.add_argument("--seed", type=int, default=20260727)
+    parser.add_argument("--audit-dir", type=Path, help="只读核验一个已有的数据版本")
     args = parser.parse_args()
-    manifest = build_dataset(args.output_dir, seed=args.seed)
+    if args.audit_dir:
+        result = audit_dataset(args.audit_dir)
+        print(json.dumps(result, ensure_ascii=False, indent=2))
+        raise SystemExit(0 if result["ready_for_training"] else 1)
+    manifest = build_dataset(args.output_dir, seed=args.seed, dataset_id=args.dataset_id)
     print(json.dumps(manifest, ensure_ascii=False, indent=2))
 
 

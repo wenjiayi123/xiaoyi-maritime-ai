@@ -55,6 +55,13 @@ class RuntimeStore:
                     context_json TEXT NOT NULL,
                     updated_at TEXT NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS actor_contexts (
+                    actor_id TEXT NOT NULL,
+                    session_id TEXT NOT NULL,
+                    context_json TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    PRIMARY KEY(actor_id, session_id)
+                );
                 CREATE TABLE IF NOT EXISTS audit_events (
                     id TEXT PRIMARY KEY,
                     correlation_id TEXT NOT NULL,
@@ -144,24 +151,30 @@ class RuntimeStore:
                 "error": "runtime_store_unavailable",
             }
 
-    def save_context(self, session_id: str, context: dict[str, Any]) -> dict[str, Any]:
+    def save_context(self, session_id: str, context: dict[str, Any], *, actor_id: str | None = None) -> dict[str, Any]:
         updated_at = _now()
+        if actor_id is None:
+            sql = "INSERT INTO contexts(session_id, context_json, updated_at) VALUES(?, ?, ?)"
+            params = (session_id, _json(context), updated_at)
+        else:
+            sql = "INSERT INTO actor_contexts(actor_id, session_id, context_json, updated_at) VALUES(?, ?, ?, ?)"
+            params = (actor_id, session_id, _json(context), updated_at)
         with self._lock, self._connect() as connection:
             connection.execute(
-                """INSERT INTO contexts(session_id, context_json, updated_at)
-                VALUES(?, ?, ?)
-                ON CONFLICT(session_id) DO UPDATE SET
-                  context_json=excluded.context_json, updated_at=excluded.updated_at""",
-                (session_id, _json(context), updated_at),
+                sql + " ON CONFLICT DO UPDATE SET context_json=excluded.context_json, updated_at=excluded.updated_at",
+                params,
             )
         return {"session_id": session_id, "context": context, "updated_at": updated_at}
 
-    def get_context(self, session_id: str) -> Optional[dict[str, Any]]:
+    def get_context(self, session_id: str, *, actor_id: str | None = None) -> Optional[dict[str, Any]]:
+        if actor_id is None:
+            sql = "SELECT context_json, updated_at FROM contexts WHERE session_id=?"
+            params = (session_id,)
+        else:
+            sql = "SELECT context_json, updated_at FROM actor_contexts WHERE session_id=? AND actor_id=?"
+            params = (session_id, actor_id)
         with self._connect() as connection:
-            row = connection.execute(
-                "SELECT context_json, updated_at FROM contexts WHERE session_id=?",
-                (session_id,),
-            ).fetchone()
+            row = connection.execute(sql, params).fetchone()
         if row is None:
             return None
         return {
@@ -315,6 +328,21 @@ class RuntimeStore:
             )
         return self._public_chat_turn(item)
 
+    def list_chat_sessions(self, *, actor_id: str, cutoff: str, limit: int = 30) -> list[dict[str, Any]]:
+        with self._connect() as connection:
+            rows = connection.execute(
+                """WITH mine AS (
+                    SELECT session_id, question, created_at,
+                           COUNT(*) OVER (PARTITION BY session_id) AS turns,
+                           ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY created_at DESC, id DESC) AS position
+                    FROM chat_turns WHERE actor_id = ? AND created_at >= ?
+                )
+                SELECT session_id, question AS title, created_at, turns FROM mine WHERE position = 1
+                ORDER BY created_at DESC, session_id LIMIT ?""",
+                (actor_id, cutoff, limit),
+            ).fetchall()
+        return [dict(row) for row in rows]
+
     def list_chat_turns(
         self,
         session_id: str,
@@ -322,13 +350,17 @@ class RuntimeStore:
         actor_id: str,
         allow_all: bool = False,
         limit: int = 50,
+        cutoff: Optional[str] = None,
     ) -> list[dict[str, Any]]:
         sql = "SELECT * FROM chat_turns WHERE session_id=?"
         params: list[Any] = [session_id]
         if not allow_all:
             sql += " AND actor_id=?"
             params.append(actor_id)
-        sql += " ORDER BY created_at DESC LIMIT ?"
+        if cutoff is not None:
+            sql += " AND created_at>=?"
+            params.append(cutoff)
+        sql += " ORDER BY created_at DESC, id DESC LIMIT ?"
         params.append(max(1, min(limit, 200)))
         with self._connect() as connection:
             rows = connection.execute(sql, params).fetchall()
@@ -373,11 +405,13 @@ class RuntimeStore:
             ).fetchone()
         return json.loads(row["payload_json"]) if row else None
 
-    def list_artifacts(self, kind: str, *, limit: int = 100) -> list[dict[str, Any]]:
+    def list_artifacts(self, kind: str, *, limit: int = 100, actor_id: Optional[str] = None) -> list[dict[str, Any]]:
         with self._connect() as connection:
             rows = connection.execute(
-                "SELECT payload_json FROM runtime_artifacts WHERE kind=? ORDER BY updated_at DESC LIMIT ?",
-                (kind, max(1, min(limit, 500))),
+                "SELECT payload_json FROM runtime_artifacts WHERE kind=?"
+                + (" AND json_extract(payload_json, '$.actor_id')=?" if actor_id is not None else "")
+                + " ORDER BY updated_at DESC, id DESC LIMIT ?",
+                (kind, *([actor_id] if actor_id is not None else []), max(1, min(limit, 500))),
             ).fetchall()
         return [json.loads(row["payload_json"]) for row in rows]
 

@@ -8,7 +8,7 @@ from app.harness.api import perform
 from app.harness.dual_api import identity_for
 from app.harness import proof_v5, research_v6
 
-router = APIRouter(prefix="/api/harness/proof", tags=["小懿实证演示"])
+router = APIRouter(prefix="/api/harness/proof", tags=["舷鸥实证演示"])
 
 
 @router.get("/catalog")

@@ -63,7 +63,7 @@ def _markdown(report: dict[str, Any]) -> str:
     result = report["benchmark"]
     snapshot = report["knowledge_snapshot"]
     categories = result["categories"]
-    return f"""# 小懿AI 主张—证据对齐固定基准 v4
+    return f"""# 舷鸥 · GullMate 主张—证据对齐固定基准 v4
 
 生成时间：{report["generated_at"]}
 

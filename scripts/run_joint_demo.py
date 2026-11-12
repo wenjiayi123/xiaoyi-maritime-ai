@@ -1,4 +1,4 @@
-"""Start the existing Xiaoyi launcher and the built Flutter receipt client locally."""
+"""Start the existing GullMate launcher and the built Flutter receipt client locally."""
 from __future__ import annotations
 
 import argparse
@@ -39,7 +39,7 @@ def main():
         with urlopen("http://127.0.0.1:7357/", timeout=3) as response:
             if "PortAI 港口数字孪生" not in response.read().decode():
                 raise SystemExit("7357端口不是预期的移动端构建。")
-        print("小懿联合API和Flutter回执端就绪。")
+        print("舷鸥联合API和Flutter回执端就绪。")
         return
     children = []
     handles = []
@@ -67,7 +67,7 @@ def main():
                     break
                 except (URLError, TimeoutError):
                     if stopping or children[-1].poll() is not None or time.monotonic() > deadline:
-                        raise RuntimeError("小懿未在预算内启动，请查看.runtime/joint-demo/xiaoyi.log")
+                        raise RuntimeError("舷鸥未在预算内启动，请查看.runtime/joint-demo/xiaoyi.log")
                     time.sleep(.5)
         if occupied(7357):
             with urlopen("http://127.0.0.1:7357/", timeout=3) as response:

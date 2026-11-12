@@ -1,6 +1,7 @@
 import hashlib
 from datetime import date
 
+from app.provenance import load_source_registry
 from app.models import ChatRequest
 from app.retrieval import KnowledgeBase
 from app.xiaoyi import XiaoyiAI
@@ -31,9 +32,10 @@ def test_strict_mode_returns_auditable_index_evidence() -> None:
     assert first.provenance_type == "internal_curated"
     assert first.official is False
     assert first.verification_status == "not_independently_verified"
-    assert first.institution == "小懿AI项目内部资料整理"
-    assert first.source_url is None
-    assert first.version in {"unversioned", "internal-2026-07-11"}
+    assert first.institution == "舷鸥 · GullMate项目内部资料整理"
+    registered = load_source_registry().documents[first.source]
+    assert first.source_url == registered.source_url
+    assert first.version == registered.version
     assert first.checksum_sha256 and len(first.checksum_sha256) == 64
     assert first.chunk_checksum_sha256 and len(first.chunk_checksum_sha256) == 64
 
@@ -98,7 +100,7 @@ def test_identity_uses_live_knowledge_inventory_and_end_to_end_positioning() -> 
     result = XiaoyiAI().ask("你是谁，你能干什么？")
 
     assert "129 份港航专业文档" in result.answer
-    assert "882 个可检索知识片段" in result.answer
+    assert "885 个可检索知识片段" in result.answer
     assert "68 份" in result.answer
     assert "不自动等同于法规或标准全文" in result.answer
     assert "结果回写" in result.answer
@@ -109,14 +111,14 @@ def test_identity_recognizes_origin_wording() -> None:
 
     assert result.intent == "identity"
     assert result.refusal_reason is None
-    assert "我是小懿" in result.answer
-    assert "我是小懿AI" not in result.answer
+    assert "我是小鸥" in result.answer
+    assert "我是小鸥AI" not in result.answer
     assert "由温家懿设计与研发" in result.answer
     assert "随时可交流的港航数字同事" in result.answer
 
 
 def test_identity_recognizes_developer_wording_without_hallucination() -> None:
-    for question in ("谁研发的？", "谁研制了小懿？", "小懿是谁设计的？"):
+    for question in ("谁研发的？", "谁研制了舷鸥？", "舷鸥是谁设计的？"):
         result = XiaoyiAI().ask(question)
 
         assert result.intent == "identity"

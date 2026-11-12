@@ -14,11 +14,9 @@ import time
 
 from .environment import LETTERS
 
-BASE = (
-    Path.home() / ".cache/huggingface/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e"
-)
+BASE = Path(os.environ.get("XIAOYI_AGENT_RL_BASE", Path.home() / ".cache/huggingface/hub/models--Qwen--Qwen3-1.7B/snapshots/70d244cc86ccca08cf5af4e1e306ecf908b1ad5e"))
 SYSTEM = (
-    "你是小懿港航工具调度员。按任务和当前状态选下一步，只输出工具字母。"
+    "你是舷鸥港航工具调度员。按任务和当前状态选下一步，只输出工具字母。"
     "先读取必要状态再计算；参数必须符合用户要求；写入结果不明先核验；暂停后恢复；"
     "核验全部结果后才交付。不要重复已经完成的操作。"
 )

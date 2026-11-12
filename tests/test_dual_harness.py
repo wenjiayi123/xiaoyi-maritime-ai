@@ -1,6 +1,7 @@
 from dataclasses import replace
 from datetime import datetime, timedelta, timezone
 import json
+import os
 import time
 import subprocess
 import sys
@@ -254,9 +255,11 @@ def test_another_live_process_is_not_mistaken_for_crash_or_double_dispatched(iso
     approve(job)
     joint._executor_lease.release()
     joint._active.clear()
-    script = "import fcntl,sys; f=open(sys.argv[1],'a+b'); fcntl.flock(f,fcntl.LOCK_EX); print('ready',flush=True); sys.stdin.read()"
+    script = ("import sys; from pathlib import Path; from app.harness.local_lock import ProcessLease; "
+              "lease=ProcessLease(Path(sys.argv[1])); lease.acquire(); print('ready',flush=True); sys.stdin.read()")
     child = subprocess.Popen([sys.executable, "-c", script, str(isolated.path.with_suffix(".joint.lock"))],
-                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
+                             stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True,
+                             creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
     try:
         assert child.stdout.readline().strip() == "ready"
         joint.recover()

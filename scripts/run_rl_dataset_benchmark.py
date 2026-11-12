@@ -354,7 +354,7 @@ def _markdown(report: dict[str, Any]) -> str:
             f"{winner} | {experiment['admission']['candidate_status']} | {headline} |"
         )
     scale = report["dataset_comparison"]["large_to_original_row_ratio"]
-    return f"""# 小懿 RL 公开数据对比与候选准入证据 v2
+    return f"""# 舷鸥 RL 公开数据对比与候选准入证据 v2
 
 生成时间：{report['generated_at']}
 
@@ -507,7 +507,7 @@ def verify() -> list[str]:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Run and verify the fixed Xiaoyi RL dataset benchmark")
+    parser = argparse.ArgumentParser(description="Run and verify the fixed GullMate RL dataset benchmark")
     subparsers = parser.add_subparsers(dest="command", required=True)
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--episodes", type=int, default=320)

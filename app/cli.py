@@ -4,8 +4,8 @@ from app.xiaoyi import XiaoyiAI
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="小懿港航迷你问答")
-    parser.add_argument("question", help="要询问小懿的问题")
+    parser = argparse.ArgumentParser(description="舷鸥港航迷你问答")
+    parser.add_argument("question", help="要询问舷鸥的问题")
     parser.add_argument("--mode", choices=["expert", "ops", "sop", "brief"], default="expert")
     parser.add_argument("--top-k", type=int, default=5)
     args = parser.parse_args()

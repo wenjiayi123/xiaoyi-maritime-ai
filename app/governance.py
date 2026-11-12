@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 
 from app.runtime_store import runtime_store
 from app.access_control import ROLE_PERMISSIONS, Role, has_permission
-from app.security import request_identity
+from app.security import bind_claimed_identity, request_identity
 
 
 router = APIRouter(prefix="/api/governance", tags=["身份权限与持久审计"])
@@ -45,10 +45,11 @@ def current_identity(request: Request) -> Identity:
 
 
 @router.post("/authorize")
-def authorize(payload: AuthorizationRequest) -> dict[str, Any]:
-    allowed = has_permission(payload.role, payload.permission)
+def authorize(payload: AuthorizationRequest, request: Request) -> dict[str, Any]:
+    actor_id, role = bind_claimed_identity(request, payload.actor_id, payload.role)
+    allowed = has_permission(role, payload.permission)
     return {
-        "actor_id": payload.actor_id, "role": payload.role, "permission": payload.permission,
+        "actor_id": actor_id, "role": role, "permission": payload.permission,
         "authorized": allowed, "decision": "allow" if allowed else "deny",
     }
 

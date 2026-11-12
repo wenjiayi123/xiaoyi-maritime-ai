@@ -132,6 +132,15 @@ def completion_issues(task, store):
             issues.append("工具原始工件完整性错误：" + record["id"])
             continue
         data = json.loads(artifact["content"])
+        if record["tool"] in ("forecast.port_load","dispatch.tariff_week") and data.get("source")=="twin":
+            covered.add("port-dt-multi")
+        if record["tool"] == "policy.select":
+            from app.policy_release import EXPECTED_SHA256
+
+            if (task.get("policy_board_context") and data.get("schema") == "gullmate.policy-board.v1"
+                    and data.get("source") == "CarbonOps" and data.get("release_sha256") == EXPECTED_SHA256
+                    and data.get("production_authority") is False):
+                covered.add("energy-cockpit")
         if record["tool"] == "systems.inspect":
             resources.add((data["target"], data["resource"]))
             if data["target"] == "all":
@@ -186,7 +195,7 @@ def completion_issues(task, store):
 
 def prompt(menu):
     return (
-        "你是小懿自主任务执行助手。按目标自行选择下一工具和参数，没有预设步骤顺序。每轮只返回绑定Schema的JSON。"
+        "你是舷鸥自主任务执行助手。按目标自行选择下一工具和参数，没有预设步骤顺序。每轮只返回绑定Schema的JSON。"
         '格式：{"action":{"kind":"tool","tool":"工具名","arguments":{},"text":"","steps":[],"evidence_ids":[]}}。'
         '结束用kind="final",tool=null,arguments={},text写结论,steps=[],evidence_ids列证据。'
         '计划用kind="plan",tool=null,arguments={},text="",steps列步骤,evidence_ids=[]。'

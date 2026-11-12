@@ -264,7 +264,7 @@ def test_unknown_write_cannot_be_compensated_blindly(isolated):
 def event_service():
     import importlib.util
 
-    path = Path("/Users/apple/Desktop/模拟器/port-dt-multi/app/services/harness_event_execution.py")
+    path = business.PORT / "app/services/harness_event_execution.py"
     if not path.is_file():
         pytest.skip("external port event-execution implementation is not installed")
     spec = importlib.util.spec_from_file_location("harness_events_unit", path)

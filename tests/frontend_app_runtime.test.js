@@ -586,9 +586,9 @@ test("task step copy reflects actual status for both stored legacy and new descr
   context.state.activeTask = {
     ...runningTask("task-status"), progress_percent: 25,
     steps: [
-      { id: "completed", order: 1, title: "完成步骤", status: "completed", description: "小懿正在执行：读取指标", result: "读取成功" },
+      { id: "completed", order: 1, title: "完成步骤", status: "completed", description: "舷鸥正在执行：读取指标", result: "读取成功" },
       { id: "current", order: 2, title: "当前步骤", status: "running", description: "步骤内容：核对来源" },
-      { id: "pending", order: 3, title: "后续步骤", status: "pending", description: "小懿正在执行：生成报告" },
+      { id: "pending", order: 3, title: "后续步骤", status: "pending", description: "舷鸥正在执行：生成报告" },
       { id: "skipped", order: 4, title: "跳过步骤", status: "skipped", description: "步骤内容：导出报告" },
     ],
   };
@@ -598,7 +598,7 @@ test("task step copy reflects actual status for both stored legacy and new descr
   assert.match(html, /<span>当前待执行：核对来源<\/span>/);
   assert.match(html, /<span>等待执行：生成报告<\/span>/);
   assert.match(html, /<span>已跳过：导出报告<\/span>/);
-  assert.doesNotMatch(html, /小懿正在执行|步骤内容/);
+  assert.doesNotMatch(html, /舷鸥正在执行|步骤内容/);
 });
 
 test("range changes keep all four energy KPIs aligned across summary, analytics and evidence detail", async () => {

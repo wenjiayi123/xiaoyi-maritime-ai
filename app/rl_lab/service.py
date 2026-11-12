@@ -30,6 +30,7 @@ from app.rl_lab.datasets import (
     inspect_dataset,
     load_records,
 )
+from app.rl_lab.recovery import training_signature
 from app.rl_lab.contracts import environment_contract
 from app.rl_lab.environment import derive_parameters
 from app.rl_lab.port_environment import derive_port_parameters
@@ -79,6 +80,7 @@ class RLLabService:
                 continue
             if job.get("status") in {"queued", "training", "cancelling"}:
                 job["status"] = "interrupted"
+                job["phase"] = "interrupted"
                 job["finished_at"] = _now()
                 job["error"] = "The previous process ended before the background training thread completed."
                 _atomic_json(path, job)
@@ -183,6 +185,7 @@ class RLLabService:
             "reproducibility": {
                 "seed": seed,
                 "dataset_sha256": dataset_info["sha256"],
+                "training_signature": training_signature(definition),
                 "config_sha256": _sha256_text(json.dumps(normalized_config, sort_keys=True)),
                 "python_hash_seed": os.getenv("PYTHONHASHSEED", "not-set; algorithm RNG uses explicit random.Random seeds"),
                 "training_render_disabled": True,
@@ -221,6 +224,7 @@ class RLLabService:
                 job["started_at"] = _now()
                 self._persist(job)
                 config = deepcopy(job["config"])
+                retained = job.get("recoveries", [{}])[-1].get("retained", {})
             definition = get_dataset(config["dataset_id"])
             records = load_records(definition)
             train, validation, _ = chronological_split(
@@ -249,6 +253,14 @@ class RLLabService:
                 if cancel_event.is_set():
                     raise InterruptedError("training cancelled")
                 self._update(run_id, lambda item, algorithm_id=algorithm_id: item.__setitem__("current_algorithm_id", algorithm_id))
+
+                if algorithm_id in retained:
+                    checkpoint = self._run_dir(run_id) / "models" / f"{algorithm_id}.json"
+                    raw = checkpoint.read_bytes()
+                    if hashlib.sha256(raw).hexdigest() != retained[algorithm_id]:
+                        raise RunConflict(f"模型检查点已变化：{algorithm_id}")
+                    policies[algorithm_id] = TrainedPolicy.from_dict(json.loads(raw))
+                    continue
 
                 def report(episode: int, point: dict[str, Any]) -> None:
                     nonlocal completed_total
@@ -386,6 +398,82 @@ class RLLabService:
         with self._lock:
             jobs = sorted(self._jobs.values(), key=lambda item: item.get("created_at", ""), reverse=True)
             return [self._public(job) for job in jobs[:limit]]
+
+    def read_test_result(self, run_id: str) -> dict[str, Any]:
+        job = self.get_run(run_id)
+        receipt = job.get("test_evaluation") or {}
+        identifier = receipt.get("evaluation_id", "")
+        if not identifier.startswith("eval-") or not identifier[5:].isalnum():
+            raise RunConflict("尚无留出测试回执。")
+        path = self._run_dir(run_id) / "evaluations" / (identifier + ".json")
+        if not path.is_file():
+            raise RunConflict("留出测试原件缺失。")
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != receipt.get("artifact_sha256"):
+            raise RunConflict("留出测试原件哈希不符。")
+        report = json.loads(raw)
+        if report.get("run_id") != run_id or report.get("evaluation_id") != identifier:
+            raise RunConflict("留出回执不属于当前作业。")
+        return report
+
+    def retry_run(self, run_id: str, expected_attempt: int) -> dict[str, Any]:
+        with self._lock:
+            if run_id not in self._jobs:
+                raise RunNotFound(run_id)
+            job = self._jobs[run_id]
+            attempts = job.get("recoveries", [])
+            if expected_attempt < len(attempts):
+                return self._public(job)
+            if expected_attempt != len(attempts) or job["status"] not in {"interrupted", "failed"}:
+                raise RunConflict("当前作业或恢复次数已变化，请刷新状态。")
+            active = self._threads.get(run_id)
+            if active and active.is_alive():
+                raise RunConflict("前次训练线程尚未退出。")
+            config = job["config"]
+            recorded = job["reproducibility"]
+            definition = get_dataset(config["dataset_id"])
+            config_hash = _sha256_text(json.dumps(config, sort_keys=True))
+            profile = file_sha256(definition.profile_path) if definition.profile_path and definition.profile_path.is_file() else None
+            if recorded.get("config_sha256") != config_hash or profile != recorded.get("profile_sha256") or file_sha256(definition.path) != recorded["dataset_sha256"]:
+                raise RunConflict("参数、数据或运行配置与原作业不一致。")
+            if recorded.get("training_signature") != training_signature(definition):
+                raise RunConflict("原作业未登记当前训练程序版本，请保留原记录并按原参数另开作业。")
+            retained = {}
+            curve = []
+            for algorithm in config["algorithms"]:
+                entry = job["training"]["algorithms"].get(algorithm, {})
+                if entry.get("status") != "trained":
+                    continue
+                model = self._run_dir(run_id) / "models" / f"{algorithm}.json"
+                if not model.is_file() or file_sha256(model) != entry["artifact_sha256"]:
+                    raise RunConflict(f"模型检查点校验失败：{algorithm}")
+                retained[algorithm] = entry["artifact_sha256"]
+                curve.extend(dict(point, algorithm_id=algorithm) for point in entry["curve"])
+            completed = len(retained) * config["episodes"]
+            resume = {"attempt":len(attempts) + 1, "requested_at":_now(), "previous_status":job["status"],
+                      "previous_error":job.get("error"), "previous_started":job.get("started_at"),
+                      "previous_finished":job.get("finished_at"), "prior_episodes":job["completed_training_episodes"],
+                      "retained_episodes":completed, "retained":retained}
+            previous = deepcopy(job)
+            job.update(recoveries=[*attempts, resume], status="queued", phase="queued", finished_at=None,
+                       error=None, current_algorithm_id=None, completed_training_episodes=completed,
+                       progress_percent=round(100*completed / job["total_training_episodes"], 2))
+            job.pop("error_trace", None)
+            job["training"]["curve_tail"] = curve[-120:]
+            self._cancel_events[run_id] = threading.Event()
+            worker = threading.Thread(target=self._execute, args=(run_id,), name=f"xiaoyi-{run_id}", daemon=True)
+            self._threads[run_id] = worker
+            try:
+                self._persist(job)
+                worker.start()
+            except Exception:
+                self._jobs[run_id] = previous
+                self._persist(previous)
+                self._threads.pop(run_id, None)
+                self._cancel_events.pop(run_id, None)
+                raise
+            return self._public(job)
+
 
     def cancel_run(self, run_id: str) -> dict[str, Any]:
         with self._lock:

@@ -106,14 +106,32 @@ class HarnessStore:
             ).fetchall()
             return [json.loads(row[0]) for row in rows]
 
-    def mutate(self, task_id: str, fn: Callable[[dict], None], event: str, detail=None, owner=None) -> dict:
+    def queued_ids(self, limit: int) -> list[str]:
+        with self.connect() as db:
+            return [row[0] for row in db.execute(
+                "SELECT id FROM harness_tasks WHERE status='queued' AND lease_until<=? "
+                "ORDER BY updated, rowid LIMIT ?", (time.time(), limit),
+            )]
+
+    @staticmethod
+    def _check_owner(db, task_id: str, owner: str):
+        row = db.execute(
+            "SELECT lease_owner,lease_until FROM harness_tasks WHERE id=?", (task_id,),
+        ).fetchone()
+        if not row or row["lease_owner"] != owner or row["lease_until"] <= time.time():
+            raise Conflict("执行租约已失效")
+
+    def mutate(
+        self, task_id: str, fn: Callable[[dict], None], event: str,
+        detail=None, owner=None, *, artifacts: list[dict] | None = None,
+    ) -> dict:
         with self.connect() as db:
             db.execute("BEGIN IMMEDIATE")
             row = db.execute("SELECT * FROM harness_tasks WHERE id=?", (task_id,)).fetchone()
             if not row:
                 raise KeyError(task_id)
-            if owner and (row["lease_owner"] != owner or row["lease_until"] < time.time()):
-                raise Conflict("执行租约已失效")
+            if owner:
+                self._check_owner(db, task_id, owner)
             task = json.loads(row["payload"])
             fn(task)
             task["updated_at"] = now()
@@ -121,6 +139,8 @@ class HarnessStore:
             raw = encoded(task)
             if len(raw.encode()) > 2_000_000:
                 raise Conflict("任务状态超过2MB上限")
+            for artifact in artifacts or []:
+                self._put_artifact(db, task_id, **artifact)
             db.execute(
                 "UPDATE harness_tasks SET payload=?,status=?,version=?,updated=? WHERE id=?",
                 (raw, task["status"], task["version"], time.time(), task_id),
@@ -137,8 +157,8 @@ class HarnessStore:
             task = json.loads(row["payload"])
             task.update(status="running", version=row["version"] + 1, updated_at=now())
             db.execute(
-                "UPDATE harness_tasks SET status='running',lease_owner=?,lease_until=?,payload=?,version=? WHERE id=?",
-                (owner, time.time() + 90, encoded(task), task["version"], task_id),
+                "UPDATE harness_tasks SET status='running',lease_owner=?,lease_until=?,payload=?,version=?,updated=? WHERE id=?",
+                (owner, time.time() + 90, encoded(task), task["version"], time.time(), task_id),
             )
             self._event(db, task, "task.claimed")
             return True
@@ -193,22 +213,47 @@ class HarnessStore:
                 )
             ]
 
-    def artifact(self, task_id: str, name: str, content: str | None = None, media_type="text/markdown") -> dict | None:
+    def trace_snapshot(self, task_id: str) -> tuple[dict, list[dict], dict[str, dict]]:
+        """Capture task, ledger and artifacts from one SQLite read snapshot."""
+        with self.connect() as db:
+            db.execute("BEGIN")
+            row = db.execute("SELECT payload FROM harness_tasks WHERE id=?", (task_id,)).fetchone()
+            if row is None:
+                raise KeyError(task_id)
+            events = [json.loads(row[0]) for row in db.execute(
+                "SELECT payload FROM harness_events WHERE task_id=? ORDER BY seq", (task_id,),
+            )]
+            artifacts = {row["name"]: dict(row) for row in db.execute(
+                "SELECT * FROM harness_artifacts WHERE task_id=?", (task_id,),
+            )}
+            return json.loads(row[0]), events, artifacts
+
+    @staticmethod
+    def _put_artifact(db, task_id: str, name: str, content: str, media_type="text/markdown"):
+        if len(content.encode()) > 200_000:
+            raise ValueError("单工件不得超过200KB")
+        if (
+            db.execute("SELECT COUNT(*) FROM harness_artifacts WHERE task_id=?", (task_id,)).fetchone()[0] >= 64
+            and not db.execute(
+                "SELECT 1 FROM harness_artifacts WHERE task_id=? AND name=?", (task_id, name)
+            ).fetchone()
+        ):
+            raise ValueError("单任务最多64个工件")
+        db.execute(
+            "INSERT OR REPLACE INTO harness_artifacts VALUES (?,?,?,?,?,?)",
+            (task_id, name, content, digest(content), media_type, now()),
+        )
+
+    def artifact(
+        self, task_id: str, name: str, content: str | None = None,
+        media_type="text/markdown", *, owner: str | None = None,
+    ) -> dict | None:
         with self.connect() as db:
             if content is not None:
-                if len(content.encode()) > 200_000:
-                    raise ValueError("单工件不得超过200KB")
-                if (
-                    db.execute("SELECT COUNT(*) FROM harness_artifacts WHERE task_id=?", (task_id,)).fetchone()[0] >= 64
-                    and not db.execute(
-                        "SELECT 1 FROM harness_artifacts WHERE task_id=? AND name=?", (task_id, name)
-                    ).fetchone()
-                ):
-                    raise ValueError("单任务最多64个工件")
-                db.execute(
-                    "INSERT OR REPLACE INTO harness_artifacts VALUES (?,?,?,?,?,?)",
-                    (task_id, name, content, digest(content), media_type, now()),
-                )
+                db.execute("BEGIN IMMEDIATE")
+                if owner:
+                    self._check_owner(db, task_id, owner)
+                self._put_artifact(db, task_id, name, content, media_type)
             row = db.execute("SELECT * FROM harness_artifacts WHERE task_id=? AND name=?", (task_id, name)).fetchone()
             return dict(row) if row else None
 

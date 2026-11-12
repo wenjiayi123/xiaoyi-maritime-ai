@@ -80,7 +80,7 @@ def _render_markdown(report: dict[str, Any]) -> str:
     retrieval = benchmark["retrieval"]["test"]
     policy = benchmark["policy"]["test"]
     hashes = report["evidence_sha256"]
-    return f"""# 小懿AI 港航检索与证据安全固定基准 v1
+    return f"""# 舷鸥 · GullMate 港航检索与证据安全固定基准 v1
 
 生成时间：{report["generated_at"]}
 
@@ -191,7 +191,7 @@ def verify_report(*, deep: bool, output_tag: str | None = None) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Run or verify the fixed Xiaoyi maritime RAG benchmark."
+        description="Run or verify the fixed GullMate maritime RAG benchmark."
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     run = subparsers.add_parser("run", help="run all cases and write a report")

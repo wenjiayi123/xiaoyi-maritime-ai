@@ -12,10 +12,10 @@ from app.domain_context import ContextResolveResponse, DomainContext, resolve_co
 from app.evidence_fusion import EvidenceFusionRequest, ExternalEvidenceInput, fuse_evidence
 from app.access_control import has_permission
 from app.runtime_store import runtime_store
-from app.security import bind_claimed_identity
+from app.security import bind_claimed_identity, request_identity
 
 
-router = APIRouter(prefix="/api/orchestrator", tags=["小懿跨系统自然语言编排"])
+router = APIRouter(prefix="/api/orchestrator", tags=["舷鸥跨系统自然语言编排"])
 
 
 class OrchestrationRequest(BaseModel):
@@ -81,13 +81,13 @@ def _select(command: str, limit: int) -> tuple[str, list[str]]:
     return ("+".join(dict.fromkeys(intents)) if intents else "knowledge_only", selected)
 
 
-def run_orchestration(payload: OrchestrationRequest) -> OrchestrationResponse:
+def run_orchestration(payload: OrchestrationRequest, *, context_actor: str | None = None) -> OrchestrationResponse:
     if payload.execute_read_only and not has_permission(payload.actor_role, "capability.invoke_read"):
         raise HTTPException(status_code=403, detail="当前角色没有跨系统只读调用权限")
     orchestration_id = f"orchestration-{uuid4().hex}"
     correlation_id = f"corr-{uuid4().hex}"
     context_resolution = resolve_context(
-        payload.command, session_id=payload.session_id, explicit=payload.context, persist=True
+        payload.command, session_id=payload.session_id, explicit=payload.context, persist=True, actor_id=context_actor
     )
     intent, selected = _select(payload.command, payload.max_capabilities)
     steps: list[OrchestrationStep] = [
@@ -141,7 +141,7 @@ def run_orchestration(payload: OrchestrationRequest) -> OrchestrationResponse:
     steps.extend(
         [
             OrchestrationStep(order=len(steps) + 1, phase="核验", action="区分知识、系统与推演证据", status="completed", detail=fusion.evidence_summary),
-            OrchestrationStep(order=len(steps) + 2, phase="交付", action="生成解释与原系统跳转", status="completed", detail="小懿只呈现摘要、来源和交接入口"),
+            OrchestrationStep(order=len(steps) + 2, phase="交付", action="生成解释与原系统跳转", status="completed", detail="舷鸥只呈现摘要、来源和交接入口"),
         ]
     )
     if selected:
@@ -169,7 +169,8 @@ def run_orchestration(payload: OrchestrationRequest) -> OrchestrationResponse:
 @router.post("/run", response_model=OrchestrationResponse)
 def run_orchestration_api(payload: OrchestrationRequest, request: Request) -> OrchestrationResponse:
     actor_id, actor_role = bind_claimed_identity(request, payload.actor_id, payload.actor_role)
-    return run_orchestration(payload.model_copy(update={"actor_id": actor_id, "actor_role": actor_role}))
+    return run_orchestration(payload.model_copy(update={"actor_id": actor_id, "actor_role": actor_role}),
+                             context_actor=actor_id if request_identity(request).authenticated else None)
 
 
 @router.get("/examples")

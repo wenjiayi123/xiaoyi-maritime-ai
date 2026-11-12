@@ -67,7 +67,7 @@ def _markdown(report: dict[str, Any]) -> str:
         f"通过率 {_percent(summary['pass_rate'])}。"
         for category, summary in result["categories"].items()
     )
-    return f"""# 小懿AI 港口日常问答固定基准 v5
+    return f"""# 舷鸥 · GullMate 港口日常问答固定基准 v5
 
 生成时间：{report["generated_at"]}
 

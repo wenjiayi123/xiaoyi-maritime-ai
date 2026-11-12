@@ -67,7 +67,7 @@ def _response(
     completion_status: str = "complete",
 ) -> ChatResponse:
     return ChatResponse(
-        app="小懿",
+        app="舷鸥",
         mode="expert",
         intent="policy",
         question="该结论是否可采用？",
@@ -260,7 +260,7 @@ def _evaluate_query_cases(
                 analysis.subquestions,
                 mode=case.get("mode", "expert"),
                 top_k=8,
-                as_of_date=as_of_date,
+                review_date=as_of_date,
             )
         else:
             response = engine.ask(
@@ -268,7 +268,7 @@ def _evaluate_query_cases(
                 mode=case.get("mode", "expert"),
                 top_k=8,
                 retrieval_queries=analysis.subquestions,
-                as_of_date=as_of_date,
+                review_date=as_of_date,
             )
         response = response.model_copy(
             update={"answer_verification": verify_response(response)}

@@ -64,7 +64,7 @@ def test_new_domain_packs_answer_formal_and_daily_questions() -> None:
     expected = {
         "港区发生油污泄漏怎么办": "124_port_safety_environment_security_daily_qa.md",
         "客户说收费不对怎么处理": "125_port_commercial_intermodal_special_cargo_daily_qa.md",
-        "小懿说的能直接执行吗": "126_port_management_kpi_system_daily_qa.md",
+        "舷鸥说的能直接执行吗": "126_port_management_kpi_system_daily_qa.md",
         "雾太大船还能进吗": "127_port_navigation_weather_engineering_daily_qa.md",
     }
     engine = XiaoyiAI()

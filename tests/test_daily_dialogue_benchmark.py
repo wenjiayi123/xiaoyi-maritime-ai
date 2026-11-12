@@ -9,7 +9,7 @@ from app.xiaoyi import SMALLTALK_INTENTS, XiaoyiAI
 
 SMALLTALK_CASES = [
     "你好",
-    "嗨，小懿",
+    "嗨，舷鸥",
     "谢谢你",
     "你是谁？",
     "你能做什么？",

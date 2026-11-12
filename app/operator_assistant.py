@@ -33,6 +33,17 @@ _REPLACEMENTS = (
 
 def normalize_operator_question(question: str) -> str:
     normalized = re.sub(r"\s+", " ", question.strip())
+    address = re.match(
+        r"^(?:(?:你好|您好|hello|hi)[，,！!\s]*)?(?:小鸥|舷鸥(?:\s*·\s*GullMate)?|GullMate)"
+        r"(?=$|[，,、：:！!。？?\s]|你好|您好|在吗)",
+        normalized, re.IGNORECASE,
+    )
+    if address:
+        normalized = normalized[address.end():].lstrip(" ，,、：:！!。？?")
+        if not normalized or normalized.rstrip("？?！!。 ") == "在吗":
+            return "你好"
+    # Keep a substantive request after a salutation in its normal business route.
+    normalized = re.sub(r"^(?:你好|您好|hello|hi)[，,！!\s]+(?=\S)", "", normalized, flags=re.IGNORECASE)
     for pattern, replacement in _REPLACEMENTS:
         normalized = re.sub(pattern, replacement, normalized, flags=re.IGNORECASE)
     return normalized
@@ -61,7 +72,14 @@ def clarification_for(question: str) -> tuple[str, list[str]] | None:
                 "泊位冲突怎么协调？",
             ],
         )
-    if any(term in compact for term in ("该船舶", "这条船", "那条船")) and not re.search(
+    # Assessing what a hypothetical observation establishes can be answered
+    # without identifying a physical vessel. Live lookups still need an ID.
+    exercise_evidence = (
+        re.search(r"桌面演练|假设|假定|举例|模拟场景", question)
+        and re.search(r"仅凭|单凭|据此|由此|能否证明|是否足以|是否意味着", question)
+        and not re.search(r"(?:请|帮我)(?:查|报|给出).{0,8}(?:实时|当前位置|到港时间|ETA|ETB)", question, re.IGNORECASE)
+    )
+    if not exercise_evidence and any(term in compact for term in ("该船舶", "这条船", "那条船")) and not re.search(
         r"(?:IMO\s*\d{7}|[A-Z][A-Z\s-]{4,}|B\d{2}|泊位\d+)", question
     ):
         return (
@@ -232,7 +250,7 @@ def sandbox_runtime_answer(question: str) -> str:
         steps = "\n".join(f"{index}. {item}" for index, item in enumerate(alert["recommended_actions"], 1))
         return (
             f"直接结论：{alert['message']}\n\n建议先安全、后诊断、再恢复：\n{steps}\n"
-            "涉及停机、旁路或转检修工单时，必须由设备主管按现场制度确认，小懿不自动下发控制。"
+            "涉及停机、旁路或转检修工单时，必须由设备主管按现场制度确认，舷鸥不自动下发控制。"
             + boundary
         )
     if "agv" in compact:

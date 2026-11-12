@@ -1,10 +1,12 @@
-# 小懿：开源底座 + RAG + LoRA 生成式大模型方案
+# 舷鸥：开源底座 + RAG + LoRA 生成式大模型方案
 
-更新日期：2026-07-27
+工作站现使用 Qwen3-14B Q4_K_M，运行配置与权重复核方法见 [README](../README.md#2026-11-12--舷鸥-14b)。
+
+以下记录为 2026-07-27 的 Intel Mac 配置。
 
 ## 已选模型与本机适配
 
-当前机器是 8 核 Intel Core i9-9880H、16GB 内存、Radeon Pro 560X 4GB，
+该开发机是 8 核 Intel Core i9-9880H、16GB 内存、Radeon Pro 560X 4GB，
 可用磁盘空间约 40GiB。默认选择：
 
 - 生成基座：`xiaoyi-local-generation-4b`
@@ -70,7 +72,7 @@ bash run.sh
 ```text
 4B Q4_K_M -> http://127.0.0.1:11435/v1
 0.6B-Embedding   -> http://127.0.0.1:11436/v1
-小懿 FastAPI     -> http://127.0.0.1:8010
+舷鸥 FastAPI     -> http://127.0.0.1:8010
 ```
 
 Embedding 服务会为每个带内容哈希的知识分块生成真实 1024 维归一化向量并写入

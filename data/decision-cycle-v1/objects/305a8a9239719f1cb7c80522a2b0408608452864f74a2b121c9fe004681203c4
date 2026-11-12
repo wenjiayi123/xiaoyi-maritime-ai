@@ -1,0 +1,86 @@
+import collections,hashlib,json,math,statistics,sys
+from datetime import date,datetime,timedelta,timezone
+from pathlib import Path
+import numpy as np
+from bts import ROOT,save
+HERE=Path(__file__).resolve().parent;P=json.loads((HERE/"protocol.json").read_bytes());A=P["areas"];FR=ROOT/"bts-first"
+COUNTS=("last","mean3","median3","blend","ridge");RISKS=("last","recent","conditional")
+def H(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def read(p):return json.loads(p.read_bytes())
+def fr(d):return d+timedelta(days=(4-d.weekday())%7)
+def load():
+    file=FR/"queue.json";assert H(file)==read(FR/"manifest.json")["datasets"]["queue"]["sha256"]
+    by=collections.defaultdict(dict);per={k:{} for k in A}
+    for z in read(file):
+        d=date.fromisoformat(z["date"][:10]);a=z["measure1"];v=int(z["value1"])
+        assert a in A and v>=0 and str(v)==z["value1"] and a not in by[d] and z["units"]=="Number of vessels"
+        by[d][a]=v
+    for d,v in sorted(by.items()):
+        for a,c in v.items():per[a][fr(d)]=(d,c)
+    mismatches=[dict(day=d.isoformat(),counts=v) for d,v in sorted(by.items()) if len(v)==4 and v["All U.S. Container Ports"]!=v["LA-LB"]+v["Savannah"]+v["All Other Ports"]]
+    return per,mismatches
+def features(series,target):
+    latest=target-timedelta(days=14);ds=[latest-timedelta(weeks=k) for k in range(8)]
+    if latest not in series:return
+    obs=[series[d] for d in ds if d in series]
+    if len(obs)<3:return
+    v=[y for _,y in obs];last=v[0];u=statistics.mean(v[:3]);m=statistics.mean(v)
+    return v,[last,v[1],u,m],[(x.isoformat(),y) for x,y in obs]
+def band(latest,th):return int(latest>0)+int(latest>=th/2)+int(latest>=th)+int(latest>=2*th)
+def targets(a,per):
+    for t,(observed,y) in sorted(per[a].items()):
+        feat=features(per[a],t)
+        if feat:yield t,feat,y,observed
+def train(a,per):
+    items=[(feat,y) for t,feat,y,_ in targets(a,per) if t.year<=2023];assert len(items)>=60
+    x=np.asarray([z[0][1] for z in items]);y=np.array([z[1] for z in items]);mu=x.mean(0);sd=np.maximum(x.std(0),1);u=np.column_stack((np.ones(len(x)),(x-mu)/sd))
+    b=np.linalg.solve(u.T@u+np.diag([0,1,1,1,1]),u.T@y)
+    freq=[[0,0] for _ in range(5)]
+    for f,n in items:
+        i=band(f[0][0],A[a]);freq[i][0]+=int(n>=A[a]);freq[i][1]+=1
+    return dict(mean=mu.tolist(),std=sd.tolist(),coef=b.tolist(),freq=freq,train_n=len(items))
+def predict(a,f,m):
+    v,x,obs=f;l=v[0];mean=statistics.mean(v[:3]);c=m["coef"];p=m["freq"][band(l,A[a])]
+    vals=dict(last=l,mean3=mean,median3=statistics.median(v[:3]),blend=(l+mean)/2,ridge=max(0,c[0]+sum(b*(z-u)/s for b,z,u,s in zip(c[1:],x,m["mean"],m["std"]))))
+    pr=dict(last=float(l>=A[a]),recent=(sum(z>=A[a] for z in v)+1)/(len(v)+2),conditional=(p[0]+1)/(p[1]+2))
+    return vals,pr
+def score(a,per,m,start,end):
+    rows=[];threshold=A[a]
+    for t,f,y,observed in targets(a,per):
+        if start<=t<=end:
+            counts,probs=predict(a,f,m);rows.append(dict(target_week=t.isoformat(),issue=(t-timedelta(days=10)).isoformat(),
+                    observed=observed.isoformat(),y=y,exceeds=int(y>=threshold),counts=counts,probs=probs,inputs=f[2]))
+    assert rows
+    n=len(rows);mae={k:sum(abs(z["counts"][k]-z["y"]) for z in rows)/n for k in COUNTS}
+    risk={}
+    for k in RISKS:
+        pred=[z["probs"][k]>=.5 for z in rows];ys=[z["exceeds"] for z in rows]
+        risk[k]=dict(brier=sum((z["probs"][k]-z["exceeds"])**2 for z in rows)/n,
+                tp=sum(a and b for a,b in zip(ys,pred)),fn=sum(a and not b for a,b in zip(ys,pred)),
+                fp=sum(not a and b for a,b in zip(ys,pred)),tn=sum(not a and not b for a,b in zip(ys,pred)))
+    return dict(n=n,events=sum(z["exceeds"] for z in rows),mae=mae,risk=risk),rows
+def fit():
+    per,bad=load();model={}
+    for a in A:
+        m=train(a,per);dev,_=score(a,per,m,date(2024,1,1),date(2024,12,31));m.update(dev=dev,count_pick=min(COUNTS,key=dev["mae"].get),risk_pick=min(RISKS,key=lambda k:dev["risk"][k]["brier"]));model[a]=m
+    out=dict(areas=model,source_sha=H(FR/"queue.json"),protocol_sha=H(HERE/"protocol.json"),code_sha=H(Path(__file__)),mismatches=bad)
+    p=ROOT/"frozen.json"
+    if p.exists():assert read(p)==out
+    else:save(p,out)
+    print([(a,m["count_pick"],m["risk_pick"],m["train_n"]) for a,m in model.items()],len(bad),"national disagreements")
+def evaluate():
+    per,_=load();m=read(ROOT/"frozen.json");assert m["code_sha"]==H(Path(__file__)) and m["source_sha"]==H(FR/"queue.json") and m["protocol_sha"]==H(HERE/"protocol.json")
+    results={};trace={}
+    for a,v in m["areas"].items():
+        results[a]={};trace[a]={}
+        for tag,(start,end) in {"2025":(date(2025,1,1),date(2025,12,31)),"2026":(date(2026,1,1),date(2026,10,31))}.items():
+            z,rr=score(a,per,v,start,end);results[a][tag]=z;trace[a][tag]=rr
+            print(a,tag,z["n"],z["events"],round(z["mae"][v["count_pick"]],2),round(z["mae"]["last"],2),z["risk"][v["risk_pick"]])
+    save(ROOT/"held.json",dict(model_sha=H(ROOT/"frozen.json"),areas=results));save(ROOT/"trace.json",trace)
+    path=ROOT/"forward-2026-11-20.json";t=date(2026,11,20);now=datetime.now(timezone.utc)
+    if path.exists():assert read(path)["model_sha"]==H(ROOT/"frozen.json");return
+    assert now.date()==t-timedelta(days=10);out={}
+    for a,v in m["areas"].items():
+        f=features(per[a],t);c,p=predict(a,f,v);out[a]=dict(count=c[v["count_pick"]],risk=p[v["risk_pick"]],threshold=A[a],latest=f[2][0],count_method=v["count_pick"],risk_method=v["risk_pick"])
+    save(path,dict(issued_utc=now.isoformat(),week_start=(t-timedelta(days=6)).isoformat(),week_end=t.isoformat(),model_sha=H(ROOT/"frozen.json"),data_sha=H(FR/"queue.json"),areas=out,observed=None))
+if __name__=="__main__":{"fit":fit,"test":evaluate}[sys.argv[1]]()
