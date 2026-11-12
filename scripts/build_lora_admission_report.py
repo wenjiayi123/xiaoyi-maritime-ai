@@ -134,7 +134,7 @@ def _markdown(report: dict[str, Any]) -> str:
         for item in report["checks"]
     )
     snapshot = report["training_snapshot"]
-    return f"""# 小懿 LoRA 工程与质量准入报告 v1
+    return f"""# 舷鸥 LoRA 工程与质量准入报告 v1
 
 生成时间：{report['generated_at']}
 来源run_id：`{report['source_run_id']}`

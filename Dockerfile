@@ -1,4 +1,5 @@
-FROM python:3.12.11-slim@sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f
+ARG PYTHON_IMAGE_REPOSITORY=python
+FROM ${PYTHON_IMAGE_REPOSITORY}:3.12.11-slim@sha256:47ae396f09c1303b8653019811a8498470603d7ffefc29cb07c88f1f8cb3d19f
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
@@ -12,7 +13,9 @@ WORKDIR /app
 RUN groupadd --system xiaoyi && useradd --system --gid xiaoyi --home-dir /app xiaoyi
 
 COPY requirements.lock requirements-research.lock ./
-RUN python -m pip install --require-hashes --no-cache-dir -r requirements.lock -r requirements-research.lock
+ARG XIAOYI_WHEELHOUSE_URL
+RUN if [ -n "$XIAOYI_WHEELHOUSE_URL" ]; then export PIP_NO_INDEX=1 PIP_FIND_LINKS="$XIAOYI_WHEELHOUSE_URL"; fi \
+    && python -m pip install --require-hashes --no-cache-dir -r requirements.lock -r requirements-research.lock
 
 COPY --chown=xiaoyi:xiaoyi . .
 RUN python scripts/build_index.py \

@@ -1,0 +1,24 @@
+<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>岸电与储能复核 · 舷鸥</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f6f3;color:#193b3b;font:16px/1.55 "Source Sans 3","Microsoft YaHei UI",sans-serif}
+main{max-width:1060px;margin:auto;padding:32px clamp(14px,4vw,44px) 60px}header{border-bottom:2px solid #166a65;padding-bottom:12px}
+h1{font-size:clamp(30px,4vw,44px);margin:0;letter-spacing:-.035em}h2{font-size:21px;margin:0 0 12px}p{margin:6px 0 11px}
+button,select{font:inherit;color:inherit;border:1px solid #95afa9;border-radius:5px;padding:6px 10px;background:white}button{cursor:pointer}
+#lang{float:right}nav{display:flex;gap:8px;margin:16px 0}nav button[aria-pressed=true]{background:#115e5a;color:white;border-color:#115e5a}
+.filters{display:flex;gap:14px;flex-wrap:wrap}label{display:grid;gap:4px;min-width:142px}.filters select{width:100%}
+section{background:#fff;border:1px solid #d3e0d9;border-radius:8px;padding:clamp(12px,2.8vw,23px);margin:14px 0}
+.metric{font-size:21px;font-weight:700}.note,summary{color:#4b6261}.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}th,td{text-align:right;padding:6px 5px;border-bottom:1px solid #e0e8e2}th:first-child,td:first-child{text-align:left}
+svg{display:block;width:100%;height:155px;background:#fafcf9;border-bottom:1px solid #d4e2dc}#hour{width:100%}details{margin:12px 0}summary{cursor:pointer}code{overflow-wrap:anywhere}.yes{color:#136b4c}.hold{color:#954e28}
+@media(max-width:550px){main{padding-top:18px}body{font-size:14px}.metric{font-size:17px}.filters{gap:8px}}
+</style><main><header><button id="lang">EN</button><h1 id="title">岸电与储能复核</h1><p id="intro">上海工程仿真 · 策略周回放与逐船供电记录</p></header>
+<nav><button id="weekTab" aria-pressed="true">周策略</button><button id="callTab" aria-pressed="false">逐船电表</button></nav>
+<div id="weekControls" class="filters"><label><span id="lp">评测分区</span><select id="part"></select></label><label><span id="lw">周起点（UTC）</span><select id="week"></select></label></div>
+<div id="callControls" hidden><label><span id="lc">工程船次</span><select id="call"></select></label></div>
+<p id="err" aria-live="polite"></p>
+<div id="weekly"><section><h2 id="overallTitle">分区评测</h2><p id="overall" class="metric"></p><p id="overallDetail" class="note"></p></section>
+<section><h2 id="compareTitle">本周配对账单</h2><div class="scroll"><table><thead><tr id="mhead"></tr></thead><tbody id="metrics"></tbody></table></div><p id="decision"></p><p id="attribution"></p></section>
+<section><h2 id="hourTitle">逐小时功率</h2><p id="legend" class="note"></p><svg id="chart" viewBox="0 0 850 150" preserveAspectRatio="none" role="img" aria-label="PCC hourly kW"></svg><label for="hour" id="hourLabel"></label><input type="range" id="hour" min="0" max="167" value="0"><p id="hourData"></p><p id="weeklyService" class="note"></p></section></div>
+<section id="meter" hidden><h2 id="meterTitle">靠泊期间供电</h2><p id="quantity" class="metric"></p><p id="meterInfo"></p><p id="meterBoundary" class="note"></p></section>
+<details><summary id="source">来源与复跑</summary><p id="scope"></p><code id="command"></code><p><code id="digest"></code></p></details></main>
+<script src="viewer-9df9d7158bfe19bc.js"></script></html>

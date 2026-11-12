@@ -230,7 +230,9 @@ def launch_simulator(payload: SimulatorLaunchRequest) -> SimulatorRuntime:
         try:
             with _LOG_PATH.open("ab", buffering=0) as log_file:
                 _simulator_process = subprocess.Popen(
-                    [str(_SIMULATOR_PYTHON), "-m", "app.server"],
+                    ([env["PORTAI_MANAGER_PYTHON"], env["PORTAI_MANAGER"], "start", "twin"]
+                     if os.name == "nt" and env.get("PORTAI_MANAGER")
+                     else [str(_SIMULATOR_PYTHON), "-m", "app.server"]),
                     cwd=str(_SIMULATOR_ROOT),
                     env=env,
                     stdin=subprocess.DEVNULL,

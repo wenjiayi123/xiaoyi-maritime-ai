@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 
@@ -36,11 +37,28 @@ def _csv(name: str, default: str) -> tuple[str, ...]:
     return tuple(item.strip() for item in os.getenv(name, default).split(",") if item.strip())
 
 
+def _secret(name: str, fallback: str = "") -> str:
+    location = os.getenv(name + "_FILE")
+    if location is None:
+        return os.getenv(name) or fallback
+    if os.getenv(name):
+        raise ValueError(f"Configure exactly one source for {name}")
+    try:
+        with Path(location).open("rb") as stream:
+            raw = stream.read(16385)
+        value = raw.decode("utf-8").rstrip("\r\n")
+    except (OSError, ValueError):
+        raise ValueError(f"Cannot read {name}_FILE") from None
+    if len(raw) > 16384 or not value or any(c in value for c in "\r\n\0"):
+        raise ValueError(f"Invalid {name}_FILE contents")
+    return value
+
+
 @dataclass(frozen=True)
 class Settings:
     environment: Environment
     security_mode: SecurityMode
-    jwt_secret: str
+    jwt_secret: str = field(repr=False)
     jwt_issuer: str
     jwt_audience: str
     jwt_clock_skew_seconds: int
@@ -56,7 +74,7 @@ class Settings:
     model_provider: ModelProvider
     model_base_url: str
     model_name: str
-    model_api_key: str
+    model_api_key: str = field(repr=False)
     model_timeout_seconds: float
     model_max_retries: int
     model_external_data_allowed: bool
@@ -91,16 +109,20 @@ class Settings:
     @classmethod
     def from_env(cls) -> "Settings":
         environment_raw = os.getenv("XIAOYI_ENV", "local").strip().lower()
+        if environment_raw not in {"local", "staging", "production"}:
+            raise ValueError("Invalid XIAOYI_ENV")
         environment: Environment = environment_raw if environment_raw in {"local", "staging", "production"} else "local"  # type: ignore[assignment]
         default_security = "jwt" if environment == "production" else "local"
         security_raw = os.getenv("XIAOYI_SECURITY_MODE", default_security).strip().lower()
+        if security_raw not in {"local", "jwt"}:
+            raise ValueError("Invalid XIAOYI_SECURITY_MODE")
         security_mode: SecurityMode = security_raw if security_raw in {"local", "jwt"} else "local"  # type: ignore[assignment]
         provider_raw = os.getenv("XIAOYI_MODEL_PROVIDER", "local_rules").strip().lower()
         model_provider: ModelProvider = provider_raw if provider_raw in {"local_rules", "openai_compatible"} else "local_rules"  # type: ignore[assignment]
         return cls(
             environment=environment,
             security_mode=security_mode,
-            jwt_secret=os.getenv("XIAOYI_JWT_SECRET", ""),
+            jwt_secret=_secret("XIAOYI_JWT_SECRET"),
             jwt_issuer=os.getenv("XIAOYI_JWT_ISSUER", "xiaoyi-ai"),
             jwt_audience=os.getenv("XIAOYI_JWT_AUDIENCE", "xiaoyi-api"),
             jwt_clock_skew_seconds=_integer("XIAOYI_JWT_CLOCK_SKEW_SECONDS", 30),
@@ -116,7 +138,7 @@ class Settings:
             model_provider=model_provider,
             model_base_url=(os.getenv("XIAOYI_MODEL_BASE_URL") or os.getenv("OPENAI_BASE_URL") or "").rstrip("/"),
             model_name=os.getenv("XIAOYI_MODEL_NAME") or os.getenv("OPENAI_MODEL") or "",
-            model_api_key=os.getenv("XIAOYI_MODEL_API_KEY") or os.getenv("OPENAI_API_KEY") or "",
+            model_api_key=_secret("XIAOYI_MODEL_API_KEY", os.getenv("OPENAI_API_KEY", "")),
             model_timeout_seconds=_number("XIAOYI_MODEL_TIMEOUT_SECONDS", 30.0, minimum=1.0),
             model_max_retries=_integer("XIAOYI_MODEL_MAX_RETRIES", 2, minimum=0),
             model_external_data_allowed=_boolean("XIAOYI_MODEL_EXTERNAL_DATA_ALLOWED", False),

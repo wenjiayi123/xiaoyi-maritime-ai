@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import unicodedata
+from decimal import Decimal, InvalidOperation
 
 from app.models import AnswerVerification, ChatResponse, ClaimSupport, Evidence
 
@@ -9,9 +10,9 @@ from app.models import AnswerVerification, ChatResponse, ClaimSupport, Evidence
 _CITATION = re.compile(r"\[E(\d+)\]")
 _LIST_PREFIX = re.compile(
     r"^\s*(?:"
-    r"[-*•]+\s*|"
+    r"[-*•]+\s+|"
     r"(?:\(?\d{1,3}\)?|[一二三四五六七八九十]+)"
-    r"(?:[、:：)）]\s*|\.\s+)"
+    r"(?:[、)）]\s*|[:：](?!\d)\s*|\.\s+)"
     r")"
 )
 _ENGLISH_TOKEN = re.compile(r"[a-z][a-z0-9_/-]{1,}")
@@ -20,14 +21,29 @@ _DATE_TOKEN = re.compile(
     r"(?<!\d)((?:19|20)\d{2})\s*(?:年|[-/.])\s*"
     r"(\d{1,2})\s*(?:月|[-/.])\s*(\d{1,2})\s*日?"
 )
+_CLOCK_TOKEN = re.compile(r"(?<![\d:])(\d{1,2}):(\d{2})(?::(\d{2}))?(?![\d:])")
+_UNIT_ALIASES = {
+    '千瓦时':'kwh', '千瓦':'kw', '兆瓦时':'MWh', '兆瓦':'MW', '毫瓦时':'mWh', '毫瓦':'mW',
+    '瓦时':'wh', '瓦':'w', '摄氏度':'°c', '千克':'kg', '公斤':'kg', '公里':'km',
+    '人民币':'元', 'cny':'元', 'usd':'美元', '吨二氧化碳当量':'tco2e',
+}
+_UNITS = set(_UNIT_ALIASES) | set(_UNIT_ALIASES.values()) | {
+    '%','小时','分钟','秒','天','日','吨','米','海里','节','teu','艘','名','条','项','次','个',
+    '个百分点','m','km','kgco2e','tco2e','v','kv','A','Hz','rpm','美元','元','度电','立方米',
+    'kva','kvar','kvarh','mva','mvar','mvarh',
+}
+_UNIT = '(?:' + '|'.join(re.escape(unit) for unit in sorted(_UNITS, key=lambda unit: (-len(unit), unit))) + ')'
 _NUMBER_TOKEN = re.compile(
-    r"(?<![A-Za-z0-9])"
-    r"(\d+(?:,\d{3})*(?:\.\d+)?)"
-    r"\s*"
-    r"(%|％|小时|分钟|秒|天|日|吨|千克|公斤|kg|米|公里|海里|节|"
-    r"teu|kw|mw|元|美元|usd|tco2e|艘|名|条|项|次|个)?",
-    re.IGNORECASE,
+    r'(?<![A-Za-z0-9_.])([+-]?(?:\d+(?:,\d{3})*(?:\.\d+)?|\.\d+)(?:e[+-]?\d+)?)'
+    + r'(?:[ \t]*(' + _UNIT + r'(?![a-z])(?:[ \t]*/[ \t]*(?:' + _UNIT + r'(?![a-z])|[a-z]+))?)'
+    + r'|([a-z]+(?:/[a-z]+)?))?', re.I,
 )
+_BOUNDS = {
+    '不超过':'<=','不得超过':'<=','不高于':'<=','不大于':'<=','至多':'<=','最多':'<=','小于等于':'<=',
+    '不低于':'>=','不得低于':'>=','不少于':'>=','至少':'>=','大于等于':'>=',
+    '小于':'<','低于':'<','大于':'>','高于':'>','超过':'>','≤':'<=','≥':'>=','<=':'<=','>=':'>=','<':'<','>':'>',
+}
+_BOUND_PREFIX = re.compile('(' + '|'.join(re.escape(op) for op in sorted(_BOUNDS, key=len, reverse=True)) + r')\s*$')
 _ALIGNMENT_THRESHOLD = 0.30
 _NON_FACTUAL_FOLLOWUP = re.compile(
     r"^(?:若|如|如果)(?:还)?需(?:要)?进一步"
@@ -148,8 +164,14 @@ def _terms(text: str) -> set[str]:
     return terms
 
 
+def _canonical_unit(part: str) -> str:
+    if re.fullmatch('[Mm][Ww][Hh]?', part):
+        return part[0] + ('Wh' if len(part) == 3 else 'W')
+    return _UNIT_ALIASES.get(part.casefold(), part.casefold())
+
+
 def _numeric_tokens(text: str) -> list[str]:
-    value = unicodedata.normalize("NFKC", text).casefold()
+    value = unicodedata.normalize("NFKC", text).replace('−', '-')
     tokens: list[tuple[int, int, str]] = []
     occupied: list[tuple[int, int]] = []
     for match in _DATE_TOKEN.finditer(value):
@@ -162,19 +184,45 @@ def _numeric_tokens(text: str) -> list[str]:
             )
         )
         occupied.append(match.span())
+    for match in _CLOCK_TOKEN.finditer(value):
+        hour, minute, second = match.groups()
+        clock = f'clock:{int(hour):02d}:{minute}' + (f':{second}' if second else '')
+        tokens.append((*match.span(), clock))
+        occupied.append(match.span())
     for match in _NUMBER_TOKEN.finditer(value):
         if any(start <= match.start() < end for start, end in occupied):
             continue
-        number, unit = match.groups()
-        canonical_unit = (unit or "").replace("％", "%").casefold()
+        number, unit, attached_unit = match.groups()
+        units = re.split(r'\s*/\s*', unit or attached_unit or '')
+        canonical_unit = '/'.join(_canonical_unit(part) for part in units)
+        bound = _BOUND_PREFIX.search(value[:match.start()])
+        comparator = _BOUNDS[bound.group(1)] if bound else ''
         tokens.append(
             (
                 match.start(),
                 match.end(),
-                f"{number.replace(',', '')}{canonical_unit}",
+                f"{comparator}{number.replace(',', '').lstrip('+')}{canonical_unit}",
             )
         )
     return list(dict.fromkeys(token for _, _, token in sorted(tokens)))
+
+
+def _quantity_key(token: str):
+    """Compare decimal spelling exactly in base ten; retain the reported spelling in the audit."""
+    match = re.fullmatch(r'(<=|>=|<|>)?([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?)(.*)', token)
+    if not match:
+        return token
+    try:
+        return match[1], Decimal(match[2]), match[3]
+    except InvalidOperation:
+        return None
+
+
+def unsupported_quantities(tokens: list[str], cited: list[Evidence]) -> list[str]:
+    supported = {_quantity_key(token) for item in cited for field in (item.title, item.snippet)
+                 for token in _numeric_tokens(field)}
+    supported.discard(None)
+    return [token for token in tokens if _quantity_key(token) not in supported]
 
 
 def _alignment(claim: str, cited: list[Evidence]) -> tuple[float, str]:
@@ -199,9 +247,12 @@ def _alignment(claim: str, cited: list[Evidence]) -> tuple[float, str]:
 def _claims(answer: str) -> list[str]:
     claims: list[str] = []
     in_model_advisory = False
+    # A citation followed by sentence punctuation closes its claim. Otherwise a
+    # later sentence on the same line could borrow numbers from the earlier source.
+    answer = re.sub(r'(\[E\d+\])([。！？;；])\s*(?=[\w+−-])', r'\1\2\n', answer)
     for raw_line in answer.splitlines():
-        line = raw_line.strip().lstrip("-").strip()
-        if not line or line.startswith("#") or len(line) < 8:
+        line = re.sub(r'^[-*•]+\s+', '', raw_line.strip())
+        if not line or line.startswith("#") or (len(line) < 8 and not _CITATION.search(line) and not _NUMBER_TOKEN.search(line)):
             continue
         if line.startswith("模型综合建议（需人工复核）："):
             in_model_advisory = True
@@ -262,16 +313,7 @@ def verify_answer(
         cited = [supporting[index] for index in dict.fromkeys(valid)]
         alignment_score, alignment_basis = _alignment(claim, cited)
         numeric_tokens = _numeric_tokens(_claim_text(claim))
-        cited_numeric_tokens = set(
-            _numeric_tokens(
-                "\n".join(
-                    f"{item.title}\n{item.snippet}" for item in cited
-                )
-            )
-        )
-        unsupported_numeric_tokens = [
-            token for token in numeric_tokens if token not in cited_numeric_tokens
-        ]
+        unsupported_numeric_tokens = unsupported_quantities(numeric_tokens, cited)
         numeric_token_count += len(numeric_tokens)
         supported_numeric_token_count += (
             len(numeric_tokens) - len(unsupported_numeric_tokens)

@@ -341,5 +341,13 @@ def assess_response(
     response: ChatResponse,
     query_analysis: QueryAnalysis | None = None,
 ) -> tuple[EvidenceHealth, DecisionReadiness]:
+    if response.intent == "offer_comparison":
+        receipt = response.offer_comparison
+        partial = receipt is None or receipt["status"] == "needs_evidence"
+        return EvidenceHealth(), DecisionReadiness(
+            status="needs_clarification" if partial else "sandbox_only", risk_level="medium",
+            blockers=(receipt["blocking_ids"] if receipt else ["offer_sheet_required"]) if partial else [],
+            next_action="补齐约束及报价来源" if partial else "在实际采用前核实现场来源及权限",
+            requires_human_confirmation=True, rationale="按用户声明的候选与约束进行只读比较")
     health = assess_evidence_health(response)
     return health, assess_decision_readiness(response, health, query_analysis)

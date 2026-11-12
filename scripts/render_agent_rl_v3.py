@@ -109,7 +109,7 @@ def main():
     names = {"D_drgrpo": "D 在线 RL", "E_more_sft": "E 继续 SFT", "F_experience": "F RL＋经验复用"}
     colors = {"D_drgrpo": "#26748b", "E_more_sft": "#d08b2d", "F_experience": "#8b59ac"}
     fig, ax = plt.subplots(2, 2, figsize=(12, 8), layout="constrained")
-    fig.suptitle("小懿 2.0 · 本机可行性试跑\n开发数据，非最终测试；空白表示该阶段尚无记录", fontsize=15)
+    fig.suptitle("舷鸥 2.0 · 本机可行性试跑\n开发数据，非最终测试；空白表示该阶段尚无记录", fontsize=15)
     ax[0, 0].plot([r["step"] for r in warmup], [r["loss"] for r in warmup], color="#536b82")
     ax[0, 0].set(title="共同 SFT 适配损失", xlabel="单状态更新", ylabel="交叉熵")
     for g in ["D_drgrpo", "F_experience"]:
@@ -197,7 +197,7 @@ def main():
     plt.close(fig)
     fig, axes = plt.subplots(2, 3, figsize=(14, 8), layout="constrained")
     fig.suptitle(
-        "小懿 2.0 · 参数更新与成本诊断（开发试跑）\n原始节点全部保留；课程初始化、模型探索与人工标签分别计数",
+        "舷鸥 2.0 · 参数更新与成本诊断（开发试跑）\n原始节点全部保留；课程初始化、模型探索与人工标签分别计数",
         fontsize=14,
     )
     settings = [
@@ -235,10 +235,10 @@ def main():
         table.append(f"<tr><td>{name}</td><td>{committed}</td><td>{node}</td><td>{score}</td></tr>")
     page = (
         '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-        "<title>小懿 2.0 实验记录</title><style>body{max-width:1200px;margin:32px auto;padding:24px;font:16px system-ui;line-height:1.7;color:#203044}"
+        "<title>舷鸥 2.0 实验记录</title><style>body{max-width:1200px;margin:32px auto;padding:24px;font:16px system-ui;line-height:1.7;color:#203044}"
         "img{width:100%;height:auto}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:12px;border-bottom:1px solid #ddd}"
         ".note{padding:18px;background:#eef4f5}a{color:#156377}</style>"
-        "<h1>小懿 2.0 · 可复核的训练记录</h1><p>生成时间："
+        "<h1>舷鸥 2.0 · 可复核的训练记录</h1><p>生成时间："
         + time.strftime("%Y-%m-%d %H:%M:%S %z")
         + "；实验："
         + escape(root.name)
@@ -275,7 +275,7 @@ def main():
     temporary_html.write_text(
         '<!doctype html><html lang="zh-CN"><meta charset="utf-8">'
         '<meta http-equiv="refresh" content="0;url=' + relative + '">'
-        '<title>小懿实验最新记录</title><p><a href="' + relative + '">打开最近生成的实验记录</a></p></html>'
+        '<title>舷鸥实验最新记录</title><p><a href="' + relative + '">打开最近生成的实验记录</a></p></html>'
     )
     temporary_html.replace(pointer_html)
     print(target.resolve())

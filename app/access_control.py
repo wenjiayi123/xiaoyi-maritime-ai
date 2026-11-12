@@ -52,6 +52,10 @@ def required_permission(method: str, path: str) -> str | None:
         return "observability.read"
     if method in {"GET", "HEAD"}:
         return "api.read"
+    if method == "POST" and path == "/api/knowledge/search":
+        return "knowledge.read"
+    if method == "POST" and path == "/api/governance/authorize":
+        return "api.read"
     if path.startswith("/api/harness/evaluation"):
         return "evaluation.run"
     if path.startswith("/api/harness"):

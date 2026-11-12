@@ -218,7 +218,7 @@ def vector_index_is_current(output_path: Path = VECTOR_INDEX_PATH) -> bool:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="构建小懿open-weight真实稠密向量索引")
+    parser = argparse.ArgumentParser(description="构建舷鸥open-weight真实稠密向量索引")
     parser.add_argument(
         "--base-url",
         default="http://127.0.0.1:11436/v1",

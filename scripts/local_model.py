@@ -261,7 +261,7 @@ def status(*, model_id: str | None = None) -> dict[str, Any]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="下载、校验并登记小懿本地开源生成模型"
+        description="下载、校验并登记舷鸥本地开源生成模型"
     )
     subparsers = parser.add_subparsers(dest="command", required=True)
     download_parser = subparsers.add_parser("download")

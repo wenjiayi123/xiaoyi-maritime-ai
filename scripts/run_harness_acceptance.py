@@ -1,4 +1,4 @@
-"""Read-only acceptance against a running Xiaoyi server; saves actual task receipts."""
+"""Read-only acceptance against a running GullMate server; saves actual task receipts."""
 
 from __future__ import annotations
 
@@ -59,7 +59,7 @@ def main():
         cases = [
             {
                 "id": "default-profile",
-                "goal": "读取小懿当前工程模拟港区快照，结合通用岸电SOP说明风险与缺失数据，不调整设备。",
+                "goal": "读取舷鸥当前工程模拟港区快照，结合通用岸电SOP说明风险与缺失数据，不调整设备。",
                 "allowed_tools": ["runtime.snapshot", "knowledge.search"],
             }
         ]

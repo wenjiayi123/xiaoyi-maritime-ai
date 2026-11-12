@@ -71,6 +71,16 @@ def finish(client, run_id):
     raise AssertionError("job did not terminate")
 
 
+def test_fast_worker_cannot_mutate_accepted_response(local, monkeypatch):
+    client, _, _ = local
+    monkeypatch.setattr(agent._pool, "submit", lambda fn, job: fn(job))
+    accepted = start(client, prepare(client).json())
+    assert accepted.status_code == 202
+    receipt = accepted.json()
+    assert receipt["status"] == "running" and not receipt["observations"]
+    assert client.get("/api/linked-agent/runs/" + receipt["id"]).json()["status"] == "completed"
+
+
 def test_scenario_adjust_observe_and_restore_are_real_calls(local):
     client, state, writes = local
     plan = prepare(client).json()
@@ -238,6 +248,7 @@ def test_vague_parameter_or_question_does_not_invent_an_action():
         ("暂停马六甲时钟后恢复时钟", {"action_id": "malacca.clock", "parameters": {"action": "stop"}}),
         ("不要恢复马六甲时钟", None),
     ],
+    ids=["resume", "observe", "long-observe", "long-resume", "first-stop", "negated"],
 )
 def test_clock_parser_handles_repeated_text_without_loosening_command_guards(text, expected):
     assert parse_command(text) == expected

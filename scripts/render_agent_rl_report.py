@@ -108,7 +108,7 @@ def main():
             )
     fig.colorbar(image, ax=axes[1], label="完成率（%）", fraction=0.025, pad=0.02)
     fig.suptitle(
-        f"小懿 1.7B · 多任务语言模型 RL 本机实验\nRL 相对 SFT：{summary['rl_increment'] * 100:+.1f} 个百分点",
+        f"舷鸥 1.7B · 多任务语言模型 RL 本机实验\nRL 相对 SFT：{summary['rl_increment'] * 100:+.1f} 个百分点",
         fontsize=15,
     )
     fig.supxlabel(

@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CATALOG = ROOT / "小懿可询问问题库"
+CATALOG = ROOT / "舷鸥可询问问题库"
 
 
 def test_question_catalog_contains_all_required_sections() -> None:

@@ -9,7 +9,10 @@ import os
 from pathlib import Path
 import re
 import threading
-import fcntl
+try:
+    import fcntl
+except ImportError:  # Windows
+    from app import windows_flock as fcntl
 import tempfile
 import time
 from contextlib import contextmanager
@@ -22,6 +25,7 @@ from fastapi import APIRouter, HTTPException, Request as APIRequest
 from pydantic import Field
 
 from app.config import BASE_DIR
+from app.durable_file import publish_file
 from app.access_control import has_permission
 from app.harness.contracts import StrictModel
 from app.harness.dual_api import identity_for
@@ -116,12 +120,7 @@ def save(result):
         json.dump(result, stream, ensure_ascii=False, indent=2, allow_nan=False)
         stream.flush()
         os.fsync(stream.fileno())
-    temporary.replace(target)
-    descriptor = os.open(ROOT, os.O_RDONLY)
-    try:
-        os.fsync(descriptor)
-    finally:
-        os.close(descriptor)
+    publish_file(temporary, target)
 
 
 @router.get("/catalog")

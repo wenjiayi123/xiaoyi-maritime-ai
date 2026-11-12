@@ -3,10 +3,11 @@ from __future__ import annotations
 import re
 from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel, Field
 
 from app.runtime_store import runtime_store
+from app.security import request_identity
 
 
 router = APIRouter(prefix="/api/context", tags=["统一港航业务上下文"])
@@ -88,8 +89,9 @@ def resolve_context(
     session_id: str = "default",
     explicit: DomainContext | None = None,
     persist: bool = True,
+    actor_id: str | None = None,
 ) -> ContextResolveResponse:
-    inherited_payload = runtime_store.get_context(session_id)
+    inherited_payload = runtime_store.get_context(session_id, actor_id=actor_id)
     inherited = inherited_payload["context"] if inherited_payload else {}
     detected = _extract(question)
     explicit_values = (explicit or DomainContext()).model_dump(exclude_none=True)
@@ -99,7 +101,7 @@ def resolve_context(
     detected_fields = sorted(set(detected) | set(explicit_values))
     inherited_fields = sorted(key for key in inherited if key not in detected_fields)
     if persist:
-        runtime_store.save_context(session_id, context.model_dump(mode="json"))
+        runtime_store.save_context(session_id, context.model_dump(mode="json"), actor_id=actor_id)
     meaningful = [value for key, value in context.model_dump().items() if key not in {"language", "extra"} and value]
     confidence = min(1.0, 0.25 + len(meaningful) * 0.12 + (0.18 if detected_fields else 0.0))
     return ContextResolveResponse(
@@ -113,18 +115,21 @@ def resolve_context(
 
 
 @router.post("/resolve", response_model=ContextResolveResponse)
-def resolve_context_api(payload: ContextResolveRequest) -> ContextResolveResponse:
+def resolve_context_api(payload: ContextResolveRequest, request: Request) -> ContextResolveResponse:
+    identity = request_identity(request)
     return resolve_context(
         payload.question,
         session_id=payload.session_id,
         explicit=payload.explicit,
         persist=payload.persist,
+        actor_id=identity.actor_id if identity.authenticated else None,
     )
 
 
 @router.get("/{session_id}")
-def get_context(session_id: str) -> dict[str, Any]:
-    item = runtime_store.get_context(session_id)
+def get_context(session_id: str, request: Request) -> dict[str, Any]:
+    identity = request_identity(request)
+    item = runtime_store.get_context(session_id, actor_id=identity.actor_id if identity.authenticated else None)
     if item is None:
         raise HTTPException(status_code=404, detail="尚未建立该会话的港航业务上下文")
     return item

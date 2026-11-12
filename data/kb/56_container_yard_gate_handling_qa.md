@@ -150,4 +150,4 @@
 ## Where is my container now
 
 常见问法：Where is my container now；等价问法：Can you track my container、我的集装箱现在在哪。
-直接回答：No real-time data is connected to the current knowledge-chat session for this container. Please provide the container number and connect to the TOS / PCS or carrier container-tracking interface, then verify the latest event, location, vessel or voyage, status and timestamp; Xiaoyi will not guess a container location without live data.
+直接回答：No real-time data is connected to the current knowledge-chat session for this container. Please provide the container number and connect to the TOS / PCS or carrier container-tracking interface, then verify the latest event, location, vessel or voyage, status and timestamp; GullMate will not guess a container location without live data.

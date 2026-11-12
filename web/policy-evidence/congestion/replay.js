@@ -1,0 +1,2 @@
+
+const area=document.querySelector("#area"),flag=document.querySelector("#flag");function show(){let n=0;for(const r of document.querySelectorAll("#replay tbody tr")){const ok=(area.value==="全部"||r.cells[0].textContent===area.value)&&(flag.value==="全部"||r.cells[8].textContent===flag.value);r.hidden=!ok;n+=Number(ok)}document.querySelector("#total").value=n+" 条记录"}area.onchange=flag.onchange=show;show()

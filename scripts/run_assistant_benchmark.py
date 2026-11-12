@@ -63,7 +63,7 @@ def _report_paths(output_tag: str | None) -> tuple[Path, Path]:
 def _markdown(report: dict[str, Any]) -> str:
     result = report["benchmark"]
     knowledge = report["knowledge_snapshot"]
-    return f"""# 小懿AI 港航助手困难基准 v2
+    return f"""# 舷鸥 · GullMate 港航助手困难基准 v2
 
 生成时间：{report["generated_at"]}
 

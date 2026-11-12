@@ -152,7 +152,7 @@ def test_training_center_connects_matrix_advisor_and_system_actions() -> None:
     html, javascript = _read_frontend()
 
     assert 'data-view="rl"' in html
-    assert "训练中心、算法矩阵、小懿训练顾问、全系统助手同屏联动" in html
+    assert "训练中心、算法矩阵、舷鸥训练顾问、全系统助手同屏联动" in html
     for action in ("refresh", "start-training", "show-contract", "show-evidence", "ask-advisor"):
         assert f'data-rl-center-action="{action}"' in html
     assert "loadRLCenter" in javascript
@@ -274,9 +274,11 @@ def test_literal_button_actions_are_all_registered() -> None:
 def test_frontend_asset_revision_and_responsive_profile_label_are_current() -> None:
     html, _ = _read_frontend()
 
-    assert "/web/styles.css?v=20261031-full-demo-layout-v1" in html
+    assert "/web/styles.css?v=20261108-source-pairs" in html
     assert "/web/linked_agent.js?v=20261101-v13" in html
-    assert "/web/app.js?v=20261101-v13" in html
+    assert "/web/app.js?v=20261110-cited-passages" in html
+    assert "/web/joint_harness.js?v=20261110-mobile-handoff" in html
+    assert "/web/navigation-language.js?v=1" in html
     assert "/web/demo_guide.js?v=20261031-full-demo-audit-v8" in html
     assert re.search(
         r'<button class="profile-button"[^>]*aria-label="打开管理员工作台"',

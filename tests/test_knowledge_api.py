@@ -11,7 +11,7 @@ def test_knowledge_status_reports_real_inventory() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["document_count"] == 129
-    assert payload["chunk_count"] == 882
+    assert payload["chunk_count"] == 885
     assert payload["official_verified_documents"] == 68
     assert payload["official_full_text_documents"] == 0
     assert payload["official_summary_documents"] > 0

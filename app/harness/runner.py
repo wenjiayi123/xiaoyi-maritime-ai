@@ -24,6 +24,8 @@ from app.harness.contracts import (
     now,
 )
 from app.harness.store import Conflict, HarnessStore
+from app.policy_release import PolicySelection
+from app.storage_council import StorageSelection
 
 
 class DecisionChanged(RuntimeError):
@@ -37,6 +39,7 @@ class Harness:
         self.rules_driver = model.RulesDriver()
         self.instance = "hx-" + uuid4().hex
         self.pool = ThreadPoolExecutor(max_workers=workers, thread_name_prefix="harness")
+        self.workers = workers
         self.lock = threading.RLock()
         self.active: set[str] = set()
         self.stopping = threading.Event()
@@ -51,24 +54,24 @@ class Harness:
             self.dispatcher.start()
 
     def close(self):
-        self.stopping.set()
+        with self.lock:
+            self.stopping.set()
         if self.dispatcher:
             self.dispatcher.join(timeout=2)
         # In-flight I/O reaches its bounded safe boundary; no write is replayed.
-        self.pool.shutdown(wait=False, cancel_futures=True)
+        self.pool.shutdown(wait=False)
 
     def _dispatch(self):
         while not self.stopping.wait(0.3):
             try:
                 self.store.recover()
-                for task in self.store.list(None, 200):
-                    if task["status"] == "queued":
-                        self.schedule(task["id"])
+                for task_id in self.store.queued_ids(self.workers):
+                    self.schedule(task_id)
             except Exception:
                 # Persistent tasks remain queued/recoverable if DB is temporarily busy.
                 continue
 
-    def create(self, payload: CreateTask, identity, *, schedule=True) -> dict:
+    def create(self, payload: CreateTask, identity, *, schedule=True, council_selection: PolicySelection | StorageSelection | None = None) -> dict:
         if (
             payload.mode == "research"
             or payload.model_profile == "open_agent"
@@ -89,7 +92,9 @@ class Harness:
         if payload.allowed_tools is None and payload.planning_mode == "adaptive":
             from app.harness.adaptive import ADAPTIVE_TOOLS
 
-            names = [n for n in names if n in ADAPTIVE_TOOLS]
+            from app.harness.operation_intent import menu
+            permitted=menu(payload.goal) or ADAPTIVE_TOOLS
+            names = [n for n in names if n in permitted]
         elif payload.allowed_tools is None and payload.template_id not in {"strategy-research", "joint-preview"}:
             names = [n for n in names if not n.startswith(("strategy.", "joint."))]
         allowed = payload.allowed_tools if payload.allowed_tools is not None else names
@@ -151,6 +156,14 @@ class Harness:
             raise ValueError("模型尚未配置或外发未授权，可选择明确标识的规则运行")
         effective_budget = Budget.model_validate(effective_budget).model_dump()
         request_config = payload.model_dump(mode="json")
+        if payload.credit_trial is None:
+            request_config.pop("credit_trial", None)
+        if payload.offer_context is None:
+            request_config.pop("offer_context", None)  # Preserve idempotency for older requests.
+        if payload.policy_board_context is None:
+            request_config.pop("policy_board_context", None)
+        if payload.policy_context is None:
+            request_config.pop("policy_context", None)  # Preserve legacy request identities.
         request_config["budget"] = effective_budget
         task = {
             "id": "ht-" + uuid4().hex,
@@ -176,6 +189,8 @@ class Harness:
                 "operations-study": "verified_operations_report",
             }.get(payload.template_id, "model_or_rules_summary"),
             "joint_context": payload.joint_context.model_dump() if payload.joint_context else None,
+            **({"offer_context": payload.offer_context} if payload.offer_context else {}),
+            **({"policy_board_context": payload.policy_board_context} if payload.policy_board_context else {}),
             "operations_context": payload.operations_context,
             "model": config["name"] if driver == "model" else None,
             "model_local": config["local"],
@@ -183,6 +198,7 @@ class Harness:
             "required_tools": required,
             "skills": payload.skills,
             "use_memory": payload.use_memory,
+            **({"policy_context": payload.policy_context.model_dump()} if payload.policy_context else {}),
             "skill_versions": {s: digest(tools.SKILLS[s]) for s in payload.skills},
             "skill_snapshots": {s: copy.deepcopy(tools.SKILLS[s]) for s in payload.skills},
             "budget": effective_budget,
@@ -208,6 +224,18 @@ class Harness:
             "production_authority": False,
             "failure_count": 0,
         }
+        if council_selection is not None:
+            # Council requests already sign these values in their goal. Keep the same
+            # request digest so retries can return jobs created by earlier versions.
+            task["policy_context"] = council_selection.model_dump()
+            task["council_role_review"] = True
+        if payload.credit_trial is not None:
+            task["credit_trial"]=payload.credit_trial
+            task["output_policy"]="verified_credit_trial"
+        if payload.offer_context:
+            task["output_policy"] = "verified_offer_comparison"
+        if payload.policy_board_context:
+            task["output_policy"] = "verified_policy_board"
         result, created = self.store.create(task)
         if created and schedule:
             self.schedule(result["id"])
@@ -215,15 +243,23 @@ class Harness:
 
     def schedule(self, task_id):
         with self.lock:
-            if task_id in self.active or len(self.active) >= 4 or self.stopping.is_set():
+            if task_id in self.active or len(self.active) >= self.workers or self.stopping.is_set():
                 return
             if not self.store.claim(task_id, self.instance):
                 return
             self.active.add(task_id)
-        self.pool.submit(self._work, task_id)
+            try:
+                self.pool.submit(self._work, task_id)
+            except Exception:
+                try:
+                    self._mutate(task_id, lambda t: t.update(status="queued"), "dispatch.deferred")
+                finally:
+                    self.store.release(task_id, self.instance)
+                    self.active.discard(task_id)
+                raise
 
-    def _mutate(self, task_id, fn, event, detail=None):
-        return self.store.mutate(task_id, fn, event, detail, owner=self.instance)
+    def _mutate(self, task_id, fn, event, detail=None, *, artifacts=None):
+        return self.store.mutate(task_id, fn, event, detail, owner=self.instance, artifacts=artifacts)
 
     def _stop(self, task_id, status, reason):
         return self._mutate(
@@ -262,6 +298,9 @@ class Harness:
             "verified_crossport_report",
             "verified_remediation_report",
             "verified_operations_report",
+            "verified_credit_trial",
+            "verified_offer_comparison",
+            "verified_policy_board",
         }:
             return bool(
                 not task.get("inputs")
@@ -276,6 +315,39 @@ class Harness:
         )
 
     def _publish_report(self, task):
+        if task.get("output_policy") == "verified_credit_trial":
+            from app.credit_trial import NAME, evidence
+            from app.harness.maritime import result
+            row=next(r for r in task["results"] if r["tool"]==NAME and r["ok"])
+            measured=result(task,self.store,row["id"],{NAME})
+            if measured["params"]!=task["credit_trial"]:raise ValueError("编排回执与登记输入不符")
+            text=evidence(measured,self.store,task["id"])
+            return self._finalize(task,Action(kind="final",text=text,evidence_ids=[row["id"]]),
+                producer={"mode":"verified_credit_trial","model_authored":False,"action_policy":measured["engine"],
+                          "notice":"结论依据本次能碳回执与工具动作独立核验"})
+        if task.get("output_policy") == "verified_policy_board":
+            from app.harness.maritime import result
+            from app.policy_board import PolicyBoard, select, summarize
+
+            row = next(r for r in task["results"] if r["tool"] == "policy.select" and r["ok"])
+            receipt = result(task, self.store, row["id"], {"policy.select"})
+            if receipt != select(PolicyBoard.model_validate(task["policy_board_context"])):
+                self._stop(task["id"], "blocked", "策略筛选回执与锁定的约束或发布证据不符")
+                return True
+            return self._finalize(task, Action(kind="final", text=summarize(receipt), evidence_ids=[row["id"]]),
+                                  producer={"mode":"verified_policy_board","model_authored":False,
+                                            "notice":"模型选择只读工具，按已核验的仿真结果交付"})
+        if task.get("output_policy") == "verified_offer_comparison":
+            from app.harness.maritime import result
+            from app.offer_comparison import OfferSheet, compare, summarize
+            row = next(r for r in task["results"] if r["tool"] == "offers.compare" and r["ok"])
+            receipt = result(task, self.store, row["id"], {"offers.compare"})
+            if receipt != compare(OfferSheet.model_validate(task["offer_context"])):
+                self._stop(task["id"], "blocked", "比选结果与锁定输入复算不一致")
+                return True
+            return self._finalize(task, Action(kind="final", text=summarize(receipt), evidence_ids=[row["id"]]),
+                                  producer={"mode": task["output_policy"], "model_authored": False,
+                                            "notice": "依据任务工件与锁定输入复算后交付"})
         if task.get("output_policy") == "verified_operations_report":
             from app.harness import operations_v5
             from app.harness.maritime import result
@@ -612,12 +684,16 @@ class Harness:
                 messages, compacted = model.context(task, memories)
                 if compacted:
                     charge(compactions=1)
+                metadata = {"driver": task["driver"]}
+                if task["driver"] == "model" and task["use_memory"]:
+                    from app.harness.task_memory import used_memory_refs
+                    metadata["memory_refs"] = used_memory_refs(messages)
                 # A durable intent precedes every model call; a format failure still consumes a step.
                 self._mutate(
                     task_id,
                     lambda t: t["usage"].update(steps=t["usage"]["steps"] + 1),
                     "model.started",
-                    {"driver": task["driver"]},
+                    metadata,
                 )
                 task = self.store.get(task_id)
                 revision = len(task["inputs"])
@@ -633,7 +709,8 @@ class Harness:
                         self._stop(task_id, "blocked", tools.safe_error(exc))
                         break
                     if getattr(exc, "response_text", None):
-                        self.store.artifact(task_id, f"model-error-{task['usage']['steps']}.txt", exc.response_text)
+                        self.store.artifact(task_id, f"model-error-{task['usage']['steps']}.txt",
+                                            exc.response_text, owner=self.instance)
                     self._mutate(
                         task_id,
                         lambda t, error_message=getattr(exc, "validation_error", tools.safe_error(exc)): t.update(
@@ -655,6 +732,30 @@ class Harness:
                     self._mutate(task_id, lambda t: None, "model.discarded", {"reason": "运行中收到新的用户约束"})
                     continue
                 self._mutate(task_id, lambda t: None, "model.action", action.model_dump(mode="json"))
+                if task["driver"] == "model" and action.kind == "tool" and action.tool == "calculate":
+                    from app.harness.task_memory import memory_cost_issue, memory_request
+                    if memory_request(task)[0]:
+                        current_notes = self.store.memories(task["actor_id"]) if task["use_memory"] else []
+                        issue = memory_cost_issue(task, action, messages, current_notes)
+                        if issue == "missing_inputs":
+                            def ask_for_cost_inputs(t):
+                                self._check_decision(t, task)
+                                t.update(status="waiting_input", question="本次任务没有可核对的项目金额或数量输入，请提供计算所用参数。")
+                            try:
+                                self._mutate(task_id, ask_for_cost_inputs, "memory.inputs_required", {"executed":False})
+                            except DecisionChanged:
+                                continue
+                            break
+                        if issue:
+                            def reject_cost_inputs(t):
+                                self._check_decision(t, task)
+                                t["last_model_error"] = "算式的输入无法从本项目已保存记录和当前用户输入核对。请使用已知数值重新列式；缺少输入时返回 ask。"
+                            try:
+                                self._mutate(task_id, reject_cost_inputs, "memory.operands_rejected", {"executed":False})
+                            except DecisionChanged:
+                                continue
+                            charge()
+                            continue
                 if action.kind == "plan":
                     if task["plan"] and task.get("plan_at_result_count", 0) == len(task["results"]):
                         self._stop(task_id, "blocked", "重复规划但未执行，触发无进展保护")
@@ -812,13 +913,17 @@ class Harness:
 
         try:
             result = tools.execute(
-                action.tool, action.arguments, task, self.store, prepared=prepared, call_id=call_id, cancelled=cancelled
+                action.tool, action.arguments, task, self.store, prepared=prepared,
+                call_id=call_id, cancelled=cancelled, owner=self.instance,
             )
             ok = result.get("status") not in {"failed", "needs_review", "cancelled", "blocked", "partial", "rejected", "budget_exceeded"}
             if action.tool == "research.parallel":
                 ok = any(b["ok"] for b in result["branches"])
         except Exception as exc:
             result, ok = {"error": tools.safe_error(exc)}, False
+            if action.tool in ("forecast.port_load","dispatch.tariff_week"):
+                from app.operation_evidence import Unavailable
+                if isinstance(exc,Unavailable):result["retryable_dependency"]="twin"
         try:
             raw = encoded(result)
         except (TypeError, ValueError):
@@ -830,7 +935,6 @@ class Harness:
             raw = encoded(result)
         result_id = "T" + str(len(task["results"]) + 1)
         name = result_id + ".json"
-        self.store.artifact(task_id, name, raw, "application/json")
         summary = self._summary(action.tool, result)
         record = {
             "id": result_id,
@@ -871,10 +975,22 @@ class Harness:
             t["results"].append(record)
             if ok or not side_effect:
                 t["inflight"] = {}
+            if not ok and not side_effect and result.get("retryable_dependency")=="twin":
+                if t["control"].get("cancel"):
+                    t.pop("waiting_source",None);t.update(status="cancelled",stop_reason="用户已取消任务")
+                elif t["control"].get("pause"):
+                    t.pop("waiting_source",None);t.update(status="paused",stop_reason="用户已暂停任务")
+                else:
+                    t.update(status="paused",stop_reason="等待 TwinLab 恢复；已有工具凭证已保存",waiting_source={"name":"twin","result_id":result_id,"fingerprint":fingerprint})
+            if ok and (t.get("waiting_source") or {}).get("fingerprint")==fingerprint:
+                t.pop("waiting_source",None)
             if not ok and side_effect:
                 t.update(status="needs_review", stop_reason="联动结果未核验成功；请查看关联目标回执，未自动重试")
 
-        current = self._mutate(task_id, finish, "tool.completed" if ok else "tool.failed", record)
+        current = self._mutate(
+            task_id, finish, "tool.completed" if ok else "tool.failed", record,
+            artifacts=[{"name": name, "content": raw, "media_type": "application/json"}],
+        )
         return current["status"] == "running"
 
     @staticmethod
@@ -888,6 +1004,51 @@ class Harness:
 
     @staticmethod
     def _summary(name, result):
+        if name in ("forecast.port_load","dispatch.tariff_week","evidence.match_scope"):
+            from app.operation_evidence import compact
+            return encoded(compact(result))
+        if name=="agent.credit_trial":return result.get("summary") or str(result.get("error","未取得编排回执"))[:500]
+        if name=="policy.deep_storage" and "summary" in result:
+            from app.storage_decision_claims import presentation
+            return encoded(presentation(result))
+        if name=="systems.inspect":
+            from app.harness.operation_intent import inspection
+            facts=inspection(result)
+            if facts is not None:return encoded(facts)
+        if name in {"policy.shore_storage","policy.vessel_schedule","policy.multidevice"} and "error" in result:
+            return encoded({"error":result["error"]})[:2600]
+        if name == "policy.shore_storage":
+            from app.shore_evidence import shore_digest
+            return encoded(shore_digest(result))
+        if name in {"policy.vessel_schedule","policy.multidevice"}:
+            from app.harness.policy_digest import policy_digest
+            return encoded(policy_digest(name,result))
+        if name == "twin.validate_public" and result.get("holdout"):
+            holdout = result["holdout"]
+            metrics = {k:holdout[k] for k in ("mae", "baseline_mae", "rmse")}
+            return encoded({"site_id":result["site_id"], "scope":"single station temporal holdout",
+                "horizon_minutes":result["forecast_horizon_minutes"], "n":holdout["n"],
+                "exact":metrics, "display":{k:format(v,".4f") for k,v in metrics.items()},
+                "passed":result["validation_passed"], "source_sha256":result["source_sha256"]})
+        if name == "knowledge.figures" and result.get("hits"):
+            from app.visual_evidence import figure_summary
+            return figure_summary(result)
+        if name in {"policy.energy","policy.operations","policy.safety","policy.release"} and result.get("policy_metrics"):
+            # Retain the exact inputs in the artifact; provide the normal two-decimal
+            # display values under their own metric names and period for final reports.
+            precision = {side:{k:format(v,".2f") for k,v in result[side].items()}
+                         for side in ("policy_metrics","baseline_metrics")}
+            return encoded({"period":result["period"],"display":precision,"decision":result["decision"],"checks":result["checks"]})
+        if name == "research.parallel":
+            return encoded({"branches": [
+                {"tool": branch["tool"], "arguments": encoded(branch.get("arguments", {}))[:400],
+                 "ok": branch["ok"],
+                 "summary": Harness._summary(branch["tool"], branch.get("result", branch))[:1000]}
+                for branch in result["branches"]
+            ]})
+        if name == "linked.observe" and "config" in result:
+            return encoded({key: result.get(key) for key in
+                            ["config", "metrics", "source", "source_time", "observed_at", "production_authority"]})
         if name == "systems.inspect" and result.get("resource") == "status":
             data = result["data"]
             return encoded({"target": result["target"], "resource": "status", "systems": data["systems"],
@@ -1124,10 +1285,12 @@ class Harness:
             )
 
         try:
-            self._mutate(task["id"], publish, "task.finalized", final["verification"])
+            self._mutate(
+                task["id"], publish, "task.finalized", final["verification"],
+                artifacts=[{"name": "report.md", "content": final["text"] + "\n\n" + final["data_notice"]}],
+            )
         except DecisionChanged:
             return False
-        self.store.artifact(task["id"], "report.md", final["text"] + "\n\n" + final["data_notice"])
         return True
 
     def control(self, task_id, command, role, *, actor_id=None):
@@ -1138,11 +1301,19 @@ class Harness:
                     raise Conflict("仅能继续已安全暂停的任务；未决副作用必须先核查")
                 if any(not has_permission(execution_role, tools.REGISTRY[n][1]) for n in t["allowed_tools"]):
                     raise PermissionError("当前角色权限不足以继续该任务")
+                waiting = t.get("waiting_source") or {}
+                if waiting.get("result_id"):
+                    prior = t.setdefault("source_recoveries", [])
+                    if not any(a["failed_id"] == waiting["result_id"] for a in prior):
+                        prior.append({"failed_id": waiting["result_id"], "source": waiting["name"], "at": now(),
+                                      "usage": dict(t["usage"]),
+                                      "retained": [{"id": r["id"], "sha256": r["sha256"]} for r in t["results"] if r["ok"]]})
                 t.update(status="queued", actor_role=execution_role, stop_reason="")
                 t["control"] = {"cancel": False, "pause": False}
             elif command in {"pause", "cancel"}:
                 if t["status"] in TERMINAL:
                     raise Conflict("任务已结束")
+                t.pop("waiting_source",None)
                 t["control"][command] = True
                 if t["status"] != "running":
                     t.update(status="cancelled" if command == "cancel" else "paused", pending=None)
@@ -1158,6 +1329,12 @@ class Harness:
 
     def input(self, task_id, payload, role, *, actor_id=None):
         def change(t):
+            if t.get("policy_board_context"):
+                raise Conflict("修改策略候选、目标或约束时请以新编号创建任务")
+            if t.get("credit_trial"):
+                raise Conflict("请用新工单复算更改后的条件")
+            if t.get("offer_context"):
+                raise Conflict("修改锁定比选数据时请以新的编号创建任务")
             if t["status"] in TERMINAL:
                 raise Conflict("已结束任务不能追加指令，请创建新任务")
             old = next((i for i in t["inputs"] if i["request_id"] == payload.request_id), None)
@@ -1248,7 +1425,6 @@ class Harness:
                        **({"source_ref": call["arguments"]["source_ref"]} if call["tool"] == "execution.restore" else {})})
         result_id = "T" + str(len(task["results"]) + 1)
         name = result_id + ".json"
-        self.store.artifact(task["id"], name, raw, "application/json")
 
         def resolve(t):
             if t["status"] != "needs_review" or t["inflight"].get("id") != call["id"]:
@@ -1273,5 +1449,6 @@ class Harness:
             t.update(status=outcome, inflight={}, stop_reason="已按关联持久化回执核查；未重新下发操作")
 
         return self.store.mutate(
-            task["id"], resolve, "operation.reconciled", {"linked_run_id": run_id, "status": result["status"]}
+            task["id"], resolve, "operation.reconciled", {"linked_run_id": run_id, "status": result["status"]},
+            artifacts=[{"name": name, "content": raw, "media_type": "application/json"}],
         )

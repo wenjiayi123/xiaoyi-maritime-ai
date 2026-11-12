@@ -138,8 +138,9 @@ _SMALLTALK_OR_IDENTITY = re.compile(
     r"你是谁|你叫什么|你来自哪里|谁研发的|谁开发的|你能做什么|你会什么)[呀啊吗呢吧？?！!]*$",
     re.IGNORECASE,
 )
+_TECHNICAL_PRESSURE = re.compile(r"压力(?=试验|测试|传感器|变送器|表|容器|阀|管道)")
 _DAILY_CONTEXT = re.compile(
-    r"(我|家里|今天|今晚|昨晚|明天|周末|上班|下班|迟到|请假|休息|睡|困|累|"
+    r"(我(?!国|方)|家里|今天|今晚|昨晚|明天|周末|上班|下班|迟到|请假|休息|睡|困|累|"
     r"吃|喝|咖啡|运动|跑步|健身|天气|下雨|太热|太冷|心情|压力|头疼|生病|"
     r"感冒|疼|药|通勤|堵车|约会|旅游|买|穿)",
     re.IGNORECASE,
@@ -148,6 +149,9 @@ _DAILY_CONTEXT = re.compile(
 
 def workforce_daily_answer(question: str) -> str | None:
     compact = re.sub(r"[\s，。！？、,.!?]", "", question).casefold()
+    # Ignore the engineering sense of pressure while keeping independent
+    # personal symptoms in the same sentence available to the daily rules.
+    compact = _TECHNICAL_PRESSURE.sub("", compact)
     for rule in _RULES:
         if any(re.search(pattern, compact, re.IGNORECASE) for pattern in rule.patterns):
             return rule.answer
@@ -161,5 +165,6 @@ def is_general_workforce_question(question: str) -> bool:
         return False
     return (
         _DAILY_CONTEXT.search(compact) is not None
+        and _TECHNICAL_PRESSURE.search(compact) is None
         and _MARITIME_OR_PROFESSIONAL.search(compact) is None
     )

@@ -126,7 +126,7 @@ def main():
                 )
         fig.colorbar(im, ax=axes[1], label="完成率（%）", fraction=0.025)
         fig.suptitle(
-            f"小懿 1.7B · 本机语言模型强化学习实测\nD−C：{summary['rl_increment'] * 100:+.1f} 个百分点；D−E：{summary['rl_vs_continued_sft'] * 100:+.1f} 个百分点",
+            f"舷鸥 1.7B · 本机语言模型强化学习实测\nD−C：{summary['rl_increment'] * 100:+.1f} 个百分点；D−E：{summary['rl_vs_continued_sft'] * 100:+.1f} 个百分点",
             fontsize=15,
         )
         fig.supxlabel(

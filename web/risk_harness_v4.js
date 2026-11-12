@@ -2,7 +2,7 @@
 window.renderCapabilityScorecard=function(data,esc){
   const table=(headers,rows)=>`<div class="hx-table-scroll"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   const link=u=>{try{const x=new URL(u);return x.protocol==='https:'?`<a href="${esc(x.href)}" target="_blank" rel="noopener">${esc(x.hostname)} ↗</a>`:'';}catch{return '';}};
-  return `<h3>小懿逐项能力评分 · ${data.components.length}项 · ${data.current?'证据当前有效':'待当前证据核验'}</h3>
+  return `<h3>舷鸥逐项能力评分 · ${data.components.length}项 · ${data.current?'证据当前有效':'待当前证据核验'}</h3>
     <p>${esc(data.rubric.method)} 每个模块同时给出当前能做的事情和未闭合的部分。现场自主调度为0分表示没有已授权现场执行证据；生产权限关闭属于现有保护机制。</p>
     <p>参考尺度：40分局部可运行，60分可复现离线研究/工程能力，80分需要更充分的多场景、业务与运行验证。分差5分不代表统计显著。</p>
     ${table(['功能模块','本次分数 / 100','目前能做到','限制与下一步','证据'],data.components.map(r=>[esc(r.name),`<strong>${esc(r.score)}</strong>`,esc(r.can_do),esc(r.boundary),`<details><summary>查看五维分解与来源</summary><pre>${esc(JSON.stringify({dimensions:r.dimensions,evidence:r.evidence,confidence:r.confidence},null,2))}</pre></details>`]))}
@@ -44,6 +44,6 @@ window.renderRiskV4=function(data,esc){
     <h3>当前Docker与全仓工程门禁 · ${data.docker.current?'已验证':'待当前构建回执'}</h3><p>${esc(data.quality.notice)}</p>
     ${detail('当前容器、源码指纹、原始回执与独立回读',{docker:data.docker,quality:data.quality,independent:data.independent})}
     ${detail('开发负面结果、运行环境错误和修复记录（未删除）',data.failures)}
-    <details><summary>逐项查看小懿全部功能评分与前沿差距</summary>${window.renderCapabilityScorecard({...data.scorecard,current:data.current},esc)}</details>
+    <details><summary>逐项查看舷鸥全部功能评分与前沿差距</summary>${window.renderCapabilityScorecard({...data.scorecard,current:data.current},esc)}</details>
     <p>${esc(data.notice)}</p>`;
 };

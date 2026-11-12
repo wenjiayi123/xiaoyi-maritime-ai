@@ -29,6 +29,9 @@ from app.harness.store import Conflict, HarnessStore
 from app.runtime_store import runtime_store
 from app.security import request_identity
 from app.settings import settings
+from app.policy_release import PolicySelection, ROLE_CHECKS
+from app.storage_council import StorageSelection
+from app.policy_board import PolicyBoard, select as select_policy
 from app.harness.runtime import build_info
 from pydantic import Field
 from app.harness.contracts import StrictModel, Budget
@@ -79,6 +82,88 @@ def perform(fn):
         raise HTTPException(422, "请求参数或证据无效，请检查输入与任务状态") from exc
 
 
+class CouncilRequest(StrictModel):
+    request_id: str = Field(pattern=r"^[A-Za-z0-9_-]{8,70}$")
+    selection: PolicySelection | StorageSelection
+
+
+@router.post("/policy-board")
+def read_policy_board(payload: PolicyBoard, request: Request):
+    identity = request_identity(request)
+    if not has_permission(identity.role, "chat.use"):
+        raise HTTPException(403, "当前身份没有查看策略比较的权限")
+    return perform(lambda: select_policy(payload))
+
+
+class CouncilStatus(StrictModel):
+    group: str = Field(pattern=r"^pc-[a-f0-9]{24}$")
+    tasks: dict[str, str] = Field(min_length=3, max_length=3)
+    selection: PolicySelection | StorageSelection
+
+
+@router.post("/policy-council")
+def start_policy_council(payload: CouncilRequest, request: Request):
+    identity = request_identity(request)
+    group = "pc-" + digest([identity.actor_id, payload.request_id])[:24]
+    tasks = {}
+    for role in ROLE_CHECKS:
+        tool = "policy." + role
+        job = CreateTask(
+            goal=f"你是 {role} 审查员。调用 {tool}，逐项解释自己负责的判定与证据；不要推测其他岗位的判断。参数："
+                 + json.dumps(payload.selection.model_dump(), ensure_ascii=False),
+            request_id=f"{group}-{role}", driver="model", required_tools=[tool], allowed_tools=[tool],
+        )
+        result = perform(lambda: get_harness().create(job, identity, council_selection=payload.selection))
+        tasks[role] = result["id"]
+    return {"group": group, "tasks": tasks, "selection": payload.selection.model_dump(),
+            "production_authority": False}
+
+
+@router.post("/policy-council/status")
+def read_policy_council(payload: CouncilStatus, request: Request):
+    if set(payload.tasks) != set(ROLE_CHECKS) or len(set(payload.tasks.values())) != len(ROLE_CHECKS):
+        raise HTTPException(422, "必须提供三个不同岗位的任务编号")
+    harness = get_harness()
+    reviews = {}
+    for role, task_id in payload.tasks.items():
+        task = task_for(task_id, request)
+        if task["request_id"] != f"{payload.group}-{role}":
+            raise HTTPException(409, "任务未绑定此会审和岗位")
+        fixed = task.get("policy_context")
+        if fixed is not None and fixed != payload.selection.model_dump():
+            raise HTTPException(409, "会审查询参数与原工单不一致")
+        review = {"id": task_id, "status": task["status"], "report": task.get("final")}
+        reviews[role] = review
+        if task["status"] != "completed":
+            continue
+        results = [r for r in task["results"] if r["ok"] and r["tool"] == f"policy.{role}"]
+        if not results:
+            raise HTTPException(409, "岗位完成但缺少原始证据")
+        result = results[-1]
+        artifact = harness.store.artifact(task_id, result["artifact"])
+        if not artifact or digest(artifact["content"]) != result["sha256"] or result["sha256"] != artifact["sha256"]:
+            raise HTTPException(409, "岗位原件完整性失败")
+        receipt = json.loads(artifact["content"])
+        if receipt["role"] != role or receipt["selection"] != payload.selection.model_dump():
+            raise HTTPException(409, "岗位选择了不同策略或窗口")
+        review.update(receipt=receipt, evidence_id=result["id"])
+    complete = all("receipt" in item for item in reviews.values())
+    if complete and len({r["receipt"]["release_sha256"] for r in reviews.values()}) != 1:
+        raise HTTPException(409, "会审未使用同一回执版本")
+    vetoes = [role for role, item in reviews.items() if item.get("receipt", {}).get("decision") == "veto"]
+    unavailable = (TERMINAL - {"completed"}) | {"expired"}
+    failed = any(item["status"] in unavailable for item in reviews.values())
+    decision = "awaiting_evidence"
+    if vetoes:
+        decision = "retain_baseline"
+    elif failed:
+        decision = "needs_review"
+    elif complete:
+        decision = "human_review"
+    return {"group": payload.group, "reviews": reviews, "vetoes": vetoes, "decision": decision,
+            "all_evidence_present": complete, "production_authority": False}
+
+
 @router.get("/capabilities")
 def capabilities(request: Request):
     identity = request_identity(request)
@@ -88,7 +173,7 @@ def capabilities(request: Request):
         "runtime": build_info(),
         "modes": [{"id": "enterprise", "label": "企业受控模式"}, {"id": "research", "label": "RL策略研究模式"}],
         "dual_templates": DUAL_TEMPLATES,
-        "model_profiles": [{"id": "existing", "label": "小懿现有模型"}, {"id": "open_agent", "label": "AgentCPM开源候选（独立服务）"}],
+        "model_profiles": [{"id": "existing", "label": "舷鸥现有模型"}, {"id": "open_agent", "label": "AgentCPM开源候选（独立服务）"}],
         "tools": tools.catalog(identity.role),
         "skills": list(tools.SKILLS.values()),
         "drivers": {
@@ -141,13 +226,13 @@ def chat_task(payload: ChatTask, request: Request):
     from app.harness.adaptive import ADAPTIVE_TOOLS
 
     # This routes an imperative to the agent; it supplies neither actions nor order.
-    operational = bool(re.search(r"查看|检查|读取|比较|对比|试算|暂停|恢复|切换|验证|核验|回放|执行|帮我|请", payload.text))
-    subject = bool(re.search(r"能碳|马六甲|数字孪生|航行模拟器|强化学习|RL|策略|Harness|harness", payload.text))
-    conceptual = bool(re.search(r"是什么|什么是|怎么实现|如何实现|能否|可以吗|能不能|原理", payload.text))
-    if not payload.force_task and not (operational and subject and not conceptual):
+    from app.harness.operation_intent import operational,menu
+    if not payload.force_task and not operational(payload.text):
         return {"handled": False, "route": "existing_chat"}
     identity = request_identity(request)
-    names = [t["name"] for t in tools.catalog(identity.role, ADAPTIVE_TOOLS)]
+    names = [t["name"] for t in tools.catalog(identity.role, menu(payload.text) or ADAPTIVE_TOOLS)]
+    if "只读" in payload.text:
+        names=[n for n in names if not tools.REGISTRY[n][2]]
     if not re.search(r"强化学习|RL|策略|回放|基线", payload.text, re.I):
         names = [n for n in names if not n.startswith("strategy.")]
     task = perform(lambda: get_harness().create(CreateTask(goal=payload.text, request_id=payload.request_id,

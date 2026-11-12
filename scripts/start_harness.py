@@ -72,7 +72,7 @@ def main():
         pid = int(listeners[0])
         command = subprocess.check_output(["ps", "-p", str(pid), "-o", "command="], text=True)
         if "uvicorn app.main:app" not in command:
-            raise SystemExit("端口进程不是登记的小懿Uvicorn，未停止。")
+            raise SystemExit("端口进程不是登记的舷鸥Uvicorn，未停止。")
         if database.exists():
             backup = ROOT / ".runtime/harness-backups" / (str(time.time_ns()) + ".sqlite")
             backup.parent.mkdir(parents=True, exist_ok=True)

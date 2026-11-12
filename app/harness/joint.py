@@ -79,6 +79,7 @@ class MobileAck(StrictModel):
 class BusinessApproval(StrictModel):
     bundle_sha256: str = Field(pattern=r"^[a-f0-9]{64}$")
     slot: Literal["operator", "safety_officer", "role_rehearsal"]
+    opinion: str = Field("", max_length=400)
     approve: bool = True
 
 
@@ -89,8 +90,8 @@ def implementation():
         for n in ["contracts.py", "server.py", "action_codec.py", "ortools_multitrip.py"]
     ]
     files += [
-        Path("/Users/apple/Desktop/航行模拟器/tools/harness_full_voyage.gd"),
-        Path("/Users/apple/Desktop/模拟器/port-dt-multi/tools/harness_business_worker.py"),
+        Path(os.getenv("XIAOYI_SAILING_SIMULATOR_ROOT", BASE_DIR.parent / "sailing-simulator")) / "tools/harness_full_voyage.gd",
+        Path(os.getenv("XIAOYI_SIMULATOR_ROOT", BASE_DIR.parent / "port-dt-multi")) / "tools/harness_business_worker.py",
     ]
     files += [
         BASE_DIR / "app/linked_agent.py",
@@ -99,7 +100,7 @@ def implementation():
         BASE_DIR / "integrations/policy_runtime/requirements.lock.txt",
         BASE_DIR / "integrations/policy_runtime/bootstrap.sh",
         BASE_DIR / "integrations/policy_runtime/xiaoyi-policy.service",
-        Path("/Users/apple/Desktop/模拟器/port-dt-multi/app/services/harness_event_execution.py"),
+        Path(os.getenv("XIAOYI_SIMULATOR_ROOT", BASE_DIR.parent / "port-dt-multi")) / "app/services/harness_event_execution.py",
     ]
     return {str(f): hashlib.sha256(f.read_bytes()).hexdigest() for f in files}
 
@@ -154,7 +155,7 @@ def get(job_id, actor_id=None, admin=False):
 
 
 def list_jobs(actor_id, admin=False):
-    return [j for j in runtime_store.list_artifacts(KIND, limit=200) if admin or j["actor_id"] == actor_id]
+    return runtime_store.list_artifacts(KIND, limit=200, actor_id=None if admin else actor_id)
 
 
 def create(payload: MissionCreate, identity):
@@ -956,7 +957,8 @@ def approve_business(job_id, payload: BusinessApproval, identity):
                 raise PermissionError("安全复核岗位需要管理员权限")
             if any(a["actor_id"] == identity.actor_id or a["slot"] == payload.slot for a in approvals):
                 raise Conflict("岗位与审批人必须分别互异")
-            approvals.append({"actor_id": identity.actor_id, "slot": payload.slot, "simulated": False, "at": now()})
+            approvals.append({"actor_id": identity.actor_id, "slot": payload.slot, "simulated": False, "at": now(),
+                              "opinion": payload.opinion.strip()})
         if len(approvals) < 2:
             return _save(job, "business.approval_recorded", {"actor": identity.actor_id, "slot": payload.slot})
         if _active:

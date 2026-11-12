@@ -1,6 +1,7 @@
 """Pinned local policy runtime; the host independently validates every proposed route."""
 
 from __future__ import annotations
+import os
 import hashlib
 import json
 import math
@@ -24,7 +25,7 @@ class NoRedirect(HTTPRedirectHandler):
 def _call(path, body=None):
     data = None if body is None else json.dumps(body, allow_nan=False).encode()
     with build_opener(NoRedirect).open(
-        Request(URL + path, data=data, headers={"Content-Type": "application/json"}), timeout=35
+        Request(URL + path, data=data, headers={"Content-Type": "application/json"}), timeout=float(os.getenv("XIAOYI_POLICY_TIMEOUT", "35"))
     ) as response:
         raw = response.read(2_000_001)
     if len(raw) > 2_000_000:

@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 from urllib.error import HTTPError
+from app.durable_file import publish_file
 
 from .live import NativeBackend, digest, execution_origin, report_html, save
 
@@ -67,12 +68,7 @@ class ReceiptBackend(NativeBackend):
             json.dump(row, stream, ensure_ascii=False, allow_nan=False)
             stream.flush()
             os.fsync(stream.fileno())
-        temporary.replace(path)
-        descriptor = os.open(self.folder, os.O_RDONLY)
-        try:
-            os.fsync(descriptor)
-        finally:
-            os.close(descriptor)
+        publish_file(temporary, path)
 
     def record(self, action, data):
         result = super().record(action, data)

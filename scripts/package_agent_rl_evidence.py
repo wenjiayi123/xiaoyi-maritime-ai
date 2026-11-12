@@ -149,12 +149,12 @@ def main():
     counts = summary["training_counts"]
     paired = summary["paired_rl_effect"]
     report = f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>小懿语言模型 RL · 实测证据</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>舷鸥语言模型 RL · 实测证据</title>
 <style>body{{font:16px/1.75 system-ui,sans-serif;background:#f0f4f7;color:#183044;max-width:1100px;margin:auto;padding:32px}}
 section{{background:white;padding:24px;margin:22px 0;border-radius:14px}}h1{{font-size:30px}}h2{{font-size:22px}}
 table{{border-collapse:collapse;width:100%;font-size:15px}}td,th{{padding:10px;border-bottom:1px solid #dce4eb;text-align:left}}
 img{{width:100%;height:auto}}a{{color:#14678b}}code{{overflow-wrap:anywhere}}li{{margin-bottom:16px}}.lead{{font-size:19px}}</style>
-<h1>小懿 1.7B 语言模型强化学习：本机实测</h1>
+<h1>舷鸥 1.7B 语言模型强化学习：本机实测</h1>
 <p>实验 {html.escape(source.name)} · CPU LoRA · 8 类工具任务 · 原 4B 保持不变</p>
 <section><p class="lead">{conclusion} RL 增量为 <b>{increment:+.1f} 个百分点</b>。</p>
 <p>比较的是相同工具、候选、任务和调用预算。C→D 有 {paired["failure_to_success"]} 个案例从失败变成功，

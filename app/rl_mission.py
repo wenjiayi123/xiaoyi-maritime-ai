@@ -15,7 +15,7 @@ from app.rl_lab.datasets import DatasetError, dataset_catalog
 from app.rl_lab.service import RunConflict, RunNotFound, rl_lab_service
 
 
-router = APIRouter(prefix="/api/rl-mission", tags=["小懿RL训练工作流"])
+router = APIRouter(prefix="/api/rl-mission", tags=["舷鸥RL训练工作流"])
 
 MISSION_COMMAND = (
     "使用公开能源时序数据启动四种强化学习算法和PID控制基线的公平训练，训练时不渲染，"
@@ -54,7 +54,7 @@ def mission_health() -> dict[str, Any]:
     systems = {
         "xiaoyi": {
             "id": "xiaoyi",
-            "label": "小懿AI",
+            "label": "舷鸥 · GullMate",
             "online": True,
             "mode": "local-orchestrator",
         },

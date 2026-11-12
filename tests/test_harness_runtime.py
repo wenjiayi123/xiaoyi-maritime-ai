@@ -810,11 +810,11 @@ def test_steering_at_question_commit_does_not_leave_stale_wait(harness, monkeypa
     original = harness._mutate
     inserted = []
 
-    def mutate(task_id, fn, event, detail=None):
+    def mutate(task_id, fn, event, detail=None, **kwargs):
         if event == "task.waiting_input" and not inserted:
             inserted.append(True)
             harness.input(task_id, InputRequest(text="信息已补充，改算2+2", request_id="question-race-001"), "operator")
-        return original(task_id, fn, event, detail)
+        return original(task_id, fn, event, detail, **kwargs)
 
     monkeypatch.setattr(harness, "_mutate", mutate)
     t = script(

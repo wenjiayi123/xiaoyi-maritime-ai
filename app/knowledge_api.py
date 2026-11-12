@@ -3,7 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any, Literal, Optional, Union
 
@@ -18,11 +18,31 @@ from app.config import (
     SOURCE_REGISTRY_PATH,
 )
 from app.provenance import SourceProvenance, load_source_registry
-from app.knowledge_policy import detect_jurisdictions
+from app.knowledge_policy import detect_jurisdictions, query_reference_date, source_review_status
 from app.retrieval import KnowledgeBase, KnowledgeChunk, get_shared_knowledge_base, load_index
+from app.ais_evidence import observed_minute
+from app.visual_evidence import search_figures
 
 
 router = APIRouter(prefix="/api/knowledge", tags=["可审计知识库"])
+
+
+@router.get("/figures")
+def find_figures(q: str = Query(min_length=2, max_length=250), window: int | None = Query(default=None, ge=0, le=11)) -> dict:
+    try:
+        return search_figures(q, window)
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=503, detail="视觉证据未通过完整性检查") from exc
+
+
+@router.get("/ais-observation")
+def ais_observation(at: datetime) -> dict:
+    try:
+        return observed_minute(at)
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except (ValueError, OSError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 class KnowledgeStatus(BaseModel):
@@ -82,10 +102,13 @@ class KnowledgeSearchRequest(BaseModel):
     jurisdiction: Optional[str] = Field(None, max_length=40)
     content_scope: Optional[str] = Field(None, max_length=80)
     current_only: bool = False
+    as_of_date: Optional[date] = Field(None, description="按登记生效区间检索，要求有生效起点；两端日期均包含")
     min_coverage: float = Field(0.30, ge=0.0, le=1.0)
 
 
 class KnowledgeSearchHit(BaseModel):
+    reprints: list[dict[str,str]] = Field(default_factory=list)
+    citation: str = ""
     id: str
     source: str
     title: str
@@ -119,6 +142,7 @@ class KnowledgeSearchHit(BaseModel):
 
 class KnowledgeSearchResponse(BaseModel):
     query: str
+    as_of_date: Optional[date] = None
     grounded: bool
     result_count: int
     official_result_count: int
@@ -289,6 +313,12 @@ def get_knowledge_status(chunks: Optional[list[KnowledgeChunk]] = None) -> Knowl
     )
 
 
+@router.get("/passages/{chunk_id}")
+def cited_passage(chunk_id: str, citation: str = Query(pattern=r"^[a-f0-9]{64}$")) -> dict:
+    from app.knowledge_passage import resolve
+    return resolve(chunk_id, citation)
+
+
 @router.get("/status", response_model=KnowledgeStatus)
 def knowledge_status() -> KnowledgeStatus:
     return get_knowledge_status()
@@ -371,6 +401,8 @@ def knowledge_sources(
 @router.post("/search", response_model=KnowledgeSearchResponse)
 def search_knowledge(payload: KnowledgeSearchRequest) -> KnowledgeSearchResponse:
     knowledge_base = get_shared_knowledge_base()
+    reference_date = payload.as_of_date or query_reference_date(payload.query, temporal_intent_only=True)
+    review_day = reference_date or date.today()
     inferred_jurisdictions = detect_jurisdictions(payload.query)
     raw_hits = knowledge_base.search(
         payload.query,
@@ -385,8 +417,10 @@ def search_knowledge(payload: KnowledgeSearchRequest) -> KnowledgeSearchResponse
         ),
         content_scopes=(payload.content_scope,) if payload.content_scope else None,
         current_only=payload.current_only,
+        as_of_date=reference_date,
     )
     raw_hits = raw_hits[: payload.top_k]
+    from app.knowledge_passage import reference, reprints
     hits: list[KnowledgeSearchHit] = []
     for hit in raw_hits:
         provenance = hit.chunk.provenance
@@ -404,13 +438,15 @@ def search_knowledge(payload: KnowledgeSearchRequest) -> KnowledgeSearchResponse
         ):
             qualified = False
             qualification_reason = "official_source_required"
-        elif payload.current_only and provenance.review_status in {"review_due", "review_date_invalid"}:
+        elif payload.current_only and provenance.official and source_review_status(provenance, review_day) != "current":
             qualified = False
             qualification_reason = "source_review_due"
         else:
             qualified = True
             qualification_reason = "qualified"
         hits.append(KnowledgeSearchHit(
+            reprints=reprints(hit.chunk),
+            citation=reference(hit.chunk),
             id=hit.chunk.id,
             source=hit.chunk.source,
             title=hit.chunk.title,
@@ -437,13 +473,14 @@ def search_knowledge(payload: KnowledgeSearchRequest) -> KnowledgeSearchResponse
             effective_to=provenance.effective_to,
             last_verified_at=provenance.last_verified_at,
             review_due_at=provenance.review_due_at,
-            review_status=provenance.review_status,
+            review_status=source_review_status(provenance, review_day),
             document_checksum_sha256=hit.chunk.document_hash or None,
             chunk_checksum_sha256=hit.chunk.content_hash or None,
         ))
     grounded = any(hit.qualified for hit in hits)
     return KnowledgeSearchResponse(
         query=payload.query,
+        as_of_date=reference_date,
         grounded=grounded,
         result_count=len(hits),
         official_result_count=sum(hit.official for hit in hits),
@@ -451,6 +488,7 @@ def search_knowledge(payload: KnowledgeSearchRequest) -> KnowledgeSearchResponse
         notice=(
             "仅返回已建立哈希和来源登记的索引命中；摘要/目录不能替代正式全文，"
             "grounded=false 表示没有达到当前覆盖与来源条件。"
+            + (" 指定日期时按登记生效区间筛选；资料的复核期限另行显示。" if reference_date else "")
         ),
         hits=hits,
     )

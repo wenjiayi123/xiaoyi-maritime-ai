@@ -592,7 +592,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Run the Xiaoyi maritime end-to-end model benchmark."
+        description="Run the GullMate maritime end-to-end model benchmark."
     )
     parser.add_argument(
         "--endpoint",

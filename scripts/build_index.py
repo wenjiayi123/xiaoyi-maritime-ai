@@ -11,7 +11,7 @@ from app.retrieval import build_index  # noqa: E402
 
 def main() -> None:
     chunks = build_index(KB_DIR, INDEX_PATH)
-    print(f"小懿索引构建完成：{len(chunks)} 个知识片段")
+    print(f"舷鸥索引构建完成：{len(chunks)} 个知识片段")
     print(f"索引文件：{INDEX_PATH}")
 
 

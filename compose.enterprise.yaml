@@ -1,0 +1,13 @@
+services:
+  xiaoyi:
+    image: xiaoyi-ai:0.4.0-enterprise
+    environment:
+      XIAOYI_ENV: production
+      XIAOYI_SECURITY_MODE: jwt
+      XIAOYI_JWT_SECRET_FILE: /run/secrets/xiaoyi_jwt
+    secrets:
+      - xiaoyi_jwt
+
+secrets:
+  xiaoyi_jwt:
+    file: ${XIAOYI_JWT_SECRET_PATH:?Set the absolute path of the provisioned JWT signing key}

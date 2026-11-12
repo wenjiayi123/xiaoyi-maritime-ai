@@ -513,6 +513,7 @@ def execute(plan_id: str, payload: ExecuteRequest, request: Request) -> dict:
             _cancel[run_id] = threading.Event()
             _leases[run_id] = lease
             _save(run, "accepted")
+            accepted = copy.deepcopy(run)
             _pool.submit(_work, run)
         except Exception:
             _active.pop(plan["target"], None)
@@ -520,7 +521,7 @@ def execute(plan_id: str, payload: ExecuteRequest, request: Request) -> dict:
             _leases.pop(run_id, None)
             lease.release()
             raise
-        return copy.deepcopy(run)
+        return accepted
 
 
 @router.get("/runs")

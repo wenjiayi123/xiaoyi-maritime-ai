@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
+from app.policy_release import PolicySelection
 
 VERSION = "xiaoyi-harness.v1"
 TERMINAL = {"completed", "partial", "failed", "cancelled", "budget_exceeded", "blocked", "needs_review"}
@@ -74,12 +75,16 @@ class CreateTask(StrictModel):
     mode: Literal["enterprise", "research"] = "enterprise"
     model_profile: Literal["existing", "open_agent"] = "existing"
     joint_context: JointContext | None = None
+    credit_trial: dict[str, Any] | None = None
+    offer_context: dict[str, Any] | None = None
+    policy_board_context: dict[str, Any] | None = None
     operations_context: dict[str, Any] | None = Field(None, max_length=5)
     skills: list[str] = Field(default_factory=lambda: ["maritime-evidence"], max_length=5)
     allowed_tools: list[str] | None = Field(None, max_length=40)
     required_tools: list[str] | None = Field(None, max_length=40)
     budget: Budget = Field(default_factory=Budget)
     use_memory: bool = False
+    policy_context: PolicySelection | None = None
     template_id: (
         Literal[
             "port-briefing",
@@ -100,6 +105,41 @@ class CreateTask(StrictModel):
     def validate_operations_context(self):
         if self.planning_mode == "adaptive" and (self.template_id or self.driver == "rules"):
             raise ValueError("自主任务使用真实模型，不能绑定固定模板或规则驱动")
+        if self.credit_trial is not None:
+            from app.credit_trial import NAME, TrialParams
+            if (self.driver != "rules" or self.planning_mode != "contract" or self.template_id or self.use_memory
+                    or any(v is not None for v in (self.policy_board_context,self.policy_context,self.offer_context,self.operations_context,self.joint_context))):
+                raise ValueError("14B 工具编排复算使用独立的参数化工单")
+            if any(v is not None and v != [NAME] for v in (self.allowed_tools,self.required_tools)):
+                raise ValueError("编排复算工具范围与登记参数不符")
+            self.credit_trial = TrialParams.model_validate(self.credit_trial).model_dump()
+            self.allowed_tools, self.required_tools = [NAME], [NAME]
+        elif self.allowed_tools and "agent.credit_trial" in self.allowed_tools:
+            raise ValueError("需要登记完整的编排复算条件")
+        if self.policy_board_context is not None:
+            from app.policy_board import PolicyBoard
+
+            if (self.planning_mode != "adaptive" or self.driver == "rules" or self.offer_context is not None
+                    or self.joint_context is not None or self.operations_context is not None):
+                raise ValueError("策略约束筛选使用独立的自主只读任务")
+            if any(v is not None and v != ["policy.select"] for v in (self.allowed_tools, self.required_tools)):
+                raise ValueError("策略约束筛选仅使用登记的核验工具")
+            self.policy_board_context = PolicyBoard.model_validate(self.policy_board_context).model_dump(mode="json")
+            self.allowed_tools = ["policy.select"]
+            self.required_tools = ["policy.select"]
+        elif self.allowed_tools and "policy.select" in self.allowed_tools:
+            raise ValueError("筛选策略需要用户登记 policy_board_context")
+        if self.offer_context is not None:
+            from app.offer_comparison import OfferSheet
+            if self.planning_mode != "contract" or self.template_id or self.joint_context or self.operations_context:
+                raise ValueError("方案比选使用独立只读任务")
+            if any(value is not None and value != ["offers.compare"] for value in (self.allowed_tools, self.required_tools)):
+                raise ValueError("方案比选任务仅使用 offers.compare")
+            self.offer_context = OfferSheet.model_validate(self.offer_context).model_dump(mode="json")
+            self.allowed_tools = ["offers.compare"]
+            self.required_tools = ["offers.compare"]
+        elif self.allowed_tools and "offers.compare" in self.allowed_tools:
+            raise ValueError("方案比选需要用户提供 offer_context")
         if self.operations_context is not None:
             from app.harness.operations_v5 import OptimizeArgs
 

@@ -82,6 +82,26 @@
       "context_configured": 4096,
       "embedding_dimensions": 1024,
       "selection_reason": "The official 0.6B multilingual embedding checkpoint provides real dense vectors while fitting beside the generation model on the 16GB Intel Mac."
+    },
+    {
+      "model_id": "xiaoyi-local-14b-q4-k-m",
+      "role": "workstation_generation_base",
+      "upstream_model": "Qwen3-14B",
+      "repository": "Qwen/Qwen3-14B-GGUF",
+      "revision": "530227a7d994db8eca5ab5ced2fb692b614357fd",
+      "filename": "Qwen3-14B-Q4_K_M.gguf",
+      "format": "GGUF",
+      "quantization": "Q4_K_M",
+      "parameter_count": 14000000000,
+      "expected_bytes": 9001752960,
+      "sha256_env": "XIAOYI_LOCAL_MODEL_SHA256",
+      "license": "Apache-2.0",
+      "download_url_env": "XIAOYI_LOCAL_MODEL_DOWNLOAD_URL",
+      "path_env": "XIAOYI_LOCAL_MODEL_PATH",
+      "local_path": ".runtime/models/Qwen3-14B-Q4_K_M.gguf",
+      "context_configured": 8192,
+      "selection_reason": "Q4_K_M generation checkpoint in the 14b-shared workstation profile.",
+      "sha256": "500a8806e85ee9c83f3ae08420295592451379b4f8cf2d0f41c15dffeb6b81f0"
     }
   ],
   "adapter_contract": {
@@ -102,5 +122,13 @@
     "inference_adapter_sha256": "2160da946ab4adcada579d9db0fa1d812285c7fbd418f6c09679bd95e546edfb",
     "knowledge_boundary": "LoRA learns maritime language, answer structure, clarification and refusal behavior. Current regulations, private documents, project facts and live state remain RAG or verified connectors.",
     "compatibility_rule": "The local proof adapter is valid only for 1.7B and its matching GGUF. It must never be attached to, or reported as training of, the 4B inference checkpoint."
+  },
+  "workstation_profile": {
+    "model_id": "xiaoyi-local-14b-q4-k-m",
+    "alias": "xiaoyi-local-14b",
+    "profile": "14b-shared",
+    "context": 8192,
+    "gpu_layers": 36,
+    "adapter": null
   }
 }

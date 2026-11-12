@@ -168,9 +168,9 @@ def main():
         if control == 0
         else "继续 SFT 的完成率更高，不能宣称 RL 是本轮最有效的额外训练方法。"
     )
-    report = f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小懿 RL 实测展示</title>
+    report = f"""<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>舷鸥 RL 实测展示</title>
 <style>body{{font:16px/1.75 system-ui,sans-serif;max-width:1160px;margin:auto;padding:32px;background:#f0f4f7;color:#19334a}}section{{padding:25px;background:white;margin:22px 0;border-radius:14px}}h1{{font-size:30px}}h2{{font-size:23px}}table{{border-collapse:collapse;width:100%}}th,td{{border-bottom:1px solid #dce5ec;padding:10px;text-align:left}}img{{width:100%;height:auto}}a{{color:#146b9b}}code{{overflow-wrap:anywhere}}.lead{{font-size:20px}}</style>
-<h1>小懿 1.7B：语言模型 RL 本机实验</h1><p>实验 {html.escape(run.name)} · 模型参数真实更新 · 同一 Harness · 全部失败与中间记录保留</p>
+<h1>舷鸥 1.7B：语言模型 RL 本机实验</h1><p>实验 {html.escape(run.name)} · 模型参数真实更新 · 同一 Harness · 全部失败与中间记录保留</p>
 <section><p class="lead">{conclusion} D−C 为 <b>{gain:+.1f} 个百分点</b>；D−E 为 <b>{control:+.1f} 个百分点</b>。</p><p>{control_text}</p>
 <table><thead><tr><th>组别</th><th>完成数</th><th>完成率</th><th>参数匹配</th><th>故障恢复</th><th>平均调用</th><th>8 题回归</th><th>20 题独立检查</th></tr></thead><tbody>{"".join(rows)}</tbody></table>
 <p>单训练种子、8 个已知任务族、24 个留出案例。新参数与开头措辞不等于未知任务泛化。规则基线完整保留；此结果不是 RL 优于所有规则或所有 Harness 的证明。</p></section>

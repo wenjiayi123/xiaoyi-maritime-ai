@@ -1,0 +1,11 @@
+{
+ "source":"BTS y5ut-ibwt queue counts from MARAD / Marine Exchange of Southern California, not the distinct anchored series",
+ "areas":{"LA-LB":5,"Savannah":5,"All Other Ports":10,"All U.S. Container Ports":25},
+ "target":"Last reported number waiting for a berth in each Saturday-Friday calendar week. Alert label = count at or above the fixed area threshold, a planning example rather than an official threshold.",
+ "origin":"Tuesday of the preceding week, ten days before the target Friday. Use only observations through the Friday before that Tuesday, i.e. at least fourteen days before the target Friday. Snapshot may include revised history; historical publication vintages unverified. Forward freeze must precede start of the target week. Do not fill missing target weeks.",
+ "missing":"Skip origin if immediately prior eligible Friday bucket absent, or <3 observations across latest 8 eligible weeks. For longer histories skip missing individual weeks. Keep only finite nonnegative integer counts. Keep published national series as-is; never repair a mismatch by replacing it with component sum.",
+ "count_methods":["last","mean of last up to 3 observed weeks within 8","median of last up to 3 observed weeks within 8","half latest plus half latest three mean","ridge using latest count, preceding eligible-week count, rolling 3 and rolling 8 mean; training only through 2023"],
+ "risk_methods":["indicator latest count >= threshold","Laplace smoothed proportion in latest up to 8 observed weeks","training-only conditional frequency by ratio of latest value to threshold with Beta(1,1) smoothing"],
+ "selection":"Use 2024 calendar targets for per-area count MAE and probability Brier score selection; do not refit on test. Fit on observed weekly targets up to 2023. Hold Jan-Dec 2025 and Jan-Oct 2026 as separate tests; report every baseline, alerts at p>=0.5, false alarms, misses, prevalence, and unreconciled aggregates. Do not imply independent national and component samples.",
+ "prospective":"Issue one frozen set for week ending 2026-11-20 before its start. Do not score before the full week is over and a later official snapshot exists. No live alert or port control."
+}

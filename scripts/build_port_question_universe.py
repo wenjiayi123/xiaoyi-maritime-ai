@@ -203,7 +203,7 @@ def _sha256(path: Path) -> str:
 def _markdown(payload: dict[str, Any]) -> str:
     matrix = payload["matrix"]
     lines = [
-        "# 小懿AI 港口问题全集与覆盖矩阵 v1",
+        "# 舷鸥 · GullMate 港口问题全集与覆盖矩阵 v1",
         "",
         f"生成时间：{payload['generated_at']}",
         "",

@@ -57,7 +57,7 @@ def main():
                 if "--alias xiaoyi-local-4b" in cmd
                 else "embedding"
                 if "--alias xiaoyi-embedding-0.6b" in cmd
-                else "Xiaoyi API"
+                else "GullMate API"
                 if "--port 8010" in cmd
                 else "energy API"
                 if "--port 8808" in cmd
@@ -111,7 +111,7 @@ def main():
         title="Native full-business cycles (blue=enterprise, green=research; mobile ACK omitted)",
     )
     axes[2].grid(axis="x", alpha=0.2)
-    fig.suptitle("Xiaoyi local simulation acceptance — measured test observations", fontsize=15)
+    fig.suptitle("GullMate local simulation acceptance — measured test observations", fontsize=15)
     fig.savefig(ART / "stability-evidence.png", dpi=160)
     fig.savefig(ART / "stability-evidence.svg")
     for filename, header, rows in [

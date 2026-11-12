@@ -68,7 +68,7 @@ def _markdown(report: dict[str, Any]) -> str:
         f"- {domain}: {summary['passed_count']}/{summary['case_count']}。"
         for domain, summary in result["domains"].items()
     )
-    return f"""# 小懿AI 港口问题全集分层基准 v6
+    return f"""# 舷鸥 · GullMate 港口问题全集分层基准 v6
 
 生成时间：{report["generated_at"]}
 

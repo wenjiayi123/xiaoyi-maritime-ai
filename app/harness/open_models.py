@@ -1,6 +1,8 @@
 """Fixed candidate registry and optional local planner process, isolated from the original model."""
 from __future__ import annotations
+import os
 
+from pathlib import Path
 import hashlib
 import json
 import subprocess
@@ -47,7 +49,7 @@ def activate():
                 if hashlib.file_digest(handle, "sha256").hexdigest() != record["sha256"]:
                     raise ValueError("候选模型哈希不匹配")
             _verified[str(path)] = signature
-        binary = BASE_DIR / ".runtime/llama.cpp/llama-server"
+        binary = Path(os.environ.get("XIAOYI_LLAMA_SERVER_BIN", BASE_DIR / ".runtime/llama.cpp/llama-server"))
         if not binary.is_file():
             raise ValueError("登记的llama.cpp运行时不存在")
         log_path = BASE_DIR / ".runtime/open-models/agentcpm-server.log"

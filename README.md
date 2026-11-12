@@ -2,8 +2,8 @@
   <tr>
     <td width="64%" valign="middle">
       <p><code>OPEN-WEIGHT LLM · HARNESS · TOOL-USE RL · RAG · LORA</code></p>
-      <h1>小懿 AI · 港航垂直行业生成式大模型研发项目</h1>
-      <h3>Xiaoyi AI · Open-Weight Maritime LLM with RAG, LoRA &amp; Source-Aware Answers</h3>
+      <h1>舷鸥 · GullMate 14B · 港航垂直行业生成式大模型研发项目</h1>
+      <h3>GullMate · Open-Weight Maritime LLM with RAG, LoRA &amp; Source-Aware Answers</h3>
       <p><strong>项目作者：</strong>温家懿 · <strong>Project Author:</strong> Wen Jiayi</p>
       <p><strong>把港航问答从“模型说了什么”，提升为“证据来自哪里、适用于哪个辖区和日期、何时必须拒答、谁允许推进任务”的可审计决策链。</strong></p>
       <p><em>A local generative maritime model stack where retrieval, adaptation, jurisdiction, temporal applicability, refusal, and audit evidence remain independently reviewable.</em></p>
@@ -47,9 +47,39 @@
 
 ---
 
+## 2026-11-12 · 舷鸥 14B
+
+港航演示中心的日常问答使用 **Qwen3-14B Q4_K_M**。当前配置为 `14b-shared`，服务别名为 `xiaoyi-local-14b`，上下文为 8,192 tokens，36 层由 GPU 执行。该配置为港口三维渲染保留显存。0.6B 模型用于向量检索，1.7B 用于独立的训练与对照实验。
+
+已安装模型的工作站可在 PowerShell 中复核权重并查看服务实际加载的模型。将环境变量设为本机 GGUF 的完整路径。
+
+```powershell
+$env:XIAOYI_LOCAL_MODEL_PATH = 'D:\models\Qwen3-14B-Q4_K_M.gguf'
+python scripts/local_model.py verify --model-id xiaoyi-local-14b-q4-k-m
+(Invoke-RestMethod http://127.0.0.1:11435/v1/models).data.id
+```
+
+权重共 9,001,752,960 字节。文件摘要、模型版本和服务别名见[模型清单](data/model_registry.json)，领域适配器与实验结果见[14B 评测目录](data/14b-evaluations/catalog.json)。`14b-shared` 加载基础权重，`14b-domain` 可单独选择海事适配器。
+
+在新工作站上复现此配置时，先安装支持 CUDA 的 llama.cpp，再从仓库根目录运行下列命令。模型服务和应用各使用一个 PowerShell 终端。
+
+```powershell
+# 模型终端，沿用上一步已核验的 XIAOYI_LOCAL_MODEL_PATH
+llama-server.exe --model $env:XIAOYI_LOCAL_MODEL_PATH --alias xiaoyi-local-14b --host 127.0.0.1 --port 11435 --ctx-size 8192 --parallel 1 --threads 6 --n-gpu-layers 36 --jinja --flash-attn on --cache-type-k q8_0 --cache-type-v q8_0 --batch-size 256 --ubatch-size 128
+```
+
+```powershell
+# 应用终端，使用已安装 requirements-windows.lock 的 Python 环境
+$env:XIAOYI_MODEL_PROVIDER = 'openai_compatible'
+$env:XIAOYI_MODEL_BASE_URL = 'http://127.0.0.1:11435/v1'
+$env:XIAOYI_MODEL_NAME = 'xiaoyi-local-14b'
+python scripts/build_index.py
+python -m uvicorn app.main:app --host 127.0.0.1 --port 8010
+```
+
 ## 2026-11-02 更新：Harness V13 与语言模型 RL 对照实验
 
-小懿现已加入可持久化、可暂停恢复、带执行核验的 **Harness 任务工作台**，并完成 **1.7B 语言模型的 LoRA 强化训练与五组对照**。4B 日常助手和 1.7B 实验模型分别运行；全部业务执行仍限公开数据回放与本机工程模拟。
+小懿现已加入可持久化、可暂停恢复、带执行核验的 **Harness 任务工作台**，并完成 **1.7B 语言模型的 LoRA 强化训练与五组对照**。该次实验使用的 4B 日常助手和 1.7B 实验模型分别运行；全部业务执行仍限公开数据回放与本机工程模拟。
 
 [本次发布与复核方法](docs/GITHUB_RELEASE_20261102.md) · [Harness V13](docs/XIAOYI_HARNESS_V13_20261101.md) · [RL 完整验收](docs/AGENT_RL_V2_ACCEPTANCE_20261102.md) · [RL 方法](docs/AGENT_RL_V2_METHODS_20261102.md) · [结果与图表](reports/agent-rl/20261102/README.md) · [下载完整证据包](https://github.com/wenjiayi123/xiaoyi-maritime-ai/releases/tag/harness-rl-20261102)
 
@@ -85,12 +115,12 @@ RL 相对冻结 SFT 提高 **20.8 个百分点**，低于继续 SFT **12.5 个�
 
 2026-10-29后续验收已补齐完整原生航次、真实预训练运输策略、原生业务执行核验补偿和客户端签收；原网页演示122步、14轮完整后台业务循环及九服务两小时4329次健康探测已完成。原生桌面窗口按用户要求跳过，早期配额拒绝和修复记录保留。见[三期验收报告](docs/HARNESS_PHASE3_ACCEPTANCE_20261029.md)、[演示使用说明](docs/HARNESS_PHASE3_DELIVERY_20261029.md)及[模型分工说明](docs/HARNESS_MODELS_EXPLAINED_20261029.md)。
 
-小懿 AI 面向港航问答、运营研判与任务副驾，解决“回答可以生成，但来源、辖区、日期、实时性和执行权限不可审计”的问题。系统由两个可独立运行与核验的平面组成：
+舷鸥面向港航问答、运营研判与任务副驾，解决“回答可以生成，但来源、辖区、日期、实时性和执行权限不可审计”的问题。系统由两个可独立运行与核验的平面组成：
 
 | 平面 | 可部署能力 | 核心业务价值 | 默认安全边界 |
 |---|---|---|---|
 | 应用服务平面 | Web UI、FastAPI、Hybrid RAG、10域港口实时模拟、任务编排、6策略RL实验室、固定基准、审计与规则回退 | 把知识问答、现场换源前联调、SOP、运营研判和训练结果放进同一条可追溯链 | 无现场数据时明确显示“公开数据校准实时模拟”；`recommendation_only=true`、`production_authority=false` |
-| 本地模型平面 | 可选4B GGUF生成、0.6B稠密检索、1.7B + LoRA工程档 | 本机完成生成、检索与领域适配，敏感资料无需外发 | 权重不随Git仓库分发；模型不可用自动回退，LoRA当前未通过质量准入 |
+| 本地模型平面 | 工作站 14B / Intel Mac 4B GGUF 生成、0.6B稠密检索、1.7B + LoRA工程档 | 本机完成生成、检索与领域适配，敏感资料无需外发 | 权重不随Git仓库分发；模型不可用自动回退，LoRA当前未通过质量准入 |
 
 基础运行不依赖生成模型权重；未配置权重时使用保守的本地规则回答，全部核心页面仍可运行：
 
@@ -151,7 +181,7 @@ XIAOYI_GENERATIVE_MODEL_ENABLED=false bash run.sh
 | 能力平面 / Plane | 已实现 / Implemented | 工程边界 / Guardrail |
 |---|---|---|
 | 港航RAG / Maritime RAG | open-weight 真实稠密向量 + Hybrid Sparse/BM25 对照、跨轮问题改写、复杂问题分解、证据融合、逐项引用及词面对齐校验<br><sub>open-weight dense vectors plus Hybrid Sparse/BM25, history-aware rewriting, decomposition, evidence fusion and citation verification</sub> | 余弦相似度只参与召回，不冒充事实证明；普通问题无匹配证据时继续回答并在底部提示，高风险实时/法规事实保留核验边界 |
-| 本地生成模型 / Local generative model | Apache-2.0 `4B` Q4_K_M 作为默认生成档；`1.7B` Q8_0 + Rank 96建立1.046亿可训练参数的本机 LoRA 训练/推理闭环<br><sub>4B quality profile plus an exact-base 1.7B Rank-96 LoRA profile</sub> | 1.7B 适配器绝不挂到 4B；隔离loss只证明固定样本上的优化信号，回答质量仍需更大未见集和未参与训练的港航业务人员盲评 |
+| 本地生成模型 / Local generative model | Apache-2.0 工作站 `14B` Q4_K_M 生成档、Intel Mac `4B` 兼容档；`1.7B` Q8_0 + Rank 96建立1.046亿可训练参数的本机 LoRA 训练/推理闭环<br><sub>14B workstation profile, 4B Intel Mac profile and an exact-base 1.7B Rank-96 LoRA profile</sub> | 1.7B 适配器绝不挂到 4B；隔离loss只证明固定样本上的优化信号，回答质量仍需更大未见集和未参与训练的港航业务人员盲评 |
 | 法规治理 / Regulatory governance | 辖区、施行日期、官方来源要求、全文版权边界、证据冲突与新鲜度<br><sub>Jurisdiction, applicability date, official-source and full-text boundaries, conflict and freshness checks</sub> | 冲突证据阻断决策；回答不替代主管机关或法律意见<br><sub>Conflicts block decision readiness; answers do not replace authorities or legal advice</sub> |
 | SOP决策 / SOP decision support | 告警解释、对象追问、步骤任务、报告生成<br><sub>Alert explanation, entity clarification, stepwise tasks, reports</sub> | 高风险任务强制 `requires_human_confirmation`<br><sub>High-risk tasks force `requires_human_confirmation`</sub> |
 | 公开数据校准实时模拟 / Public-data-calibrated realtime simulation | 船舶、AIS/VTS、泊位、168台设备、堆场、闸口、能源碳排、气象潮汐、安全维护、治理审计共10域API与SSE<br><sub>Ten-domain API/SSE stream with deterministic scenarios and inspectable lineage</sub> | 所有页面显示 `SIM`；公共AIS只校准交通包络，其他量级与影响为工程模拟；接入现场后替换适配器，权限不继承 |
@@ -259,7 +289,7 @@ Model weights are not committed. Supply local GGUF paths through environment
 variables; the public registry retains only parameter count, quantization,
 artifact size, context limits, and optional checksum contracts.
 
-默认使用 4B 流畅生成档；显式验证本机 LoRA 档：
+以下 Intel Mac 脚本默认使用 4B 兼容档；显式验证本机 LoRA 档：
 
 ```bash
 XIAOYI_LOCAL_MODEL_PROFILE=lora bash run.sh
@@ -367,9 +397,9 @@ See the [deployment guide](docs/DEPLOYMENT.md) for TLS/SSO, secrets, backups, mo
 
 ## 当前适合问的问题 / Suitable questions
 
-完整分类问题库见：[小懿可询问问题库](小懿可询问问题库/00_问题库使用说明.md)。其中已区分当前运营沙箱、知识库问答和生产系统接入后实时问题。
+完整分类问题库见：[舷鸥可询问问题库](舷鸥可询问问题库/00_问题库使用说明.md)。其中已区分当前运营沙箱、知识库问答和生产系统接入后实时问题。
 
-See the [categorized question library](小懿可询问问题库/00_问题库使用说明.md), which separates current sandbox questions, knowledge-base questions, and questions that require a verified live production connection.
+See the [categorized question library](舷鸥可询问问题库/00_问题库使用说明.md), which separates current sandbox questions, knowledge-base questions, and questions that require a verified live production connection.
 
 ## 可复现 RL 训练实验室 / Reproducible RL laboratory
 

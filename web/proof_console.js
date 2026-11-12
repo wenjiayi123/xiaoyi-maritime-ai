@@ -137,7 +137,7 @@ window.createProofConsole=function({api,openModal,escapeHtml:esc,isOpen}){
   document.addEventListener('click',event=>{const b=event.target.closest('#proofConsole [data-pf]');if(b&&visible())handle(b);});
   async function open(){
     epoch++;const e=epoch;clearTimeout(timer);busy=false;
-    openModal('小懿能力实证演示','真实计算 · 可改参数 · 逐点核对 · 失败与来源可导出','<div id="proofConsole"><p>正在读取能力、原始公开数据与评估协议…</p></div>','', 'proof-console');
+    openModal('舷鸥能力实证演示','真实计算 · 可改参数 · 逐点核对 · 失败与来源可导出','<div id="proofConsole"><p>正在读取能力、原始公开数据与评估协议…</p></div>','', 'proof-console');
     try{const data=await call('/catalog');if(!visible(e))return;if(catalog&&catalog.actor_id!==data.actor_id){current=null;receipts=[];modelTask=null;modelExport=null;pending=null;modelPending=null;draft={};done.clear();skipped.clear();step=0;}catalog=data;root().outerHTML=shell();guide();resultView();modelView();for(const [name,value] of Object.entries(draft)){const control=root().querySelector(`[name="${name}"]`);if(control)control.value=value;}if(modelTask&&['queued','running'].includes(modelTask.status))pollModel(e);}
     catch(err){if(visible(e))root().innerHTML=`<p>${esc(err.message)}</p>`;}
   }

@@ -125,4 +125,4 @@
 ## When will this vessel berth
 
 常见问法：When will this vessel berth；等价问法：What is this vessel's ETB、这条船什么时候靠泊。
-直接回答：No real-time data is connected to the current knowledge-chat session for this berth plan. The answer requires the vessel identifier and a connection to the TOS berth plan, AIS / VTS or the vessel schedule system, including the latest timestamp and time zone; Xiaoyi will not invent an ETA or ETB before verified live data is returned.
+直接回答：No real-time data is connected to the current knowledge-chat session for this berth plan. The answer requires the vessel identifier and a connection to the TOS berth plan, AIS / VTS or the vessel schedule system, including the latest timestamp and time zone; GullMate will not invent an ETA or ETB before verified live data is returned.

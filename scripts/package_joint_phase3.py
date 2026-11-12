@@ -42,7 +42,7 @@ def main():
     readme = ('# 三期源文件审阅快照\n\n'
         '这是现有项目文件的快照，包含相应文件中用户既有的更改；不是脱离原工程的独立安装包。'
         '请先对比版本，不要直接覆盖另一份工程。原有数据、权重和运行环境继续使用原位置。\n\n'
-        '本机原始验收证据在小懿项目的 .codex_artifacts/joint-harness-phase3-20261029/。'
+        '本机原始验收证据在舷鸥项目的 .codex_artifacts/joint-harness-phase3-20261029/。'
         '通过范围和跳过项目以验收报告为准；测试进行中的报告不能作为最终通过凭证。\n')
     name = 'HARNESS_PHASE3_SOURCE_20261029.zip'
     temp = ART / (name + '.partial')

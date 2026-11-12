@@ -90,9 +90,9 @@ def register(experiment):
     score_path = ROOT / "data/evaluation/xiaoyi_capability_scorecard_v8_20261031.json"
     write(score_path, scorecard)
     docs = [
-        "# 小懿37项能力评估与逐项提升 V8（2026-10-31）",
+        "# 舷鸥37项能力评估与逐项提升 V8（2026-10-31）",
         "",
-        "**结论：小懿是已有较强可追溯工程能力的港航研究平台，距离顶级港口生产系统的主要差距仍是预测可靠性、真实物理标定、多机构协同和现场验证。**",
+        "**结论：舷鸥是已有较强可追溯工程能力的港航研究平台，距离顶级港口生产系统的主要差距仍是预测可靠性、真实物理标定、多机构协同和现场验证。**",
         "",
         "本轮沿用五维0—4分×5的100分量表。没有统一的“全球顶级港航系统百分制”；这些是工程判断，不是排名、认证或统计显著差异。文件存在、代码测试通过、算法收益和现场资格分别记录。",
         "",
@@ -158,7 +158,7 @@ def register(experiment):
         "",
         "## 使用与复验",
         "",
-        "在小懿左侧点击“能力评估与提升 · 37项”，或访问 `/web/capability-review.html`。可搜索能力、按优先级筛选、查看逐港/逐提前量结果，运行预测检查、缺测/突变演练以及五情景排程；导出包含当前会话回执。",
+        "在舷鸥左侧点击“能力评估与提升 · 37项”，或访问 `/web/capability-review.html`。可搜索能力、按优先级筛选、查看逐港/逐提前量结果，运行预测检查、缺测/突变演练以及五情景排程；导出包含当前会话回执。",
         "",
         "API沿用现有身份权限：`GET /api/harness/capability-review/catalog`；`POST /api/harness/capability-review/forecast`；`POST /api/harness/capability-review/schedule`。代码或输入哈希变化后历史资料仍可查阅，重算暂停。",
         "",

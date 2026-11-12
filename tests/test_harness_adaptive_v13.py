@@ -220,7 +220,7 @@ def test_trajectory_detects_tampering_and_never_claims_training(harness):
     task = run(harness, [{"kind":"tool","tool":"calculate","arguments":{"expression":"9*7"}},
         {"kind":"final","text":"计算得到63 [T1]。","evidence_ids":["T1"]}], allowed_tools=["calculate"])
     exported = export_trajectory(task, harness.store)
-    assert exported["integrity"] == {"event_chain":True,"artifacts":True}
+    assert exported["integrity"] == {"event_chain":True,"artifacts":True,"state_link":True,"final_report":True}
     assert len(exported["transitions"]) == 2
     assert not exported["training_performed"] and not exported["reward_assigned"]
     harness.store.artifact(task["id"], "T1.json", "{}")

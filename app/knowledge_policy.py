@@ -216,6 +216,7 @@ class QueryEvidencePolicy:
     locator_facts_allowed: bool
     requires_human_review: bool
     as_of_date: date
+    dated_evidence_required: bool = False
 
     @property
     def allowed_content_scopes(self) -> set[str] | None:
@@ -252,12 +253,21 @@ def detect_jurisdictions(question: str) -> tuple[str, ...]:
         for code, terms in JURISDICTION_TERMS.items()
         if any(term.casefold() in lowered for term in terms)
     ]
+    if re.search(r"\b(?:china|chinese|prc)\b", lowered):
+        found.append("CN")
     return tuple(dict.fromkeys(found))
+
+
+def asks_penalty_amount_to_apply(question: str) -> bool:
+    """Distinguish a requested legal assessment from a report of an observed fine."""
+    return bool(re.search(r"(?:应当|应予|应处|应罚|应该|依法|法定|裁定).{0,20}(?:罚款|罚金|处罚金额)|"
+                          r"(?:罚款|罚金).{0,20}(?:应当|如何裁定|裁定金额)", question)
+                and re.search(r"多少|几元|金额|数额|幅度|上限|下限", question))
 
 
 def requires_full_text_evidence(question: str) -> bool:
     compact = re.sub(r"\s+", "", question)
-    if re.search(r"第[一二三四五六七八九十百千0-9]+条", compact):
+    if asks_penalty_amount_to_apply(compact) or re.search(r"第[一二三四五六七八九十百千0-9]+条", compact):
         return True
     if re.search(r"(?:具体|法定).{0,12}(?:限值|时限|期限|金额|幅度|误差)", compact):
         return True
@@ -283,10 +293,12 @@ def requires_official_evidence(question: str, intent: str | None = None) -> bool
     )
 
 
-def _as_of_date_from_question(question: str) -> date | None:
+def query_reference_date(question: str, *, temporal_intent_only: bool = False) -> date | None:
+    if temporal_intent_only and not re.search(r'截至|截止|按\s*(?:19|20)\d{2}|当时|生效|适用|有效期|as (?:of|at)|in force|effective', question, re.I):
+        return None
     patterns = (
-        r"(?P<year>20\d{2})年(?P<month>0?[1-9]|1[0-2])月(?P<day>0?[1-9]|[12]\d|3[01])日",
-        r"(?P<year>20\d{2})-(?P<month>0[1-9]|1[0-2])-(?P<day>0[1-9]|[12]\d|3[01])",
+        r"(?P<year>(?:19|20)\d{2})年(?P<month>0?[1-9]|1[0-2])月(?P<day>0?[1-9]|[12]\d|3[01])日",
+        r"(?P<year>(?:19|20)\d{2})-(?P<month>0[1-9]|1[0-2])-(?P<day>0[1-9]|[12]\d|3[01])(?!\d)",
     )
     for pattern in patterns:
         matched = re.search(pattern, question)
@@ -309,6 +321,7 @@ def build_query_policy(
     official_required: bool,
     requested_jurisdiction: str | None = None,
     as_of_date: date | None = None,
+    review_date: date | None = None,
 ) -> QueryEvidencePolicy:
     requested = _normalize_requested_jurisdiction(requested_jurisdiction)
     detected = detect_jurisdictions(question)
@@ -321,6 +334,7 @@ def build_query_policy(
         requirement = "official_summary"
     else:
         requirement = "registered_index"
+    reference_date = as_of_date or query_reference_date(question)
     return QueryEvidencePolicy(
         jurisdictions=jurisdictions,
         explicit_jurisdiction=bool(requested or detected),
@@ -330,7 +344,8 @@ def build_query_policy(
         locator_facts_allowed=locator_facts_allowed,
         requires_human_review=official_required
         or any(term in question for term in HUMAN_REVIEW_TERMS),
-        as_of_date=as_of_date or _as_of_date_from_question(question) or date.today(),
+        as_of_date=reference_date or review_date or date.today(),
+        dated_evidence_required=as_of_date is not None or query_reference_date(question, temporal_intent_only=True) is not None,
     )
 
 
@@ -352,15 +367,22 @@ def source_is_applicable(
     allowed_scopes = policy.allowed_content_scopes
     if allowed_scopes is not None and provenance.content_scope not in allowed_scopes:
         return False
+    return source_effective_on(provenance, policy.as_of_date, require_start=policy.dated_evidence_required)
+
+
+def source_effective_on(provenance: SourceProvenance, day: date, *, require_start: bool = False) -> bool:
+    """Registered validity is inclusive. Review deadlines describe maintenance separately."""
+    if require_start and not provenance.effective_from:
+        return False
     if provenance.effective_from:
         try:
-            if date.fromisoformat(provenance.effective_from) > policy.as_of_date:
+            if date.fromisoformat(provenance.effective_from) > day:
                 return False
         except ValueError:
             return False
     if provenance.effective_to:
         try:
-            if date.fromisoformat(provenance.effective_to) < policy.as_of_date:
+            if date.fromisoformat(provenance.effective_to) < day:
                 return False
         except ValueError:
             return False

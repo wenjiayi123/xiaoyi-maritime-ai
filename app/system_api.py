@@ -83,7 +83,9 @@ def readiness_payload() -> dict[str, Any]:
         "checks": checks,
         "runtime_posture": {
             "application_ready": ready,
-            "generation_mode": "local_model" if local_model_active else "deterministic_fallback",
+            "configured_generation_mode": "local_model" if local_model_active else "deterministic_fallback",
+            "generation_mode": "unverified" if local_model_active else "deterministic_fallback",
+            "live_components_endpoint": "/api/system/components",
             "recommendation_only": True,
             "dispatch_allowed": False,
             "production_authority": False,
@@ -107,6 +109,12 @@ def liveness() -> dict[str, str]:
 def readiness() -> JSONResponse:
     payload = readiness_payload()
     return JSONResponse(status_code=200 if payload["status"] == "ready" else 503, content=payload)
+
+
+@router.get("/api/system/components")
+def components():
+    from app.components import component_snapshot
+    return component_snapshot()
 
 
 @router.get("/api/system/readiness")

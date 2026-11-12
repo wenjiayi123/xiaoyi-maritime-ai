@@ -37,11 +37,11 @@ export XIAOYI_MALACCA_HEALTH_URL="${XIAOYI_MALACCA_HEALTH_URL:-http://127.0.0.1:
 if command -v lsof >/dev/null 2>&1 \
   && lsof -nP -iTCP:"$XIAOYI_PORT" -sTCP:LISTEN >/dev/null 2>&1; then
   if curl --fail --silent --max-time 2 "http://127.0.0.1:${XIAOYI_PORT}/" \
-    | grep -q "港航小懿AI"; then
-    echo "小懿已在 http://127.0.0.1:${XIAOYI_PORT}/ 运行，直接复用。"
+    | grep -q "舷鸥 · GullMate"; then
+    echo "舷鸥已在 http://127.0.0.1:${XIAOYI_PORT}/ 运行，直接复用。"
     exit 0
   fi
-  echo "端口契约冲突：${XIAOYI_PORT} 已被非小懿服务占用，已拒绝重复启动。" >&2
+  echo "端口契约冲突：${XIAOYI_PORT} 已被非舷鸥服务占用，已拒绝重复启动。" >&2
   lsof -nP -iTCP:"$XIAOYI_PORT" -sTCP:LISTEN >&2 || true
   exit 2
 fi
@@ -221,9 +221,9 @@ if [[ "$MODEL_ENABLED" != "false" && -f "$MODEL_FILE" && -n "$LLAMA_SERVER_BIN" 
       export XIAOYI_MODEL_EXTERNAL_DATA_ALLOWED=false
       if [[ "$USE_LORA" == true ]]; then
         export XIAOYI_MODEL_ADAPTER_ID=xiaoyi-maritime-lora-r96-v3
-        echo "小懿生成层：1.7B Q8_0 + Rank 96 本机LoRA v3；证据不足时回答并在底部提醒。"
+        echo "舷鸥生成层：1.7B Q8_0 + Rank 96 本机LoRA v3；证据不足时回答并在底部提醒。"
       else
-        echo "小懿生成层：4B Q4_K_M（本机）；证据不足时回答并在底部提醒。"
+        echo "舷鸥生成层：4B Q4_K_M（本机）；证据不足时回答并在底部提醒。"
       fi
     fi
   fi
@@ -268,7 +268,7 @@ if [[ "$MODEL_ENABLED" != "false" && -f "$EMBEDDING_FILE" && -n "$LLAMA_SERVER_B
       export XIAOYI_EMBEDDING_MODEL=xiaoyi-embedding-0.6b
       if "$PYTHON_BIN" scripts/build_vector_index.py --ensure \
         --batch-size "${XIAOYI_EMBEDDING_BATCH_SIZE:-32}"; then
-        echo "小懿检索层：0.6B-Embedding 稠密向量 + Sparse/BM25 对照。"
+        echo "舷鸥检索层：0.6B-Embedding 稠密向量 + Sparse/BM25 对照。"
       else
         unset XIAOYI_EMBEDDING_BASE_URL
         echo "稠密向量索引构建失败；已回退到Sparse/BM25。" >&2

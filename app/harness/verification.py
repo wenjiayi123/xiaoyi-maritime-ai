@@ -8,8 +8,26 @@ from app.harness.contracts import digest, completed_tools
 
 
 def numbers(text):
+    # Unit suffixes are common in operator prose, e.g. 3065.40kWh. Separate
+    # recognized units before scanning, so a decimal cannot become a partial integer.
+    text = re.sub(r"(?<=\d)(?=(?:kWh|MWh|GWh|kW|MW|TEU|kg)(?![A-Za-z0-9_]))"," ",text,flags=re.I)
     text = re.sub(r"\[T\d+\]", "", text)
-    text = re.sub(r"(?m)^\s*\d+[.)、]\s*", "", text)
+    text = re.sub(r"(?m)^\s*\d+[.)、](?!\d)\s*", "", text)
+    # Chinese prose can put an ordered list on one line after colons or
+    # clause separators. Only remove a consecutive series starting at one;
+    # decimal measurements, dates and unrelated counts remain verifiable.
+    inline = list(re.finditer(r"(?<=[：；;。])[ \t]*(\d{1,2})[.)、](?!\d)[ \t]*(?=[\u4e00-\u9fff])", text))
+    serials = []
+    for marker in inline:
+        number = int(marker.group(1))
+        if number == 1:
+            serials.append([marker])
+        elif serials and number == len(serials[-1]) + 1:
+            serials[-1].append(marker)
+    for group in reversed(serials):
+        if len(group) >= 2:
+            for marker in reversed(group):
+                text = text[:marker.start()] + text[marker.end():]
     values = set()
     for token in re.findall(r"(?<![A-Za-z0-9])[-+]?\d+(?:,\d{3})*(?:\.\d+)?(?![A-Za-z0-9])", text):
         try:
@@ -55,6 +73,14 @@ def verify(task, action, store, *, at=None):
         "production_boundary": not claims_production_action(action.text),
     }
     support = ""
+    claim_text = action.text
+    verified_calculation = False
+    policy_issues = []
+    from app.cycle_evidence import check_refs as check_cycle_refs
+    policy_issues.extend(check_cycle_refs(task, action))
+    shore_receipts = []
+    operation_receipts = []
+    deep_receipts = []
     for ref in action.evidence_ids:
         if ref not in successful:
             continue
@@ -62,7 +88,69 @@ def verify(task, action, store, *, at=None):
         artifact = store.artifact(task["id"], record["artifact"])
         if not artifact or artifact["sha256"] != digest(artifact["content"]) or record["sha256"] != artifact["sha256"]:
             checks["artifact_integrity"] = False
+        elif record["tool"] in ("forecast.port_load","dispatch.tariff_week","evidence.match_scope"):
+            from app.harness.contracts import encoded
+            from app.operation_evidence import compact
+            receipt=json.loads(artifact["content"])
+            operation_receipts.append(receipt)
+            support += "\n"+artifact["content"]+"\n"+encoded(compact(receipt))
+        elif record["tool"]=="policy.deep_storage":
+            from app.harness.contracts import encoded
+            receipt=json.loads(artifact["content"])
+            deep_receipts.append(receipt)
+            from app.storage_decision_claims import presentation
+            support += "\n"+encoded(receipt["summary"])+"\n"+encoded(presentation(receipt))
+        elif record["tool"]=="systems.inspect":
+            from app.harness.contracts import encoded
+            from app.harness.operation_intent import inspection
+            receipt=json.loads(artifact["content"])
+            facts=inspection(receipt)
+            from app.harness.operation_intent import wrong_coverage
+            if wrong_coverage(action.text,receipt):policy_issues.append("覆盖项数和比例不可互换。请按回执区分已覆盖数、场景总数及百分比。")
+            support += "\n"+artifact["content"]+"\n"+(encoded(facts) if facts is not None else record["summary"])
+        elif record["tool"] == "policy.shore_storage":
+            from app.harness.contracts import encoded
+            from app.shore_evidence import shore_digest
+            receipt=json.loads(artifact["content"])
+            support += "\n" + artifact["content"] + "\n" + encoded(shore_digest(receipt))
+            shore_receipts.append(receipt)
+        elif record["tool"] in {"policy.vessel_schedule","policy.multidevice"}:
+            from app.harness.contracts import encoded
+            from app.harness.policy_digest import policy_digest
+            # Recompute display precision from the cited, hash-verified artifact.
+            # A mutable summary cannot extend the set of supported claims.
+            receipt=json.loads(artifact["content"])
+            support += "\n" + artifact["content"] + "\n" + encoded(policy_digest(record["tool"],receipt))
+            if record["tool"]=="policy.multidevice":
+                from app.harness.policy_digest import conflicting_service_claim
+                # Allow the documented two- or three-decimal kWh display only
+                # for metered delivery, the threshold and the authenticated upper bound.
+                cap=receipt["dr_capacity_review"]
+                support += " " + " ".join(format(cap[key],fmt) for key in ("required_kwh","delivered_kwh","upper_kwh") for fmt in (".2f",".3f"))
+                if conflicting_service_claim(action.text,receipt):
+                    policy_issues.append("请直接回答：本方案实际同时保持了充电和冷链。未能满足的是第三项最低响应交付。删除把前两项写成不兼容的结论。")
+                from app.harness.service_facts import unanswered_feasibility
+                from app.harness.required_energy import required_energy_issues
+                policy_issues.extend(required_energy_issues(task,action.text,receipt))
+                if unanswered_feasibility(task,action.text,receipt):
+                    policy_issues.append("用户问上界能否证明不可行，请按回执说明现有上界仍不能判断可行性。")
         elif record["tool"] in {
+            "agent.credit_trial",
+            "offers.compare",
+            "policy.select",
+            "policy.release",
+            "policy.energy",
+            "policy.operations",
+            "policy.safety",
+            "cycle.evidence",
+            "congestion.queue_week",
+            "finance.port_cost",
+            "emissions.port_year",
+            "equipment.state",
+            "portcall.eta",
+            "portcall.berths",
+            "knowledge.ais_minute",
+            "knowledge.figures",
             "knowledge.search",
             "runtime.snapshot",
             "linked.observe",
@@ -89,9 +177,58 @@ def verify(task, action, store, *, at=None):
             "operations.optimize",
         }:
             support += "\n" + artifact["content"] + "\n" + record["summary"]
-    unsupported = sorted(numbers(action.text) - numbers(support))
+            if record["tool"] == "congestion.queue_week":
+                from app.queue_evidence import boundary_issues as queue_boundary
+                policy_issues.extend(queue_boundary(action.text,record["arguments"].get("case")))
+            if record["tool"] == "finance.port_cost":
+                from app.port_cost_evidence import boundary_issues
+                policy_issues.extend(boundary_issues(action.text,record["arguments"].get("case")))
+            if record["tool"] == "calculate":
+                from app.harness.calculation_evidence import remove_rounded_value
+
+                claim_text = remove_rounded_value(claim_text, task["goal"], json.loads(artifact["content"]))
+                verified_calculation = True
+            if record["tool"] in {"policy.release", "policy.energy", "policy.operations", "policy.safety"}:
+                receipt = json.loads(artifact["content"])
+                if task.get("council_role_review") and not task.get("inputs"):
+                    from app.harness.council_report import verified_text
+                    if action.text != verified_text(receipt):
+                        policy_issues.append("岗位结论、指标、单位和策略/基线顺序须与已核验的岗位工件一致。")
+                # Permit ordinary display precision only for actual metrics of this receipt.
+                for group in ("policy_metrics", "baseline_metrics"):
+                    for value in receipt[group].values():
+                        support += " " + " ".join(f"{value:.{places}f}" for places in (0, 1, 2))
+    from app.deep_storage_trial import delivery_issues
+    policy_issues.extend(delivery_issues(task,action.text,deep_receipts))
+    from app.harness.operation_intent import domain_issues
+    policy_issues.extend(domain_issues(task,action.text,operation_receipts))
+    if shore_receipts:
+        from app.shore_carbon_direction import directions
+        from app.shore_online_intent import live_claim_problem
+        from app.shore_meter_clocks import verify_clock_claims
+        claim_text,clock_issues=verify_clock_claims(claim_text,shore_receipts)
+        policy_issues.extend(clock_issues)
+        amounts,issues=directions(action.text,shore_receipts,task)
+        support += " " + " ".join(amounts)
+        policy_issues.extend(issues)
+        from app.shore_online_intent import incorrect_departure_credit
+        if any(r.get("schema")=="gullmate.shore-call-review.v1" for r in shore_receipts) and incorrect_departure_credit(action.text):
+            policy_issues.append("本船服务在离泊时刻截止。离泊之后的一刻钟不计入该船次电量，请按凭证纠正计量边界。")
+        if live_claim_problem(task,action.text,shore_receipts):
+            policy_issues.append("尚无相应周的本次 TwinLab 在线核验凭证，不能声明已与原生重放核对一致。")
+    if verified_calculation:
+        from app.harness.calculation_evidence import remove_registered_metadata
+
+        claim_text = remove_registered_metadata(claim_text, task["goal"])
+    unsupported = sorted(numbers(claim_text) - numbers(support))
     checks["numeric_support"] = not unsupported
-    issues, withheld, comparison = [], False, False
+    issues, withheld, comparison = policy_issues, False, False
+    if verified_calculation and not task.get("production_authority"):
+        from app.harness.calculation_evidence import historical_dispatch_issue
+
+        issue = historical_dispatch_issue(task["goal"], action.text)
+        if issue:
+            issues.append(issue)
     delivery_readiness = None
     active_snapshot_alerts = False
     semantic_check = None

@@ -67,7 +67,7 @@ def report_html(report):
 
     summaries = report["summaries"]
     sections = [
-        "<h1>小懿任务执行报告</h1><p>" + escape(report["goal"]) + "</p>",
+        "<h1>舷鸥任务执行报告</h1><p>" + escape(report["goal"]) + "</p>",
         "<p class='scope'>本报告来自本机原系统的实际接口调用。各系统保留自己的地点、模拟时钟和数据来源，不能视作同一真实港区的现场联合效果。</p>",
     ]
     sources = []
@@ -163,7 +163,7 @@ def report_html(report):
         + "</ul><p><a href='report.json'>下载结构化报告</a></p>"
     )
     return (
-        '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>小懿任务执行报告</title><style>body{font:16px system-ui;color:#203044;max-width:1080px;margin:36px auto;padding:24px;line-height:1.8}h1{font-size:28px}h2{font-size:21px;margin-top:32px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #d7e0e7;overflow-wrap:anywhere}th,.scope{background:#eef4f5}.scope{padding:16px}a{color:#146b64}@media print{body{margin:0;padding:0}}@media(max-width:650px){body{padding:14px}table{font-size:12px}th,td{padding:6px}}</style>'
+        '<!doctype html><html lang="zh-CN"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>舷鸥任务执行报告</title><style>body{font:16px system-ui;color:#203044;max-width:1080px;margin:36px auto;padding:24px;line-height:1.8}h1{font-size:28px}h2{font-size:21px;margin-top:32px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:12px;border-bottom:1px solid #d7e0e7;overflow-wrap:anywhere}th,.scope{background:#eef4f5}.scope{padding:16px}a{color:#146b64}@media print{body{margin:0;padding:0}}@media(max-width:650px){body{padding:14px}table{font-size:12px}th,td{padding:6px}}</style>'
         + "".join(sections)
         + "</html>"
     )

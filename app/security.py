@@ -13,6 +13,7 @@ from typing import Any, Awaitable, Callable
 from uuid import uuid4
 
 from fastapi import Request
+from starlette.concurrency import run_in_threadpool
 from starlette.datastructures import Headers
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse, Response
@@ -73,29 +74,32 @@ def issue_access_token(
 
 def verify_access_token(token: str, settings: Settings, *, now: datetime | None = None) -> IdentityContext:
     parts = token.split(".")
-    if len(parts) != 3:
+    if len(token) > 8192 or len(parts) != 3:
         raise AuthenticationError("Bearer令牌格式无效")
     signing_input = f"{parts[0]}.{parts[1]}"
     expected = hmac.new(settings.jwt_secret.encode(), signing_input.encode(), hashlib.sha256).digest()
     try:
         supplied = _b64decode(parts[2])
+        if not hmac.compare_digest(expected, supplied):
+            raise AuthenticationError("Bearer令牌签名无效")
         header = json.loads(_b64decode(parts[0]))
         payload = json.loads(_b64decode(parts[1]))
-    except (ValueError, json.JSONDecodeError) as exc:
+    except (ValueError, RecursionError) as exc:
         raise AuthenticationError("Bearer令牌无法解析") from exc
-    if header.get("alg") != "HS256" or not hmac.compare_digest(expected, supplied):
+    if not isinstance(header, dict) or header.get("alg") != "HS256" or not isinstance(payload, dict):
         raise AuthenticationError("Bearer令牌签名无效")
     current = int((now or datetime.now(timezone.utc)).timestamp())
     skew = settings.jwt_clock_skew_seconds
     if payload.get("iss") != settings.jwt_issuer or payload.get("aud") != settings.jwt_audience:
         raise AuthenticationError("Bearer令牌签发方或受众不匹配")
-    if not isinstance(payload.get("exp"), int) or current > payload["exp"] + skew:
+    if type(payload.get("exp")) is not int or current >= payload["exp"] + skew:
         raise AuthenticationError("Bearer令牌已过期")
-    if isinstance(payload.get("nbf"), int) and current + skew < payload["nbf"]:
+    if "nbf" in payload and (type(payload["nbf"]) is not int or current + skew < payload["nbf"]):
         raise AuthenticationError("Bearer令牌尚未生效")
-    actor_id = str(payload.get("sub") or "").strip()
-    role = str(payload.get("role") or "").strip()
-    if len(actor_id) < 2 or role not in ROLE_PERMISSIONS:
+    actor_id = payload.get("sub")
+    role = payload.get("role")
+    if (not isinstance(actor_id, str) or not 2 <= len(actor_id) <= 100 or not actor_id.isprintable()
+            or actor_id != actor_id.strip() or not isinstance(role, str) or role not in ROLE_PERMISSIONS):
         raise AuthenticationError("Bearer令牌身份声明无效")
     return IdentityContext(
         actor_id=actor_id,
@@ -243,6 +247,17 @@ class PlatformMiddleware(BaseHTTPMiddleware):
             response = self._error(500, "服务内部错误", request_id)
         duration = time.perf_counter() - started
         route = getattr(request.scope.get("route"), "path", request.url.path)
+        protected = request.url.path.startswith("/api/") or request.url.path == "/metrics"
+        if self.settings.security_mode == "jwt" and protected and (
+            response.status_code in {401, 403} or request.method in {"POST", "PUT", "PATCH", "DELETE"}
+        ):
+            resource = getattr(request.scope.get("route"), "path", "protected_api")
+            await run_in_threadpool(
+                runtime_store.add_audit, correlation_id=request_id, actor_id=identity.actor_id, actor_role=identity.role,
+                action="http.security", resource=resource, risk_level="low",
+                outcome="denied" if response.status_code in {401, 403} else "allowed" if response.status_code < 400 else "error",
+                detail=f"{request.method} {response.status_code}",
+            )
         self._secure_headers(response, request_id, duration, request.url.path)
         if request.url.path.startswith("/api/"):
             response.headers.setdefault("Cache-Control", "no-store")
@@ -299,7 +314,11 @@ class IdempotencyMiddleware:
             body_parts.append(message.get("body", b""))
             more = bool(message.get("more_body", False))
         body = b"".join(body_parts)
-        request_hash = hashlib.sha256(method.encode() + b"\0" + path.encode() + b"\0" + body).hexdigest()
+        target = path.encode()
+        query = scope.get("query_string", b"")
+        if query:
+            target += b"?" + query
+        request_hash = hashlib.sha256(method.encode() + b"\0" + target + b"\0" + body).hexdigest()
         namespace = self._namespace(headers)
         cached = runtime_store.get_idempotency(namespace, key)
         if cached:
@@ -307,10 +326,8 @@ class IdempotencyMiddleware:
                 response = JSONResponse(status_code=409, content={"detail": "幂等键已用于不同请求"})
                 await response(scope, receive, send)
                 return
-            replay_headers = [(name.encode("latin-1"), value.encode("latin-1")) for name, value in cached["response_headers"] if name.lower() not in {"content-length", "x-request-id"}]
-            replay_headers.append((b"x-idempotent-replay", b"true"))
-            await send({"type": "http.response.start", "status": cached["status_code"], "headers": replay_headers})
-            await send({"type": "http.response.body", "body": bytes(cached["response_body"])})
+            from app.idempotent_reply import reply
+            await reply(cached,headers,scope,receive,send)
             return
 
         delivered = False

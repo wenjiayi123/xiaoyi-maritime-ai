@@ -16,7 +16,7 @@ from app.linked_agent_catalog import ACTIONS as LINKED_ACTIONS, parse_command as
 import json
 
 
-router = APIRouter(prefix="/api/automation", tags=["小懿智能操作"])
+router = APIRouter(prefix="/api/automation", tags=["舷鸥智能操作"])
 
 ActionKind = Literal[
     "prepare_linked_operation",
@@ -430,7 +430,7 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
             if not matched:
                 continue
             parameters = {"target": target, "label": label}
-            return linked_intent, f"从小懿启动{label}，等待业务健康检查后进入对应系统。", 0.99, [
+            return linked_intent, f"从舷鸥启动{label}，等待业务健康检查后进入对应系统。", 0.99, [
                 _action("check_linked_system_runtime", f"检查{label}运行状态", "linked-system-runtime", parameters, phase="理解"),
                 _action("launch_linked_system_runtime", f"启动{label}", "linked-system-launch", parameters, phase="执行"),
                 _action("verify_linked_system_runtime", f"核验{label}业务健康", "linked-system-health", parameters, phase="核验"),
@@ -442,7 +442,7 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
         or (has_launch_verb and any(word in text for word in ["航行模拟器", "无人航行模拟器"]))
     )
     if is_simulator_launch:
-        return "launch_sailing_simulator", "从小懿启动桌面航行模拟器，核验 Godot 主进程后切换到仿真窗口。", 0.99, [
+        return "launch_sailing_simulator", "从舷鸥启动桌面航行模拟器，核验 Godot 主进程后切换到仿真窗口。", 0.99, [
             _action("check_simulator_runtime", "识别航行模拟器项目与 Godot 运行环境", "simulator-runtime", phase="理解"),
             _action("launch_simulator", "启动桌面航行模拟器主场景", "simulator-launch", phase="执行"),
             _action("verify_simulator_runtime", "核验航行模拟器主进程", "simulator-health", phase="核验"),
@@ -532,8 +532,8 @@ def _plan_actions(command: str) -> tuple[str, str, float, list[dict[str, object]
             _action("present_result", "确认设置面板可用", "operation-result", {"result_type": "navigation"}, phase="交付"),
         ]
     if "形象" in text or "头像" in text:
-        return "switch_avatar", "打开小懿形象选择并等待用户选择。", 0.96, [
-            _action("switch_avatar", "打开小懿形象选择", "avatar-switch", phase="执行"),
+        return "switch_avatar", "打开舷鸥形象选择并等待用户选择。", 0.96, [
+            _action("switch_avatar", "打开舷鸥形象选择", "avatar-switch", phase="执行"),
             _action("verify_view", "核验形象资源已加载", "avatar-ready", {"view": "avatar"}, phase="核验"),
             _action("present_result", "提示形象选择已就绪", "operation-result", {"result_type": "navigation"}, phase="交付"),
         ]

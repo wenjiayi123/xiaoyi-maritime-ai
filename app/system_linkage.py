@@ -23,7 +23,7 @@ from app.runtime_store import runtime_store
 from app.security import request_identity
 
 
-router = APIRouter(prefix="/api/system-linkage", tags=["小懿四系统联动网关"])
+router = APIRouter(prefix="/api/system-linkage", tags=["舷鸥四系统联动网关"])
 logger = logging.getLogger("xiaoyi.system_linkage")
 
 SystemTarget = Literal[
@@ -360,7 +360,7 @@ def _sailing_request(
             {
                 "id": "xiaoyi-demo-collision-risk",
                 "type": "collision-risk",
-                "label": "小懿联动碰撞风险验证",
+                "label": "舷鸥联动碰撞风险验证",
                 "affectedArea": "验证航段",
                 "severity": "warning",
                 "resolved": False,
@@ -468,7 +468,7 @@ def _execute_target(
             "simulatorCodeModified": False,
             "routeInjected": False,
             "controlCommandSent": False,
-            "reason": "航行模拟器保持隔离，只读取登记状态；小懿不自动注入航线或控制指令。",
+            "reason": "航行模拟器保持隔离，只读取登记状态；舷鸥不自动注入航线或控制指令。",
         }
         summary = {
             "protectionStatus": "isolated",

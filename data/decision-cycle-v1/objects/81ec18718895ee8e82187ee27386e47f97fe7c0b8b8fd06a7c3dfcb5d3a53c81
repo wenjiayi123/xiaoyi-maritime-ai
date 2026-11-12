@@ -1,0 +1,53 @@
+"""Read prior-week receipts, choose an arm without this week's outcomes, then settle it."""
+import collections,hashlib,json,math,os,statistics
+from datetime import date,timedelta
+from pathlib import Path
+HERE=Path(__file__).resolve().parent;ROOT=Path(os.environ.get("GULLMATE_MULTI_ROOT","G:/AI/Runs/gullmate-next-20261106/port-multiobjective"))
+SRC=Path(os.environ.get("GULLMATE_MULTI_SOURCE",str(ROOT.parent/"external-load-challenge")))
+P=json.loads((HERE/"protocol.json").read_bytes())
+def read(p):return json.loads(p.read_bytes())
+def h(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def put(p,b):
+    p.parent.mkdir(parents=True,exist_ok=True);tmp=p.with_suffix(p.suffix+".writing");tmp.write_bytes(b);tmp.replace(p)
+def save(p,j):put(p,json.dumps(j,ensure_ascii=False,indent=2,allow_nan=False).encode())
+def mean(v):return [statistics.mean(i) for i in zip(*v)]
+def minus(v,w):return [a-b for a,b in zip(v,w)]
+def dominates(v,w):return all(a>=b-1e-6 for a,b in zip(v,w)) and any(a>b+1e-6 for a,b in zip(v,w))
+def frontier(points):return [a for a,v in points.items() if not any(dominates(o,v) for o in points.values())]
+def hist(data,cs,arms,ds,weights):
+    # Call receives only a sliced history dictionary, with no target-week rows.
+    util=lambda v:sum(x/s*w for x,s,w in zip(v,P["unit_scales"],weights))/sum(weights)
+    eligible=[a for a in arms if all(data[c][d][a]["safe"] for c in cs for d in ds)]
+    per={a:{c:mean([data[c][d][a]["vs_idle"] for d in ds]) for c in cs} for a in eligible}
+    overall={a:mean(z.values()) for a,z in per.items()};front=frontier(overall);worst={a:min(util(z) for z in per[a].values()) for a in front}
+    win=next(a for a in arms if a in front and worst[a]>=max(worst.values())-1e-12)
+    if worst[win]<-1e-12:win="idle"
+    return win,front,worst
+def run():
+    source=SRC/"paired-audit.json";data=read(source)["days"];sets={c:{r["day"]:r["policies"] for r in rows} for c,rows in data.items()};dates=sorted(sets["shanghai"])
+    assert len(dates)==17 and all(sorted(z)==dates for z in sets.values()) and all(date.fromisoformat(b)-date.fromisoformat(a)==timedelta(weeks=1) for a,b in zip(dates,dates[1:]))
+    protocol_hash=h(HERE/"protocol.json");lock=ROOT/"input-lock.json";doc={"protocol_sha256":protocol_hash,"source_sha256":h(source)}
+    if lock.exists():assert read(lock)==doc
+    else:save(lock,doc)
+    reports={};decisions={};details={}
+    for panel,scope in P["panels"].items():
+        cs=scope["cases"];arms=scope["arms"];reports[panel]={};decisions[panel]=[];details[panel]=[]
+        for profile,weights in P["profiles"].items():
+            rec=[];sel=collections.Counter()
+            for i,day in enumerate(dates[4:],4):
+                ds=dates[i-4:i];past={c:{d:sets[c][d] for d in ds} for c in cs}
+                a,front,score=hist(past,cs,arms,ds,weights);sel[a]+=1
+                decisions[panel].append(dict(target=day,profile=profile,history=ds,selected=a,past_frontier=front,worst_score=score))
+                for c in cs:
+                    now=sets[c][day];z=now[a];vector=z["vs_idle"];actual={p:now[p]["vs_idle"] for p in arms if now[p]["safe"]}
+                    rec.append(dict(day=day,scenario=c,profile=profile,selected=a,safe=z["safe"],vs_idle=vector,
+                             vs_original=minus(vector,now["original"]["vs_idle"]),vs_adaptive=minus(vector,now["adaptive_clock"]["vs_idle"]),actual_front=frontier(actual),dominated_after=a not in frontier(actual)))
+            m=mean([r["vs_idle"] for r in rec]);wa=[min(row[k] for row in [r["vs_idle"] for r in rec]) for k in range(3)]
+            cf=mean([r["vs_adaptive"] for r in rec]);safe=all(r["safe"] for r in rec);nonloss=sum(all(x>=-1e-6 for x in r["vs_idle"]) for r in rec)
+            outcome=dict(decisions=sum(sel.values()),allocation=dict(sel),case_weeks=len(rec),vs_idle=m,worst_each_vs_idle=wa,vs_original=mean([r["vs_original"] for r in rec]),vs_adaptive=cf,
+                         safe=safe,all_three_nonloss_caseweeks=nonloss,hindsight_dominated=sum(r["dominated_after"] for r in rec),
+                         passes_numeric_gate=safe and nonloss==len(rec) and all(v>=-1e-6 for v in m) and dominates(cf,[0,0,0]))
+            reports[panel][profile]=outcome;details[panel].extend(rec)
+            print(panel,profile,dict(sel),[round(v,2) for v in m],nonloss,"/",len(rec),outcome["passes_numeric_gate"])
+    save(ROOT/"report.json",reports);save(ROOT/"decisions.json",decisions);save(ROOT/"outcomes.json",details)
+if __name__=="__main__":run()

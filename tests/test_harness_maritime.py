@@ -512,6 +512,18 @@ def test_business_report_is_published_from_artifact_without_a_model_summary(h):
     assert "港航交接简报" in t["final"]["text"] and t["final"]["verification"]["business_claims"]
 
 
+def test_prompt_schema_preserves_named_fields_literal_values_and_validation():
+    literal = {"title": "draft"}
+    schema = {"title": "Command", "$defs": {"title": {"type": "object"}},
+              "properties": {"title": {"title": "Title", "type": "string"},
+                             "mode": {"enum": [literal], "default": literal}},
+              "required": ["title"], "additionalProperties": False}
+    projected = model.prompt_schema(schema)
+    assert projected == {**{k: v for k, v in schema.items() if k != "title"},
+                         "properties": {"title": {"type": "string"}, "mode": schema["properties"]["mode"]}}
+    assert schema["properties"]["title"]["title"] == "Title"
+
+
 def test_late_user_instruction_disables_automatic_report_publication(h, monkeypatch):
     original = tools.execute
 
@@ -531,7 +543,11 @@ def test_late_user_instruction_disables_automatic_report_publication(h, monkeypa
     class ToolDriver:
         def next(self, task, messages):
             if set(maritime.REQUIRED).issubset(completed_tools(task)):
-                assert task["inputs"]
+                packet = json.loads(messages[-1]["content"])
+                assert packet["user_inputs"] == task["inputs"]
+                assert any(r["id"] == "T5" and r["ok"] for r in packet["tool_results"])
+                assert packet["source_facts"]["T1"] == task["results"][0]["source_facts"]
+                assert sum(len(message["content"]) for message in messages) <= task["budget"]["context_chars"]
                 return Action(
                     kind="final", text="仅展示工程模拟事实，生产权限关闭，交接草稿需人工核验", evidence_ids=["T5"]
                 ), {"tokens": 10}

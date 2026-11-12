@@ -18,7 +18,7 @@ from pydantic import BaseModel, Field
 from app import simulator_launcher
 
 
-router = APIRouter(prefix="/api/linked-systems", tags=["小懿本机联动启动器"])
+router = APIRouter(prefix="/api/linked-systems", tags=["舷鸥本机联动启动器"])
 
 LinkedTarget = Literal["port-dt-multi", "energy-cockpit", "malacca-sandbox"]
 LinkedState = Literal["offline", "starting", "online", "error", "port_conflict"]
@@ -226,7 +226,7 @@ def _runtime(target: LinkedTarget, *, already_running: bool = False) -> LinkedSy
     managed, pid, return_code = _managed_process(target)
     if state == "offline" and managed:
         state = "starting"
-        message = "小懿已拉起进程，正在等待业务健康接口。"
+        message = "舷鸥已拉起进程，正在等待业务健康接口。"
     elif state == "offline" and return_code is not None:
         state = "error"
         message = f"服务进程提前退出（code={return_code}），请查看启动日志。"
@@ -248,6 +248,13 @@ def _runtime(target: LinkedTarget, *, already_running: bool = False) -> LinkedSy
 def _start_registered_process(target: LinkedTarget) -> None:
     spec = _TARGETS[target]
     root = Path(spec["root"])
+    if os.name == "nt" and os.getenv("PORTAI_MANAGER"):
+        services = ("carbon-api", "carbon") if target == "energy-cockpit" else ("strait",)
+        _processes[target] = subprocess.Popen(
+            [os.environ["PORTAI_MANAGER_PYTHON"], os.environ["PORTAI_MANAGER"], "start", *services],
+            creationflags=subprocess.CREATE_NO_WINDOW, stdin=subprocess.DEVNULL,
+        )
+        return
     command = tuple(str(part) for part in spec["command"])
     energy_frontend_only = False
     if target == "energy-cockpit":
@@ -300,7 +307,7 @@ def _launch_target(target: LinkedTarget) -> LinkedSystemRuntime:
     current = _runtime(target)
     if current.state == "online":
         current.already_running = True
-        current.message = "服务已在线，小懿将直接复用并继续流程。"
+        current.message = "服务已在线，舷鸥将直接复用并继续流程。"
         return current
     if current.state == "starting":
         if target == "energy-cockpit":
